@@ -4027,6 +4027,7 @@ bool Game::playerSay(uint32_t playerId, uint16_t channelId, MessageClasses type,
 		case MSG_GAMEMASTER_PRIVATE_TO:
 			return playerSpeakTo(player, type, receiver, text, statementId);
 		case MSG_CHANNEL:
+		case MSG_CHANNEL_HIGHLIGHT:
 		case MSG_GAMEMASTER_CHANNEL:
 		{
 			if(playerSpeakToChannel(player, type, text, channelId, statementId))
@@ -4102,7 +4103,7 @@ bool Game::playerSpeakTo(Player* player, MessageClasses type, const std::string&
 		return false;
 	}
 
-	if(type == MSG_GAMEMASTER_PRIVATE_TO && player->hasFlag(PlayerFlag_CanTalkRedPrivate))
+	if(type == MSG_GAMEMASTER_PRIVATE_TO && (player->hasFlag(PlayerFlag_CanTalkRedPrivate) || player->hasFlag(PlayerFlag_CannotBeMuted)))
 		type = MSG_GAMEMASTER_PRIVATE_FROM;
 	else
 		type = MSG_PRIVATE_FROM;
@@ -4127,29 +4128,18 @@ bool Game::playerSpeakToChannel(Player* player, MessageClasses type, const std::
 	{
 		case MSG_CHANNEL:
 		{
-			if(channelId == CHANNEL_HELP)
-			{
-				if(player->hasFlag(PlayerFlag_TalkOrangeHelpChannel))
-					type = MSG_CHANNEL_HIGHLIGHT;
-
-				if(player->hasFlag(PlayerFlag_CanTalkRedChannel))
-					type = MSG_GAMEMASTER_CHANNEL;
-			}
+			if(channelId == CHANNEL_HELP && player->hasFlag(PlayerFlag_TalkOrangeHelpChannel))
+				type = MSG_CHANNEL_HIGHLIGHT;
 
 			break;
 		}
 
 		case MSG_GAMEMASTER_CHANNEL:
 		{
-			if(player->hasFlag(PlayerFlag_CanTalkRedChannelAnonymous))
-			{
-				if(text.length() < 251)
-					return g_chat.talk(player, type, text, channelId, statementId, true);
-			}
-			else
+			if(!player->hasFlag(PlayerFlag_CanTalkRedChannel))
 				type = MSG_CHANNEL;
+			break;
 		}
-
 
 		case MSG_GAMEMASTER_BROADCAST:
 		{
@@ -4860,8 +4850,9 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaCh
 		if(deny)
 			return false;
 
+		int32_t oldMana = target->getMana();
 		target->changeMana(manaChange);
-		if(g_config.getBool(ConfigManager::SHOW_MANA_CHANGE) && !target->isGhost() &&
+		if(oldMana != target->getMana() && g_config.getBool(ConfigManager::SHOW_MANA_CHANGE) && !target->isGhost() &&
 			(g_config.getBool(ConfigManager::SHOW_MANA_CHANGE_MONSTER) || !target->getMonster()))
 		{
 			const SpectatorVec& list = getSpectators(targetPos);
@@ -4876,16 +4867,25 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaCh
 					textList.push_back(*it);
 			}
 
+			manaChange = (target->getMana() - oldMana);
+			std::string plural = (manaChange != 1 ? "s." : ".");
+
 			std::stringstream ss;
 			MessageDetails* details = new MessageDetails(manaChange, COLOR_DARKPURPLE);
 			if(!textList.empty())
 			{
 				if(!attacker)
-					ss << ucfirst(target->getNameDescription()) << " is regenerated with " << manaChange << " mana.";
+					ss << ucfirst(target->getNameDescription()) << " is regenerated with " << manaChange << " mana" << plural;
 				else if(attacker != target)
-					ss << ucfirst(attacker->getNameDescription()) << " regenerates " << target->getNameDescription() << " with " << manaChange << " mana.";
+					ss << ucfirst(attacker->getNameDescription()) << " regenerates " << target->getNameDescription() << " with " << manaChange << " mana" << plural;
 				else
-					ss << ucfirst(attacker->getNameDescription()) << " regenerates himself with " << manaChange << " mana.";
+				{
+					ss << ucfirst(attacker->getNameDescription()) << " regenerates ";
+					if(Player* attackerPlayer = attacker->getPlayer())
+						ss << (attackerPlayer->getSex(false) == PLAYERSEX_FEMALE ? "herself" : "himself") << " with " << manaChange << " mana" << plural;
+					else
+						ss << "itself with " << manaChange << " mana" << plural;
+				}
 
 				addStatsMessage(textList, MSG_HEALED_OTHERS, ss.str(), targetPos, details);
 				ss.str("");
@@ -4895,9 +4895,9 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaCh
 			if(attacker && (player = attacker->getPlayer()))
 			{
 				if(attacker != target)
-					ss << "You regenerate " << target->getNameDescription() << " with " << manaChange << " mana.";
+					ss << "You regenerate " << target->getNameDescription() << " with " << manaChange << " mana" << plural;
 				else
-					ss << "You regenerate yourself with " << manaChange << " mana.";
+					ss << "You regenerate yourself with " << manaChange << " mana" << plural;
 
 				player->sendStatsMessage(MSG_HEALED, ss.str(), targetPos, details);
 				ss.str("");
@@ -4906,9 +4906,9 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaCh
 			if((player = target->getPlayer()) && attacker != target)
 			{
 				if(attacker)
-					ss << ucfirst(attacker->getNameDescription()) << " regenerates you with " << manaChange << " mana.";
+					ss << ucfirst(attacker->getNameDescription()) << " regenerates you with " << manaChange << " mana" << plural;
 				else
-					ss << "You are regenerated with " << manaChange << " mana.";
+					ss << "You are regenerated with " << manaChange << " mana" << plural;
 
 				player->sendStatsMessage(MSG_HEALED, ss.str(), targetPos, details);
 			}
@@ -5253,6 +5253,44 @@ void Game::updateCreatureSkull(Creature* creature)
 	{
 		 if((tmpPlayer = (*it)->getPlayer()))
 			tmpPlayer->sendCreatureSkull(creature);
+	}
+}
+
+void Game::updateCreatureType(Creature* creature)
+{
+	const Player* masterPlayer = NULL;
+	uint32_t creatureId = creature->getID();
+	CreatureType_t creatureType = creature->getType();
+	if(creatureType == CREATURETYPE_MONSTER)
+	{
+		const Creature* master = creature->getMaster();
+		if(master)
+		{
+			masterPlayer = master->getPlayer();
+			if(masterPlayer)
+				creatureType = CREATURETYPE_SUMMON_OTHERS;
+		}
+	}
+
+	//send to clients
+	SpectatorVec list;
+	getSpectators(list, creature->getPosition(), true, true);
+
+	if(creatureType == CREATURETYPE_SUMMON_OTHERS)
+	{
+		for(SpectatorVec::const_iterator it = list.begin(), end = list.end(); it != end; ++it)
+		{
+			Player* player = (*it)->getPlayer();
+			if(masterPlayer == player)
+				player->sendCreatureType(creatureId, CREATURETYPE_SUMMON_OWN);
+			else
+				player->sendCreatureType(creatureId, creatureType);
+		}
+	}
+	else
+	{
+		for(SpectatorVec::const_iterator it = list.begin(), end = list.end(); it != end; ++it)
+		(*it)->getPlayer()->sendCreatureType(creatureId, creatureType);
 	}
 }
 
@@ -6900,7 +6938,7 @@ void Game::checkExpiredMarketOffers()
 		Scheduler::getInstance().addEvent(createSchedulerTask(checkExpiredMarketOffersEachMinutes * 60 * 1000, boost::bind(&Game::checkExpiredMarketOffers, this)));
 }
 
-void Game::playerExtendedOpcode(uint32_t playerId, uint8_t opcode, const std::string& buffer)
+void Game::parsePlayerExtendedOpcode(uint32_t playerId, uint8_t opcode, const std::string& buffer)
 {
 	Player* player = getPlayerByID(playerId);
 	if(!player || player->isRemoved())

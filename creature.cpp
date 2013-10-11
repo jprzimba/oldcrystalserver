@@ -56,7 +56,7 @@ Creature::Creature()
 	speakType = MSG_NONE;
 	skull = SKULL_NONE;
 	partyShield = SHIELD_NONE;
-	guildEmblem = EMBLEM_NONE;
+	guildEmblem = GUILDEMBLEM_NONE;
 
 	health = 1000;
 	healthMax = 1000;

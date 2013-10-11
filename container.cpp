@@ -252,8 +252,8 @@ void Container::onRemoveContainerItem(uint32_t index, Item* item)
 	g_game.getSpectators(list, cylinderMapPos, false, false, 2, 2, 2, 2);
 
 	//send change to client
-	Player* player = NULL;
 	Item* lastItem = getItem(maxSize);
+	Player* player = NULL;
 	for(it = list.begin(); it != list.end(); ++it)
 	{
 		if((player = (*it)->getPlayer()))

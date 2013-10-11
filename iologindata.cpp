@@ -303,6 +303,12 @@ bool IOLoginData::getPassword(uint32_t accountId, std::string& password, std::st
 bool IOLoginData::setPassword(uint32_t accountId, std::string newPassword)
 {
 	std::string salt;
+	if(g_config.getBool(ConfigManager::GENERATE_ACCOUNT_SALT))
+	{
+		salt = generateRecoveryKey(2, 19, true);
+		newPassword = salt + newPassword;
+	}
+
 	Database* db = Database::getInstance();
 	DBQuery query;
 
@@ -341,6 +347,7 @@ bool IOLoginData::setRecoveryKey(uint32_t accountId, std::string newRecoveryKey)
 uint64_t IOLoginData::createAccount(std::string name, std::string password)
 {
 	std::string salt = generateRecoveryKey(2, 19, true);
+	password = salt + password;
 	_encrypt(password, false);
 
 	Database* db = Database::getInstance();

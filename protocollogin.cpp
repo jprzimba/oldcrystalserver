@@ -77,15 +77,15 @@ void ProtocolLogin::onRecvFirstMessage(NetworkMessage& msg)
 	uint16_t version = msg.get<uint16_t>();
 
 	if(version >= 971)
-		msg.skip(5); // wtf???
+		msg.skip(17);
+	else
+		msg.skip(12);
 
 #ifdef CLIENT_VERSION_DATA
 	uint32_t datSignature = msg.get<uint32_t>();
 	uint32_t sprSignature = msg.get<uint32_t>();
 
 	uint32_t picSignature = msg.get<uint32_t>();
-#else
-	msg.skip(12);
 #endif
 	if(!RSA_decrypt(msg))
 	{
@@ -161,7 +161,7 @@ void ProtocolLogin::onRecvFirstMessage(NetworkMessage& msg)
 	}
 
 	Account account;
-	if(!IOLoginData::getInstance()->loadAccount(account, name) || !encryptTest(password, account.password))
+	if(!IOLoginData::getInstance()->loadAccount(account, name) || !encryptTest(account.salt + password, account.password))
 	{
 		ConnectionManager::getInstance()->addAttempt(clientIp, protocolId, false);
 		disconnectClient(0x0A, "Invalid account name or password.");

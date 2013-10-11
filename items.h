@@ -26,7 +26,7 @@
 #include "position.h"
 #include <libxml/parser.h>
 
-#define ITEMS_SIZE 15000
+#define ITEMS_SIZE 21000
 #define ITEMS_INCREMENT 500
 #define ITEMS_RANDOMIZATION 50
 
@@ -155,7 +155,8 @@ class ItemType
 		Ammo_t ammoType;
 
 		uint16_t transformBed[PLAYERSEX_MALE + 1], transformUseTo, transformEquipTo, transformDeEquipTo,
-			id, clientId, maxItems, slotPosition, wieldPosition, speed, maxTextLength, writeOnceItemId, wareId;
+			id, clientId, maxItems, slotPosition, wieldPosition, speed, maxTextLength, writeOnceItemId, wareId,
+			premiumDays;
 
 		int32_t attack, extraAttack, defense, extraDefense, armor, breakChance, hitChance, maxHitChance,
 			runeLevel, runeMagLevel, lightLevel, lightColor, decayTo, rotateTo, alwaysOnTopOrder;

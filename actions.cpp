@@ -482,6 +482,10 @@ ReturnValue Actions::internalUseItem(Player* player, const Position& pos, uint8_
 		if(!bed->canUse(player))
 			return RET_CANNOTUSETHISOBJECT;
 
+		uint32_t levelToOffinBedHouse = g_config.getNumber(ConfigManager::LEVEL_TO_OFFLINE);
+		if(player->getLevel() < levelToOffinBedHouse)
+			bed->sleep(player);
+
 		player->prepareSleep(bed);
 		return RET_NOERROR;
 	}
@@ -559,6 +563,17 @@ ReturnValue Actions::internalUseItem(Player* player, const Position& pos, uint8_
 	{
 		g_game.transformItem(item, it.transformUseTo);
 		g_game.startDecay(item);
+		return RET_NOERROR;
+	}
+
+	if(item->isPremiumScroll())
+	{
+		std::stringstream ss;
+		ss << " You have recived " << it.premiumDays << " premium days.";
+		player->sendTextMessage(MSG_INFO_DESCR, ss.str());
+		
+		player->addPremiumDays(it.premiumDays);
+		g_game.internalRemoveItem(NULL, item, 1);
 		return RET_NOERROR;
 	}
 

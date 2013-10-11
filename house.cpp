@@ -826,8 +826,8 @@ bool Houses::payRent(Player* player, House* house, uint32_t bid, time_t _time/* 
 		player->balance -= amount;
 		paid = true;
 	}
-	else if(DepotChest* depot = player->getDepotChest(town->getID(), true))
-		paid = g_game.removeMoney(depot, amount, FLAG_NOLIMIT);
+	else if(DepotChest* depotChest = player->getDepotChest(town->getID(), true))
+		paid = g_game.removeMoney(depotChest, amount, FLAG_NOLIMIT);
 
 	if(!paid)
 		return false;

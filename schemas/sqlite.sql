@@ -111,7 +111,7 @@ CREATE TABLE "players" (
 	FOREIGN KEY ("account_id") REFERENCES "accounts" ("id")
 );
 
-INSERT INTO "players" VALUES (1, 'Account Manager', 0, 1, 1, 1, 0, 150, 150, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 853, 921, 7, '', 400, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 0, 201660000, 0, 100, 100, 100, 100, 100, 0, 0, 0, 0, 0, '');
+INSERT INTO "players" VALUES (1, 'Account Manager', 0, 1, 1, 1, 0, 150, 150, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 400, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 0, 201660000, 0, 100, 100, 100, 100, 100, 0, 0, 0, 0, 0, '');
 
 CREATE TABLE "account_viplist" (
 	"account_id" INTEGER NOT NULL,
@@ -137,34 +137,8 @@ CREATE TABLE "guilds" (
 	"creationdata" INTEGER NOT NULL,
 	"checkdata" INTEGER NOT NULL,
 	"motd" VARCHAR(255) NOT NULL DEFAULT '',
-	"balance" INTEGER NOT NULL DEFAULT 0,
 	UNIQUE ("name", "world_id"),
 	FOREIGN KEY ("ownerid") REFERENCES "players" ("id")
-);
-
-CREATE TABLE "guild_wars" (
-	"id" INTEGER PRIMARY KEY,
-	"guild_id" INTEGER NOT NULL,
-	"enemy_id" INTEGER NOT NULL,
-	"begin" INTEGER NOT NULL DEFAULT 0,
-	"end" INTEGER NOT NULL DEFAULT 0,
-	"frags" INTEGER NOT NULL DEFAULT 0,
-	"payment" INTEGER NOT NULL DEFAULT 0,
-	"guild_kills" INTEGER NOT NULL DEFAULT 0,
-	"enemy_kills" INTEGER NOT NULL DEFAULT 0,
-	"status" TINYINT(1) NOT NULL DEFAULT 0,
-	FOREIGN KEY ("guild_id") REFERENCES "guilds"("id") ON DELETE CASCADE,
-	FOREIGN KEY ("enemy_id") REFERENCES "guilds"("id") ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS "guild_kills" (
-	"id" INTEGER PRIMARY KEY,
-	"guild_id" INTEGER NOT NULL,
-	"war_id" INTEGER NOT NULL,
-	"death_id" INTEGER NOT NULL.
-	FOREIGN KEY ("guild_id") REFERENCES "guilds"("id") ON DELETE CASCADE,
-	FOREIGN KEY ("war_id") REFERENCES "guild_wars"("id") ON DELETE CASCADE,
-	FOREIGN KEY ("death_id") REFERENCES "player_deaths"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE "guild_invites" (
@@ -245,7 +219,6 @@ CREATE TABLE "killers" (
 	"death_id" INTEGER NOT NULL,
 	"final_hit" BOOLEAN NOT NULL DEFAULT FALSE,
 	"unjustified" BOOLEAN NOT NULL DEFAULT FALSE,
-	"war" INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY ("death_id") REFERENCES "player_deaths" ("id")
 );
 
@@ -365,7 +338,7 @@ CREATE TABLE "bans" (
 	"expires" INTEGER NOT NULL DEFAULT -1,
 	"added" INTEGER NOT NULL,
 	"admin_id" INTEGER NOT NULL DEFAULT 0,
-	"comment" TEXT NOT NULL,
+	"comment" TEXT NOT NULL
 );
 
 CREATE TABLE "tile_store"

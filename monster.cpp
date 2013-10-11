@@ -1038,14 +1038,18 @@ bool Monster::getRandomStep(const Position& creaturePos, Direction& dir)
 	return false;
 }
 
-bool Monster::getDanceStep(const Position& creaturePos, Direction& dir,	bool keepAttack /*= true*/, bool keepDistance /*= true*/)
+bool Monster::getDanceStep(const Position& creaturePos, Direction& dir,
+	bool keepAttack /*= true*/, bool keepDistance /*= true*/)
 {
-	assert(attackedCreature);
 	bool canDoAttackNow = canUseAttack(creaturePos, attackedCreature);
-	const Position& centerPos = attackedCreature->getPosition();
 
-	uint32_t tmpDist, centerToDist = std::max(std::abs(creaturePos.x - centerPos.x), std::abs(creaturePos.y - centerPos.y));
+	assert(attackedCreature != NULL);
+	const Position& centerPos = attackedCreature->getPosition();
+	uint32_t centerToDist = std::max(std::abs(creaturePos.x - centerPos.x), std::abs(creaturePos.y - centerPos.y));
+	uint32_t tmpDist;
+
 	DirVector dirVector;
+
 	if(!keepDistance || creaturePos.y - centerPos.y >= 0)
 	{
 		tmpDist = std::max(std::abs((creaturePos.x) - centerPos.x), std::abs((creaturePos.y - 1) - centerPos.y));
@@ -1076,7 +1080,7 @@ bool Monster::getDanceStep(const Position& creaturePos, Direction& dir,	bool kee
 
 	if(!keepDistance || creaturePos.x - centerPos.x <= 0)
 	{
-		tmpDist = std::max(std::abs((creaturePos.x + 1) - centerPos.x), std::abs((creaturePos.y) - centerPos.y));
+		tmpDist = std::max(std::abs((creaturePos.x + 1) - centerPos.x), std::abs(creaturePos.y - centerPos.y));
 		if(tmpDist == centerToDist && canWalkTo(creaturePos, EAST))
 		{
 			bool result = true;
@@ -1090,7 +1094,7 @@ bool Monster::getDanceStep(const Position& creaturePos, Direction& dir,	bool kee
 
 	if(!keepDistance || creaturePos.x - centerPos.x >= 0)
 	{
-		tmpDist = std::max(std::abs((creaturePos.x - 1) - centerPos.x), std::abs((creaturePos.y) - centerPos.y));
+		tmpDist = std::max(std::abs((creaturePos.x - 1) - centerPos.x), std::abs(creaturePos.y - centerPos.y));
 		if(tmpDist == centerToDist && canWalkTo(creaturePos, WEST))
 		{
 			bool result = true;

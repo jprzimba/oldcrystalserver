@@ -2516,8 +2516,11 @@ void LuaInterface::registerFunctions()
 	//getConfigFile()
 	lua_register(m_luaState, "getConfigFile", LuaInterface::luaGetConfigFile);
 
-	//doPlayerSendExtendedOpcode(cid, opcode, buffer)
-	lua_register(m_luaState, "doSendPlayerExtendedOpcode", LuaInterface::luaDoPlayerSendExtendedOpcode);
+	//isPlayerUsingOtclient(cid)
+	lua_register(m_luaState, "isPlayerUsingOtclient", LuaInterface::luaIsPlayerUsingOtclient);
+
+	//doSendPlayerExtendedOpcode(cid, opcode, buffer)
+	lua_register(m_luaState, "doSendPlayerExtendedOpcode", LuaInterface::luaDoSendPlayerExtendedOpcode);
 
 	//getConfigValue(key)
 	lua_register(m_luaState, "getConfigValue", LuaInterface::luaGetConfigValue);
@@ -6988,6 +6991,7 @@ int32_t LuaInterface::luaDoConvinceCreature(lua_State* L)
 	}
 
 	target->convinceCreature(creature);
+	g_game.updateCreatureType(target);
 	lua_pushboolean(L, true);
 	return 1;
 }
@@ -7681,8 +7685,8 @@ int32_t LuaInterface::luaGetPlayerDepotItems(lua_State* L)
 	ScriptEnviroment* env = getEnv();
 	if(Player* player = env->getPlayerByUID(popNumber(L)))
 	{
-		if(const DepotChest* depot = player->getDepotChest(depotid, true))
-			lua_pushnumber(L, depot->getItemHoldingCount());
+		if(const DepotChest* depotChest = player->getDepotChest(depotid, true))
+			lua_pushnumber(L, depotChest->getItemHoldingCount());
 		else
 			lua_pushboolean(L, false);
 	}
@@ -8589,24 +8593,7 @@ int32_t LuaInterface::luaDoPlayerAddPremiumDays(lua_State* L)
 	ScriptEnviroment* env = getEnv();
 	if(Player* player = env->getPlayerByUID(popNumber(L)))
 	{
-		if(player->premiumDays < GRATIS_PREMIUM)
-		{
-			Account account = IOLoginData::getInstance()->loadAccount(player->getAccount());
-			if(days < 0)
-			{
-				account.premiumDays = std::max((uint32_t)0, uint32_t(account.premiumDays + (int32_t)days));
-				player->premiumDays = std::max((uint32_t)0, uint32_t(player->premiumDays + (int32_t)days));
-			}
-			else
-			{
-				account.premiumDays = std::min((uint32_t)65534, uint32_t(account.premiumDays + (uint32_t)days));
-				player->premiumDays = std::min((uint32_t)65534, uint32_t(player->premiumDays + (uint32_t)days));
-			}
-
-			IOLoginData::getInstance()->saveAccount(account);
-			player->sendBasicData();
-		}
-
+		player->addPremiumDays(days);
 		lua_pushboolean(L, true);
 	}
 	else
@@ -9724,7 +9711,20 @@ int32_t LuaInterface::luaGetMountInfo(lua_State* L)
 	return 1;
 }
 
-int32_t LuaInterface::luaDoPlayerSendExtendedOpcode(lua_State* L)
+int32_t LuaInterface::luaIsPlayerUsingOtclient(lua_State* L)
+{
+	//isPlayerUsingOtclient(cid)
+	ScriptEnviroment* env = getEnv();
+	if(Player* player = env->getPlayerByUID(popNumber(L)))
+	{
+		lua_pushboolean(L, player->isUsingOtclient());
+	}
+
+	lua_pushboolean(L, false);
+	return 1;
+}
+
+int32_t LuaInterface::luaDoSendPlayerExtendedOpcode(lua_State* L)
 {
 	//doPlayerSendExtendedOpcode(cid, opcode, buffer)
 	std::string buffer = popString(L);

@@ -255,6 +255,7 @@ class Player : public Creature, public Cylinder
 		bool hasPVPBlessing() const {return pvpBlessing;}
 		uint16_t getBlessings() const;
 
+		bool isUsingOtclient() const { return operatingSystem >= CLIENTOS_OTCLIENT_LINUX; }
 		OperatingSystem_t getOperatingSystem() const {return operatingSystem;}
 		void setOperatingSystem(OperatingSystem_t os) {operatingSystem = os;}
 		uint32_t getClientVersion() const {return clientVersion;}
@@ -311,6 +312,7 @@ class Player : public Creature, public Cylinder
 
 		bool isPremium() const;
 		int32_t getPremiumDays() const {return premiumDays;}
+		void addPremiumDays(int32_t days);
 
 		bool hasEnemy() const {return !warMap.empty();}
 		bool getEnemy(const Player* player, War_t& data) const;
@@ -600,6 +602,8 @@ class Player : public Creature, public Cylinder
 			{if(client) client->sendCreatureLight(creature);}
 		void sendCreatureShield(const Creature* creature)
 			{if(client) client->sendCreatureShield(creature);}
+		void sendCreatureType(uint32_t creatureId, uint8_t creatureType)
+			{if(client) client->sendCreatureType(creatureId, creatureType);}
 		void sendCreatureEmblem(const Creature* creature)
 			{if(client) client->sendCreatureEmblem(creature);}
 		void sendCreatureWalkthrough(const Creature* creature, bool walkthrough)
