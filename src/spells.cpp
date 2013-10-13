@@ -520,10 +520,10 @@ bool Spell::configureSpell(xmlNodePtr p)
 	}
 
 	if(readXMLInteger(p, "lvl", intValue) || readXMLInteger(p, "level", intValue))
-	 	level = intValue;
+		level = intValue;
 
 	if(readXMLInteger(p, "maglv", intValue) || readXMLInteger(p, "magiclevel", intValue))
-	 	magLevel = intValue;
+		magLevel = intValue;
 
 	if(readXMLString(p, "skill", strValue) || readXMLString(p, "skills", strValue))
 	{
@@ -543,13 +543,13 @@ bool Spell::configureSpell(xmlNodePtr p)
 	}
 
 	if(readXMLInteger(p, "mana", intValue))
-	 	mana = intValue;
+		mana = intValue;
 
 	if(readXMLInteger(p, "manapercent", intValue))
-	 	manaPercent = intValue;
+		manaPercent = intValue;
 
 	if(readXMLInteger(p, "soul", intValue))
-	 	soul = intValue;
+		soul = intValue;
 
 	if(readXMLInteger(p, "exhaustion", intValue))
 		exhaustion = intValue;
@@ -585,7 +585,7 @@ bool Spell::configureSpell(xmlNodePtr p)
 		else if(tmpStrValue == "creature")
 			blockingCreature = true;
 		else
-			std::clog << "[Warning - Spell::configureSpell] Blocktype \"" <<strValue << "\" does not exist." << std::endl;
+			std::clog << "[Warning - Spell::configureSpell] Blocktype \"" << strValue << "\" does not exist." << std::endl;
 	}
 	else if(readXMLString(p, "blocking", strValue))
 		blockingCreature = blockingSolid = booleanString(strValue);
@@ -660,13 +660,13 @@ bool Spell::checkSpell(Player* player) const
 			player->sendCancelMessage(RET_ACTIONNOTPERMITTEDINPROTECTIONZONE);
 			return false;
 		}
-		
+
 		if(player->checkLoginDelay())
 		{
 			player->sendCancelMessage(RET_YOUMAYNOTATTACKIMMEDIATELYAFTERLOGGINGIN);
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 			return false;
-		}					
+		}
 	}
 
 	if(!player->hasFlag(PlayerFlag_HasNoExhaustion))
@@ -781,7 +781,7 @@ bool Spell::checkSpell(Player* player) const
 			}
 		}
 	}
-	
+
 	return true;
 }
 
@@ -1147,7 +1147,7 @@ bool InstantSpell::configureEvent(xmlNodePtr p)
 
 	std::string strValue;
 	if(readXMLString(p, "param", strValue) || readXMLString(p, "params", strValue))
- 		hasParam = booleanString(strValue);
+		hasParam = booleanString(strValue);
 
 	if(readXMLString(p, "direction", strValue))
 		needDirection = booleanString(strValue);
@@ -1530,12 +1530,13 @@ bool InstantSpell::Levitate(const InstantSpell*, Creature* creature, const std::
 				tmpTile = g_game.getTile(destination);
 				destination.z++;
 			}
+
 			if(!tmpTile || (!tmpTile->ground && !tmpTile->hasProperty(IMMOVABLEBLOCKSOLID)))
 			{
 				Tile* tile = player->getTile();
 				tmpTile = g_game.getTile(destination);
 				if(tile && tmpTile && tmpTile->ground && !tmpTile->hasProperty(IMMOVABLEBLOCKSOLID) &&
-					/*!tmpTile->floorChange() &&*/ tile->hasFlag(TILESTATE_HOUSE) == tmpTile->hasFlag(TILESTATE_HOUSE)
+					tile->hasFlag(TILESTATE_HOUSE) == tmpTile->hasFlag(TILESTATE_HOUSE)
 					&& tile->hasFlag(TILESTATE_PROTECTIONZONE) == tmpTile->hasFlag(TILESTATE_PROTECTIONZONE))
 					ret = g_game.internalMoveCreature(NULL, player, tile, tmpTile, FLAG_IGNOREBLOCKITEM | FLAG_IGNOREBLOCKCREATURE);
 			}

@@ -102,7 +102,7 @@ bool Actions::registerEvent(Event* event, xmlNodePtr p, bool override)
 		}
 		else
 			std::clog << "[Warning - Actions::registerEvent] You cannot define more than one default action, if you want to do so "
-                << "Please define \"override\"." << std::endl;
+				<< "Please define \"override\"." << std::endl;
 
 		return true;
 	}

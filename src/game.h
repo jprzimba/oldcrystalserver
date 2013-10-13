@@ -634,7 +634,6 @@ class Game
 		void startDecay(Item* item);
 
 #ifdef __GROUND_CACHE__
-
 		std::map<Item*, int32_t> grounds;
 #endif
 

@@ -582,7 +582,7 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 	player->lastLogin = result->getDataLong("lastlogin");
 	player->lastLogout = result->getDataLong("lastlogout");
 	player->lastIP = result->getDataInt("lastip");
-	
+
 	player->offlineTrainingTime = result->getDataInt("offlinetraining_time") * 1000;
 	player->offlineTrainingSkill = result->getDataInt("offlinetraining_skill");
 
@@ -793,7 +793,6 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 		itemMap.clear();
 		result->free();
 	}
-
 
 	//load storage map
 	query.str("");
@@ -1891,7 +1890,7 @@ bool IOLoginData::updateOnlineStatus(uint32_t guid, bool login)
 			value++;
 		else if(value > 0)
 			value--;
-			
+
 		query.str("");
 	}
 

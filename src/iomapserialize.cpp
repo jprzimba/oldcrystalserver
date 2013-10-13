@@ -511,37 +511,37 @@ bool IOMapSerialize::loadMapBinary(Map* map)
 					<< " at position " << pos << std::endl;
 				break;
 			}
- 		}
+		}
 	}
 	while(result->next());
 	result->free();
- 	return true;
+	return true;
 }
 
 bool IOMapSerialize::saveMapBinary(Map*)
 {
- 	Database* db = Database::getInstance();
+	Database* db = Database::getInstance();
 	//Start the transaction
- 	DBTransaction transaction(db);
- 	if(!transaction.begin())
- 		return false;
+	DBTransaction transaction(db);
+	if(!transaction.begin())
+		return false;
 
 	DBQuery query;
 	query << "DELETE FROM `house_data` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID);
 	if(!db->query(query.str()))
- 		return false;
+		return false;
 
 	DBInsert stmt(db);
 	stmt.setQuery("INSERT INTO `house_data` (`house_id`, `world_id`, `data`) VALUES ");
- 	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin(); it != Houses::getInstance()->getHouseEnd(); ++it)
+	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin(); it != Houses::getInstance()->getHouseEnd(); ++it)
 		saveHouseBinary(db, stmt, it->second);
 
 	query.str("");
 	if(!stmt.execute())
 		return false;
 
- 	//End the transaction
- 	return transaction.commit();
+	//End the transaction
+	return transaction.commit();
 }
 
 bool IOMapSerialize::loadMapBinaryTileBased(Map* map)
@@ -603,37 +603,37 @@ bool IOMapSerialize::loadMapBinaryTileBased(Map* map)
 					<< " at position " << pos << std::endl;
 				break;
 			}
- 		}
+		}
 	}
 	while(result->next());
 	result->free();
- 	return true;
+	return true;
 }
 
 bool IOMapSerialize::saveMapBinaryTileBased(Map*)
 {
- 	Database* db = Database::getInstance();
+	Database* db = Database::getInstance();
 	//Start the transaction
- 	DBTransaction transaction(db);
- 	if(!transaction.begin())
- 		return false;
+	DBTransaction transaction(db);
+	if(!transaction.begin())
+		return false;
 
 	DBQuery query;
 	query << "DELETE FROM `tile_store` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID);
 	if(!db->query(query.str()))
- 		return false;
+		return false;
 
 	DBInsert stmt(db);
 	stmt.setQuery("INSERT INTO `tile_store` (`house_id`, `world_id`, `data`) VALUES ");
- 	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin(); it != Houses::getInstance()->getHouseEnd(); ++it)
+	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin(); it != Houses::getInstance()->getHouseEnd(); ++it)
 		saveHouseBinaryTileBased(db, stmt, it->second);
 
 	query.str("");
 	if(!stmt.execute())
 		return false;
 
- 	//End the transaction
- 	return transaction.commit();
+	//End the transaction
+	return transaction.commit();
 }
 
 bool IOMapSerialize::saveHouseRelational(Database* db, House* house, uint32_t& tileId)
@@ -650,8 +650,8 @@ bool IOMapSerialize::saveHouseBinary(Database* db, DBInsert& stmt, House* house)
 	for(HouseTileList::iterator tit = house->getHouseTileBegin(); tit != house->getHouseTileEnd(); ++tit)
 	{
 		if(!saveTile(stream, *tit))
- 			continue;
- 	}
+			continue;
+	}
 
 	uint32_t attributesSize = 0;
 	const char* attributes = stream.getStream(attributesSize);
@@ -682,7 +682,7 @@ bool IOMapSerialize::saveHouseBinaryTileBased(Database* db, DBInsert& stmt, Hous
 			<< ", " << db->escapeBlob(attributes, attributesSize);
 		if(!stmt.addRow(query))
 			return false;
- 	}
+	}
 
 	return true;
 }

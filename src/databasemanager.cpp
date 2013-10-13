@@ -1373,7 +1373,7 @@ uint32_t DatabaseManager::updateDatabase()
 			registerDatabaseConfig("db_version", 34);
 			return 34;
 		}
-		
+
 		case 34:
 		{
 			std::clog << "> Updating database to version 35..." << std::endl;

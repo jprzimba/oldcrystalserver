@@ -691,7 +691,7 @@ bool Mounts::parseMountNode(xmlNodePtr p)
 				mount->conditionSuppressions |= CONDITION_GAMEMASTER;
 		}
 	}
-    
+
 	mounts.push_back(mount);
 	return true;
 }

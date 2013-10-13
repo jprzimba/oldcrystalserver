@@ -160,6 +160,12 @@ class ItemType
 
 		int32_t attack, extraAttack, defense, extraDefense, armor, breakChance, hitChance, maxHitChance,
 			runeLevel, runeMagLevel, lightLevel, lightColor, decayTo, rotateTo, alwaysOnTopOrder;
+
+		int32_t extraAttackChance, extraDefenseChance, attackSpeedChance;
+		int32_t armorRndMin, armorRndMax, defenseRndMin, defenseRndMax, extraDefenseRndMin,
+			extraDefenseRndMax, attackRndMin, attackRndMax, extraAttackRndMin, extraAttackRndMax, chargesRndMin,
+			chargesRndMax, attackSpeedRndMin, attackSpeedRndMax;
+
 		uint32_t shootRange, charges, decayTime, attackSpeed, wieldInfo, minReqLevel, minReqMagicLevel,
 			worth, levelDoor, date;
 

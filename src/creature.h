@@ -173,7 +173,7 @@ class Creature : public AutoId, virtual public Thing
 
 	public:
 		static double speedA, speedB, speedC;
-		
+
 		virtual ~Creature();
 
 		virtual Creature* getCreature() {return this;}

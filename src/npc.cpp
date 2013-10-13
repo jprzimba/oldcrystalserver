@@ -24,16 +24,16 @@
 
 #include "npc.h"
 #include "tools.h"
- 
+
 #include "luascript.h"
 #include "position.h"
- 
+
 #include "spells.h"
 #include "vocation.h"
 
 #include "configmanager.h"
 #include "game.h"
- 
+
 extern ConfigManager g_config;
 extern Game g_game;
 extern Spells* g_spells;
@@ -44,7 +44,7 @@ AutoList<Npc> Npc::autoList;
 uint32_t Npc::npcCount = 0;
 #endif
 NpcScript* Npc::m_interface = NULL;
- 
+
 Npcs::~Npcs()
 {
 	for(DataMap::iterator it = data.begin(); it != data.end(); ++it)
@@ -52,7 +52,7 @@ Npcs::~Npcs()
 
 	data.clear();
 }
- 
+
 bool Npcs::loadFromXml(bool reloading/* = false*/)
 {
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_OTHER, "npc/npcs.xml").c_str());
@@ -62,7 +62,7 @@ bool Npcs::loadFromXml(bool reloading/* = false*/)
 		std::clog << getLastXMLError() << std::endl;
 		return false;
 	}
- 
+
 	xmlNodePtr root = xmlDocGetRootElement(doc);
 	if(xmlStrcmp(root->name,(const xmlChar*)"npcs"))
 	{
@@ -74,11 +74,11 @@ bool Npcs::loadFromXml(bool reloading/* = false*/)
 	{
 		if(p->type != XML_ELEMENT_NODE)
 			continue;
- 
+
 		if(xmlStrcmp(p->name, (const xmlChar*)"npc"))
 		{
 			std::clog << "[Warning - Npcs::loadFromXml] Unknown node name: " << p->name << "." << std::endl;
-    		continue;
+			continue;
 		}
 		else
 			parseNpcNode(p, FILE_TYPE_OTHER, reloading);
@@ -115,7 +115,7 @@ bool Npcs::parseNpcNode(xmlNodePtr node, FileType_t path, bool reloading/* = fal
 
 	if(new_nType)
 		nType = new NpcType();
- 
+
 	nType->name = name;
 	toLowerCaseString(name);
 
@@ -125,7 +125,7 @@ bool Npcs::parseNpcNode(xmlNodePtr node, FileType_t path, bool reloading/* = fal
 
 	if(readXMLString(node, "script", strValue))
 		nType->script = strValue;
- 
+
 	for(xmlNodePtr q = node->children; q; q = q->next)
 	{
 		if(!xmlStrcmp(q->name, (const xmlChar*)"look"))
@@ -136,10 +136,10 @@ bool Npcs::parseNpcNode(xmlNodePtr node, FileType_t path, bool reloading/* = fal
 				nType->outfit.lookType = intValue;
 				if(readXMLInteger(q, "head", intValue))
 					nType->outfit.lookHead = intValue;
- 
+
 				if(readXMLInteger(q, "body", intValue))
 					nType->outfit.lookBody = intValue;
- 
+
 				if(readXMLInteger(q, "legs", intValue))
 					nType->outfit.lookLegs = intValue;
 
@@ -148,7 +148,7 @@ bool Npcs::parseNpcNode(xmlNodePtr node, FileType_t path, bool reloading/* = fal
 
 				if(readXMLInteger(q, "addons", intValue))
 					nType->outfit.lookAddons = intValue;
- 
+
 				if(readXMLInteger(q, "mount", intValue))
 					nType->outfit.lookMount = intValue;
 			}
@@ -156,7 +156,7 @@ bool Npcs::parseNpcNode(xmlNodePtr node, FileType_t path, bool reloading/* = fal
 				nType->outfit.lookTypeEx = intValue;
 		}
 	}
- 
+
 	if(new_nType)
 		data[name] = nType;
 
@@ -167,7 +167,7 @@ void Npcs::reload()
 {
 	for(AutoList<Npc>::iterator it = Npc::autoList.begin(); it != Npc::autoList.end(); ++it)
 		it->second->closeAllShopWindows();
- 
+
 	delete Npc::m_interface;
 	Npc::m_interface = NULL;
 
@@ -1556,7 +1556,7 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 					if(g_spells->getInstantSpellByName(it->strValue))
 						npcState->spellName = it->strValue;
 					else
-						npcState->spellName = "";						
+						npcState->spellName = "";
 
 					break;
 				}
@@ -1635,7 +1635,7 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 						if(iit.hasSubType())
 							subType = npcState->subType;
 						else
-							subType = -1;							
+							subType = -1;
 
 						int32_t itemCount = player->__getItemTypeCount(iit.id, subType);
 						if(itemCount >= npcState->amount)
@@ -1716,7 +1716,7 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 							subType = npcState->subType;
 						else
 							subType = -1;
-							
+
 						int32_t itemCount = player->__getItemTypeCount(itemId, subType);
 						if(itemCount >= npcState->amount)
 							g_game.removeItemOfType(player, itemId, npcState->amount, subType);
@@ -1737,7 +1737,7 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 						if(iit.hasSubType())
 							subType = npcState->subType;
 						else
-							subType = -1;							
+							subType = -1;
 
 						for(int32_t i = 0; i < npcState->amount; ++i)
 						{

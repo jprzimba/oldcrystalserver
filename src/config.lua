@@ -218,7 +218,6 @@
 	-- Startup
 	startupDatabaseOptimization = true
 	updatePremiumStateAtStartup = true
-	confirmOutdatedVersion = false
 	skipItemsVersionCheck = false
 
 	-- Spells

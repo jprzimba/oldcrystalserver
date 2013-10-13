@@ -238,7 +238,7 @@ void Creature::onThink(uint32_t interval)
 
 void Creature::onAttacking(uint32_t interval)
 {
-	if(!attackedCreature || attackedCreature->getHealth() < 1)
+	if(!attackedCreature || attackedCreature->getHealth() < 1 || interval < 100)
 		return;
 
 	bool deny = false;
@@ -283,7 +283,7 @@ void Creature::onWalk()
 		cancelNextWalk = false;
 		listWalkDir.clear();
 		onWalkAborted();
- 	}
+	}
 
 	if(eventWalk)
 	{
@@ -1086,7 +1086,7 @@ void Creature::goToFollowCreature()
 {
 	if(getPlayer() && (OTSYS_TIME() - lastFailedFollow <= g_config.getNumber(ConfigManager::FOLLOW_EXHAUST)))
 		return;
-	
+
 	if(followCreature)
 	{
 		FindPathParams fpp;

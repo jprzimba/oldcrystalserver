@@ -955,7 +955,7 @@ bool Game::placeCreature(Creature* creature, const Position& pos, bool extendedP
 	{
 		for(ConditionList::iterator it = tmpPlayer->storedConditionList.begin(); it != tmpPlayer->storedConditionList.end(); ++it)
 		{
-			 if((*it)->getType() == CONDITION_MUTED && (*it)->getTicks() != -1 &&
+			if((*it)->getType() == CONDITION_MUTED && (*it)->getTicks() != -1 &&
 				(*it)->getTicks() - ((time(NULL) - tmpPlayer->getLastLogout()) * 1000) <= 0)
 				continue;
 
@@ -3686,7 +3686,7 @@ bool Game::playerLookInBattleList(uint32_t playerId, uint32_t creatureId)
 	if(player->hasCustomFlag(PlayerCustomFlag_CanSeeCreatureDetails))
 	{
 		if(!player->hasFlag(PlayerFlag_HideHealth))
-		{														 
+		{
 			ss << std::endl << "Health: [" << creature->getHealth() << " / " << creature->getMaxHealth() << "]";
 			if(creature->getMaxMana() > 0)
 				ss << ", Mana: [" << creature->getMana() << " / " << creature->getMaxMana() << "]";
@@ -5248,7 +5248,7 @@ void Game::updateCreatureSkull(Creature* creature)
 	Player* tmpPlayer = NULL;
 	for(SpectatorVec::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
-		 if((tmpPlayer = (*it)->getPlayer()))
+		if((tmpPlayer = (*it)->getPlayer()))
 			tmpPlayer->sendCreatureSkull(creature);
 	}
 }

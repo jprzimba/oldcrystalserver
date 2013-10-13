@@ -3870,7 +3870,7 @@ int32_t LuaInterface::luaDoCreatureSetSpeakType(lua_State* L)
 	if(Creature* creature = env->getCreatureByUID(popNumber(L)))
 	{
 		if(!((type >= MSG_SPEAK_FIRST && type <= MSG_SPEAK_LAST) ||
-				(type >= MSG_SPEAK_MONSTER_FIRST && type <= MSG_SPEAK_MONSTER_LAST)))
+			(type >= MSG_SPEAK_MONSTER_FIRST && type <= MSG_SPEAK_MONSTER_LAST)))
 		{
 			errorEx("Invalid speak type");
 			lua_pushboolean(L, false);
@@ -3948,7 +3948,7 @@ int32_t LuaInterface::luaDoCreatureAddHealth(lua_State* L)
 	{
 		if(healthChange) //do not post with 0 value
 			g_game.combatChangeHealth(healthChange < 1 ? COMBAT_UNDEFINEDDAMAGE : COMBAT_HEALING,
-									  NULL, creature, healthChange, hitEffect, hitColor, force);
+				NULL, creature, healthChange, hitEffect, hitColor, force);
 
 		lua_pushboolean(L, true);
 	}
@@ -4253,11 +4253,11 @@ int32_t LuaInterface::luaDoRelocate(lua_State* L)
 	}
 
 	TileItemVector *toItems = toTile->getItemList(),
-							  *fromItems = fromTile->getItemList();
+		*fromItems = fromTile->getItemList();
 	if(fromItems && toItems)
 	{
 		int32_t itemLimit = g_config.getNumber(toTile->hasFlag(TILESTATE_PROTECTIONZONE)
-											   ? ConfigManager::PROTECTION_TILE_LIMIT : ConfigManager::TILE_LIMIT), count = 0;
+			? ConfigManager::PROTECTION_TILE_LIMIT : ConfigManager::TILE_LIMIT), count = 0;
 		for(ItemVector::iterator it = fromItems->getBeginDownItem(); it != fromItems->getEndDownItem(); )
 		{
 			if(itemLimit && (int32_t)toItems->size() > itemLimit)
@@ -4298,7 +4298,7 @@ int32_t LuaInterface::luaDoRelocate(lua_State* L)
 		fromTile->onUpdateTile();
 		toTile->onUpdateTile();
 		if(g_config.getBool(ConfigManager::STORE_TRASH)
-				&& fromTile->hasFlag(TILESTATE_TRASHED))
+			&& fromTile->hasFlag(TILESTATE_TRASHED))
 		{
 			g_game.addTrash(toPos);
 			toTile->setFlag(TILESTATE_TRASHED);
@@ -4521,7 +4521,7 @@ int32_t LuaInterface::luaGetPlayerSkillLevel(lua_State* L)
 	{
 		if(skill <= SKILL_LAST)
 			lua_pushnumber(L, ignoreModifiers ? player->skills[skill][SKILL_LEVEL] :
-						   player->skills[skill][SKILL_LEVEL] + player->getVarSkill((skills_t)skill));
+				player->skills[skill][SKILL_LEVEL] + player->getVarSkill((skills_t)skill));
 		else
 			lua_pushboolean(L, false);
 	}
@@ -6401,7 +6401,7 @@ int32_t LuaInterface::luaSetCombatFormula(lua_State* L)
 		minc = popNumber(L);
 
 	double minm = g_config.getDouble(ConfigManager::FORMULA_MAGIC), maxm = minm,
-				  minl = g_config.getDouble(ConfigManager::FORMULA_LEVEL), maxl = minl;
+		minl = g_config.getDouble(ConfigManager::FORMULA_LEVEL), maxl = minl;
 	if(params > 8)
 	{
 		maxm = popFloatNumber(L);
@@ -6415,7 +6415,7 @@ int32_t LuaInterface::luaSetCombatFormula(lua_State* L)
 	}
 
 	double maxb = popFloatNumber(L), maxa = popFloatNumber(L),
-											minb = popFloatNumber(L), mina = popFloatNumber(L);
+		minb = popFloatNumber(L), mina = popFloatNumber(L);
 	formulaType_t type = (formulaType_t)popNumber(L);
 	if(Combat* combat = env->getCombatObject(popNumber(L)))
 	{
@@ -6439,7 +6439,7 @@ int32_t LuaInterface::luaSetConditionFormula(lua_State* L)
 		loaded = popBoolean(L);
 
 	double maxb = popFloatNumber(L), maxa = popFloatNumber(L),
-											minb = popFloatNumber(L), mina = popFloatNumber(L);
+		minb = popFloatNumber(L), mina = popFloatNumber(L);
 	ScriptEnviroment* env = getEnv();
 	if(ConditionSpeed* condition = dynamic_cast<ConditionSpeed*>(env->getConditionObject(popNumber(L), loaded)))
 	{
@@ -8921,7 +8921,7 @@ int32_t LuaInterface::luaAddEvent(lua_State* L)
 
 	LuaTimerEvent event;
 	event.eventId = Scheduler::getInstance().addEvent(createSchedulerTask(std::max((int64_t)SCHEDULER_MINTICKS, popNumber(L)),
-					boost::bind(&LuaInterface::executeTimer, interface, ++interface->m_lastTimer)));
+		boost::bind(&LuaInterface::executeTimer, interface, ++interface->m_lastTimer)));
 
 	event.parameters = params;
 	event.function = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -10338,7 +10338,7 @@ int32_t LuaInterface::luaDoSetGameState(lua_State* L)
 	if(id >= GAMESTATE_FIRST && id <= GAMESTATE_LAST)
 	{
 		Dispatcher::getInstance().addTask(createTask(
-											  boost::bind(&Game::setGameState, &g_game, (GameState_t)id)));
+			boost::bind(&Game::setGameState, &g_game, (GameState_t)id)));
 		lua_pushboolean(L, true);
 	}
 	else
@@ -10406,7 +10406,7 @@ int32_t LuaInterface::luaDoReloadInfo(lua_State* L)
 		// we're passing it to scheduler since talkactions reload will
 		// re-init our lua state and crash due to unfinished call
 		Scheduler::getInstance().addEvent(createSchedulerTask(SCHEDULER_MINTICKS,
-										  boost::bind(&Game::reloadInfo, &g_game, (ReloadInfo_t)id, cid, false)));
+			boost::bind(&Game::reloadInfo, &g_game, (ReloadInfo_t)id, cid, false)));
 		lua_pushboolean(L, true);
 	}
 	else
@@ -11058,7 +11058,7 @@ int32_t LuaInterface::luaDoRemoveIpBanishment(lua_State* L)
 		mask = popNumber(L);
 
 	lua_pushboolean(L, IOBan::getInstance()->removeIpBanishment(
-						(uint32_t)popNumber(L), mask));
+		(uint32_t)popNumber(L), mask));
 	return 1;
 }
 
@@ -11339,38 +11339,38 @@ int32_t LuaInterface::luaL_errors(lua_State* L)
 }
 
 #define EXPOSE_LOG(Name, Stream)\
-        int32_t LuaInterface::luaStd##Name(lua_State* L)\
-        {\
-                StringVec data;\
-                for(int32_t i = 0, params = lua_gettop(L); i < params; ++i)\
-                {\
-                        if(lua_isnil(L, -1))\
-                        {\
-                                data.push_back("nil");\
-                                lua_pop(L, 1);\
-                        }\
-                        else if(lua_isboolean(L, -1))\
-                                data.push_back(popBoolean(L) ? "true" : "false");\
-                        else if(lua_istable(L, -1)) {/* "table: address" */}\
-                        else if(lua_isfunction(L, -1)) {/* "function: address" */}\
-                        else\
-                                data.push_back(popString(L));\
-                }\
+	int32_t LuaInterface::luaStd##Name(lua_State* L)\
+	{\
+		StringVec data;\
+		for(int32_t i = 0, params = lua_gettop(L); i < params; ++i)\
+		{\
+			if(lua_isnil(L, -1))\
+			{\
+				data.push_back("nil");\
+				lua_pop(L, 1);\
+			}\
+			else if(lua_isboolean(L, -1))\
+				data.push_back(popBoolean(L) ? "true" : "false");\
+			else if(lua_istable(L, -1)) {/* "table: address" */}\
+			else if(lua_isfunction(L, -1)) {/* "function: address" */}\
+			else\
+				data.push_back(popString(L));\
+		}\
 \
-                for(StringVec::reverse_iterator it = data.rbegin(); it != data.rend(); ++it)\
-                        Stream << (*it) << std::endl;\
+		for(StringVec::reverse_iterator it = data.rbegin(); it != data.rend(); ++it)\
+			Stream << (*it) << std::endl;\
 \
-                lua_pushnumber(L, data.size());\
-                return 1;\
-        }
+		lua_pushnumber(L, data.size());\
+		return 1;\
+	}
 
-	   EXPOSE_LOG(Cout, std::cout)
-	   EXPOSE_LOG(Clog, std::clog)
-	   EXPOSE_LOG(Cerr, std::cerr)
+EXPOSE_LOG(Cout, std::cout)
+EXPOSE_LOG(Clog, std::clog)
+EXPOSE_LOG(Cerr, std::cerr)
 
 #undef EXPOSE_LOG
 
-	   int32_t LuaInterface::luaStdMD5(lua_State* L)
+int32_t LuaInterface::luaStdMD5(lua_State* L)
 {
 	//std.md5(string[, upperCase = false])
 	bool upperCase = false;
@@ -11638,7 +11638,7 @@ int32_t LuaInterface::luaBitUNot(lua_State* L)
 		type value = (type)popNumber(L);\
 		for(int32_t i = 2; i <= params; ++i)\
 			value op popNumber(L);\
-		\
+\
 		lua_pushnumber(L, value);\
 		return 1;\
 	}

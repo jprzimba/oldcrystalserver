@@ -118,7 +118,7 @@ SocketCode_t NetworkMessage::write(SOCKET socket, int32_t timeout/* = NETWORK_RE
 	m_buffer[3] = (uint8_t)(m_size >> 8);
 
 	int32_t sent = 0, waiting = 0;
-  	do
+	do
 	{
 		int32_t ret = send(socket, (char*)m_buffer + sent + NETWORK_HEADER_SIZE,
 			std::min(m_size - sent + NETWORK_HEADER_SIZE, 1000), 0);

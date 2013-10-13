@@ -245,7 +245,7 @@ class ProtocolGame : public Protocol
 
 		void sendPendingStateEntered();
 		void sendEnterWorld();
-		
+
 		void sendSpellCooldown(Spells_t icon, uint32_t cooldown);
 		void sendSpellGroupCooldown(SpellGroup_t groupId, uint32_t cooldown);
 

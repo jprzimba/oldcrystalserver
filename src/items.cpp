@@ -72,6 +72,9 @@ ItemType::ItemType()
 	decayTime = 0;
 	stopTime = false;
 	corpseType = RACE_NONE;
+	armorRndMin = armorRndMax = defenseRndMin = defenseRndMax = extraDefenseRndMin = extraDefenseRndMax = -1;
+	attackRndMin = attackRndMax = extraAttackRndMin = extraAttackRndMax = chargesRndMin = chargesRndMax = -1;
+	attackSpeedRndMin = attackSpeedRndMax = attackSpeedChance = extraAttackChance = extraDefenseChance = -1;
 	fluidSource = FLUID_NONE;
 	allowDistRead = false;
 
@@ -700,31 +703,61 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 		{
 			if(readXMLInteger(itemAttributesNode, "value", intValue))
 				it.armor = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_min", intValue))
+				it.armorRndMin = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_max", intValue))
+				it.armorRndMax = intValue;
 		}
 		else if(tmpStrValue == "defense")
 		{
 			if(readXMLInteger(itemAttributesNode, "value", intValue))
 				it.defense = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_min", intValue))
+				it.defenseRndMin = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_max", intValue))
+				it.defenseRndMax = intValue;
 		}
 		else if(tmpStrValue == "extradefense" || tmpStrValue == "extradef")
 		{
+			if(readXMLInteger(itemAttributesNode, "chance", intValue))
+				it.extraDefenseChance = intValue;
 			if(readXMLInteger(itemAttributesNode, "value", intValue))
 				it.extraDefense = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_min", intValue))
+				it.extraDefenseRndMin = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_max", intValue))
+				it.extraDefenseRndMax = intValue;
 		}
 		else if(tmpStrValue == "attack")
 		{
 			if(readXMLInteger(itemAttributesNode, "value", intValue))
 				it.attack = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_min", intValue))
+				it.attackRndMin = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_max", intValue))
+				it.attackRndMax = intValue;
 		}
 		else if(tmpStrValue == "extraattack" || tmpStrValue == "extraatk")
 		{
+			if(readXMLInteger(itemAttributesNode, "chance", intValue))
+				it.extraAttackChance = intValue;
 			if(readXMLInteger(itemAttributesNode, "value", intValue))
 				it.extraAttack = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_min", intValue))
+				it.extraAttackRndMin = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_max", intValue))
+				it.extraAttackRndMax = intValue;
 		}
 		else if(tmpStrValue == "attackspeed")
 		{
+			if(readXMLInteger(itemAttributesNode, "chance", intValue))
+				it.attackSpeedChance = intValue;
 			if(readXMLInteger(itemAttributesNode, "value", intValue))
 				it.attackSpeed = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_min", intValue))
+				it.attackSpeedRndMin = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_max", intValue))
+				it.attackSpeedRndMax = intValue;
 		}
 		else if(tmpStrValue == "rotateto")
 		{
@@ -1062,6 +1095,10 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 		{
 			if(readXMLInteger(itemAttributesNode, "value", intValue))
 				it.charges = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_min", intValue))
+				it.chargesRndMin = intValue;
+			if(readXMLInteger(itemAttributesNode, "random_max", intValue))
+				it.chargesRndMax = intValue;
 		}
 		else if(tmpStrValue == "showcharges")
 		{

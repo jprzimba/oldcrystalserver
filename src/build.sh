@@ -25,7 +25,6 @@
 
 echo "Crystal Server build script - "
 
-
 # Enable CCache
 if test -x `which ccache`; then
 	echo "Using ccache"

@@ -29,7 +29,7 @@ MarketOfferList IOMarket::getActiveOffers(MarketAction_t action, uint16_t itemId
 	Database* db = Database::getInstance();
 	DBQuery query;
 	query << "SELECT `id`, `player_id`, `amount`, `price`, `created`, `anonymous` FROM `market_offers` WHERE `sale` = "
-		<< action << " AND `itemtype` = " << itemId << " AND `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID) << ";";	
+		<< action << " AND `itemtype` = " << itemId << " AND `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID) << ";";
 
 	DBResult* result;
 	if(!(result = db->storeQuery(query.str())))

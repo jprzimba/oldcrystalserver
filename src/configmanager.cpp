@@ -27,7 +27,7 @@ ConfigManager::ConfigManager()
 	m_loaded = false;
 	m_startup = true;
 
-	m_confNumber[ENCRYPTION] = ENCRYPTION_SHA256;
+	m_confNumber[ENCRYPTION] = ENCRYPTION_SHA1;
 	m_confString[CONFIG_FILE] = getFilePath(FILE_TYPE_CONFIG, "config.lua");
 
 	m_confNumber[LOGIN_PORT] = m_confNumber[ADMIN_PORT] = m_confNumber[MANAGER_PORT] = m_confNumber[STATUS_PORT] = 0;
@@ -266,7 +266,6 @@ bool ConfigManager::load()
 	m_confBool[SHOW_MANA_CHANGE_MONSTER] = getGlobalBool("showManaChangeForMonsters", false);
 	m_confBool[CHECK_CORPSE_OWNER] = getGlobalBool("checkCorpseOwner", true);
 	m_confBool[BUFFER_SPELL_FAILURE] = getGlobalBool("bufferMutedOnSpellFailure", false);
-	m_confBool[CONFIRM_OUTDATED_VERSION] = getGlobalBool("confirmOutdatedVersion", true);
 	m_confNumber[GUILD_PREMIUM_DAYS] = getGlobalNumber("premiumDaysToFormGuild", 0);
 	m_confNumber[PUSH_CREATURE_DELAY] = getGlobalNumber("pushCreatureDelay", 2000);
 	m_confNumber[DEATH_CONTAINER] = getGlobalNumber("deathContainerId", 1987);

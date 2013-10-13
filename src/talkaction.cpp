@@ -301,7 +301,7 @@ bool TalkAction::loadFunction(const std::string& functionName)
 	m_functionName = asLowerCaseString(functionName);
 	if(m_functionName == "housebuy")
 		m_function = houseBuy;
- 	else if(m_functionName == "housesell")
+	else if(m_functionName == "housesell")
 		m_function = houseSell;
 	else if(m_functionName == "housekick")
 		m_function = houseKick;
@@ -311,9 +311,9 @@ bool TalkAction::loadFunction(const std::string& functionName)
 		m_function = houseGuestList;
 	else if(m_functionName == "housesubownerlist")
 		m_function = houseSubOwnerList;
- 	else if(m_functionName == "guildjoin")
+	else if(m_functionName == "guildjoin")
 		m_function = guildJoin;
- 	else if(m_functionName == "guildcreate")
+	else if(m_functionName == "guildcreate")
 		m_function = guildCreate;
 	else if(m_functionName == "thingproporties")
 		m_function = thingProporties;

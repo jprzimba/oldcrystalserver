@@ -266,7 +266,7 @@ bool ProtocolGame::login(const std::string& name, uint32_t id, const std::string
 		player->lastIP = player->getIP();
 		player->lastLoad = OTSYS_TIME();
 		player->lastLogin = std::max(time(NULL), player->lastLogin + 1);
-			
+
 		sendPendingStateEntered();
 		if(!g_game.placeCreature(player, player->getLoginPosition()) && !g_game.placeCreature(player, player->getMasterPosition(), false, true))
 		{
@@ -1296,7 +1296,7 @@ void ProtocolGame::parseEditVip(NetworkMessage& msg)
 	if(description.size() > 128)
 		return;
 
-	if(/*icon < VIP_ICON_FIRST || */icon > VIP_ICON_LAST)
+	if(icon > VIP_ICON_LAST)
 		return;
 
 	addGameTask(&Game::playerRequestEditVip, player->getID(), guid, description, icon, notify);
@@ -1752,7 +1752,7 @@ void ProtocolGame::sendContainer(uint32_t cid, const Container* container, bool 
 		msg->putItem(container);
 		msg->putString(container->getName());
 	}
-	
+
 	msg->put<char>(container->capacity());
 
 	msg->put<char>(hasParent ? 0x01 : 0x00);
@@ -1888,6 +1888,7 @@ void ProtocolGame::sendMarketEnter(uint32_t depotId)
 
 	std::map<uint16_t, uint32_t> depotItems;
 	std::list<Container*> containerList;
+
 	containerList.push_back(depotChest);
 	containerList.push_back(player->getInbox());
 	do

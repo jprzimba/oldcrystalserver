@@ -38,6 +38,7 @@
 #include "configmanager.h"
 #include "game.h"
 #include "chat.h"
+#include "outputmessage.h"
 
 extern ConfigManager g_config;
 extern Game g_game;
@@ -104,7 +105,7 @@ Player::Player(const std::string& _name, ProtocolGame* p):
 
 	inbox = new Inbox(ITEM_INBOX);
 	inbox->addRef();
-	
+
 	depotChange = false;
 
 	transferContainer.setParent(NULL);
@@ -549,7 +550,7 @@ void Player::sendIcons() const
 	if(getZone() == ZONE_PROTECTION)
 	{
 		icons |= ICON_PZ;
-		
+
 		// Don't show ICON_SWORDS if player is in protection zone.
 		if(hasBitSet(ICON_SWORDS, icons))
 			icons &= ~ICON_SWORDS;
@@ -688,11 +689,11 @@ void Player::addSkillAdvance(skills_t skill, uint64_t count, bool useMultiplier/
 
 	//update percent
 	uint16_t newPercent = Player::getPercentLevel(skills[skill][SKILL_TRIES], nextReqTries);
- 	if(skills[skill][SKILL_PERCENT] != newPercent)
+	if(skills[skill][SKILL_PERCENT] != newPercent)
 	{
 		skills[skill][SKILL_PERCENT] = newPercent;
 		sendSkills();
- 	}
+	}
 	else if(!s.str().empty())
 		sendSkills();
 }
@@ -852,7 +853,7 @@ bool Player::setStorage(const std::string& key, const std::string& value)
 
 		if(Quests::getInstance()->isQuestStorage(key, value, true))
 			onUpdateQuest();
-		
+
 		return true;
 	}
 
@@ -1233,18 +1234,18 @@ void Player::sendCancelMessage(ReturnValue message) const
 		case RET_NOTPOSSIBLE:
 			sendCancel("Sorry, not possible.");
 			break;
-			
+
 		case RET_YOUMAYNOTATTACKIMMEDIATELYAFTERLOGGINGIN:
 			sendCancel("You may not attack immediately after logging in.");
 			break;
-			
+
 		case RET_YOUCANONLYTRADEUPTOX:
 		{
 			std::stringstream s;
 			s << "You can only trade up to " << g_config.getNumber(ConfigManager::TRADE_LIMIT) << " items at a time.";
 			sendCancel(s.str());
-		}	
-			break;	
+		}
+			break;
 
 		default:
 			break;
@@ -1704,8 +1705,7 @@ bool Player::canShopItem(uint16_t itemId, uint8_t subType, ShopEvent_t event)
 				return true;
 		}
 		else
-			return true;	
-		
+			return true;
 	}
 
 	return false;
@@ -2744,7 +2744,6 @@ void Player::notifyStatusChange(Player* loginPlayer, VipStatus_t status)
 	if(!client)
 		return;
 
-		
 	VIPMap::iterator it = VIPList.find(loginPlayer->getGUID());
 	if(it != VIPList.end())
 		client->sendUpdatedVIPStatus(loginPlayer->getGUID(), status);
@@ -3762,7 +3761,7 @@ void Player::doAttacking(uint32_t)
 		lastAttack = OTSYS_TIME();
 		return;
 	}
-	
+
 	if(!lastAttack)
 		lastAttack = OTSYS_TIME() - attackSpeed - 1;
 	else if((OTSYS_TIME() - lastAttack) < attackSpeed)

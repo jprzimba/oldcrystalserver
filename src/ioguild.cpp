@@ -392,7 +392,6 @@ bool IOGuild::setMotd(uint32_t guild, const std::string& newMessage)
 	return db->query(query.str());
 }
 
-
 std::string IOGuild::getMotd(uint32_t guild)
 {
 	Database* db = Database::getInstance();
@@ -407,7 +406,6 @@ std::string IOGuild::getMotd(uint32_t guild)
 	result->free();
 	return motd;
 }
-
 
 void IOGuild::checkWars()
 {
@@ -430,7 +428,6 @@ void IOGuild::checkWars()
 	std::stringstream s;
 	uint32_t tmpInterval = (uint32_t) (EVENT_WARSINTERVAL/1000)+10; //+10 for sure
 
-	
 	query << "SELECT `g`.`name` as `guild_name`, `e`.`name` as `enemy_name`, `guild_wars`.`frags` as `frags`  FROM `guild_wars` LEFT JOIN `guilds` as `g` ON `guild_wars`.`guild_id` = `g`.`id` LEFT JOIN `guilds` as `e` ON `guild_wars`.`enemy_id` = `e`.`id` WHERE (`begin` > 0 AND (`begin` + " << tmpInterval << ") > UNIX_TIMESTAMP()) AND `status` IN (0, 6)";
 	if((result = db->storeQuery(query.str())))
 	{
@@ -576,7 +573,7 @@ void IOGuild::checkEndingWars()
 	DBResult* result;
 
 	DBQuery query;
-	
+
 	query << "SELECT `id`, `guild_id`, `enemy_id` FROM `guild_wars` WHERE `status` IN (1,4) AND `end` > 0 AND `end` < " << time(NULL);
 	if(!(result = db->storeQuery(query.str())))
 		return;

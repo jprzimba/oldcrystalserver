@@ -172,6 +172,6 @@ fi
 ####################################
 #Reference Used in this compilation#
 #######################################################################
-# Compiling Crystal Server in Debian GNU/Linux By: Don Daniello ############         
+# Compiling Crystal Server in Debian GNU/Linux By: Don Daniello ############
 # URL: http://otland.net/content/compiling-forgotten-server-debian-gnu-linux-16/ #
 ##################################################################################

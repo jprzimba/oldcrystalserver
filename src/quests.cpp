@@ -23,12 +23,12 @@ bool Mission::isStarted(Player* player)
 {
 	if(!player)
 		return false;
- 
+
 	std::string value;
 	player->getStorage(storageId, value);
 	return atoi(value.c_str()) >= startValue;
 }
- 
+
 bool Mission::isCompleted(Player* player)
 {
 	if(!player)
@@ -38,7 +38,7 @@ bool Mission::isCompleted(Player* player)
 	player->getStorage(storageId, value);
 	return atoi(value.c_str()) >= endValue;
 }
- 
+
 std::string Mission::parseStorages(std::string state, std::string value, Player* player)
 {
 	std::string::size_type start = 0, end = 0, nStart = 0, length = 0;
@@ -53,7 +53,7 @@ std::string Mission::parseStorages(std::string state, std::string value, Player*
 		player->getStorage(storage, value);
 		state.replace(start, (end - start + 1), value);
 	}
- 
+
 	replaceString(state, "|STATE|", value);
 	replaceString(state, "\\n", "\n");
 	return state;
@@ -63,7 +63,7 @@ std::string Mission::getDescription(Player* player)
 {
 	if(!player)
 		return "Couldn't retrieve any mission description, please report to a gamemaster.";
- 
+
 	std::string value;
 	player->getStorage(storageId, value);
 	if(!states.empty())
@@ -71,7 +71,7 @@ std::string Mission::getDescription(Player* player)
 		int32_t cmp = atoi(value.c_str());
 		if(cmp >= endValue)
 			return parseStorages(states.rbegin()->second, value, player);
- 
+
 		for(int32_t i = (endValue - 1); i >= startValue; --i)
 		{
 			if(cmp != i)
@@ -82,7 +82,7 @@ std::string Mission::getDescription(Player* player)
 				return parseStorages(tmp, value, player);
 		}
 	}
- 
+
 	if(state.size())
 		return parseStorages(state, value, player);
 
@@ -107,7 +107,7 @@ bool Quest::isStarted(Player* player)
 		if((*it)->isStarted(player))
 			return true;
 	}
- 
+
 	std::string value;
 	player->getStorage(storageId, value);
 	return atoi(value.c_str()) >= storageValue;
@@ -123,15 +123,15 @@ bool Quest::isCompleted(Player* player) const
 		if(!(*it)->isCompleted(player))
 			return false;
 	}
- 
+
 	return true;
 }
- 
+
 uint16_t Quest::getMissionCount(Player* player)
 {
 	if(!player)
 		return 0;
- 
+
 	uint16_t count = 0;
 	for(MissionList::iterator it = missions.begin(); it != missions.end(); ++it)
 	{
@@ -146,10 +146,10 @@ void Quests::clear()
 {
 	for(QuestList::iterator it = quests.begin(); it != quests.end(); ++it)
 		delete (*it);
- 
+
 	quests.clear();
 }
- 
+
 bool Quests::reload()
 {
 	clear();
@@ -173,7 +173,7 @@ bool Quests::loadFromXml()
 		xmlFreeDoc(doc);
 		return false;
 	}
- 
+
 	for(xmlNodePtr p = root->children; p; p = p->next)
 		parseQuestNode(p, false);
 
@@ -274,7 +274,7 @@ bool Quests::parseQuestNode(xmlNodePtr p, bool checkDuplicate)
 				else
 					mission->newState(atoi(strValue.c_str()), description);
 			}
-			
+
 			quest->newMission(mission);
 		}
 	}

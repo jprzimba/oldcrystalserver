@@ -66,7 +66,7 @@ bool ExceptionHandler::InstallHandler()
 	if(ref_counter == 1)
 		SetUnhandledExceptionFilter(ExceptionHandler::MiniDumpExceptionHandler);
 
- //Unix/Linux
+//Unix/Linux
 #else
 	struct sigaction sa;
 	sa.sa_sigaction = &_SigHandler;
@@ -137,7 +137,7 @@ long ExceptionHandler::MiniDumpExceptionHandler(EXCEPTION_POINTERS* exceptionPoi
 
 	HANDLE hProcess = GetCurrentProcess();
 	DWORD processId = GetProcessId(hProcess);
-    
+
 	MINIDUMP_TYPE flags = (MINIDUMP_TYPE)(MiniDumpWithIndirectlyReferencedMemory);
 
 	BOOL dumpResult = MiniDumpWriteDump(hProcess, processId, hFile, flags,
