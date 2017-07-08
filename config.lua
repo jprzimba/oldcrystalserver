@@ -29,6 +29,8 @@ serverName = "Crystal"
 statusTimeout = 5000
 replaceKickOnLogin = true
 maxPacketsPerSecond = 25
+premiumPlayerSkipWaitList = false
+displayOnOrOffAtCharlist = false
 
 -- Deaths
 -- NOTE: Leave deathLosePercent as -1 if you want to use the default
@@ -38,8 +40,11 @@ deathLosePercent = -1
 
 -- Houses
 -- NOTE: set housePriceEachSQM to -1 to disable the ingame buy house functionality
+-- rent period types never, yearly, weekly, monthly and daily
+
 housePriceEachSQM = 1000
 houseRentPeriod = "never"
+bedsRequirePremium = true
 
 -- Item Usage
 timeBetweenActions = 200
@@ -81,6 +86,7 @@ rateMagic = 3
 rateSpawn = 1
 
 -- Monsters
+teleportPlayerSummons = true
 deSpawnRange = 2
 deSpawnRadius = 50
 
@@ -94,7 +100,7 @@ convertUnsafeScripts = true
 -- Startup
 -- NOTE: defaultPriority only works on Windows and sets process
 -- priority, valid values are: "normal", "above-normal", "high"
-defaultPriority = "high"
+defaultPriority = "normal"
 startupDatabaseOptimization = false
 
 -- Status server information

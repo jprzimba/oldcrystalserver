@@ -94,9 +94,11 @@ void ProtocolLogin::getCharacterList(const std::string& accountName, const std::
 		output->addByte(i);
 
 		if (g_game.getPlayerByName(account.characters[i]))
-			output->addString("Online");
+			output->addString(g_config.getBoolean(ConfigManager::ON_OR_OFF_CHARLIST) ? "Online" : g_config.getString(
+				ConfigManager::SERVER_NAME));
 		else
-			output->addString("Offline");
+			output->addString(g_config.getBoolean(ConfigManager::ON_OR_OFF_CHARLIST) ? "Offline" : g_config.getString(
+				ConfigManager::SERVER_NAME));
 
 		output->addString(g_config.getString(ConfigManager::IP));
 		output->add<uint16_t>(g_config.getNumber(ConfigManager::GAME_PORT));

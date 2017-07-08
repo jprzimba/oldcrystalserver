@@ -135,6 +135,10 @@ bool ConfigManager::load()
 	boolean[WARN_UNSAFE_SCRIPTS] = getGlobalBoolean(L, "warnUnsafeScripts", true);
 	boolean[CONVERT_UNSAFE_SCRIPTS] = getGlobalBoolean(L, "convertUnsafeScripts", true);
 	boolean[CLASSIC_EQUIPMENT_SLOTS] = getGlobalBoolean(L, "classicEquipmentSlots", false);
+	boolean[BED_REQUIRE_PREMIUM] = getGlobalBoolean(L, "bedsRequirePremium", true);
+	boolean[PREMIUM_SKIP_WAIT] = getGlobalBoolean(L, "premiumPlayerSkipWaitList", false);
+	boolean[TELEPORT_PLAYER_SUMMONS] = getGlobalBoolean(L, "teleportPlayerSummons", false);
+	boolean[ON_OR_OFF_CHARLIST] = getGlobalBoolean(L, "displayOnOrOffAtCharlist", false);
 
 	string[DEFAULT_PRIORITY] = getGlobalString(L, "defaultPriority", "high");
 	string[SERVER_NAME] = getGlobalString(L, "serverName", "");

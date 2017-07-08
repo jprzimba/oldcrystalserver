@@ -22,9 +22,11 @@
 #include "monster.h"
 #include "game.h"
 #include "spells.h"
+#include "configmanager.h"
 
 extern Game g_game;
 extern Monsters g_monsters;
+extern ConfigManager g_config;
 
 int32_t Monster::despawnRange;
 int32_t Monster::despawnRadius;
@@ -447,8 +449,15 @@ void Monster::onCreatureLeave(Creature* creature)
 	// std::cout << "onCreatureLeave - " << creature->getName() << std::endl;
 
 	if (getMaster() == creature) {
-		//Take random steps and only use defense abilities (e.g. heal) until its master comes back
-		isMasterInRange = false;
+		if (g_config.getBoolean(ConfigManager::TELEPORT_PLAYER_SUMMONS)) {
+			if (g_game.internalTeleport(this, creature->getPosition()) == RETURNVALUE_NOERROR) {
+				g_game.addMagicEffect(creature->getPosition(), CONST_ME_TELEPORT);
+			}
+		}
+		else {
+			//Take random steps and only use defense abilities (e.g. heal) until its master comes back
+			isMasterInRange = false;
+		}
 	}
 
 	//update friendList

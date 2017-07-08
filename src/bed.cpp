@@ -23,8 +23,10 @@
 #include "game.h"
 #include "iologindata.h"
 #include "scheduler.h"
+#include "configmanager.h"
 
 extern Game g_game;
+extern ConfigManager g_config;
 
 BedItem::BedItem(uint16_t id) : Item(id)
 {
@@ -95,7 +97,8 @@ BedItem* BedItem::getNextBedItem() const
 
 bool BedItem::canUse(Player* player)
 {
-	if (!player || !house || !player->isPremium()) {
+	if (!player || !house || (!player->isPremium() && g_config.getBoolean(
+		ConfigManager::BED_REQUIRE_PREMIUM))) {
 		return false;
 	}
 
