@@ -410,22 +410,23 @@ void Weapon::onUsedWeapon(Player* player, Item* item, Tile* destTile) const
 		}
 	}
 
-	uint32_t manaCost = getManaCost(player);
-	if (manaCost != 0) {
-		player->addManaSpent(manaCost);
-		player->changeMana(-static_cast<int32_t>(manaCost));
-	}
+	if (g_config.getBoolean(ConfigManager::REMOVE_WEAPONS_CHARGES)) {
+		uint32_t manaCost = getManaCost(player);
+		if (manaCost != 0) {
+			player->addManaSpent(manaCost);
+			player->changeMana(-static_cast<int32_t>(manaCost));
+		}
 
-	if (!player->hasFlag(PlayerFlag_HasInfiniteSoul) && soul > 0) {
-		player->changeSoul(-static_cast<int32_t>(soul));
-	}
+		if (!player->hasFlag(PlayerFlag_HasInfiniteSoul) && soul > 0) {
+			player->changeSoul(-static_cast<int32_t>(soul));
+		}
 
-	if (breakChance != 0 && uniform_random(1, 100) <= breakChance) {
-		Weapon::decrementItemCount(item);
-		return;
-	}
+		if (breakChance != 0 && uniform_random(1, 100) <= breakChance) {
+			Weapon::decrementItemCount(item);
+			return;
+		}
 
-	switch (action) {
+		switch (action) {
 		case WEAPONACTION_REMOVECOUNT:
 			Weapon::decrementItemCount(item);
 			break;
@@ -444,6 +445,7 @@ void Weapon::onUsedWeapon(Player* player, Item* item, Tile* destTile) const
 
 		default:
 			break;
+		}
 	}
 }
 
