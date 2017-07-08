@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_MOUNTS_H_73716D11906A4C5C9F4A7B68D34C9BA6
-#define FS_MOUNTS_H_73716D11906A4C5C9F4A7B68D34C9BA6
+#ifndef __MOUNTS__
+#define __MOUNTS__
 
 struct Mount
 {

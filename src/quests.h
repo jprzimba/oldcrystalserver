@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_QUESTS_H_16E44051F23547BE8097F8EA9FCAACA0
-#define FS_QUESTS_H_16E44051F23547BE8097F8EA9FCAACA0
+#ifndef __QUESTS__
+#define __QUESTS__
 
 #include "player.h"
 #include "networkmessage.h"

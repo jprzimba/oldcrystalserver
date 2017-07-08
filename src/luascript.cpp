@@ -1775,6 +1775,7 @@ void LuaScriptInterface::registerFunctions()
 	registerEnumIn("configKeys", ConfigManager::PREMIUM_SKIP_WAIT)
 	registerEnumIn("configKeys", ConfigManager::TELEPORT_PLAYER_SUMMONS)
 	registerEnumIn("configKeys", ConfigManager::ON_OR_OFF_CHARLIST)
+	registerEnumIn("configKeys", ConfigManager::CLEAN_PROTECTED_ZONES)
 
 	registerEnumIn("configKeys", ConfigManager::MAP_NAME)
 	registerEnumIn("configKeys", ConfigManager::HOUSE_RENT_PERIOD)

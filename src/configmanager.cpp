@@ -139,6 +139,7 @@ bool ConfigManager::load()
 	boolean[PREMIUM_SKIP_WAIT] = getGlobalBoolean(L, "premiumPlayerSkipWaitList", false);
 	boolean[TELEPORT_PLAYER_SUMMONS] = getGlobalBoolean(L, "teleportPlayerSummons", false);
 	boolean[ON_OR_OFF_CHARLIST] = getGlobalBoolean(L, "displayOnOrOffAtCharlist", false);
+	boolean[CLEAN_PROTECTED_ZONES] = getGlobalBoolean(L, "cleanProtectedZones", true);
 
 	string[DEFAULT_PRIORITY] = getGlobalString(L, "defaultPriority", "high");
 	string[SERVER_NAME] = getGlobalString(L, "serverName", "");

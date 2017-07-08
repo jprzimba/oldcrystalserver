@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_TELEPORT_H_873B7F7F1DB24101A7ACFB54B25E0ABC
-#define FS_TELEPORT_H_873B7F7F1DB24101A7ACFB54B25E0ABC
+#ifndef __TELEPORT__
+#define __TELEPORT__
 
 #include "tile.h"
 

@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_THREAD_HOLDER_H_BEB56FC46748E71D15A5BF0773ED2E67
-#define FS_THREAD_HOLDER_H_BEB56FC46748E71D15A5BF0773ED2E67
+#ifndef __THREAD_HOLDER__
+#define __THREAD_HOLDER__
 
 #include <thread>
 #include <atomic>

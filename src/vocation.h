@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_VOCATION_H_ADCAA356C0DB44CEBA994A0D678EC92D
-#define FS_VOCATION_H_ADCAA356C0DB44CEBA994A0D678EC92D
+#ifndef __VOCATIONS__
+#define __VOCATIONS__
 
 #include "enums.h"
 #include "item.h"

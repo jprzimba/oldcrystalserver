@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_RSA_H_C4E277DA8E884B578DDBF0566F504E91
-#define FS_RSA_H_C4E277DA8E884B578DDBF0566F504E91
+#ifndef __RSA__
+#define __RSA__
 
 #include <gmp.h>
 

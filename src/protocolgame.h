@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_PROTOCOLGAME_H_FACA2A2D1A9348B78E8FD7E8003EBB87
-#define FS_PROTOCOLGAME_H_FACA2A2D1A9348B78E8FD7E8003EBB87
+#ifndef __PROTOCOL_GAME__
+#define __PROTOCOL_GAME__
 
 #include "protocol.h"
 #include "chat.h"

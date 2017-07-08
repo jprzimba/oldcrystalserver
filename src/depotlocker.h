@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_DEPOTLOCKER_H_53AD8E0606A34070B87F792611F4F3F8
-#define FS_DEPOTLOCKER_H_53AD8E0606A34070B87F792611F4F3F8
+#ifndef __DEPOT_LOCKER__
+#define __DEPOT_LOCKER__
 
 #include "container.h"
 #include "inbox.h"

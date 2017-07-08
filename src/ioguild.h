@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_IOGUILD_H_EF9ACEBA0B844C388B70FF52E69F1AFF
-#define FS_IOGUILD_H_EF9ACEBA0B844C388B70FF52E69F1AFF
+#ifndef __IO_GUILDS__
+#define __IO_GUILDS__
 
 using GuildWarVector = std::vector<uint32_t>;
 

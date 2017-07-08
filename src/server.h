@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_SERVER_H_984DA68ABF744127850F90CC710F281B
-#define FS_SERVER_H_984DA68ABF744127850F90CC710F281B
+#ifndef __SERVER__
+#define __SERVER__
 
 #include "connection.h"
 #include "signals.h"

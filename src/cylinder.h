@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_CYLINDER_H_54BBCEB2A5B7415DAD837E4D58115150
-#define FS_CYLINDER_H_54BBCEB2A5B7415DAD837E4D58115150
+#ifndef __CYLINDER__
+#define __CYLINDER__
 
 #include "enums.h"
 #include "thing.h"

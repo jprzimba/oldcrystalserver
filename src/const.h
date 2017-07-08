@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_CONST_H_0A49B5996F074465BF44B90F4F780E8B
-#define FS_CONST_H_0A49B5996F074465BF44B90F4F780E8B
+#ifndef __CONST__
+#define __CONST__
 
 static constexpr int32_t NETWORKMESSAGE_MAXSIZE = 24590;
 

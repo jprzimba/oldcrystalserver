@@ -54,6 +54,7 @@ timeBetweenExActions = 1000
 -- NOTE: set mapName WITHOUT .otbm at the end
 mapName = "forgotten"
 mapAuthor = "Komic"
+cleanProtectedZones = false
 
 -- Market
 marketOfferDuration = 30 * 24 * 60 * 60

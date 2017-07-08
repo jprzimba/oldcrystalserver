@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FS_TRASHHOLDER_H_BA162024D67B4D388147F5EE06F33098
-#define FS_TRASHHOLDER_H_BA162024D67B4D388147F5EE06F33098
+#ifndef __TRASH_HOLDER__
+#define __TRASH_HOLDER__
 
 #include "item.h"
 #include "cylinder.h"
