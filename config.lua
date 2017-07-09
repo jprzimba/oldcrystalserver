@@ -1,3 +1,20 @@
+-- Database
+mysqlHost = "127.0.0.1"
+mysqlUser = "otserv"
+mysqlPass = ""
+mysqlDatabase = "crystalserver"
+mysqlPort = 3306
+mysqlSock = ""
+
+-- Startup
+-- NOTE: If autoSaveEachMinutes is set to 0
+-- configure server save at globalevents folder.
+-- NOTE: defaultPriority only works on Windows and sets process
+-- priority, valid values are: "normal", "above-normal", "high"
+displayOnOrOffAtCharlist = false
+defaultPriority = "normal"
+startupDatabaseOptimization = false
+
 -- Combat settings
 -- NOTE: valid values for worldType are: "pvp", "no-pvp" and "pvp-enforced"
 worldType = "pvp"
@@ -30,7 +47,6 @@ statusTimeout = 5000
 replaceKickOnLogin = true
 maxPacketsPerSecond = 25
 premiumPlayerSkipWaitList = false
-displayOnOrOffAtCharlist = false
 
 -- Deaths
 -- NOTE: Leave deathLosePercent as -1 if you want to use the default
@@ -62,14 +78,6 @@ premiumToCreateMarketOffer = true
 checkExpiredMarketOffersEachMinutes = 60
 maxMarketOffersAtATimePerPlayer = 100
 
--- MySQL
-mysqlHost = "127.0.0.1"
-mysqlUser = "otserv"
-mysqlPass = ""
-mysqlDatabase = "crystalserver"
-mysqlPort = 3306
-mysqlSock = ""
-
 -- Misc.
 allowChangeOutfit = true
 freePremium = false
@@ -97,12 +105,6 @@ staminaSystem = true
 -- Scripts
 warnUnsafeScripts = true
 convertUnsafeScripts = true
-
--- Startup
--- NOTE: defaultPriority only works on Windows and sets process
--- priority, valid values are: "normal", "above-normal", "high"
-defaultPriority = "normal"
-startupDatabaseOptimization = false
 
 -- Status server information
 ownerName = ""

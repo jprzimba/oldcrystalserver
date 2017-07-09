@@ -5611,3 +5611,13 @@ bool Game::reload(ReloadTypes_t reloadType)
 		}
 	}
 }
+
+void Game::autoSave()
+{
+	int32_t autoSaveEachMinutes = g_config.getNumber(ConfigManager::AUTO_SAVE_EACH_MINUTES);
+	if (autoSaveEachMinutes <= 0)
+		return;
+
+	g_dispatcher.addTask(createTask(std::bind(&Game::saveGameState, this)));
+	g_scheduler.addEvent(createSchedulerTask(autoSaveEachMinutes * 1000 * 60, std::bind(&Game::autoSave, this)));
+}

@@ -119,7 +119,7 @@ void mainLoader(int, char*[], ServiceManager* services)
 #endif
 	std::cout << std::endl;
 
-	std::cout << "A server developed by " << STATUS_SERVER_DEVELOPERS << " and modified by: " << STATUS_CUSTOM_EDITOR << std::endl;
+	std::cout << "A server developed by " << STATUS_SERVER_DEVELOPERS << " and modified by " << STATUS_CUSTOM_EDITOR << std::endl;
 	std::cout << "Visit our forum for updates, support, and resources: http://otland.net/." << std::endl;
 	std::cout << std::endl;
 
@@ -241,6 +241,11 @@ void mainLoader(int, char*[], ServiceManager* services)
 
 	// Legacy login protocol
 	services->add<ProtocolOld>(g_config.getNumber(ConfigManager::LOGIN_PORT));
+
+	int32_t autoSaveEachMinutes = g_config.getNumber(ConfigManager::AUTO_SAVE_EACH_MINUTES);
+	if (autoSaveEachMinutes > 0) {
+		g_scheduler.addEvent(createSchedulerTask(autoSaveEachMinutes * 1000 * 60, std::bind(&Game::autoSave, &g_game)));
+	}
 
 	RentPeriod_t rentPeriod;
 	std::string strRentPeriod = asLowerCaseString(g_config.getString(ConfigManager::HOUSE_RENT_PERIOD));
