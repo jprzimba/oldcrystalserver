@@ -12,6 +12,7 @@ mysqlSock = ""
 -- NOTE: defaultPriority only works on Windows and sets process
 -- priority, valid values are: "normal", "above-normal", "high"
 displayOnOrOffAtCharlist = false
+autoSaveEachMinutes = 0
 defaultPriority = "normal"
 startupDatabaseOptimization = false
 
