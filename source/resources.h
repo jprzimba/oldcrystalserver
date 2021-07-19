@@ -76,10 +76,10 @@
 	#define ID_MENU_RELOAD_ALL 237
 #endif
 
-#define CLIENT_VERSION_MIN 854
-#define CLIENT_VERSION_MAX 854
-#define CLIENT_VERSION_STRING "Only clients with protocol 8.54 allowed!"
-#define CLIENT_VERSION_PROTOCOL "8.54"
+#define CLIENT_VERSION_MIN 860
+#define CLIENT_VERSION_MAX 860
+#define CLIENT_VERSION_STRING "Only clients with protocol 8.6 allowed!"
+#define CLIENT_VERSION_PROTOCOL "8.6"
 
 #define SOFTWARE_NAME "Crystal Server"
 #define SOFTWARE_VERSION "0.1.8"
