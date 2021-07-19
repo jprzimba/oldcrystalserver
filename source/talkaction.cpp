@@ -36,7 +36,6 @@
 #ifdef __ENABLE_SERVER_DIAGNOSTIC__
 #include "outputmessage.h"
 #include "connection.h"
-#include "admin.h"
 #include "protocollogin.h"
 #include "protocolold.h"
 #endif
@@ -1149,9 +1148,6 @@ bool TalkAction::diagnostics(Creature* creature, const std::string& cmd, const s
 	text << "--------------------\n";
 	text << "ProtocolGame: " << ProtocolGame::protocolGameCount << std::endl;
 	text << "ProtocolLogin: " << ProtocolLogin::protocolLoginCount << std::endl;
-#ifdef __REMOTE_CONTROL__
-	text << "ProtocolAdmin: " << ProtocolAdmin::protocolAdminCount << std::endl;
-#endif
 	text << "ProtocolStatus: " << ProtocolStatus::protocolStatusCount << std::endl;
 	text << "ProtocolOld: " << ProtocolOld::protocolOldCount << std::endl << std::endl;
 	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, text.str().c_str());

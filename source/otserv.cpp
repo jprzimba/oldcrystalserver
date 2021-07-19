@@ -41,9 +41,6 @@
 #include "protocolgame.h"
 #include "protocolold.h"
 #include "status.h"
-#ifdef __REMOTE_CONTROL__
-#include "admin.h"
-#endif
 
 #include "configmanager.h"
 #include "scriptmanager.h"
@@ -97,11 +94,7 @@ NOTIFYICONDATA NID;
 IpList serverIps;
 boost::mutex g_loaderLock;
 boost::condition_variable g_loaderSignal;
-
 boost::unique_lock<boost::mutex> g_loaderUniqueLock(g_loaderLock);
-#ifdef __REMOTE_CONTROL__
-extern Admin* g_admin;
-#endif
 
 #if !defined(WINDOWS) || defined(__CONSOLE__)
 bool argumentsHandler(StringVec args)
@@ -134,13 +127,10 @@ bool argumentsHandler(StringVec args)
 
 		if((*it) == "--version")
 		{
-            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-        	std::cout << ">> " << STATUS_SERVER_NAME << ", version: " << STATUS_SERVER_VERSION << ", codename: (" << STATUS_SERVER_CODENAME << ")." << std::endl;
-            std::cout << ">> Compiled at " << __DATE__ << ", " << __TIME__ << "." << std::endl;
-			std::cout << ">> A server developed by: " << DEVELOPERS << "." << std::endl;
-        	std::cout << ">> Visit forum for updates, support and resources: " << WEBSITE_INFO << "." << std::endl;
-            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-            std::cout << ">>" << std::endl;
+			std::cout << ">> " << SOFTWARE_NAME << ", version: " << SOFTWARE_VERSION << "." << std::endl;
+			std::cout << ">> Compiled at " << __DATE__ << ", " << __TIME__ << "." << std::endl;
+			std::cout << ">> A server developed by: " << SOFTWARE_DEVELOPERS << "." << std::endl;
+			std::cout << ">>" << std::endl;
 			return false;
 		}
 
@@ -384,7 +374,8 @@ ServiceManager* services)
 	srand((uint32_t)OTSYS_TIME());
 	#if defined(WINDOWS)
 	#if defined(__CONSOLE__)
-	SetConsoleTitle(STATUS_SERVER_NAME);
+	system("color 2f");
+	SetConsoleTitle(SOFTWARE_NAME);
 	#else
 	GUI::getInstance()->m_connections = false;
 	#endif
@@ -403,14 +394,10 @@ ServiceManager* services)
 	}
 	#endif
 
-		  	system("color 5f");
-            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-        	std::cout << ">> " << STATUS_SERVER_NAME << ", version: " << STATUS_SERVER_VERSION << ", codename: (" << STATUS_SERVER_CODENAME << ")." << std::endl;
-            std::cout << ">> Compiled at " << __DATE__ << ", " << __TIME__ << "." << std::endl;
-			std::cout << ">> A server developed by: " << DEVELOPERS << "." << std::endl;
-        	std::cout << ">> Visit forum for updates, support and resources: " << WEBSITE_INFO << "." << std::endl;
-            std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-            std::cout << ">>" << std::endl;
+	std::cout << ">> " << SOFTWARE_NAME << ", version: " << SOFTWARE_VERSION << "." << std::endl;
+	std::cout << ">> Compiled at " << __DATE__ << ", " << __TIME__ << "." << std::endl;
+	std::cout << ">> A server developed by: " << SOFTWARE_DEVELOPERS << "." << std::endl;
+	std::cout << ">>" << std::endl;
             
 	std::stringstream ss;
 	#ifdef __DEBUG__
@@ -483,11 +470,11 @@ ServiceManager* services)
 	}
 
 	std::stringstream mutexName;
-	mutexName << "forgottenserver_" << g_config.getNumber(ConfigManager::WORLD_ID);
+	mutexName << "crystalserver_" << g_config.getNumber(ConfigManager::WORLD_ID);
 
 	CreateMutex(NULL, FALSE, mutexName.str().c_str());
 	if(GetLastError() == ERROR_ALREADY_EXISTS)
-		startupErrorMessage("Another instance of The Forgotten Server is already running with the same worldId.\nIf you want to run multiple servers, please change the worldId in configuration file.");
+		startupErrorMessage("Another instance of Crystal Server is already running with the same worldId.\nIf you want to run multiple servers, please change the worldId in configuration file.");
 
 	std::string defaultPriority = asLowerCaseString(g_config.getString(ConfigManager::DEFAULT_PRIORITY));
 	if(defaultPriority == "realtime")
@@ -533,69 +520,6 @@ ServiceManager* services)
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_PLAIN);
 		std::cout << "> Using plaintext encryption" << std::endl;
 	}
-	
-	std::cout << ">> Checking software version... ";
-	#if defined(WINDOWS) && !defined(__CONSOLE__)
-	SendMessage(GUI::getInstance()->m_statusBar, WM_SETTEXT, 0, (LPARAM)">> Checking software version");
-	#endif
-	if(xmlDocPtr doc = xmlParseFile(VERSION_CHECK))
-	{
-		xmlNodePtr p, root = xmlDocGetRootElement(doc);
-		if(!xmlStrcmp(root->name, (const xmlChar*)"versions"))
-		{
-			p = root->children->next;
-			if(!xmlStrcmp(p->name, (const xmlChar*)"entry"))
-			{
-				std::string version;
-				int32_t patch, build, timestamp;
-
-				bool tmp = false;
-				if(readXMLString(p, "version", version) && version != STATUS_SERVER_VERSION)
-					tmp = true;
-
-				if(readXMLInteger(p, "patch", patch) && patch > VERSION_PATCH)
-					tmp = true;
-
-				if(readXMLInteger(p, "build", build) && build > VERSION_BUILD)
-					tmp = true;
-
-				if(readXMLInteger(p, "timestamp", timestamp) && timestamp > VERSION_TIMESTAMP)
-					tmp = true;
-
-				if(tmp)
-				{
-					std::cout << "outdated, please consider updating!" << std::endl;
-					std::cout << "> Current version information - version: " << STATUS_SERVER_VERSION << ", patch: " << VERSION_PATCH;
-					std::cout << ", build: " << VERSION_BUILD << ", timestamp: " << VERSION_TIMESTAMP << "." << std::endl;
-					std::cout << "> Latest version information - version: " << version << ", patch: " << patch;
-					std::cout << ", build: " << build << ", timestamp: " << timestamp << "." << std::endl;
-					if(g_config.getBool(ConfigManager::CONFIM_OUTDATED_VERSION) && version.find("_SVN") == std::string::npos)
-					{
-						#if defined(WINDOWS) && !defined(__CONSOLE__)
-						if(MessageBox(GUI::getInstance()->m_mainWindow, "Continue?", "Outdated software", MB_YESNO) == IDNO)
-						#else
-						std::cout << "Continue? (y/N)" << std::endl;
-	
-						char buffer = getchar();
-						if(buffer == 10 || (buffer != 121 && buffer != 89))
-						#endif
-							startupErrorMessage("Aborted.");
-					}
-				}
-				else
-					std::cout << "up to date!" << std::endl;
-			}
-			else
-				std::cout << "failed checking - malformed entry." << std::endl;
-		}
-		else
-			std::cout << "failed checking - malformed file." << std::endl;
-
-		xmlFreeDoc(doc);
-	}
-	else
-		std::cout << "failed - could not parse remote file (are you connected to the internet?)" << std::endl;
-
 
 	std::cout << ">> Loading RSA key" << std::endl;
 	#if defined(WINDOWS) && !defined(__CONSOLE__)
@@ -737,19 +661,6 @@ ServiceManager* services)
 	#endif
 	if(!GameServers::getInstance()->loadFromXml(true))
 		startupErrorMessage("Unable to load game servers!");
-	#endif
-
-	#ifdef __REMOTE_CONTROL__
-	std::cout << ">> Loading administration protocol" << std::endl;
-	#if defined(WINDOWS) && !defined(__CONSOLE__)
-	SendMessage(GUI::getInstance()->m_statusBar, WM_SETTEXT, 0, (LPARAM)">> Loading administration protocol");
-	#endif
-
-	g_admin = new Admin();
-	if(!g_admin->loadFromXml())
-		startupErrorMessage("Unable to load administration protocol!");
-
-	services->add<ProtocolAdmin>(g_config.getNumber(ConfigManager::ADMIN_PORT));
 	#endif
 
 	std::cout << ">> Checking world type... ";
@@ -953,12 +864,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						GUI::getInstance()->m_logText = "";
 						GUI::getInstance()->m_lineCount = 0;
-                        std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-                        std::cout << ">> " << STATUS_SERVER_NAME << ", version: " << STATUS_SERVER_VERSION << ", codename: (" << STATUS_SERVER_CODENAME << ")." << std::endl;
+                        std::cout << ">> " << STATUS_SERVER_NAME << ", version: " << STATUS_SERVER_VERSION << "." << std::endl;
                         std::cout << ">> Compiled at " << __DATE__ << ", " << __TIME__ << "." << std::endl;
 						std::cout << ">> A server developed by: " << DEVELOPERS << "." << std::endl;
                         std::cout << ">> Visit forum for updates, support and resources: " << WEBSITE_INFO << "." << std::endl;
-                        std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
                         std::cout << ">>" << std::endl;
                         std::cout << std::endl;
 					}
@@ -1414,7 +1323,7 @@ int32_t WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszA
 	GUI::getInstance()->initTrayMenu();
 	GUI::getInstance()->initFont();
 	wincl.hInstance = hInstance;
-	wincl.lpszClassName = "forgottenserver_gui";
+	wincl.lpszClassName = "crystalserver_gui";
 	wincl.lpfnWndProc = WindowProcedure;
 	wincl.style = CS_DBLCLKS;
 	wincl.cbSize = sizeof(WNDCLASSEX);
@@ -1428,7 +1337,7 @@ int32_t WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszA
 	if(!RegisterClassEx(&wincl))
 		return 0;
 
-	GUI::getInstance()->m_mainWindow = CreateWindowEx(0, "forgottenserver_gui", STATUS_SERVER_NAME, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 640, 450, HWND_DESKTOP, NULL, hInstance, NULL);
+	GUI::getInstance()->m_mainWindow = CreateWindowEx(0, "crystalserver_gui", STATUS_SERVER_NAME, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 640, 450, HWND_DESKTOP, NULL, hInstance, NULL);
 	ShowWindow(GUI::getInstance()->m_mainWindow, 1);
 	while(GetMessage(&messages, NULL, 0, 0))
 	{

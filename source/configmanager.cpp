@@ -91,15 +91,15 @@ bool ConfigManager::load()
 		#endif
 		m_confString[SQL_HOST] = getGlobalString("sqlHost", "localhost");
 		m_confNumber[SQL_PORT] = getGlobalNumber("sqlPort", 3306);
-		m_confString[SQL_DB] = getGlobalString("sqlDatabase", "theforgottenserver");
+		m_confString[SQL_DB] = getGlobalString("sqlDatabase", "crystalserver");
 		m_confString[SQL_USER] = getGlobalString("sqlUser", "root");
 		m_confString[SQL_PASS] = getGlobalString("sqlPass", "");
-		m_confString[SQL_FILE] = getGlobalString("sqlFile", "forgottenserver.s3db");
+		m_confString[SQL_FILE] = getGlobalString("sqlFile", "crystalserver.s3db");
 		m_confNumber[SQL_KEEPALIVE] = getGlobalNumber("sqlKeepAlive", 0);
 		m_confNumber[MYSQL_READ_TIMEOUT] = getGlobalNumber("mysqlReadTimeout", 10);
 		m_confNumber[MYSQL_WRITE_TIMEOUT] = getGlobalNumber("mysqlWriteTimeout", 10);
 		m_confBool[OPTIMIZE_DB_AT_STARTUP] = getGlobalBool("optimizeDatabaseAtStartup", true);
-		m_confString[MAP_NAME] = getGlobalString("mapName", "forgotten");
+		m_confString[MAP_NAME] = getGlobalString("mapName", "DnSend");
 		m_confString[HOUSE_RENT_PERIOD] = getGlobalString("houseRentPeriod", "monthly");
 		m_confNumber[WORLD_ID] = getGlobalNumber("worldId", 0);
 		m_confBool[RANDOMIZE_TILES] = getGlobalBool("randomizeTiles", true);
@@ -291,24 +291,22 @@ bool ConfigManager::load()
 	m_confDouble[RATE_MONSTER_DEFENSE] = getGlobalDouble("rateMonsterDefense", 1);
 	m_confBool[ADDONS_PREMIUM] = getGlobalBool("addonsOnlyPremium", true);
 
+	m_confNumber[MANAGER_PASS_LENGTH] = getGlobalNumber("minPasswordLength", 6);
+	m_confNumber[MANAGER_ACCNAME_MIN_LENGTH] = getGlobalNumber("minAccountNameLength", 3);
+	m_confNumber[MANAGER_ACCNAME_MAX_LENGTH] = getGlobalNumber("maxAccountNameLength", 25);
+	m_confNumber[MANAGER_MIN_PLAYER_NAME_LENGTH] = getGlobalNumber("newCharacterMinNameLength", 3);
+	m_confNumber[MANAGER_MAX_PLAYER_NAME_LENGTH] = getGlobalNumber("newCharacterMaxNameLength", 25);
+	m_confBool[DISPLAY_CRITICAL_HIT] = getGlobalBool("displayCriticalHitNotify", false);
+	m_confNumber[CRITICAL_HIT_CHANCE] = getGlobalNumber("criticalHitChance", 5);
+	m_confDouble[CRITICAL_HIT_MUL] = getGlobalDouble("criticalHitMultiplier", 1);
+	m_confNumber[CRITICAL_COLOR] = getGlobalNumber("criticalHitColor", TEXTCOLOR_TEAL);
+	m_confBool[SYSTEM_CAP] = getGlobalBool("useCapSystem", false);
+	m_confBool[SHOW_DESCR] = getGlobalBool("showDescriptionItems", false);
+	m_confNumber[MIN_GUILD_NICK] = getGlobalNumber("guildNickMinLength", 2);
+	m_confNumber[MAX_GUILD_NICK] = getGlobalNumber("guildNickMaxLength", 25);
+	m_confBool[REMOVE_BREAK] = getGlobalBool("removeBreakWeaponsCharges", true);
+	m_confBool[SHOW_GAMEMASTERS_ONLINE] = getGlobalBool("displayGamemastersWithOnlineCommand", false);
 
-		m_confNumber[MANAGER_PASS_LENGTH] = getGlobalNumber("minPasswordLength", 6);
-		m_confNumber[MANAGER_ACCNAME_MIN_LENGTH] = getGlobalNumber("minAccountNameLength", 3);
-		m_confNumber[MANAGER_ACCNAME_MAX_LENGTH] = getGlobalNumber("maxAccountNameLength", 25);
-		m_confNumber[MANAGER_MIN_PLAYER_NAME_LENGTH] = getGlobalNumber("newCharacterMinNameLength", 3);
-		m_confNumber[MANAGER_MAX_PLAYER_NAME_LENGTH] = getGlobalNumber("newCharacterMaxNameLength", 25);
-        m_confBool[DISPLAY_CRITICAL_HIT] = getGlobalBool("displayCriticalHitNotify", false);
-		m_confNumber[CRITICAL_HIT_CHANCE] = getGlobalNumber("criticalHitChance", 5);
-		m_confDouble[CRITICAL_HIT_MUL] = getGlobalDouble("criticalHitMultiplier", 1);
-		m_confNumber[CRITICAL_COLOR] = getGlobalNumber("criticalHitColor", TEXTCOLOR_TEAL);
-   	   	m_confBool[SYSTEM_CAP] = getGlobalBool("useCapSystem", false);
-   	   	m_confBool[SHOW_DESCR] = getGlobalBool("showDescriptionItems", false);
-		m_confNumber[MIN_GUILD_NICK] = getGlobalNumber("guildNickMinLength", 2);
-		m_confNumber[MAX_GUILD_NICK] = getGlobalNumber("guildNickMaxLength", 25);
-   	   	m_confBool[REMOVE_BREAK] = getGlobalBool("removeBreakWeaponsCharges", true);
-   	   	m_confBool[SHOW_GAMEMASTERS_ONLINE] = getGlobalBool("displayGamemastersWithOnlineCommand", false);
-	
-	
 	m_loaded = true;
 	return true;
 }

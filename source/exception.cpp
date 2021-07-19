@@ -327,14 +327,14 @@ bool ExceptionHandler::LoadMap()
 	installed = false;
 	//load map file if exists
 	char line[1024];
-	FILE* input = fopen("forgottenserver.map", "r");
+	FILE* input = fopen("crystalserver.map", "r");
 	offMin = 0xFFFFFF;
 	offMax = 0;
 	int32_t n = 0;
 	if(!input)
 	{
-		MessageBoxA(NULL, "Failed loading symbols, forgottenserver.map file not found.", "Error", MB_OK | MB_ICONERROR);
-		std::cout << "Failed loading symbols, forgottenserver.map file not found. " << std::endl;
+		MessageBoxA(NULL, "Failed loading symbols, crystalserver.map file not found.", "Error", MB_OK | MB_ICONERROR);
+		std::cout << "Failed loading symbols, crystalserver.map file not found. " << std::endl;
 		exit(1);
 		return false;
 	}

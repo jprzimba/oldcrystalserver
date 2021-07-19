@@ -79,19 +79,12 @@
 #define CLIENT_VERSION_MIN 854
 #define CLIENT_VERSION_MAX 854
 #define CLIENT_VERSION_STRING "Only clients with protocol 8.54 allowed!"
+#define CLIENT_VERSION_PROTOCOL "8.54"
 
-#define STATUS_SERVER_NAME "Crystal Server"
-#define STATUS_SERVER_VERSION "0.1.2"
-#define STATUS_SERVER_CODENAME "Eagle Eyes"
-#define STATUS_SERVER_PROTOCOL "8.54"
-#define DEVELOPERS "Tryller, Shenlong, Slinix, Antharaz"
-#define CREATOR_INFO "This server is created by: Tryller, Shenlong, Slinix, Antharaz."
+#define SOFTWARE_NAME "Crystal Server"
+#define SOFTWARE_VERSION "0.1.8"
+#define SOFTWARE_DEVELOPERS "Tryller"
+#define CREATOR_INFO "Server created by Tryller."
 
-#define VERSION_CHECK "http://otserverlife.webs.com/crystalserver/docs/version.xml"
-#define WEBSITE_INFO "http://kingtibia.com.com/"
-#define VERSION_PATCH 0
-#define VERSION_TIMESTAMP 0
-#define VERSION_BUILD 0
 #define VERSION_DATABASE 23
-
 #endif

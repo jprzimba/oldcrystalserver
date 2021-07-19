@@ -276,7 +276,7 @@ uint32_t DatabaseManager::updateDatabase()
 					//insert data to server_record table
 					"INSERT INTO `server_record` VALUES (0, 0);",
 					//insert data to server_motd table
-					"INSERT INTO `server_motd` VALUES (1, 'Welcome to The Forgotten Server!');",
+					"INSERT INTO `server_motd` VALUES (1, 'Welcome to Crystal Server!');",
 					//update players table
 					"ALTER TABLE `players` ADD `balance` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `blessings`;",
 					"ALTER TABLE `players` ADD `stamina` BIGINT UNSIGNED NOT NULL DEFAULT 201660000 AFTER `balance`;",
