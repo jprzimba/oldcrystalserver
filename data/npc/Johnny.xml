@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="Johnny" script="promotion.lua" walkinterval="2000" floorchange="0">
+	<mana now="800" max="800"/>
+	<health now="200" max="200"/>
+	<look type="133" head="114" body="119" legs="132" feet="114"/>
+
+	<parameters>
+		<parameter key="module_shop" value="3" />
+	</parameters>
+</npc>
