@@ -320,9 +320,9 @@
 	teleportPlayerSummons = false
 
 	-- Status
-	ownerName = "Shynzo"
-	ownerEmail = "@kingtibia.com"
-	url = "http://kingtibia.com/"
+	ownerName = "Tryller"
+	ownerEmail = ""
+	url = ""
 	location = "Brazil"
 
 	-- Logs
