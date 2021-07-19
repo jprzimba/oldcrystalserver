@@ -2004,16 +2004,8 @@ void Player::onAttackedCreatureBlockHit(Creature* target, BlockType_t blockType)
 
 bool Player::hasShield() const
 {
-	bool result = false;
 	Item* item = getInventoryItem(SLOT_LEFT);
-	if(item && item->getWeaponType() == WEAPON_SHIELD)
-		result = true;
-
-	item = getInventoryItem(SLOT_RIGHT);
-	if(item && item->getWeaponType() == WEAPON_SHIELD)
-		result = true;
-
-	return result;
+	return (item && item->getWeaponType() == WEAPON_SHIELD) || ((item = getInventoryItem(SLOT_RIGHT)) && item->getWeaponType() == WEAPON_SHIELD);
 }
 
 BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
@@ -2026,7 +2018,7 @@ BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_
 		if(color < 0)
 			color = random_range(0, 255);
 
-		sendCreatureSquare(attacker, (SquareColor_t)color);
+		sendCreatureSquare(attacker, color);
 	}
 
 	if(blockType != BLOCK_NONE)

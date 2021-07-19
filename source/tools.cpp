@@ -928,7 +928,8 @@ MagicEffectNames magicEffectNames[] =
 	{"yalaharighost",	MAGIC_EFFECT_YALAHARIGHOST},
 	{"bats",		MAGIC_EFFECT_BATS},
 	{"smoke",		MAGIC_EFFECT_SMOKE},
-	{"insects",		MAGIC_EFFECT_INSECTS}
+	{"insects",		MAGIC_EFFECT_INSECTS},
+	{"dragonhead",	MAGIC_EFFECT_DRAGONHEAD}
 };
 
 ShootTypeNames shootTypeNames[] =
@@ -983,6 +984,7 @@ CombatTypeNames combatTypeNames[] =
 	{"physical",		COMBAT_PHYSICALDAMAGE},
 	{"energy",		COMBAT_ENERGYDAMAGE},
 	{"earth",		COMBAT_EARTHDAMAGE},
+	{"poison",		COMBAT_EARTHDAMAGE},
 	{"fire",		COMBAT_FIREDAMAGE},
 	{"undefined",		COMBAT_UNDEFINEDDAMAGE},
 	{"lifedrain",		COMBAT_LIFEDRAIN},
@@ -993,7 +995,8 @@ CombatTypeNames combatTypeNames[] =
 	{"drown",		COMBAT_DROWNDAMAGE},
 	{"ice",			COMBAT_ICEDAMAGE},
 	{"holy",		COMBAT_HOLYDAMAGE},
-	{"death",		COMBAT_DEATHDAMAGE}
+	{"death",		COMBAT_DEATHDAMAGE},
+	{"mort",		COMBAT_DEATHDAMAGE}
 };
 
 AmmoTypeNames ammoTypeNames[] =
@@ -1056,7 +1059,9 @@ FluidTypeNames fluidTypeNames[] =
 	{"fruit juice",		FLUID_FRUITJUICE},
 	{"lava",		FLUID_LAVA},
 	{"rum",			FLUID_RUM},
-	{"swamp",		FLUID_SWAMP}
+	{"swamp",		FLUID_SWAMP},
+	{"tea",			FLUID_TEA},
+	{"mead",		FLUID_MEAD}
 };
 
 SkillIdNames skillIdNames[] =

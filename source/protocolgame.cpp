@@ -1599,7 +1599,7 @@ void ProtocolGame::sendCreatureSkull(const Creature* creature)
 	}
 }
 
-void ProtocolGame::sendCreatureSquare(const Creature* creature, SquareColor_t color)
+void ProtocolGame::sendCreatureSquare(const Creature* creature, uint8_t color)
 {
 	if(!canSee(creature))
 		return;

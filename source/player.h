@@ -519,7 +519,7 @@ class Player : public Creature, public Cylinder
 			{if(client) client->sendCreatureTurn(creature, creature->getTile()->getClientIndexOfThing(this, creature));}
 		void sendCreatureSay(const Creature* creature, SpeakClasses type, const std::string& text, Position* pos = NULL)
 			{if(client) client->sendCreatureSay(creature, type, text, pos);}
-		void sendCreatureSquare(const Creature* creature, SquareColor_t color)
+		void sendCreatureSquare(const Creature* creature, uint8_t color)
 			{if(client) client->sendCreatureSquare(creature, color);}
 		void sendCreatureChangeOutfit(const Creature* creature, const Outfit_t& outfit)
 			{if(client) client->sendCreatureOutfit(creature, outfit);}

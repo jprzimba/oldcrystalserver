@@ -222,7 +222,7 @@ class ProtocolGame : public Protocol
 		void sendCreatureLight(const Creature* creature);
 		void sendWorldLight(const LightInfo& lightInfo);
 
-		void sendCreatureSquare(const Creature* creature, SquareColor_t color);
+		void sendCreatureSquare(const Creature* creature, uint8_t color);
 
 		//tiles
 		void sendAddTileItem(const Tile* tile, const Position& pos, uint32_t stackpos, const Item* item);

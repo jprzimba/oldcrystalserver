@@ -1618,6 +1618,9 @@ void LuaScriptInterface::registerFunctions()
 	//doCreatureSay(uid, text[, type = SPEAK_SAY[, ghost = false[, cid = 0[, pos]]]])
 	lua_register(m_luaState, "doCreatureSay", LuaScriptInterface::luaDoCreatureSay);
 
+	//doSendCreatureSquare(cid, color[, player])
+	lua_register(m_luaState, "doSendCreatureSquare", LuaScriptInterface::luaDoSendCreatureSquare);
+
 	//doSendMagicEffect(pos, type[, player])
 	lua_register(m_luaState, "doSendMagicEffect", LuaScriptInterface::luaDoSendMagicEffect);
 
@@ -3367,6 +3370,36 @@ int32_t LuaScriptInterface::luaDoCreatureSay(lua_State* L)
 	return 1;
 }
 
+int32_t LuaScriptInterface::luaDoSendCreatureSquare(lua_State* L)
+{
+	//doSendCreatureSquare(cid, color[, player])
+	ScriptEnviroment* env = getEnv();
+	SpectatorVec list;
+	if(lua_gettop(L) > 2)
+	{
+		if(Creature* creature = env->getCreatureByUID(popNumber(L)))
+			list.push_back(creature);
+	}
+
+        uint8_t color = popNumber(L);
+	if(Creature* creature = env->getCreatureByUID(popNumber(L)))
+	{
+	        if(!list.empty())
+        	        g_game.addCreatureSquare(list, creature, color);
+	        else
+        	        g_game.addCreatureSquare(creature, color);
+
+	        lua_pushboolean(L, true);
+	}
+	else
+	{
+		errorEx(getError(LUA_ERROR_CREATURE_NOT_FOUND));
+		lua_pushboolean(L, false);
+	}
+
+        return 1;
+}
+
 int32_t LuaScriptInterface::luaDoSendMagicEffect(lua_State* L)
 {
 	//doSendMagicEffect(pos, type[, player])
@@ -3530,9 +3563,9 @@ int32_t LuaScriptInterface::luaDoCreatureAddHealth(lua_State* L)
 	if(params > 4)
 		force = popNumber(L);
 
-	TextColor_t hitColor = TEXTCOLOR_UNKNOWN;
+	Color_t hitColor = COLOR_UNKNOWN;
 	if(params > 3)
-		hitColor = (TextColor_t)popNumber(L);
+		hitColor = (Color_t)popNumber(L);
 
 	MagicEffect_t hitEffect = MAGIC_EFFECT_UNKNOWN;
 	if(params > 2)

@@ -452,7 +452,7 @@ bool Combat::setParam(CombatParam_t param, uint32_t value)
 			return true;
 
 		case COMBATPARAM_HITCOLOR:
-			params.effects.color = (TextColor_t)value;
+			params.effects.color = (Color_t)value;
 			return true;
 
 		default:
