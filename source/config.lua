@@ -1,8 +1,4 @@
---[[
-	Crystal Server:
-	This server is based on:
-	The Forgotten Server, OpenTibia Server.
-]]--
+	-- Crystal Server:
 
 	-- Account manager
 	accountManager = true
@@ -109,7 +105,6 @@
 	bindOnlyConfiguredIpAddress = false
 	loginPort = 7171
 	gamePort = 7172
-	adminPort = 7171
 	statusPort = 7171
 	loginTries = 10
 	retryTimeout = 5 * 1000
@@ -333,7 +328,6 @@
 	-- Logs
 	-- NOTE: This kind of logging does not work in GUI version.
 	-- For such, please compile the software with __GUI_LOGS__ flag.
-	adminLogsEnabled = false
 	displayPlayersLogging = true
 	prefixChannelLogs = ""
 	runFile = ""

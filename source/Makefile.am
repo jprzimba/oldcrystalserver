@@ -1,11 +1,11 @@
-noinst_PROGRAMS = theforgottenserver
+noinst_PROGRAMS = crystalserver
 
 CXXFLAGS = -g -O1
 AM_CXXFLAGS = $(XML_CPPFLAGS) $(OTSERV_FLAGS) $(LUA_CFLAGS) $(DEBUG_FLAGS)\
 $(MYSQL_FLAGS) $(SQLITE_FLAGS) $(ODBC_FLAGS) $(PGSQL_FLAGS)\
 $(PROFILER_FLAGS) $(OPTIONAL_FLAGS) -D_THREAD_SAFE -D_REENTRANT -Wall
 
-theforgottenserver_LDADD = $(LUA_LIBS)
+crystalserver_LDADD = $(LUA_LIBS)
 
 if USE_MYSQL
 MAYBE_MYSQL = databasemysql.cpp databasemysql.h
@@ -13,24 +13,18 @@ endif
 if USE_SQLITE
 MAYBE_SQLITE = databasesqlite.cpp databasesqlite.h
 endif
-if USE_PGSQL
-MAYBE_PGSQL = databasepgsql.cpp databasepgsql.h
-endif
-if USE_ODBC
-MAYBE_ODBC = databaseodbc.cpp databaseodbc.h
-endif
 if LOGIN_SERVER
 MAYBE_LOGIN = gameservers.cpp gameservers.h
 endif
 
-theforgottenserver_SOURCES = account.h actions.cpp actions.h \
+crystalserver_SOURCES = account.h actions.cpp actions.h \
 	allocator.cpp allocator.h baseevents.cpp baseevents.h beds.cpp \
 	beds.h chat.cpp chat.h combat.cpp combat.h condition.cpp condition.h \
 	config.h configmanager.cpp configmanager.h connection.cpp \
 	connection.h const.h container.cpp container.h creature.cpp \
 	creature.h creatureevent.cpp creatureevent.h cylinder.cpp cylinder.h \
 	database.cpp database.h databasemanager.cpp databasemanager.h \
-	$(MAYBE_MYSQL) $(MAYBE_SQLITE) $(MAYBE_PGSQL) $(MAYBE_ODBC) \
+	$(MAYBE_MYSQL) $(MAYBE_SQLITE) \
 	depot.cpp depot.h exception.cpp exception.h fileloader.cpp \
 	fileloader.h game.cpp game.h $(MAYBE_LOGIN) globalevent.cpp \
 	globalevent.h group.cpp group.h gui.cpp gui.h house.cpp house.h \

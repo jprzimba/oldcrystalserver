@@ -1,5 +1,5 @@
 AC_PREREQ([2.50])
-AC_INIT([TheForgottenServer], [0.3.5])
+AC_INIT([CrystalServer], [0.1.8])
 AM_INIT_AUTOMAKE([1.10 foreign])
 AC_CONFIG_SRCDIR([account.h])
 AM_CONFIG_HEADER([config.h])
@@ -21,15 +21,6 @@ AC_ARG_ENABLE(login-server, [  --enable-login-server		enable login server mode],
 	[OPTIONAL_FLAGS="$OPTIONAL_FLAGS -D__LOGIN_SERVER__"]
 	AM_CONDITIONAL(LOGIN_SERVER, true)
 	loginServer=yes
-)
-
-# check if we want remote control feature
-AM_CONDITIONAL(REMOTE_CONTROL, false)
-remoteControl=no
-AC_ARG_ENABLE(remote-control, [  --enable-remote-control	enable remote control feature],
-	[OPTIONAL_FLAGS="$OPTIONAL_FLAGS -D__REMOTE_CONTROL__"]
-	AM_CONDITIONAL(REMOTE_CONTROL, true)
-	remoteControl=yes
 )
 
 # check if we want otserv allocator enabled
@@ -84,22 +75,6 @@ AC_ARG_ENABLE(mysql, [  --enable-mysql			enable MySQL support], [
 	MYSQL_FLAGS=-D__USE_MYSQL__
 	AC_SUBST(MYSQL_FLAGS)
 	useMySQL=yes
-])
-
-# check if we want postgresql enabled
-AC_ARG_ENABLE(pgsql, [  --enable-pgsql			enable PostgreSQL support], [
-	AM_CONDITIONAL(USE_PGSQL, true)
-	PGSQL_FLAGS=-D__USE_PGSQL__
-	AC_SUBST(PGSQL_FLAGS)
-	usePostgreSQL=yes
-])
-
-# check if we want odbc enabled
-AC_ARG_ENABLE(odbc, [  --enable-odbc			enable ODBC support], [
-	AM_CONDITIONAL(USE_ODBC, true)
-	ODBC_FLAGS=-D__USE_ODBC__
-	AC_SUBST(ODBC_FLAGS)
-	useODBC=yes
 ])
 
 # check if we want sqlite enabled
@@ -208,20 +183,6 @@ if test -n "$MYSQL_FLAGS"; then
 	AC_SUBST(MYSQL_LIBS)
 fi
 
-# check for postgresql if it is enabled
-if test -n "$PGSQL_FLAGS"; then
-	AC_CHECK_HEADERS([postgresql/libpq-fe.h],[PGSQL_LIBS=-lpg],[AC_MSG_ERROR("postgresql headers missing.")])
-	AC_CHECK_LIB(pq, main,[],[AC_MSG_ERROR("Linking against libpq failed.")])
-	AC_SUBST(PGSQL_LIBS)
-fi
-
-# check for odbc if it is enabled
-if test -n "$ODBC_FLAGS"; then
-	AC_CHECK_HEADERS([sql.h sqlext.h sqltypes.h],[ODBC_LIBS=-lodbc],[AC_MSG_ERROR("unixodbc headers missing.")])
-	AC_CHECK_LIB(odbc, main, [], [AC_MSG_ERROR("Linking against odbc failed.")])
-	AC_SUBST(ODBC_LIBS)
-fi
-
 # check for sqlite if it is enabled
 if test -n "$SQLITE_FLAGS"; then
 	AC_CHECK_HEADERS([sqlite3.h],[SQLITE_LIBS=-lsqlite3],[AC_MSG_ERROR("sqlite3 headers missing.")])
@@ -238,7 +199,6 @@ echo $PACKAGE $VERSION
 echo
 echo Server diagnostics.......... : $serverDiag
 echo Login server mode........... : $loginServer
-echo Remote control.............. : $remoteControl
 echo Root run permission......... : $rootPermission
 echo Home-directory configuration : $homedirConf
 echo OTServ custom allocator..... : $otservAllocator
@@ -247,8 +207,6 @@ echo
 #echo Build with libboost_thread.. : $boostThread
 echo Build with MySQL............ : $useMySQL
 echo Build with SQLite........... : $useSQLite
-echo Build with PostgreSQL....... : $usePostgreSQL
-echo Build with ODBC............. : $useODBC
 echo
 if test "$useMySQL" = "no" ; then
 	if test "$useSQLite" = "no" ; then

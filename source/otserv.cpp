@@ -145,8 +145,6 @@ bool argumentsHandler(StringVec args)
 			g_config.setNumber(ConfigManager::LOGIN_PORT, atoi(tmp[1].c_str()));
 		else if(tmp[0] == "--game-port")
 			g_config.setNumber(ConfigManager::GAME_PORT, atoi(tmp[1].c_str()));
-		else if(tmp[0] == "--admin-port")
-			g_config.setNumber(ConfigManager::ADMIN_PORT, atoi(tmp[1].c_str()));
 		else if(tmp[0] == "--status-port")
 			g_config.setNumber(ConfigManager::STATUS_PORT, atoi(tmp[1].c_str()));
 #ifndef WINDOWS
@@ -779,7 +777,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			NID.uCallbackMessage = WM_USER + 1;
 			NID.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
 
-			strcpy(NID.szTip, STATUS_SERVER_NAME);
+			strcpy(NID.szTip, SOFTWARE_NAME);
 			Shell_NotifyIcon(NIM_ADD, &NID);
 
 			boost::thread(boost::bind(&serverMain, (void*)hwnd));
@@ -864,10 +862,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					{
 						GUI::getInstance()->m_logText = "";
 						GUI::getInstance()->m_lineCount = 0;
-                        std::cout << ">> " << STATUS_SERVER_NAME << ", version: " << STATUS_SERVER_VERSION << "." << std::endl;
+                        std::cout << ">> " << SOFTWARE_NAME << ", version: " << SOFTWARE_VERSION << "." << std::endl;
                         std::cout << ">> Compiled at " << __DATE__ << ", " << __TIME__ << "." << std::endl;
-						std::cout << ">> A server developed by: " << DEVELOPERS << "." << std::endl;
-                        std::cout << ">> Visit forum for updates, support and resources: " << WEBSITE_INFO << "." << std::endl;
+						std::cout << ">> A server developed by: " << SOFTWARE_DEVELOPERS << "." << std::endl;
                         std::cout << ">>" << std::endl;
                         std::cout << std::endl;
 					}
@@ -1337,7 +1334,7 @@ int32_t WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszA
 	if(!RegisterClassEx(&wincl))
 		return 0;
 
-	GUI::getInstance()->m_mainWindow = CreateWindowEx(0, "crystalserver_gui", STATUS_SERVER_NAME, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 640, 450, HWND_DESKTOP, NULL, hInstance, NULL);
+	GUI::getInstance()->m_mainWindow = CreateWindowEx(0, "crystalserver_gui", SOFTWARE_NAME, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 640, 450, HWND_DESKTOP, NULL, hInstance, NULL);
 	ShowWindow(GUI::getInstance()->m_mainWindow, 1);
 	while(GetMessage(&messages, NULL, 0, 0))
 	{

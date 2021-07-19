@@ -18,7 +18,7 @@
 #ifndef __DEFINITIONS__
 #define __DEFINITIONS__
 #undef MULTI_SQL_DRIVERS
-#define SQL_DRIVERS __USE_SQLITE__+__USE_MYSQL__+__USE_ODBC__+__USE_PGSQL__
+#define SQL_DRIVERS __USE_SQLITE__+__USE_MYSQL__
 #if SQL_DRIVERS > 1
 #define MULTI_SQL_DRIVERS
 #endif

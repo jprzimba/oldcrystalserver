@@ -24,12 +24,6 @@
 #ifdef __USE_SQLITE__
 #include "databasesqlite.h"
 #endif
-#ifdef __USE_ODBC__
-#include "databaseodbc.h"
-#endif
-#ifdef __USE_PGSQL__
-#include "databasepgsql.h"
-#endif
 
 #if defined MULTI_SQL_DRIVERS
 #include "configmanager.h"
@@ -48,17 +42,9 @@ Database* _Database::getInstance()
 		if(g_config.getString(ConfigManager::SQL_TYPE) == "mysql")
 			_instance = new DatabaseMySQL;
 #endif
-#ifdef __USE_ODBC__
-		if(g_config.getString(ConfigManager::SQL_TYPE) == "odbc")
-			_instance = new DatabaseODBC;
-#endif
 #ifdef __USE_SQLITE__
 		if(g_config.getString(ConfigManager::SQL_TYPE) == "sqlite")
 			_instance = new DatabaseSQLite;
-#endif
-#ifdef __USE_PGSQL__
-		if(g_config.getString(ConfigManager::SQL_TYPE) == "pgsql")
-			_instance = new DatabasePgSQL;
 #endif
 #else
 		_instance = new Database;
