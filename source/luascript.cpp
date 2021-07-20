@@ -9094,7 +9094,6 @@ int32_t LuaScriptInterface::luaGetItemInfo(lua_State* L)
 	lua_newtable(L);
 	setFieldBool(L, "stopTime", item->stopTime);
 	setFieldBool(L, "showCount", item->showCount);
-	setFieldBool(L, "clientCharges", item->clientCharges);
 	setFieldBool(L, "stackable", item->stackable);
 	setFieldBool(L, "showDuration", item->showDuration);
 	setFieldBool(L, "showCharges", item->showCharges);

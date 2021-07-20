@@ -1491,7 +1491,6 @@ ReturnValue Game::internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cyli
 	int32_t itemIndex = fromCylinder->__getIndexOfThing(item);
 	fromCylinder->__removeThing(item, m);
 
-	bool isCompleteRemoval = item->isRemoved();
 	Item* updateItem = NULL;
 	//update item(s)
 	if(item->isStackable())
@@ -1517,7 +1516,7 @@ ReturnValue Game::internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cyli
 		toCylinder->__addThing(actor, index, moveItem);
 
 	if(itemIndex != -1)
-		fromCylinder->postRemoveNotification(actor, item, toCylinder, itemIndex, isCompleteRemoval);
+		fromCylinder->postRemoveNotification(actor, item, toCylinder, itemIndex, item->isRemoved());
 
 	if(moveItem)
 	{
@@ -1549,64 +1548,91 @@ ReturnValue Game::internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cyli
 }
 
 ReturnValue Game::internalAddItem(Creature* actor, Cylinder* toCylinder, Item* item, int32_t index /*= INDEX_WHEREEVER*/,
-	uint32_t flags /*= 0*/, bool test /*= false*/)
+	uint32_t flags/* = 0*/, bool test/* = false*/)
 {
+	uint32_t remainderCount = 0;
+	return internalAddItem(actor, toCylinder, item, index, flags, test, remainderCount);
+}
+
+ReturnValue Game::internalAddItem(Creature* actor, Cylinder* toCylinder, Item* item, int32_t index,
+	uint32_t flags, bool test, uint32_t& remainderCount)
+{
+	Item* stackItem = NULL;
+	return internalAddItem(actor, toCylinder, item, index, flags, test, remainderCount, &stackItem);
+}
+
+ReturnValue Game::internalAddItem(Creature* actor, Cylinder* toCylinder, Item* item, int32_t index,
+	uint32_t flags, bool test, uint32_t& remainderCount, Item** stackItem)
+{
+	*stackItem = NULL;
+	remainderCount = 0;
 	if(!toCylinder || !item)
 		return RET_NOTPOSSIBLE;
 
-	Item* toItem = NULL;
-	toCylinder = toCylinder->__queryDestination(index, item, &toItem, flags);
+	Cylinder* destCylinder = toCylinder;
+	toCylinder = toCylinder->__queryDestination(index, item, stackItem, flags);
 
+	//check if we can add this item
 	ReturnValue ret = toCylinder->__queryAdd(index, item, item->getItemCount(), flags);
 	if(ret != RET_NOERROR)
 		return ret;
 
 	uint32_t maxQueryCount = 0;
-	ret = toCylinder->__queryMaxCount(index, item, item->getItemCount(), maxQueryCount, flags);
+	ret = destCylinder->__queryMaxCount(INDEX_WHEREEVER, item, item->getItemCount(), maxQueryCount, flags);
 	if(ret != RET_NOERROR)
 		return ret;
 
-	if(!test)
-	{
-		uint32_t m = maxQueryCount;
-		if(item->isStackable())
-			m = std::min((uint32_t)item->getItemCount(), maxQueryCount);
+	if(test)
+		return RET_NOERROR;
 
-		Item* moveItem = item;
-		if(item->isStackable() && toItem && toItem->getID() == item->getID())
+	Item* toItem = *stackItem;
+	if(item->isStackable() && toItem)
+	{
+		uint32_t m = std::min((uint32_t)item->getItemCount(), maxQueryCount), n = 0;
+		if(toItem->getID() == item->getID())
 		{
-			uint32_t n = std::min((uint32_t)100 - toItem->getItemCount(), m);
+			n = std::min((uint32_t)100 - toItem->getItemCount(), m);
 			toCylinder->__updateThing(toItem, toItem->getID(), toItem->getItemCount() + n);
-			if(m - n > 0)
-			{
-				if(m - n != item->getItemCount())
-					moveItem = Item::CreateItem(item->getID(), m - n);
-			}
-			else
-			{
-				moveItem = NULL;
-				if(item->getParent() != VirtualCylinder::virtualCylinder)
-				{
-					item->onRemoved();
-					freeThing(item);
-				}
-			}
 		}
 
-		if(moveItem)
+		uint32_t count = m - n;
+		if(count > 0)
 		{
-			toCylinder->__addThing(actor, index, moveItem);
-			int32_t moveItemIndex = toCylinder->__getIndexOfThing(moveItem);
-			if(moveItemIndex != -1)
-				toCylinder->postAddNotification(actor, moveItem, NULL, moveItemIndex);
+			if(item->getItemCount() != count)
+			{
+				Item* remainderItem = Item::CreateItem(item->getID(), count);
+				if((ret = internalAddItem(NULL, destCylinder, remainderItem, INDEX_WHEREEVER, flags, false)) == RET_NOERROR)
+				{
+					if(item->getParent() != VirtualCylinder::virtualCylinder)
+					{
+						item->onRemoved();
+						freeThing(item);
+					}
+
+					return RET_NOERROR;
+				}
+
+				delete remainderItem;
+				remainderCount = count;
+				return ret;
+			}
 		}
 		else
 		{
-			int32_t itemIndex = toCylinder->__getIndexOfThing(item);
-			if(itemIndex != -1)
-				toCylinder->postAddNotification(actor, item, NULL, itemIndex);
+			if(item->getParent() != VirtualCylinder::virtualCylinder)
+			{
+				item->onRemoved();
+				freeThing(item);
+			}
+
+			return RET_NOERROR;
 		}
 	}
+
+	toCylinder->__addThing(NULL, index, item);
+	int32_t itemIndex = toCylinder->__getIndexOfThing(item);
+	if(itemIndex != -1)
+		toCylinder->postAddNotification(actor, item, NULL, itemIndex);
 
 	return RET_NOERROR;
 }
@@ -1634,25 +1660,40 @@ ReturnValue Game::internalRemoveItem(Creature* actor, Item* item, int32_t count 
 		int32_t index = cylinder->__getIndexOfThing(item);
 		cylinder->__removeThing(item, count);
 
-		bool isCompleteRemoval = false;
+		cylinder->postRemoveNotification(actor, item, NULL, index, item->isRemoved());
 		if(item->isRemoved())
-		{
-			isCompleteRemoval = true;
 			freeThing(item);
-		}
-
-		cylinder->postRemoveNotification(actor, item, NULL, index, isCompleteRemoval);
 	}
 
 	item->onRemoved();
 	return RET_NOERROR;
 }
 
-ReturnValue Game::internalPlayerAddItem(Creature* actor, Player* player, Item* item, bool dropOnMap /*= true*/)
+ReturnValue Game::internalPlayerAddItem(Creature* actor, Player* player, Item* item,
+	bool dropOnMap/* = true*/, slots_t slot/* = SLOT_WHEREEVER*/)
 {
-	ReturnValue ret = internalAddItem(actor, player, item);
-	if(ret != RET_NOERROR && dropOnMap)
-		ret = internalAddItem(actor, player->getTile(), item, INDEX_WHEREEVER, FLAG_NOLIMIT);
+	Item* toItem = NULL;
+	uint32_t remainderCount = 0, count = item->getItemCount();
+
+	ReturnValue ret = internalAddItem(actor, player, item, (int32_t)slot, 0, false, remainderCount, &toItem);
+	if(ret == RET_NOERROR)
+		return RET_NOERROR;
+
+	if(dropOnMap)
+	{
+		if(!remainderCount)
+			return internalAddItem(actor, player->getTile(), item, (int32_t)slot, FLAG_NOLIMIT);
+
+		Item* remainderItem = Item::CreateItem(item->getID(), remainderCount);
+		ReturnValue remainderRet = internalAddItem(actor, player->getTile(), remainderItem, INDEX_WHEREEVER, FLAG_NOLIMIT);
+		if(remainderRet == RET_NOERROR)
+			return RET_NOERROR;
+
+		delete remainderItem;
+	}
+
+	if(remainderCount && toItem)
+		transformItem(toItem, toItem->getID(), (toItem->getItemCount() - (count - remainderCount)));
 
 	return ret;
 }
@@ -1716,9 +1757,9 @@ bool Game::removeItemOfType(Cylinder* cylinder, uint16_t itemId, int32_t count, 
 
 	std::list<Container*> listContainer;
 	Container* tmpContainer = NULL;
+	Item* item = NULL;
 
 	Thing* thing = NULL;
-	Item* item = NULL;
 	for(int32_t i = cylinder->__getFirstIndex(); i < cylinder->__getLastIndex() && count > 0;)
 	{
 		if((thing = cylinder->__getThing(i)) && (item = thing->getItem()))
@@ -1743,6 +1784,8 @@ bool Game::removeItemOfType(Cylinder* cylinder, uint16_t itemId, int32_t count, 
 					--count;
 					internalRemoveItem(NULL, item);
 				}
+				else
+					++i;
 			}
 			else
 			{
@@ -1782,6 +1825,8 @@ bool Game::removeItemOfType(Cylinder* cylinder, uint16_t itemId, int32_t count, 
 					--count;
 					internalRemoveItem(NULL, item);
 				}
+				else
+					++i;
 			}
 			else
 			{
@@ -1992,7 +2037,7 @@ Item* Game::transformItem(Item* item, uint16_t newId, int32_t newCount /*= -1*/)
 	if(curType.type == newType.type)
 	{
 		//Both items has the same type so we can safely change id/subtype
-		if(!newCount && (item->isStackable() || item->hasCharges()))
+		if(!newCount && (item->isStackable() || (curType.charges > 0)))
 		{
 			if(!item->isStackable() && (!item->getDefaultDuration() || item->getDuration() <= 0))
 			{
@@ -6146,20 +6191,16 @@ void Game::freeThing(Thing* thing)
 
 void Game::showHotkeyUseMessage(Player* player, Item* item)
 {
-	int32_t subType = -1;
-	if(item->hasSubType() && !item->hasCharges())
-		subType = item->getSubType();
-
 	const ItemType& it = Item::items[item->getID()];
-	uint32_t count = player->__getItemTypeCount(item->getID(), subType, false);
+	uint32_t count = player->__getItemTypeCount(item->getID(), item->isFluidContainer() ? item->getFluidType() : -1);
 
-	char buffer[40 + it.name.size()];
+	std::stringstream ss;
 	if(count == 1)
-		sprintf(buffer, "Using the last %s...", it.name.c_str());
+		ss << "Using the last " << it.name.c_str() << "...";
 	else
-		sprintf(buffer, "Using one of %d %s...", count, it.pluralName.c_str());
+		ss << "Using one of " << count << " " << it.pluralName.c_str() << "...";
 
-	player->sendTextMessage(MSG_INFO_DESCR, buffer);
+	player->sendTextMessage(MSG_INFO_DESCR, ss.str());
 }
 
 void Game::sendNoticeBox(const std::string& _datadir, Player* player)

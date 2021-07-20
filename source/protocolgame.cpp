@@ -1842,7 +1842,7 @@ void ProtocolGame::sendGoods(const ShopInfoList& shop)
 	{
 		TRACK_MESSAGE(msg);
 		msg->AddByte(0x7B);
-		msg->AddU32(g_game.getMoney(player));
+		msg->AddU32((uint32_t)g_game.getMoney(player));
 
 		std::map<uint32_t, uint32_t> goodsMap;
 		if(shop.size() >= 5)
@@ -1875,18 +1875,20 @@ void ProtocolGame::sendGoods(const ShopInfoList& shop)
 					continue;
 
 				int8_t subType = -1;
-				if(sit->subType)
-				{
-					const ItemType& it = Item::items[sit->itemId];
-					if(it.hasSubType() && !it.stackable)
-						subType = sit->subType;
-				}
+				const ItemType& it = Item::items[sit->itemId];
+				if(sit->subType && it.hasSubType() && !it.stackable)
+					subType = sit->subType;
 
 				if(subType != -1)
 				{
-					uint32_t count = player->__getItemTypeCount(sit->itemId, subType);
+					uint32_t count = subType;
+					if(!it.isFluidContainer() && !it.isSplash())
+						count = player->__getItemTypeCount(sit->itemId, subType);
+
 					if(count > 0)
 						goodsMap[sit->itemId] = count;
+					else
+						goodsMap[sit->itemId] = 0;
 				}
 				else
 					goodsMap[sit->itemId] = tmpMap[sit->itemId];

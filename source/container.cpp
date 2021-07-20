@@ -322,15 +322,33 @@ ReturnValue Container::__queryMaxCount(int32_t index, const Thing* thing, uint32
 	if(item->isStackable())
 	{
 		uint32_t n = 0;
-		if(index != INDEX_WHEREEVER)
+		if(index == INDEX_WHEREEVER)
+		{
+			//Iterate through every item and check how much free stackable slots there is.
+			uint32_t slotIndex = 0;
+			for(ItemList::const_iterator cit = itemlist.begin(); cit != itemlist.end(); ++cit, ++slotIndex)
+			{
+				if((*cit) != item && (*cit)->getID() == item->getID() && (*cit)->getItemCount() < 100)
+				{
+					uint32_t remainder = (100 - (*cit)->getItemCount());
+					if(__queryAdd(slotIndex, item, remainder, flags) == RET_NOERROR)
+						n += remainder;
+				}
+			}
+		}
+		else
 		{
 			const Thing* destThing = __getThing(index);
 			const Item* destItem = NULL;
 			if(destThing)
 				destItem = destThing->getItem();
 
-			if(destItem && destItem->getID() == item->getID())
-				n = 100 - destItem->getItemCount();
+			if(destItem && destItem->getID() == item->getID() && destItem->getItemCount() < 100)
+			{
+				uint32_t remainder = 100 - destItem->getItemCount();
+				if(__queryAdd(index, item, remainder, flags) == RET_NOERROR)
+					n = remainder;
+			}
 		}
 
 		maxQueryCount = freeSlots * 100 + n;
@@ -377,41 +395,59 @@ Cylinder* Container::__queryDestination(int32_t& index, const Thing* thing, Item
 		Container* parentContainer = dynamic_cast<Container*>(getParent());
 		if(parentContainer)
 			return parentContainer;
-		else
-			return this;
+
+		return this;
 	}
 	else if(index == 255 /*add wherever*/)
 	{
 		index = INDEX_WHEREEVER;
 		*destItem = NULL;
-		return this;
 	}
-	else
+	else if(index >= (int32_t)capacity())
 	{
-		if(index >= (int32_t)capacity())
-		{
-			/*
-			if you have a container, maximize it to show all 20 slots
-			then you open a bag that is inside the container you will have a bag with 8 slots
-			and a "grey" area where the other 12 slots where from the container
-			if you drop the item on that grey area
-			the client calculates the slot position as if the bag has 20 slots
-			*/
-			index = INDEX_WHEREEVER;
-		}
+		/*
+		if you have a container, maximize it to show all 20 slots
+		then you open a bag that is inside the container you will have a bag with 8 slots
+		and a "grey" area where the other 12 slots where from the container
+		if you drop the item on that grey area the client calculates the slot position
+		as if the bag has 20 slots
+		*/
 
-		if(index != INDEX_WHEREEVER)
-		{
-			Thing* destThing = __getThing(index);
-			if(destThing)
-				*destItem = destThing->getItem();
+		index = INDEX_WHEREEVER;
+		*destItem = NULL;
+	}
 
-			if(Cylinder* subCylinder = dynamic_cast<Cylinder*>(*destItem))
+	const Item* item = thing->getItem();
+	if(!item)
+		return this;
+
+	if(!((flags & FLAG_IGNOREAUTOSTACK) == FLAG_IGNOREAUTOSTACK)
+		&& item->isStackable() && item->getParent() != this)
+	{
+		//try to find a suitable item to stack with
+		uint32_t n = itemlist.size();
+		for(ItemList::reverse_iterator cit = itemlist.rbegin(); cit != itemlist.rend(); ++cit, --n)
+		{
+			if((*cit)->getID() == item->getID() && (*cit)->getItemCount() < 100)
 			{
-				index = INDEX_WHEREEVER;
-				*destItem = NULL;
-				return subCylinder;
+				*destItem = (*cit);
+				index = n;
+				return this;
 			}
+		}
+	}
+
+	if(index != INDEX_WHEREEVER)
+	{
+		Thing* destThing = __getThing(index);
+		if(destThing)
+			*destItem = destThing->getItem();
+
+		if(Cylinder* subCylinder = dynamic_cast<Cylinder*>(*destItem))
+		{
+			index = INDEX_WHEREEVER;
+			*destItem = NULL;
+			return subCylinder;
 		}
 	}
 
@@ -664,48 +700,23 @@ int32_t Container::__getLastIndex() const
 	return size();
 }
 
-uint32_t Container::__getItemTypeCount(uint16_t itemId, int32_t subType /*= -1*/, bool itemCount /*= true*/) const
+uint32_t Container::__getItemTypeCount(uint16_t itemId, int32_t subType /*= -1*/) const
 {
 	uint32_t count = 0;
-
-	Item* item = NULL;
 	for(ItemList::const_iterator it = itemlist.begin(); it != itemlist.end(); ++it)
 	{
-		item = (*it);
-		if(item && item->getID() == itemId && (subType == -1 || subType == item->getSubType()))
-		{
-			if(!itemCount)
-			{
-				if(item->isRune())
-					count += item->getCharges();
-				else
-					count += item->getItemCount();
-			}
-			else
-				count += item->getItemCount();
-		}
+		if((*it) && (*it)->getID() == itemId && (subType == -1 || subType == (*it)->getSubType()))
+			count += (*it)->getItemCount();
 	}
 
 	return count;
 }
 
 std::map<uint32_t, uint32_t>& Container::__getAllItemTypeCount(std::map<uint32_t,
-	uint32_t>& countMap, bool itemCount /*= true*/) const
+	uint32_t>& countMap) const
 {
-	Item* item = NULL;
 	for(ItemList::const_iterator it = itemlist.begin(); it != itemlist.end(); ++it)
-	{
-		item = (*it);
-		if(!itemCount)
-		{
-			if(item->isRune())
-				countMap[item->getID()] += item->getCharges();
-			else
-				countMap[item->getID()] += item->getItemCount();
-		}
-		else
-			countMap[item->getID()] += item->getItemCount();
-	}
+		countMap[(*it)->getID()] += (*it)->getItemCount();
 
 	return countMap;
 }

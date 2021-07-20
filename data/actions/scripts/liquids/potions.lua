@@ -2,6 +2,7 @@ local config = {
 	removeOnUse = "no",
 	usableOnTarget = "yes", -- can be used on target? (fe. healing friend)
 	splashable = "no",
+	range = -1,
 	realAnimation = "no", -- make text effect visible only for players in range 1x1
 	healthMultiplier = 1.0,
 	manaMultiplier = 1.0
@@ -45,7 +46,9 @@ function onUse(cid, item, fromPosition, itemEx, toPosition)
 		end
 
 		doDecayItem(doCreateItem(2016, potion.splash, toPosition))
-		doTransformItem(item.uid, potion.empty)
+		doRemoveItem(item.uid, 1)
+
+		doPlayerAddItem(cid, potion.empty, 1)
 		return true
 	end
 
@@ -59,6 +62,10 @@ function onUse(cid, item, fromPosition, itemEx, toPosition)
 	then
 		doCreatureSay(itemEx.uid, "Only " .. potion.vocStr .. (potion.level and (" of level " .. potion.level) or "") .. " or above may drink this fluid.", TALKTYPE_ORANGE_1)
 		return true
+	end
+
+	if(config.range > 0 and cid ~= itemEx.uid and getDistanceBetween(getCreaturePosition(cid), getCreaturePosition(itemEx.uid)) > config.range) then
+		return false
 	end
 
 	local health = potion.health
@@ -83,11 +90,11 @@ function onUse(cid, item, fromPosition, itemEx, toPosition)
 	end
 
 	doAddCondition(cid, exhaust)
+	doRemoveItem(item.uid, 1)
 	if(not potion.empty or config.removeOnUse) then
-		doRemoveItem(item.uid)
 		return true
 	end
 
-	doTransformItem(item.uid, potion.empty)
+	doPlayerAddItem(cid, potion.empty, 1)
 	return true
 end
