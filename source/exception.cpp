@@ -137,7 +137,7 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 	_MEMORY_BASIC_INFORMATION mbi;
 
 	std::ostream *outdriver;
-	std::cout << ">> CRASH: Writing report file..." << std::endl;
+	std::clog << "CRASH: Writing report file..." << std::endl;
 	std::ofstream output(getFilePath(FILE_TYPE_LOG, "server/exceptions.log").c_str(), std::ios_base::app);
 	if(output.fail())
 	{
@@ -304,7 +304,7 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 		MessageBoxA(NULL, ss.str().c_str(), "Error", MB_OK | MB_ICONERROR);
 	}
 
-	std::cout << "> Crash report generated, killing server." << std::endl;
+	std::clog << "Crash report generated, killing server." << std::endl;
 	exit(1);
 	return ExceptionContinueSearch;
 }
@@ -334,7 +334,7 @@ bool ExceptionHandler::LoadMap()
 	if(!input)
 	{
 		MessageBoxA(NULL, "Failed loading symbols, crystalserver.map file not found.", "Error", MB_OK | MB_ICONERROR);
-		std::cout << "Failed loading symbols, crystalserver.map file not found. " << std::endl;
+		std::clog << "Failed loading symbols, crystalserver.map file not found. " << std::endl;
 		exit(1);
 		return false;
 	}
@@ -416,7 +416,7 @@ void ExceptionHandler::dumpStack()
 	uint32_t foundRetAddress = 0;
 	_MEMORY_BASIC_INFORMATION mbi;
 
-	std::cout << ">> CRASH: Writing report file..." << std::endl;
+	std::clog << "CRASH: Writing report file..." << std::endl;
 	std::ofstream output(getFilePath(FILE_TYPE_LOG, "server/exceptions.log").c_str(), std::ios_base::app);
 	output.flags(std::ios::hex | std::ios::showbase);
 	time_t rawtime;
@@ -486,6 +486,6 @@ void ExceptionHandler::dumpStack()
 
 	output << "*****************************************************" << std::endl;
 	output.close();
-	std::cout << "> Crash report generated, killing server." << std::endl;
+	std::clog << "Crash report generated, killing server." << std::endl;
 }
 #endif

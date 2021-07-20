@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
 #include "otpch.h"
-#include "resources.h"
 #include <iomanip>
 
 #include "protocollogin.h"
@@ -25,9 +24,6 @@
 #include "iologindata.h"
 #include "ioban.h"
 
-#if defined(WINDOWS) && !defined(__CONSOLE__)
-#include "gui.h"
-#endif
 #include "outputmessage.h"
 #include "connection.h"
 
@@ -37,7 +33,7 @@
 extern ConfigManager g_config;
 extern Game g_game;
 
-extern IpList serverIps;
+extern std::list<std::pair<uint32_t, uint32_t> > serverIps;
 
 #ifdef __ENABLE_SERVER_DIAGNOSTIC__
 uint32_t ProtocolLogin::protocolLoginCount = 0;
@@ -46,7 +42,7 @@ uint32_t ProtocolLogin::protocolLoginCount = 0;
 void ProtocolLogin::deleteProtocolTask()
 {
 #ifdef __DEBUG_NET_DETAIL__
-	std::cout << "Deleting ProtocolLogin" << std::endl;
+	std::clog << "Deleting ProtocolLogin" << std::endl;
 #endif
 	Protocol::deleteProtocolTask();
 }
@@ -67,11 +63,7 @@ void ProtocolLogin::disconnectClient(uint8_t error, const char* message)
 
 bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 {
-	if(
-#if defined(WINDOWS) && !defined(__CONSOLE__)
-		!GUI::getInstance()->m_connections ||
-#endif
-		g_game.getGameState() == GAME_STATE_SHUTDOWN)
+	if(g_game.getGameState() == GAME_STATE_SHUTDOWN)
 	{
 		getConnection()->close();
 		return false;
@@ -164,14 +156,13 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 		else
 			IOLoginData::getInstance()->getNameByGuid(ban.adminId, name_, true);
 
-		char buffer[500 + ban.comment.length()];
-		sprintf(buffer, "Your account has been %s at:\n%s by: %s,\nfor the following reason:\n%s.\nThe action taken was:\n%s.\nThe comment given was:\n%s.\nYour %s%s.",
-			(deletion ? "deleted" : "banished"), formatDateShort(ban.added).c_str(), name_.c_str(),
-			getReason(ban.reason).c_str(), getAction(ban.action, false).c_str(), ban.comment.c_str(),
-			(deletion ? "account won't be undeleted" : "banishment will be lifted at:\n"),
-			(deletion ? "." : formatDateShort(ban.expires, true).c_str()));
+		std::stringstream ss;
+		ss << "Your account has been " << (deletion ? "deleted" : "banished") << " at:\n" << formatDateEx(ban.added).c_str()
+			<< " by: " << name_.c_str() << ",\nfor the following reason:\n" << getReason(ban.reason).c_str() << ".\nThe action taken was:\n"
+			<< getAction(ban.action, false).c_str() << ".\nThe comment given was:\n" << ban.comment.c_str() << ".\nYour "
+			<< (deletion ? "account won't be undeleted" : "banishment will be lifted at:\n") << (deletion ? "." : formatDateEx(ban.expires).c_str()) << ".";
 
-		disconnectClient(0x0A, buffer);
+		disconnectClient(0x0A, ss.str().c_str());
 		return false;
 	}
 
@@ -194,8 +185,8 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 		sprintf(motd, "%d\n%s", g_game.getMotdId(), g_config.getString(ConfigManager::MOTD).c_str());
 		output->AddString(motd);
 
-		uint32_t serverIp = serverIps[0].first;
-		for(IpList::iterator it = serverIps.begin(); it != serverIps.end(); ++it)
+		uint32_t serverIp = serverIps.front().first;
+		for(std::list<std::pair<uint32_t, uint32_t> >::iterator it = serverIps.begin(); it != serverIps.end(); ++it)
 		{
 			if((it->first & it->second) != (clientIp & it->second))
 				continue;

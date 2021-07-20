@@ -201,7 +201,7 @@ void ScriptEnviroment::addUniqueThing(Thing* thing)
 	if(m_globalMap[item->getUniqueId()])
 	{
 		if(item->getActionId() != 2000) //scripted quest system
-			std::cout << "Duplicate uniqueId " << item->getUniqueId() << std::endl;
+			std::clog << "Duplicate uniqueId " << item->getUniqueId() << std::endl;
 	}
 	else
 		m_globalMap[item->getUniqueId()] = thing;
@@ -257,7 +257,7 @@ void ScriptEnviroment::insertThing(uint32_t uid, Thing* thing)
 	if(!m_localMap[uid])
 		m_localMap[uid] = thing;
 	else
-		std::cout << "[Error - ScriptEnviroment::insertThing] Thing uid already taken" << std::endl;
+		std::clog << "[Error - ScriptEnviroment::insertThing] Thing uid already taken" << std::endl;
 }
 
 Thing* ScriptEnviroment::getThingByUID(uint32_t uid)
@@ -683,7 +683,7 @@ bool LuaScriptInterface::loadFile(const std::string& file, Npc* npc/* = NULL*/)
 	if(ret)
 	{
 		m_lastError = popString(m_luaState);
-		std::cout << "[Error - LuaScriptInterface::loadFile] " << m_lastError << std::endl;
+		std::clog << "[Error - LuaScriptInterface::loadFile] " << m_lastError << std::endl;
 		return false;
 	}
 
@@ -792,7 +792,7 @@ void LuaScriptInterface::error(const char* function, const std::string& desc)
 	{
 		std::cout << std::endl << "[Error - " << interface->getName() << "] " << std::endl;
 		if(callback)
-			std::cout << "In a callback: " << interface->getScript(callback) << std::endl;
+			std::clog << "In a callback: " << interface->getScript(callback) << std::endl;
 
 		if(timer)
 			std::cout << (callback ? "from" : "In") << " a timer event called from: " << std::endl;
@@ -804,7 +804,7 @@ void LuaScriptInterface::error(const char* function, const std::string& desc)
 
 	std::cout << event << std::endl;
 	if(function)
-		std::cout << "(" << function << ") ";
+		std::clog << "(" << function << ") ";
 
 	std::cout << desc << std::endl;
 }
@@ -834,7 +834,7 @@ bool LuaScriptInterface::initState()
 	luaL_openlibs(m_luaState);
 	registerFunctions();
 	if(!loadDirectory(getFilePath(FILE_TYPE_OTHER, "lib/"), NULL))
-		std::cout << "[Warning - LuaScriptInterface::initState] Cannot load " << getFilePath(FILE_TYPE_OTHER, "lib/") << std::endl;
+		std::clog << "[Warning - LuaScriptInterface::initState] Cannot load " << getFilePath(FILE_TYPE_OTHER, "lib/") << std::endl;
 
 	lua_newtable(m_luaState);
 	lua_setfield(m_luaState, LUA_REGISTRYINDEX, "EVENTS");
@@ -886,7 +886,7 @@ void LuaScriptInterface::executeTimer(uint32_t eventIndex)
 			releaseEnv();
 		}
 		else
-			std::cout << "[Error] Call stack overflow. LuaScriptInterface::executeTimer" << std::endl;
+			std::clog << "[Error] Call stack overflow. LuaScriptInterface::executeTimer" << std::endl;
 
 		//free resources
 		for(std::list<int32_t>::iterator lt = it->second.parameters.begin(); lt != it->second.parameters.end(); ++lt)
@@ -949,7 +949,7 @@ void LuaScriptInterface::dumpStack(lua_State* L/* = NULL*/)
 	if(!stack)
 		return;
 
-	std::cout << "Stack size: " << stack << std::endl;
+	std::clog << "Stack size: " << stack << std::endl;
 	for(int32_t i = 1; i <= stack ; ++i)
 		std::cout << lua_typename(m_luaState, lua_type(m_luaState, -i)) << " " << lua_topointer(m_luaState, -i) << std::endl;
 }

@@ -117,7 +117,7 @@ bool ChatChannel::addUser(Player* player)
 	if(!channel)
 	{
 		#ifdef __DEBUG_CHAT__
-		std::cout << "ChatChannel::addUser - failed retrieving channel." << std::endl;
+		std::clog << "ChatChannel::addUser - failed retrieving channel." << std::endl;
 		#endif
 		return false;
 	}
@@ -202,7 +202,7 @@ bool Chat::loadFromXml()
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "channels.xml").c_str());
 	if(!doc)
 	{
-		std::cout << "[Warning - Chat::loadFromXml] Cannot load channels file." << std::endl;
+		std::clog << "[Warning - Chat::loadFromXml] Cannot load channels file." << std::endl;
 		std::cout << getLastXMLError() << std::endl;
 		return false;
 	}
@@ -210,7 +210,7 @@ bool Chat::loadFromXml()
 	xmlNodePtr p, root = xmlDocGetRootElement(doc);
 	if(xmlStrcmp(root->name,(const xmlChar*)"channels"))
 	{
-		std::cout << "[Error - Chat::loadFromXml] Malformed channels file" << std::endl;
+		std::clog << "[Error - Chat::loadFromXml] Malformed channels file" << std::endl;
 		xmlFreeDoc(doc);
 		return false;
 	}
@@ -230,7 +230,7 @@ bool Chat::parseChannelNode(xmlNodePtr p)
 
 	if(!readXMLInteger(p, "id", intValue) || intValue <= CHANNEL_GUILD)
 	{
-		std::cout << "[Warning - Chat::loadFromXml] Invalid or not specified channel id." << std::endl;
+		std::clog << "[Warning - Chat::loadFromXml] Invalid or not specified channel id." << std::endl;
 		return false;
 	}
 
@@ -238,13 +238,13 @@ bool Chat::parseChannelNode(xmlNodePtr p)
 	std::string strValue;
 	if(m_normalChannels.find(id) != m_normalChannels.end() && (!readXMLString(p, "override", strValue) || !booleanString(strValue)))
 	{
-		std::cout << "[Warning - Chat::loadFromXml] Duplicated channel with id: " << id << "." << std::endl;
+		std::clog << "[Warning - Chat::loadFromXml] Duplicated channel with id: " << id << "." << std::endl;
 		return false;
 	}
 
 	if(!readXMLString(p, "name", strValue))
 	{
-		std::cout << "[Warning - Chat::loadFromXml] Missing name for channel with id: " << id << "." << std::endl;
+		std::clog << "[Warning - Chat::loadFromXml] Missing name for channel with id: " << id << "." << std::endl;
 		return false;
 	}
 
@@ -279,7 +279,7 @@ bool Chat::parseChannelNode(xmlNodePtr p)
 		{
 			conditionId = intValue;
 			if(conditionId < 2)
-				std::cout << "[Warning - Chat::parseChannelNode] Using reserved muted condition sub id (" << conditionId << ")" << std::endl;
+				std::clog << "[Warning - Chat::parseChannelNode] Using reserved muted condition sub id (" << conditionId << ")" << std::endl;
 		}
 
 		if((condition = Condition::createCondition(CONDITIONID_DEFAULT, CONDITION_MUTED, tmp, 0, false, conditionId)))
@@ -298,7 +298,7 @@ bool Chat::parseChannelNode(xmlNodePtr p)
 	for(xmlNodePtr tmpNode = p->children; tmpNode; tmpNode = tmpNode->next)
 	{
 		if(!parseVocationNode(tmpNode, vocMap, vocStringVec, error))
-			std::cout << "[Warning - Chat::loadFromXml] " << error << std::endl;
+			std::clog << "[Warning - Chat::loadFromXml] " << error << std::endl;
 	}
 
 	VocationMap* vocationMap = NULL;
@@ -1100,7 +1100,7 @@ ChannelList Chat::getChannelList(Player* player)
 ChatChannel* Chat::getChannel(Player* player, uint16_t channelId)
 {
 	#ifdef __DEBUG_CHAT__
-	std::cout << "Chat::getChannel - getChannel id " << channelId << std::endl;
+	std::clog << "Chat::getChannel - getChannel id " << channelId << std::endl;
 	#endif
 	if(!player || player->isRemoved())
 		return false;
@@ -1130,7 +1130,7 @@ ChatChannel* Chat::getChannel(Player* player, uint16_t channelId)
 	if(nit != m_normalChannels.end())
 	{
 		#ifdef __DEBUG_CHAT__
-		std::cout << "Chat::getChannel - found normal channel" << std::endl;
+		std::clog << "Chat::getChannel - found normal channel" << std::endl;
 		#endif
 		ChatChannel* tmpChannel = nit->second;
 		if(!tmpChannel || !tmpChannel->hasFlag(CHANNELFLAG_ENABLED) || player->getAccess() < tmpChannel->getAccess()
@@ -1138,7 +1138,7 @@ ChatChannel* Chat::getChannel(Player* player, uint16_t channelId)
 			player->getVocationId())))
 		{
 			#ifdef __DEBUG_CHAT__
-			std::cout << "Chat::getChannel - cannot access normal channel" << std::endl;
+			std::clog << "Chat::getChannel - cannot access normal channel" << std::endl;
 			#endif
 			return NULL;
 		}
@@ -1147,7 +1147,7 @@ ChatChannel* Chat::getChannel(Player* player, uint16_t channelId)
 			return NULL;
 
 		#ifdef __DEBUG_CHAT__
-		std::cout << "Chat::getChannel - endpoint return" << std::endl;
+		std::clog << "Chat::getChannel - endpoint return" << std::endl;
 		#endif
 		return tmpChannel;
 	}

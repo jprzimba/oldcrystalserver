@@ -15,16 +15,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
 #include "otpch.h"
-#include "resources.h"
 
 #include "protocolold.h"
 #include "rsa.h"
 
 #include "outputmessage.h"
 #include "connection.h"
-#if defined(WINDOWS) && !defined(__CONSOLE__)
-#include "gui.h"
-#endif
 
 #include "game.h"
 extern Game g_game;
@@ -36,7 +32,7 @@ uint32_t ProtocolOld::protocolOldCount = 0;
 #ifdef __DEBUG_NET_DETAIL__
 void ProtocolOld::deleteProtocolTask()
 {
-	std::cout << "Deleting ProtocolOld" << std::endl;
+	std::clog << "Deleting ProtocolOld" << std::endl;
 	Protocol::deleteProtocolTask();
 }
 #endif
@@ -56,11 +52,7 @@ void ProtocolOld::disconnectClient(uint8_t error, const char* message)
 
 bool ProtocolOld::parseFirstPacket(NetworkMessage& msg)
 {
-	if(
-#if defined(WINDOWS) && !defined(__CONSOLE__)
-		!GUI::getInstance()->m_connections ||
-#endif
-		g_game.getGameState() == GAME_STATE_SHUTDOWN)
+	if(g_game.getGameState() == GAME_STATE_SHUTDOWN)
 	{
 		getConnection()->close();
 		return false;

@@ -672,7 +672,7 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 	{
 #ifdef __DEBUG__
 		if(thing->getParent() == NULL && !hasBitSet(FLAG_NOLIMIT, flags))
-			std::cout << "[Notice - Tile::__queryAdd] thing->getParent() == NULL" << std::endl;
+			std::clog << "[Notice - Tile::__queryAdd] thing->getParent() == NULL" << std::endl;
 
 #endif
 		if(items && items->size() >= 0xFFFF)
@@ -896,7 +896,7 @@ void Tile::__addThing(Creature* actor, int32_t index, Thing* thing)
 	if(!item)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "[Failure - Tile::__addThing] item == NULL" << std::endl;
+		std::clog << "[Failure - Tile::__addThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return/* RET_NOTPOSSIBLE*/;
@@ -1041,7 +1041,7 @@ void Tile::__updateThing(Thing* thing, uint16_t itemId, uint32_t count)
 	if(index == -1)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "[Failure - Tile::__updateThing] index == -1" << std::endl;
+		std::clog << "[Failure - Tile::__updateThing] index == -1" << std::endl;
 		DEBUG_REPORT
 #endif
 		return/* RET_NOTPOSSIBLE*/;
@@ -1051,7 +1051,7 @@ void Tile::__updateThing(Thing* thing, uint16_t itemId, uint32_t count)
 	if(!item)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "[Failure - Tile::__updateThing] item == NULL" << std::endl;
+		std::clog << "[Failure - Tile::__updateThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return/* RET_NOTPOSSIBLE*/;
@@ -1074,7 +1074,7 @@ void Tile::__replaceThing(uint32_t index, Thing* thing)
 	if(!item)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "[Failure - Tile::__replaceThing] item == NULL" << std::endl;
+		std::clog << "[Failure - Tile::__replaceThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return/* RET_NOTPOSSIBLE*/;
@@ -1117,7 +1117,7 @@ void Tile::__replaceThing(uint32_t index, Thing* thing)
 			if(pos < (int32_t)creatures->size())
 			{
 #ifdef __DEBUG_MOVESYS__
-				std::cout << "[Failure - Tile::__replaceThing] Update object is a creature" << std::endl;
+				std::clog << "[Failure - Tile::__replaceThing] Update object is a creature" << std::endl;
 				DEBUG_REPORT
 #endif
 				return/* RET_NOTPOSSIBLE*/;
@@ -1154,7 +1154,7 @@ void Tile::__replaceThing(uint32_t index, Thing* thing)
 	}
 
 #ifdef __DEBUG_MOVESYS__
-	std::cout << "[Failure - Tile::__replaceThing] Update object not found" << std::endl;
+	std::clog << "[Failure - Tile::__replaceThing] Update object not found" << std::endl;
 	DEBUG_REPORT
 #endif
 }
@@ -1170,7 +1170,7 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 			if(it == creatures->end())
 			{
 #ifdef __DEBUG_MOVESYS__
-				std::cout << "[Failure - Tile::__removeThing] creature not found" << std::endl;
+				std::clog << "[Failure - Tile::__removeThing] creature not found" << std::endl;
 				DEBUG_REPORT
 #endif
 				return/* RET_NOTPOSSIBLE*/;
@@ -1183,7 +1183,7 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 #ifdef __DEBUG_MOVESYS__
 		else
 		{
-			std::cout << "[Failure - Tile::__removeThing] creature not found" << std::endl;
+			std::clog << "[Failure - Tile::__removeThing] creature not found" << std::endl;
 			DEBUG_REPORT
 		}
 #endif
@@ -1195,7 +1195,7 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 	if(!item)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "[Failure - Tile::__removeThing] item == NULL" << std::endl;
+		std::clog << "[Failure - Tile::__removeThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return/* RET_NOTPOSSIBLE*/;
@@ -1205,7 +1205,7 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 	if(index == -1)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "[Failure - Tile::__removeThing] index == -1" << std::endl;
+		std::clog << "[Failure - Tile::__removeThing] index == -1" << std::endl;
 		DEBUG_REPORT
 #endif
 		return/* RET_NOTPOSSIBLE*/;
@@ -1303,7 +1303,7 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 	}
 
 #ifdef __DEBUG_MOVESYS__
-	std::cout << "[Failure - Tile::__removeThing] thing not found" << std::endl;
+	std::clog << "[Failure - Tile::__removeThing] thing not found" << std::endl;
 	DEBUG_REPORT
 #endif
 }

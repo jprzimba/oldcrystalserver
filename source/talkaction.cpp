@@ -44,7 +44,6 @@
 #include "game.h"
 #include "chat.h"
 #include "tools.h"
-#include "resources.h"
 
 extern ConfigManager g_config;
 extern Game g_game;
@@ -98,7 +97,7 @@ bool TalkActions::registerEvent(Event* event, xmlNodePtr p, bool override)
 		{
 			if(!override)
 			{
-				std::cout << "[Warning - TalkAction::configureEvent] Duplicate registered talkaction with words: " << (*it) << std::endl;
+				std::clog << "[Warning - TalkAction::configureEvent] Duplicate registered talkaction with words: " << (*it) << std::endl;
 				continue;
 			}
 			else
@@ -215,7 +214,7 @@ bool TalkAction::configureEvent(xmlNodePtr p)
 		m_words = strValue;
 	else
 	{
-		std::cout << "[Error - TalkAction::configureEvent] No words for TalkAction." << std::endl;
+		std::clog << "[Error - TalkAction::configureEvent] No words for TalkAction." << std::endl;
 		return false;
 	}
 
@@ -229,7 +228,7 @@ bool TalkAction::configureEvent(xmlNodePtr p)
 		else if(tmpStrValue == "word-spaced")
 			m_filter = TALKFILTER_WORD_SPACED;
 		else
-			std::cout << "[Warning - TalkAction::configureEvent] Unknown filter for TalkAction: " << strValue << ", using default." << std::endl;
+			std::clog << "[Warning - TalkAction::configureEvent] Unknown filter for TalkAction: " << strValue << ", using default." << std::endl;
 	}
 
 	int32_t intValue;
@@ -348,7 +347,7 @@ bool TalkAction::loadFunction(const std::string& functionName)
 		m_function = teleportToTown;
 	else
 	{
-		std::cout << "[Warning - TalkAction::loadFunction] Function \"" << functionName << "\" does not exist." << std::endl;
+		std::clog << "[Warning - TalkAction::loadFunction] Function \"" << functionName << "\" does not exist." << std::endl;
 		return false;
 	}
 
@@ -410,7 +409,7 @@ int32_t TalkAction::executeSay(Creature* creature, const std::string& words, std
 	}
 	else
 	{
-		std::cout << "[Error - TalkAction::executeSay] Call stack overflow." << std::endl;
+		std::clog << "[Error - TalkAction::executeSay] Call stack overflow." << std::endl;
 		return 0;
 	}
 }
@@ -1115,12 +1114,12 @@ bool TalkAction::banishmentInfo(Creature* creature, const std::string& cmd, cons
 	if(deletion)
 		end = what + (std::string)" won't be undeleted";
 
-	char buffer[500 + ban.comment.length()];
-	sprintf(buffer, "%s has been %s at:\n%s by: %s,\nfor the following reason:\n%s.\nThe action taken was:\n%s.\nThe comment given was:\n%s.\n%s%s.",
-		what.c_str(), (deletion ? "deleted" : "banished"), formatDateShort(ban.added).c_str(), admin.c_str(), getReason(ban.reason).c_str(),
-		getAction(ban.action, false).c_str(), ban.comment.c_str(), end.c_str(), (deletion ? "." : formatDateShort(ban.expires, true).c_str()));
+	std::stringstream ss;
+	ss << what.c_str() << " has been " << (deletion ? "deleted" : "banished") << " at:\n" << formatDateEx(ban.added).c_str() << " by: "
+		<< admin.c_str() << ",\nfor the following reason:\n" << getReason(ban.reason).c_str() << ".\nThe action taken was:\n" << getAction(ban.action, false).c_str()
+		<< ".\nThe comment given was:\n" << ban.comment.c_str() << ".\n" << end.c_str() << (deletion ? "." : formatDateEx(ban.expires).c_str()) << ".";
 
-	player->sendFYIBox(buffer);
+	player->sendFYIBox(ss.str());
 	return true;
 }
 
@@ -1131,48 +1130,38 @@ bool TalkAction::diagnostics(Creature* creature, const std::string& cmd, const s
 		return false;
 
 #ifdef __ENABLE_SERVER_DIAGNOSTIC__
-	std::stringstream text;
-	text << "Server diagonostic:\n";
-	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, text.str().c_str());
+	std::stringstream s;
+	s << "Server diagonostic:\n";
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
 
-	text.str("");
-	text << "World:" << "\n";
-	text << "--------------------\n";
-	text << "Player: " << g_game.getPlayersOnline() << " (" << Player::playerCount << ")" << std::endl;
-	text << "Npc: " << g_game.getNpcsOnline() << " (" << Npc::npcCount << ")" << std::endl;
-	text << "Monster: " << g_game.getMonstersOnline() << " (" << Monster::monsterCount << ")" << std::endl << std::endl;
-	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, text.str().c_str());
+	s.str("");
+	s << "World:" << "\n";
+	s << "--------------------\n";
+	s << "Player: " << g_game.getPlayersOnline() << " (" << Player::playerCount << ")" << std::endl;
+	s << "Npc: " << g_game.getNpcsOnline() << " (" << Npc::npcCount << ")" << std::endl;
+	s << "Monster: " << g_game.getMonstersOnline() << " (" << Monster::monsterCount << ")" << std::endl << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
 
-	text.str("");
-	text << "Protocols:" << "\n";
-	text << "--------------------\n";
-	text << "ProtocolGame: " << ProtocolGame::protocolGameCount << std::endl;
-	text << "ProtocolLogin: " << ProtocolLogin::protocolLoginCount << std::endl;
-	text << "ProtocolStatus: " << ProtocolStatus::protocolStatusCount << std::endl;
-	text << "ProtocolOld: " << ProtocolOld::protocolOldCount << std::endl << std::endl;
-	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, text.str().c_str());
+	s.str("");
+	s << "Protocols:" << std::endl
+		<< "--------------------" << std::endl
+		<< "ProtocolGame: " << ProtocolGame::protocolGameCount << std::endl
+		<< "ProtocolLogin: " << ProtocolLogin::protocolLoginCount << std::endl
+		<< "ProtocolStatus: " << ProtocolStatus::protocolStatusCount << std::endl
+		<< "ProtocolOld: " << ProtocolOld::protocolOldCount << std::endl << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
 
-	text.str("");
-	text << "Connections:\n";
-	text << "--------------------\n";
-	text << "Active connections: " << Connection::connectionCount << "\n";
-	text << "Total message pool: " << OutputMessagePool::getInstance()->getTotalMessageCount() << std::endl;
-	text << "Auto message pool: " << OutputMessagePool::getInstance()->getAutoMessageCount() << std::endl;
-	text << "Queued message pool: " << OutputMessagePool::getInstance()->getQueuedMessageCount() << std::endl;
-	text << "Free message pool: " << OutputMessagePool::getInstance()->getAvailableMessageCount() << std::endl << std::endl;
-	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, text.str().c_str());
-
-	text.str("");
-	text << "Libraries:\n";
-	text << "--------------------\n";
-	text << "Platform: " << BOOST_PLATFORM << std::endl;
-	text << "Compiler: " << BOOST_COMPILER << std::endl;
-	text << "Boost: " << BOOST_VERSION << std::endl;
-	text << "ASIO: " << BOOST_ASIO_VERSION << std::endl;
-	text << "XML: " << XML_DEFAULT_VERSION << std::endl;
-	text << "Lua: " << LUA_VERSION << std::endl;
-	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, text.str().c_str());
-
+	s.str("");
+	s << "Connections:" << std::endl
+		<< "--------------------" << std::endl
+		<< "Active connections: " << Connection::connectionCount << std::endl
+		<< "Total message pool: " << OutputMessagePool::getInstance()->getTotalMessageCount() << std::endl
+		<< "Auto message pool: " << OutputMessagePool::getInstance()->getAutoMessageCount() << std::endl
+		<< "Queued message pool: " << OutputMessagePool::getInstance()->getQueuedMessageCount() << std::endl
+		<< "Free message pool: " << OutputMessagePool::getInstance()->getAvailableMessageCount() << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
+#else
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Command not available, please rebuild your software with -D__ENABLE_SERVER_DIAG__");
 #endif
 	return true;
 }

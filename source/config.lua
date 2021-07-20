@@ -60,7 +60,7 @@
 	-- NOTE: showHealingDamageForMonsters inheritates from showHealingDamage.
 	-- loginProtectionPeriod is the famous Tibia anti-magebomb system.
 	-- deathLostPercent set to nil enables manual mode.
-	worldType = "pvp"
+	worldType = "open"
 	protectionLevel = 1
 	pvpTileIgnoreLevelAndVocationProtection = true
 	pzLocked = 60 * 1000
@@ -102,7 +102,7 @@
 	-- Connection config
 	worldId = 0
 	ip = "127.0.0.1"
-	bindOnlyConfiguredIpAddress = false
+	bindOnlyGlobalAddress = false
 	loginPort = 7171
 	gamePort = 7172
 	statusPort = 7171
@@ -196,7 +196,7 @@
 	coresUsed = "-1"
 	optimizeDatabaseAtStartup = true
 	removePremiumOnInit = true
-	confirmOutdatedVersion = false
+	skipItemsVersionCheck = false
 
 	-- Muted buffer
 	maxMessageBuffer = 4
@@ -331,6 +331,5 @@
 	displayPlayersLogging = true
 	prefixChannelLogs = ""
 	runFile = ""
-	outLogName = ""
-	errorLogName = ""
+	outputLog = ""
 	truncateLogsOnStartup = false

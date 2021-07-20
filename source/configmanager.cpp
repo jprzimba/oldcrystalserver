@@ -26,11 +26,12 @@ ConfigManager::ConfigManager()
 	m_loaded = false;
 	m_startup = true;
 
+	m_confNumber[ENCRYPTION] = ENCRYPTION_SHA1;
 	m_confString[CONFIG_FILE] = getFilePath(FILE_TYPE_CONFIG, "config.lua");
-	m_confBool[LOGIN_ONLY_LOGINSERVER] = false;
 
 	m_confNumber[LOGIN_PORT] = m_confNumber[GAME_PORT] = m_confNumber[STATUS_PORT] = 0;
-	m_confString[DATA_DIRECTORY] = m_confString[IP] = m_confString[RUNFILE] = m_confString[ERROR_LOG] = m_confString[OUT_LOG] = "";
+	m_confString[DATA_DIRECTORY] = m_confString[LOGS_DIRECTORY] = m_confString[IP] = m_confString[RUNFILE] = m_confString[OUT_LOG] = "";
+	m_confBool[LOGIN_ONLY_LOGINSERVER] = false;
 }
 
 bool ConfigManager::load()
@@ -42,6 +43,7 @@ bool ConfigManager::load()
 	if(!L)
 		return false;
 
+	luaL_openlibs(L);
 	if(luaL_dofile(L, m_confString[CONFIG_FILE].c_str()))
 	{
 		lua_close(L);
@@ -54,6 +56,9 @@ bool ConfigManager::load()
 	{
 		if(m_confString[DATA_DIRECTORY] == "")
 			m_confString[DATA_DIRECTORY] = getGlobalString("dataDirectory", "data/");
+
+		if(m_confString[LOGS_DIRECTORY] == "")
+			m_confString[LOGS_DIRECTORY] = getGlobalString("logsDirectory", "logs/");
 
 		if(m_confString[IP] == "")
 			m_confString[IP] = getGlobalString("ip", "127.0.0.1");
@@ -71,17 +76,12 @@ bool ConfigManager::load()
 			m_confString[RUNFILE] = getGlobalString("runFile", "");
 
 		if(m_confString[OUT_LOG] == "")
-			m_confString[OUT_LOG] = getGlobalString("outLogName", "");
+			m_confString[OUT_LOG] = getGlobalString("outputLog", "");
 
-		if(m_confString[ERROR_LOG] == "")
-			m_confString[ERROR_LOG] = getGlobalString("errorLogName", "");
-			
-			
 		m_confBool[GLOBALSAVE_ENABLED] = getGlobalBool("globalSaveEnabled", true);
 		m_confNumber[GLOBALSAVE_H] = getGlobalNumber("globalSaveHour", 8);
 		m_confNumber[AUTO_SAVE_EACH_MINUTES] = getGlobalNumber("autoSaveEachMinutes", 0);
 
-		m_confBool[BIND_IP_ONLY] = getGlobalBool("bindOnlyConfiguredIpAddress", false);
 		m_confBool[TRUNCATE_LOGS] = getGlobalBool("truncateLogsOnStartup", true);
 		#ifdef MULTI_SQL_DRIVERS
 		m_confString[SQL_TYPE] = getGlobalString("sqlType", "sqlite");
@@ -95,7 +95,7 @@ bool ConfigManager::load()
 		m_confNumber[SQL_KEEPALIVE] = getGlobalNumber("sqlKeepAlive", 0);
 		m_confNumber[MYSQL_READ_TIMEOUT] = getGlobalNumber("mysqlReadTimeout", 10);
 		m_confNumber[MYSQL_WRITE_TIMEOUT] = getGlobalNumber("mysqlWriteTimeout", 10);
-		m_confBool[OPTIMIZE_DB_AT_STARTUP] = getGlobalBool("optimizeDatabaseAtStartup", true);
+		m_confBool[OPTIMIZE_DATABASE] = getGlobalBool("optimizeDatabaseAtStartup", true);
 		m_confString[MAP_NAME] = getGlobalString("mapName", "DnSend");
 		m_confString[HOUSE_RENT_PERIOD] = getGlobalString("houseRentPeriod", "monthly");
 		m_confNumber[WORLD_ID] = getGlobalNumber("worldId", 0);
@@ -109,6 +109,8 @@ bool ConfigManager::load()
 		#endif
 		m_confString[ENCRYPTION_TYPE] = getGlobalString("encryptionType", "plain");
 		m_confNumber[ENCRYPTION] = ENCRYPTION_PLAIN;
+		
+		m_confBool[BIND_ONLY_GLOBAL_ADDRESS] = getGlobalBool("bindOnlyGlobalAddress", false);
 	}
 
 	m_confString[MAP_AUTHOR] = getGlobalString("mapAuthor", "Unknown");
@@ -246,7 +248,6 @@ bool ConfigManager::load()
 	m_confBool[SHOW_HEALING_DAMAGE_MONSTER] = getGlobalBool("showHealingDamageForMonsters", false);
 	m_confBool[CHECK_CORPSE_OWNER] = getGlobalBool("checkCorpseOwner ", true);
 	m_confBool[BUFFER_SPELL_FAILURE] = getGlobalBool("bufferMutedOnSpellFailure", false);
-	m_confBool[CONFIM_OUTDATED_VERSION] = getGlobalBool("confirmOutdatedVersion", true);
 	m_confNumber[GUILD_PREMIUM_DAYS] = getGlobalNumber("premiumDaysToFormGuild", 0);
 	m_confNumber[PUSH_CREATURE_DELAY] = getGlobalNumber("pushCreatureDelay", 2 * 1000);
 	m_confNumber[DEATH_CONTAINER] = getGlobalNumber("deathContainerId", 1987);
@@ -302,6 +303,7 @@ bool ConfigManager::load()
 	m_confNumber[MAX_GUILD_NICK] = getGlobalNumber("guildNickMaxLength", 25);
 	m_confBool[REMOVE_BREAK] = getGlobalBool("removeBreakWeaponsCharges", true);
 	m_confBool[SHOW_GAMEMASTERS_ONLINE] = getGlobalBool("displayGamemastersWithOnlineCommand", false);
+	m_confBool[SKIP_ITEMS_VERSION] = getGlobalBool("skipItemsVersionCheck", true);
 
 	m_loaded = true;
 	return true;
@@ -312,7 +314,10 @@ bool ConfigManager::reload()
 	if(!m_loaded)
 		return false;
 
-	return load();
+	if(!load())
+		return false;
+
+	return true;
 }
 
 const std::string& ConfigManager::getString(uint32_t _what) const
@@ -321,7 +326,7 @@ const std::string& ConfigManager::getString(uint32_t _what) const
 		return m_confString[_what];
 
 	if(!m_startup)
-		std::cout << "[Warning - ConfigManager::getString] " << _what << std::endl;
+		std::clog << "[Warning - ConfigManager::getString] " << _what << std::endl;
 
 	return m_confString[DUMMY_STR];
 }
@@ -332,7 +337,7 @@ bool ConfigManager::getBool(uint32_t _what) const
 		return m_confBool[_what];
 
 	if(!m_startup)
-		std::cout << "[Warning - ConfigManager::getBool] " << _what << std::endl;
+		std::clog << "[Warning - ConfigManager::getBool] " << _what << std::endl;
 
 	return false;
 }
@@ -343,7 +348,7 @@ int32_t ConfigManager::getNumber(uint32_t _what) const
 		return m_confNumber[_what];
 
 	if(!m_startup)
-		std::cout << "[Warning - ConfigManager::getNumber] " << _what << std::endl;
+		std::clog << "[Warning - ConfigManager::getNumber] " << _what << std::endl;
 
 	return 0;
 }
@@ -354,7 +359,7 @@ double ConfigManager::getDouble(uint32_t _what) const
 		return m_confDouble[_what];
 
 	if(!m_startup)
-		std::cout << "[Warning - ConfigManager::getDouble] " << _what << std::endl;
+		std::clog << "[Warning - ConfigManager::getDouble] " << _what << std::endl;
 
 	return 0;
 }
@@ -367,7 +372,7 @@ bool ConfigManager::setString(uint32_t _what, const std::string& _value)
 		return true;
 	}
 
-	std::cout << "[Warning - ConfigManager::setString] " << _what << std::endl;
+	std::clog << "[Warning - ConfigManager::setString] " << _what << std::endl;
 	return false;
 }
 
@@ -379,6 +384,6 @@ bool ConfigManager::setNumber(uint32_t _what, int32_t _value)
 		return true;
 	}
 
-	std::cout << "[Warning - ConfigManager::setNumber] " << _what << std::endl;
+	std::clog << "[Warning - ConfigManager::setNumber] " << _what << std::endl;
 	return false;
 }

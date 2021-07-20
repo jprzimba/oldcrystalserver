@@ -464,7 +464,7 @@ void Container::__addThing(Creature* actor, int32_t index, Thing* thing)
 	if(index >= (int32_t)capacity())
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__addThing], index:" << index << ", index >= capacity()" << std::endl;
+		std::clog << "Failure: [Container::__addThing], index:" << index << ", index >= capacity()" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -474,7 +474,7 @@ void Container::__addThing(Creature* actor, int32_t index, Thing* thing)
 	if(item == NULL)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__addThing] item == NULL" << std::endl;
+		std::clog << "Failure: [Container::__addThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -485,7 +485,7 @@ void Container::__addThing(Creature* actor, int32_t index, Thing* thing)
 	{
 		if(size() >= capacity())
 		{
-			std::cout << "Failure: [Container::__addThing] size() >= capacity()" << std::endl;
+			std::clog << "Failure: [Container::__addThing] size() >= capacity()" << std::endl;
 			DEBUG_REPORT
 			return /*RET_CONTAINERNOTENOUGHROOM*/;
 		}
@@ -510,7 +510,7 @@ void Container::__updateThing(Thing* thing, uint16_t itemId, uint32_t count)
 	if(index == -1)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__updateThing] index == -1" << std::endl;
+		std::clog << "Failure: [Container::__updateThing] index == -1" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -520,7 +520,7 @@ void Container::__updateThing(Thing* thing, uint16_t itemId, uint32_t count)
 	if(item == NULL)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__updateThing] item == NULL" << std::endl;
+		std::clog << "Failure: [Container::__updateThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -549,7 +549,7 @@ void Container::__replaceThing(uint32_t index, Thing* thing)
 	if(item == NULL)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__replaceThing] item == NULL" << std::endl;
+		std::clog << "Failure: [Container::__replaceThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -568,7 +568,7 @@ void Container::__replaceThing(uint32_t index, Thing* thing)
 	if(cit == itemlist.end())
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__updateThing] item not found" << std::endl;
+		std::clog << "Failure: [Container::__updateThing] item not found" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -599,7 +599,7 @@ void Container::__removeThing(Thing* thing, uint32_t count)
 	if(item == NULL)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__removeThing] item == NULL" << std::endl;
+		std::clog << "Failure: [Container::__removeThing] item == NULL" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -609,7 +609,7 @@ void Container::__removeThing(Thing* thing, uint32_t count)
 	if(index == -1)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__removeThing] index == -1" << std::endl;
+		std::clog << "Failure: [Container::__removeThing] index == -1" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -619,7 +619,7 @@ void Container::__removeThing(Thing* thing, uint32_t count)
 	if(cit == itemlist.end())
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__removeThing] item not found" << std::endl;
+		std::clog << "Failure: [Container::__removeThing] item not found" << std::endl;
 		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
@@ -770,7 +770,7 @@ void Container::__internalAddThing(Thing* thing)
 void Container::__internalAddThing(uint32_t index, Thing* thing)
 {
 #ifdef __DEBUG_MOVESYS__
-	std::cout << "[Container::__internalAddThing] index: " << index << std::endl;
+	std::clog << "[Container::__internalAddThing] index: " << index << std::endl;
 #endif
 	if(!thing)
 		return;
@@ -779,7 +779,7 @@ void Container::__internalAddThing(uint32_t index, Thing* thing)
 	if(item == NULL)
 	{
 #ifdef __DEBUG_MOVESYS__
-		std::cout << "Failure: [Container::__internalAddThing] item == NULL" << std::endl;
+		std::clog << "Failure: [Container::__internalAddThing] item == NULL" << std::endl;
 #endif
 		return;
 	}

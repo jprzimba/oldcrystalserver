@@ -25,17 +25,17 @@ bool BaseEvents::loadFromXml()
 	std::string scriptsName = getScriptBaseName();
 	if(m_loaded)
 	{
-		std::cout << "[Error - BaseEvents::loadFromXml] " << scriptsName << " interface already loaded!" << std::endl;
+		std::clog << "[Error - BaseEvents::loadFromXml] " << scriptsName << " interface already loaded!" << std::endl;
 		return false;
 	}
 
 	if(!getInterface().loadDirectory(getFilePath(FILE_TYPE_OTHER, std::string(scriptsName + "/lib/"))))
-		std::cout << "[Warning - BaseEvents::loadFromXml] Cannot load " << scriptsName << "/lib/" << std::endl;
+		std::clog << "[Warning - BaseEvents::loadFromXml] Cannot load " << scriptsName << "/lib/" << std::endl;
 
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_OTHER, std::string(scriptsName + "/" + scriptsName + ".xml")).c_str());
 	if(!doc)
 	{
-		std::cout << "[Warning - BaseEvents::loadFromXml] Cannot open " << scriptsName << ".xml file." << std::endl;
+		std::clog << "[Warning - BaseEvents::loadFromXml] Cannot open " << scriptsName << ".xml file." << std::endl;
 		std::cout << getLastXMLError() << std::endl;
 		return false;
 	}
@@ -43,7 +43,7 @@ bool BaseEvents::loadFromXml()
 	xmlNodePtr p, root = xmlDocGetRootElement(doc);
 	if(xmlStrcmp(root->name,(const xmlChar*)scriptsName.c_str()))
 	{
-		std::cout << "[Error - BaseEvents::loadFromXml] Malformed " << scriptsName << ".xml file." << std::endl;
+		std::clog << "[Error - BaseEvents::loadFromXml] Malformed " << scriptsName << ".xml file." << std::endl;
 		xmlFreeDoc(doc);
 		return false;
 	}
@@ -69,7 +69,7 @@ bool BaseEvents::parseEventNode(xmlNodePtr p, std::string scriptsPath, bool over
 
 	if(!event->configureEvent(p))
 	{
-		std::cout << "[Warning - BaseEvents::loadFromXml] Cannot configure an event" << std::endl;
+		std::clog << "[Warning - BaseEvents::loadFromXml] Cannot configure an event" << std::endl;
 		delete event;
 		event = NULL;
 		return false;
@@ -156,7 +156,7 @@ bool Event::loadBuffer(const std::string& buffer)
 {
 	if(!m_interface || m_scriptData != "")
 	{
-		std::cout << "[Error - Event::loadScriptFile] m_interface == NULL, scriptData != \"\"" << std::endl;
+		std::clog << "[Error - Event::loadScriptFile] m_interface == NULL, scriptData != \"\"" << std::endl;
 		return false;
 	}
 
@@ -174,7 +174,7 @@ bool Event::loadScript(const std::string& script, bool file)
 {
 	if(!m_interface || m_scriptId != 0)
 	{
-		std::cout << "[Error - Event::loadScript] m_interface == NULL, scriptId = " << m_scriptId << std::endl;
+		std::clog << "[Error - Event::loadScript] m_interface == NULL, scriptId = " << m_scriptId << std::endl;
 		return false;
 	}
 
@@ -197,7 +197,7 @@ bool Event::loadScript(const std::string& script, bool file)
 
 	if(!result)
 	{
-		std::cout << "[Warning - Event::loadScript] Cannot load script (" << script << ")" << std::endl;
+		std::clog << "[Warning - Event::loadScript] Cannot load script (" << script << ")" << std::endl;
 		std::cout << m_interface->getLastError() << std::endl;
 		return false;
 	}
@@ -205,7 +205,7 @@ bool Event::loadScript(const std::string& script, bool file)
 	int32_t id = m_interface->getEvent(getScriptEventName());
 	if(id == -1)
 	{
-		std::cout << "[Warning - Event::loadScript] Event " << getScriptEventName() << " not found (" << script << ")" << std::endl;
+		std::clog << "[Warning - Event::loadScript] Event " << getScriptEventName() << " not found (" << script << ")" << std::endl;
 		return false;
 	}
 
@@ -230,7 +230,7 @@ bool CallBack::loadCallBack(LuaScriptInterface* _interface, std::string name)
 {
 	if(!_interface)
 	{
-		std::cout << "Failure: [CallBack::loadCallBack] m_interface == NULL" << std::endl;
+		std::clog << "Failure: [CallBack::loadCallBack] m_interface == NULL" << std::endl;
 		return false;
 	}
 
@@ -238,7 +238,7 @@ bool CallBack::loadCallBack(LuaScriptInterface* _interface, std::string name)
 	int32_t id = m_interface->getEvent(name);
 	if(id == -1)
 	{
-		std::cout << "Warning: [CallBack::loadCallBack] Event " << name << " not found." << std::endl;
+		std::clog << "Warning: [CallBack::loadCallBack] Event " << name << " not found." << std::endl;
 		return false;
 	}
 

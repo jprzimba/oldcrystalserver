@@ -27,8 +27,8 @@ crystalserver_SOURCES = account.h actions.cpp actions.h \
 	$(MAYBE_MYSQL) $(MAYBE_SQLITE) \
 	depot.cpp depot.h exception.cpp exception.h fileloader.cpp \
 	fileloader.h game.cpp game.h $(MAYBE_LOGIN) globalevent.cpp \
-	globalevent.h group.cpp group.h gui.cpp gui.h house.cpp house.h \
-	housetile.cpp housetile.h inputbox.cpp inputbox.h ioban.cpp ioban.h \
+	globalevent.h group.cpp group.h house.cpp house.h \
+	housetile.cpp housetile.h ioban.cpp ioban.h \
 	ioguild.cpp ioguild.h iologindata.cpp iologindata.h iomap.cpp \
 	iomapserialize.cpp iomapserialize.h item.cpp item.h itemattributes.cpp \
 	itemattributes.h items.cpp items.h luascript.cpp luascript.h \
@@ -36,7 +36,7 @@ crystalserver_SOURCES = account.h actions.cpp actions.h \
 	monster.h monsters.cpp monsters.h movement.cpp movement.h \
 	networkmessage.cpp networkmessage.h npc.cpp npc.h otpch.h \
 	otserv.cpp otsystem.h outfit.cpp outfit.h outputmessage.cpp \
-	outputmessage.h party.cpp party.h playerbox.cpp playerbox.h \
+	outputmessage.h party.cpp party.h \
 	player.cpp player.h position.cpp position.h protocol.cpp protocol.h \
 	protocolgame.cpp protocolgame.h protocollogin.cpp protocollogin.h \
 	protocolold.cpp protocolold.h quests.cpp quests.h raids.cpp raids.h \

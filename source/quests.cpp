@@ -126,7 +126,7 @@ bool Quests::loadFromXml()
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "quests.xml").c_str());
 	if(!doc)
 	{
-		std::cout << "[Warning - Quests::loadFromXml] Cannot load quests file." << std::endl;
+		std::clog << "[Warning - Quests::loadFromXml] Cannot load quests file." << std::endl;
 		std::cout << getLastXMLError() << std::endl;
 		return false;
 	}
@@ -134,7 +134,7 @@ bool Quests::loadFromXml()
 	xmlNodePtr p, root = xmlDocGetRootElement(doc);
 	if(xmlStrcmp(root->name,(const xmlChar*)"quests"))
 	{
-		std::cout << "[Error - Quests::loadFromXml] Malformed quests file." << std::endl;
+		std::clog << "[Error - Quests::loadFromXml] Malformed quests file." << std::endl;
 		xmlFreeDoc(doc);
 		return false;
 	}
@@ -218,7 +218,7 @@ bool Quests::parseQuestNode(xmlNodePtr p, bool checkDuplicate)
 					uint32_t missionId;
 					if(!readXMLInteger(stateNode, "id", intValue))
 					{
-						std::cout << "[Warning - Quests::parseQuestNode] Missing missionId for mission state" << std::endl;
+						std::clog << "[Warning - Quests::parseQuestNode] Missing missionId for mission state" << std::endl;
 						continue;
 					}
 

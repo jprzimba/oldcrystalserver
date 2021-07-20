@@ -54,8 +54,8 @@ class ConfigManager
 			MAP_AUTHOR,
 			RUNFILE,
 			OUT_LOG,
-			ERROR_LOG,
 			DATA_DIRECTORY,
+			LOGS_DIRECTORY,
 			PREFIX_CHANNEL_LOGS,
 			CORES_USED,
 			MAILBOX_DISABLED_TOWNS,
@@ -241,7 +241,7 @@ class ConfigManager
 			LOGIN_ONLY_LOGINSERVER,
 			STOP_ATTACK_AT_EXIT,
 			DISABLE_OUTFITS_PRIVILEGED,
-			OPTIMIZE_DB_AT_STARTUP,
+			OPTIMIZE_DATABASE,
 			OLD_CONDITION_ACCURACY,
 			STORE_TRASH,
 			HOUSE_STORAGE,
@@ -256,11 +256,10 @@ class ConfigManager
 			SHOW_HEALING_DAMAGE_MONSTER,
 			CHECK_CORPSE_OWNER,
 			BUFFER_SPELL_FAILURE,
-			CONFIM_OUTDATED_VERSION,
 			PREMIUM_SKIP_WAIT,
 			GUILD_HALLS,
 			DEATH_LIST,
-			BIND_IP_ONLY,
+			BIND_ONLY_GLOBAL_ADDRESS,
 			GHOST_SPELL_EFFECTS,
 			PVPZONE_ADDMANASPENT,
 			USE_BLACK_SKULL,
@@ -272,12 +271,16 @@ class ConfigManager
 			SHOW_DESCR,
 			REMOVE_BREAK,
 			SHOW_GAMEMASTERS_ONLINE,
+			SKIP_ITEMS_VERSION,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 
 		bool load();
 		bool reload();
 		void startup() {m_startup = false;}
+
+		bool isRunning() const {return !m_startup;}
+		bool isLoaded() const {return m_loaded;}
 
 		const std::string& getString(uint32_t _what) const;
 		bool getBool(uint32_t _what) const;

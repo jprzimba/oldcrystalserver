@@ -385,7 +385,7 @@ bool House::getAccessList(uint32_t listId, std::string& list) const
 		return door->getAccessList(list);
 
 	#ifdef __DEBUG_HOUSES__
-	std::cout << "[Failure - House::getAccessList] door == NULL, listId = " << listId <<std::endl;
+	std::clog << "[Failure - House::getAccessList] door == NULL, listId = " << listId <<std::endl;
 	#endif
 	return false;
 }
@@ -402,7 +402,7 @@ void House::setAccessList(uint32_t listId, const std::string& textlist, bool tel
 			door->setAccessList(textlist);
 		#ifdef __DEBUG_HOUSES__
 		else
-			std::cout << "[Failure - House::setAccessList] door == NULL, listId = " << listId <<std::endl;
+			std::clog << "[Failure - House::setAccessList] door == NULL, listId = " << listId <<std::endl;
 		#endif
 
 		return;
@@ -692,7 +692,7 @@ bool Houses::loadFromXml(std::string filename)
 	xmlDocPtr doc = xmlParseFile(filename.c_str());
 	if(!doc)
 	{
-		std::cout << "[Warning - Houses::loadFromXml] Cannot load houses file." << std::endl;
+		std::clog << "[Warning - Houses::loadFromXml] Cannot load houses file." << std::endl;
 		std::cout << getLastXMLError() << std::endl;
 		return false;
 	}
@@ -700,7 +700,7 @@ bool Houses::loadFromXml(std::string filename)
 	xmlNodePtr houseNode, root = xmlDocGetRootElement(doc);
 	if(xmlStrcmp(root->name,(const xmlChar*)"houses"))
 	{
-		std::cout << "[Error - Houses::loadFromXml] Malformed houses file." << std::endl;
+		std::clog << "[Error - Houses::loadFromXml] Malformed houses file." << std::endl;
 		xmlFreeDoc(doc);
 		return false;
 	}
@@ -720,7 +720,7 @@ bool Houses::loadFromXml(std::string filename)
 		int32_t houseId = 0;
 		if(!readXMLInteger(houseNode, "houseid", houseId))
 		{
-			std::cout << "[Error - Houses::loadFromXml] Could not read houseId" << std::endl;
+			std::clog << "[Error - Houses::loadFromXml] Could not read houseId" << std::endl;
 			xmlFreeDoc(doc);
 			return false;
 		}
@@ -728,7 +728,7 @@ bool Houses::loadFromXml(std::string filename)
 		House* house = Houses::getInstance()->getHouse(houseId);
 		if(!house)
 		{
-			std::cout << "[Error - Houses::loadFromXml] Unknown house with id: " << houseId << std::endl;
+			std::clog << "[Error - Houses::loadFromXml] Unknown house with id: " << houseId << std::endl;
 			xmlFreeDoc(doc);
 			return false;
 		}
@@ -746,7 +746,7 @@ bool Houses::loadFromXml(std::string filename)
 		house->setEntry(entry);
 		if(!entry.x || !entry.y)
 		{
-			std::cout << "[Warning - Houses::loadFromXml] House entry not set for: ";
+			std::clog << "[Warning - Houses::loadFromXml] House entry not set for: ";
 			std::cout << house->getName() << " (" << houseId << ")" << std::endl;
 		}
 
@@ -817,13 +817,13 @@ void Houses::payHouses()
 		return;
 
 	uint64_t start = OTSYS_TIME();
-	std::cout << "> Paying houses..." << std::endl;
+	std::clog << "Paying houses..." << std::endl;
 
 	time_t currentTime = time(NULL);
 	for(HouseMap::iterator it = houseMap.begin(); it != houseMap.end(); ++it)
 		payHouse(it->second, currentTime, 0);
 
-	std::cout << "> Houses paid in " << (OTSYS_TIME() - start) / (1000.) << " seconds." << std::endl;
+	std::clog << "Houses paid in " << (OTSYS_TIME() - start) / (1000.) << " seconds." << std::endl;
 }
 
 bool Houses::payRent(Player* player, House* house, uint32_t bid, time_t _time/* = 0*/)

@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
 #include "otpch.h"
-#include "resources.h"
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -106,7 +105,7 @@ void ProtocolStatus::onRecvFirstMessage(NetworkMessage& msg)
 void ProtocolStatus::deleteProtocolTask()
 {
 #ifdef __DEBUG_NET_DETAIL__
-	std::cout << "Deleting ProtocolStatus" << std::endl;
+	std::clog << "Deleting ProtocolStatus" << std::endl;
 #endif
 	Protocol::deleteProtocolTask();
 }

@@ -17,15 +17,24 @@
 #include "otpch.h"
 #include "textlogger.h"
 
+#include "configmanager.h"
 #include "tools.h"
-#if defined(WINDOWS) && !defined(__CONSOLE__)
-#include "gui.h"
-#endif
+
+extern ConfigManager g_config;
 
 void Logger::open()
 {
+	std::string path = g_config.getString(ConfigManager::OUT_LOG);
+	if(path.length() < 3)
+		path = "";
+	else if(path[0] != '/' && path[1] != ':')
+		path = getFilePath(FILE_TYPE_LOG, path);
+
 	m_files[LOGFILE_ADMIN] = fopen(getFilePath(FILE_TYPE_LOG, "admin.log").c_str(), "a");
-	m_files[LOGFILE_CLIENT_ASSERTION] = fopen(getFilePath(FILE_TYPE_LOG, "client_assertions.log").c_str(), "a");
+	if(!path.empty())
+		m_files[LOGFILE_OUTPUT] = fopen(path.c_str(), (g_config.getBool(ConfigManager::TRUNCATE_LOGS) ? "w" : "a"));
+
+	m_files[LOGFILE_ASSERTIONS] = fopen(getFilePath(FILE_TYPE_LOG, "client_assertions.log").c_str(), "a");
 }
 
 void Logger::close()
@@ -94,62 +103,45 @@ void Logger::log(const char* func, LogType_t type, std::string message, std::str
 	}
 
 	ss << " - " << func << ") ";
-
 	if(!channel.empty())
 		ss << channel << ": ";
 
 	ss << message;
 	iFile(LOGFILE_ADMIN, ss.str(), newLine);
 }
-#if defined(WINDOWS) && !defined(__CONSOLE__)
 
-GUILogger::GUILogger()
+OutputHandler::OutputHandler()
 {
-	out = std::cout.rdbuf();
-	err = std::cerr.rdbuf();
-	log = std::clog.rdbuf();
-	m_displayDate = true;
+	log = std::clog.rdbuf(this);
+	err = std::cerr.rdbuf(this);
 }
 
-GUILogger::~GUILogger()
+OutputHandler::~OutputHandler()
 {
-	std::cout.rdbuf(out);
-	std::cerr.rdbuf(err);
 	std::clog.rdbuf(log);
+	std::cerr.rdbuf(err);
 }
 
-int32_t GUILogger::overflow(int32_t c)
+std::streambuf::int_type OutputHandler::overflow(std::streambuf::int_type c/* = traits_type::eof()*/)
 {
-	if(c == '\n')
+	m_cache += c;
+	if(c != '\n' && c != '\r')
+		return c;
+
+	if(m_cache.size() > 1)
+		std::cout << "[" << formatTime(0, true) << "] ";
+
+	std::cout.write(m_cache.c_str(), m_cache.size());
+	if(g_config.isLoaded())
 	{
-		GUI::getInstance()->m_logText += "\r\n";
-		SendMessage(GetDlgItem(GUI::getInstance()->m_mainWindow, ID_LOG), WM_SETTEXT, 0, (LPARAM)GUI::getInstance()->m_logText.c_str());
-		SendMessage(GUI::getInstance()->m_logWindow, EM_LINESCROLL, 0, ++GUI::getInstance()->m_lineCount);
+		std::stringstream s;
+		if(m_cache.size() > 1)
+			s << "[" << formatDate() << "] ";
 
-		char buffer[85];
-		sprintf(buffer, "logs/server/%s.log", formatDateShort().c_str());
-		if(FILE* file = fopen(buffer, "a"))
-		{
-			fprintf(file, "[%s] %s\n", formatDate().c_str(), m_cache.c_str());
-			fclose(file);
-			m_cache = "";
-		}
-
-		m_displayDate = true;
-	}
-	else
-	{
-		if(m_displayDate)
-		{
-			GUI::getInstance()->m_logText += std::string("[" + formatDate() +"] ").c_str();
-			m_displayDate = false;
-		}
-
-		GUI::getInstance()->m_logText += (char)c;
-		m_cache += c;
+		s.write(m_cache.c_str(), m_cache.size());
+		Logger::getInstance()->iFile(LOGFILE_OUTPUT, s.str(), false);
 	}
 
+	m_cache.clear();
 	return c;
 }
-#endif
-

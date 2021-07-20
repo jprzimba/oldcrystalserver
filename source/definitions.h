@@ -17,6 +17,19 @@
 
 #ifndef __DEFINITIONS__
 #define __DEFINITIONS__
+
+#define CLIENT_VERSION_MIN 860
+#define CLIENT_VERSION_MAX 860
+#define CLIENT_VERSION_STRING "Only clients with protocol 8.6 allowed!"
+#define CLIENT_VERSION_PROTOCOL "8.6"
+
+#define SOFTWARE_NAME "Crystal Server"
+#define SOFTWARE_VERSION "0.1.8"
+#define SOFTWARE_DEVELOPERS "Tryller"
+#define CREATOR_INFO "Server created by Tryller."
+
+#define VERSION_DATABASE 23
+
 #undef MULTI_SQL_DRIVERS
 #define SQL_DRIVERS __USE_SQLITE__+__USE_MYSQL__
 #if SQL_DRIVERS > 1

@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
 #include "otpch.h"
-#include "resources.h"
 
 #include <boost/function.hpp>
 #include <iostream>
@@ -44,10 +43,6 @@
 #include "chat.h"
 #include "configmanager.h"
 #include "game.h"
-
-#if defined(WINDOWS) && !defined(__CONSOLE__)
-#include "gui.h"
-#endif
 
 extern Game g_game;
 extern ConfigManager g_config;
@@ -130,14 +125,13 @@ bool ProtocolGame::login(const std::string& name, uint32_t id, const std::string
 			else
 				IOLoginData::getInstance()->getNameByGuid(ban.adminId, name_, true);
 
-			char buffer[500 + ban.comment.length()];
-			sprintf(buffer, "Your character has been %s at:\n%s by: %s,\nfor the following reason:\n%s.\nThe action taken was:\n%s.\nThe comment given was:\n%s.\nYour %s%s.",
-				(deletion ? "deleted" : "banished"), formatDateShort(ban.added).c_str(), name_.c_str(),
-				getReason(ban.reason).c_str(), getAction(ban.action, false).c_str(), ban.comment.c_str(),
-				(deletion ? "character won't be undeleted" : "banishment will be lifted at:\n"),
-				(deletion ? "." : formatDateShort(ban.expires, true).c_str()));
+			std::stringstream ss;
+			ss << "Your character has been " << (deletion ? "deleted" : "banished") << " at:\n" << formatDateEx(ban.added).c_str() << " by: "
+				<< name_.c_str() << ",\nfor the following reason:\n" << getReason(ban.reason).c_str() << ".\nThe action taken was:\n" << getAction(ban.action, false).c_str()
+				<< ".\nThe comment given was:\n" << ban.comment.c_str() << ".\nYour " << (deletion ? "character won't be undeleted" : "banishment will be lifted at:\n")
+				<< (deletion ? "." : formatDateEx(ban.expires).c_str()) << ".";
 
-			disconnectClient(0x14, buffer);
+			disconnectClient(0x14, ss.str().c_str());
 			return false;
 		}
 
@@ -305,7 +299,7 @@ bool ProtocolGame::logout(bool displayEffect, bool forceLogout)
 					return false;
 				}
 
-				if(player->hasCondition(CONDITION_INFIGHT))
+				if(player->getZone() != ZONE_PROTECTION && player->hasCondition(CONDITION_INFIGHT))
 				{
 					player->sendCancelMessage(RET_YOUMAYNOTLOGOUTDURINGAFIGHT);
 					return false;
@@ -315,7 +309,7 @@ bool ProtocolGame::logout(bool displayEffect, bool forceLogout)
 					return false;
 			}
 			else
-				g_creatureEvents->playerLogout(player, false);
+				g_creatureEvents->playerLogout(player, true);
 		}
 		else if(!g_creatureEvents->playerLogout(player, true))
 			return false;
@@ -405,11 +399,7 @@ void ProtocolGame::onRecvFirstMessage(NetworkMessage& msg)
 
 bool ProtocolGame::parseFirstPacket(NetworkMessage& msg)
 {
-	if(
-#if defined(WINDOWS) && !defined(__CONSOLE__)
-		!GUI::getInstance()->m_connections ||
-#endif
-		g_game.getGameState() == GAME_STATE_SHUTDOWN)
+	if(g_game.getGameState() == GAME_STATE_SHUTDOWN)
 	{
 		getConnection()->close();
 		return false;
@@ -502,14 +492,14 @@ bool ProtocolGame::parseFirstPacket(NetworkMessage& msg)
 		else
 			IOLoginData::getInstance()->getNameByGuid(ban.adminId, name_, true);
 
-		char buffer[500 + ban.comment.length()];
-		sprintf(buffer, "Your account has been %s at:\n%s by: %s,\nfor the following reason:\n%s.\nThe action taken was:\n%s.\nThe comment given was:\n%s.\nYour %s%s.",
-			(deletion ? "deleted" : "banished"), formatDateShort(ban.added).c_str(), name_.c_str(),
-			getReason(ban.reason).c_str(), getAction(ban.action, false).c_str(), ban.comment.c_str(),
-			(deletion ? "account won't be undeleted" : "banishment will be lifted at:\n"),
-			(deletion ? "." : formatDateShort(ban.expires, true).c_str()));
+		std::stringstream ss;
+		ss << "Your account has been " << (deletion ? "deleted" : "banished") << " at:\n" << formatDateEx(ban.added).c_str()
+			<< " by: " << name_.c_str() << ",\nfor the following reason:\n" << getReason(ban.reason).c_str() << ".\nThe action taken was:\n"
+			<< getAction(ban.action, false).c_str() << ".\nThe comment given was:\n" << ban.comment.c_str() << ".\nYour "
+			<< (deletion ? "account won't be undeleted" : "banishment will be lifted at:\n") << (deletion ? "." : formatDateEx(ban.expires).c_str())
+			<< ".";
 
-		disconnectClient(0x14, buffer);
+		disconnectClient(0x14, ss.str().c_str());
 		return false;
 	}
 
@@ -1014,7 +1004,7 @@ bool ProtocolGame::canSee(uint16_t x, uint16_t y, uint16_t z) const
 {
 #ifdef __DEBUG__
 	if(z < 0 || z >= MAP_MAX_LAYERS)
-		std::cout << "[Warning - ProtocolGame::canSee] Z-value is out of range!" << std::endl;
+		std::clog << "[Warning - ProtocolGame::canSee] Z-value is out of range!" << std::endl;
 #endif
 
 	const Position& myPos = player->getPosition();
@@ -1454,7 +1444,7 @@ void ProtocolGame::parseDebugAssert(NetworkMessage& msg)
 		<< std::endl << std::endl;
 
 	m_debugAssertSent = true;
-	Logger::getInstance()->iFile(LOGFILE_CLIENT_ASSERTION, s.str(), false);
+	Logger::getInstance()->iFile(LOGFILE_ASSERTIONS, s.str(), false);
 }
 
 void ProtocolGame::parseBugReport(NetworkMessage& msg)
@@ -2115,7 +2105,7 @@ void ProtocolGame::sendFYIBox(const std::string& message)
 {
 	if(message.empty() || message.length() > 1018) //Prevent client debug when message is empty or length is > 1018 (not confirmed)
 	{
-		std::cout << "[Warning - ProtocolGame::sendFYIBox] Trying to send an empty or too huge message." << std::endl;
+		std::clog << "[Warning - ProtocolGame::sendFYIBox] Trying to send an empty or too huge message." << std::endl;
 		return;
 	}
 
