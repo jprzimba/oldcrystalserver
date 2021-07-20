@@ -319,15 +319,16 @@ bool ProtocolGame::logout(bool displayEffect, bool forceLogout)
 		}
 		else if(!g_creatureEvents->playerLogout(player, true))
 			return false;
-	}
-	else
-		displayEffect = false;
 
-	if(displayEffect && !player->isGhost())
-		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
+		if(displayEffect && !player->isGhost())
+			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
+	}
 
 	if(Connection_ptr connection = getConnection())
 		connection->close();
+
+	if(player->isRemoved())
+		return true;
 
 	return g_game.removeCreature(player);
 }

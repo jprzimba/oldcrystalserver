@@ -490,7 +490,6 @@ class Player : public Creature, public Cylinder
 		bool removeOutfit(uint32_t outfitId, uint32_t addons);
 
 		bool canWearOutfit(uint32_t outfitId, uint32_t addons);
-		bool canLogout(bool checkInfight);
 
 		//tile
 		//send methods

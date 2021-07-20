@@ -775,11 +775,9 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance, const
 	bool dot = true;
 	if(it.isRune())
 	{
-		s << "(";
 		if(!it.runeSpellName.empty())
-			s << "\"" << it.runeSpellName << "\", ";
+			s << "(\"" << it.runeSpellName << "\")";
 
-		s << "Charges:" << subType << ")";
 		if(it.runeLevel > 0 || it.runeMagLevel > 0 || (it.vocationString != "" && it.wieldInfo == 0))
 		{
 			s << "." << std::endl << "It can only be used";
@@ -887,8 +885,9 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance, const
 			s << "magic level " << std::showpos << (int32_t)it.abilities.stats[STAT_MAGICLEVEL] << std::noshowpos;
 		}
 
+		// TODO: we should find some better way of completing this
 		int32_t show = it.abilities.absorb[COMBAT_FIRST];
-		for(uint32_t i = (COMBAT_FIRST + 1); i <= COMBAT_LAST; i++)
+		for(int32_t i = (COMBAT_FIRST + 1); i <= COMBAT_LAST; i++)
 		{
 			if(it.abilities.absorb[i] == show)
 				continue;

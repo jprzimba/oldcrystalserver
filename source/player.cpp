@@ -1505,7 +1505,7 @@ bool Player::canShopItem(uint16_t itemId, uint8_t subType, ShopEvent_t event)
 			return true;
 
 		const ItemType& it = Item::items[id];
-		if(it.isFluidContainer() || it.isSplash() || it.isRune())
+		if(it.isFluidContainer() || it.isSplash())
 			return sit->subType == subType;
 
 		return true;
@@ -1713,11 +1713,12 @@ void Player::onThink(uint32_t interval)
 			setAttackedCreature(NULL);
 	}
 
-	if((timeNow - lastPong) >= 60000 && canLogout(true))
+	if((timeNow - lastPong) >= 60000 && !getTile()->hasFlag(TILESTATE_NOLOGOUT)
+		&& !isConnecting && !pzLocked && !hasCondition(CONDITION_INFIGHT))
 	{
 		if(client)
 			client->logout(true, true);
-		else if(g_creatureEvents->playerLogout(this, true))
+		else if(g_creatureEvents->playerLogout(this, false))
 			g_game.removeCreature(this, true);
 	}
 
@@ -3830,14 +3831,6 @@ void Player::changeSoul(int32_t soulChange)
 		soul = std::min((int32_t)soulMax, (int32_t)soul + soulChange);
 
 	sendStats();
-}
-
-bool Player::canLogout(bool checkInfight)
-{
-	if(checkInfight && hasCondition(CONDITION_INFIGHT))
-		return false;
-
-	return !isConnecting && !pzLocked && !getTile()->hasFlag(TILESTATE_NOLOGOUT);
 }
 
 bool Player::changeOutfit(Outfit_t outfit, bool checkList)

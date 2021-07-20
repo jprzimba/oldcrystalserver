@@ -372,7 +372,7 @@ ServiceManager* services)
 	srand((uint32_t)OTSYS_TIME());
 	#if defined(WINDOWS)
 	#if defined(__CONSOLE__)
-	system("color 2f");
+	system("color f0");
 	SetConsoleTitle(SOFTWARE_NAME);
 	#else
 	GUI::getInstance()->m_connections = false;
