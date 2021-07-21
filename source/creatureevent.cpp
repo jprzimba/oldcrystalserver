@@ -1385,11 +1385,21 @@ uint32_t CreatureEvent::executeCast(Creature* creature, Creature* target/* = NUL
 	}
 }
 
-uint32_t CreatureEvent::executeKill(Creature* creature, Creature* target, bool lastHit)
+uint32_t CreatureEvent::executeKill(Creature* creature, Creature* target, const DeathEntry& entry)
 {
-	//onKill(cid, target, lastHit)
+	//onKill(cid, target, damage, flags)
 	if(m_interface->reserveEnv())
 	{
+		uint32_t flags = 0;
+		if(entry.isLast())
+			flags |= 1;
+
+		if(entry.isJustify())
+			flags |= 2;
+
+		if(entry.isUnjustified())
+			flags |= 4;
+
 		ScriptEnviroment* env = m_interface->getEnv();
 		if(m_scripted == EVENT_SCRIPT_BUFFER)
 		{
@@ -1398,7 +1408,9 @@ uint32_t CreatureEvent::executeKill(Creature* creature, Creature* target, bool l
 			scriptstream << "local cid = " << env->addThing(creature) << std::endl;
 
 			scriptstream << "local target = " << env->addThing(target) << std::endl;
-			scriptstream << "local lastHit = " << (lastHit ? "true" : "false") << std::endl;
+			scriptstream << "local damage = " << entry.getDamage() << std::endl;
+			scriptstream << "local flags = " << flags << std::endl;
+			scriptstream << "local war = " << entry.getWar().war << std::endl;
 
 			scriptstream << m_scriptData;
 			bool result = true;
@@ -1427,9 +1439,12 @@ uint32_t CreatureEvent::executeKill(Creature* creature, Creature* target, bool l
 
 			lua_pushnumber(L, env->addThing(creature));
 			lua_pushnumber(L, env->addThing(target));
-			lua_pushboolean(L, lastHit);
 
-			bool result = m_interface->callFunction(3);
+			lua_pushnumber(L, entry.getDamage());
+			lua_pushnumber(L, flags);
+			lua_pushnumber(L, entry.getWar().war);
+
+			bool result = m_interface->callFunction(5);
 			m_interface->releaseEnv();
 			return result;
 		}

@@ -52,6 +52,7 @@ Creature::Creature()
 	speakType = SPEAK_CLASS_NONE;
 	skull = SKULL_NONE;
 	partyShield = SHIELD_NONE;
+	guildEmblem = EMBLEM_NONE;
 
 	health = 1000;
 	healthMax = 1000;
@@ -679,10 +680,8 @@ bool Creature::onDeath()
 		if(it->isNameKill())
 			continue;
 
-		bool lastHit = it == deathList.begin();
-		uint32_t flags = KILLFLAG_NONE;
-		if(lastHit)
-			flags |= (uint32_t)KILLFLAG_LASTHIT;
+		if(it == deathList.begin())
+			it->setLast();
 
 		if(i < size)
 		{
@@ -696,18 +695,15 @@ bool Creature::onDeath()
 		{
 			if(std::find(justifyVec.begin(), justifyVec.end(), tmp) == justifyVec.end())
 			{
-				flags |= (uint32_t)KILLFLAG_JUSTIFY;
+				it->setJustify();
 				justifyVec.push_back(tmp);
 			}
 
 			tmp = NULL;
 		}
 
-		if(!it->getKillerCreature()->onKilledCreature(this, flags) && lastHit)
+		if(!it->getKillerCreature()->onKilledCreature(this, (*it)) && it->isLast())
 			return false;
-
-		if(hasBitSet((uint32_t)KILLFLAG_UNJUSTIFIED, flags))
-			it->setUnjustified(true);
 	}
 
 	for(CountMap::iterator it = damageMap.begin(); it != damageMap.end(); ++it)
@@ -1206,24 +1202,24 @@ void Creature::onAttackedCreatureKilled(Creature* target)
 	onGainExperience(gainExp, !target->getPlayer(), false);
 }
 
-bool Creature::onKilledCreature(Creature* target, uint32_t& flags)
+bool Creature::onKilledCreature(Creature* target, DeathEntry& entry)
 {
 	bool ret = true;
 	if(master)
-		ret = master->onKilledCreature(target, flags);
+		ret = master->onKilledCreature(target, entry);
 
 	CreatureEventList killEvents = getCreatureEvents(CREATURE_EVENT_KILL);
-	if(!hasBitSet((uint32_t)KILLFLAG_LASTHIT, flags))
+	if(!entry.isLast())
 	{
 		for(CreatureEventList::iterator it = killEvents.begin(); it != killEvents.end(); ++it)
-			(*it)->executeKill(this, target, false);
+			(*it)->executeKill(this, target, entry);
 
 		return true;
 	}
 
 	for(CreatureEventList::iterator it = killEvents.begin(); it != killEvents.end(); ++it)
 	{
-		if(!(*it)->executeKill(this, target, true) && ret)
+		if(!(*it)->executeKill(this, target, entry) && ret)
 			ret = false;
 	}
 

@@ -1577,6 +1577,36 @@ void ProtocolGame::sendCreatureShield(const Creature* creature)
 	}
 }
 
+void ProtocolGame::sendCreatureEmblem(const Creature* creature)
+{
+	if(!canSee(creature))
+		return;
+
+	// we are cheating the client in here!
+	uint32_t stackpos = creature->getTile()->getClientIndexOfThing(player, creature);
+	if(stackpos >= 10)
+		return;
+
+	NetworkMessage_ptr msg = getOutputBuffer();
+	if(msg)
+	{
+		TRACK_MESSAGE(msg);
+		std::list<uint32_t>::iterator it = std::find(knownCreatureList.begin(), knownCreatureList.end(), creature->getID());
+		if(it != knownCreatureList.end())
+		{
+			RemoveTileItem(msg, creature->getPosition(), stackpos);
+			msg->AddByte(0x6A);
+
+			msg->AddPosition(creature->getPosition());
+			msg->AddByte(stackpos);
+			AddCreature(msg, creature, false, creature->getID());
+		}
+		else
+			AddTileCreature(msg, creature->getPosition(), stackpos, creature);
+	}
+}
+
+
 void ProtocolGame::sendCreatureSkull(const Creature* creature)
 {
 	if(!canSee(creature))
@@ -1588,7 +1618,7 @@ void ProtocolGame::sendCreatureSkull(const Creature* creature)
 		TRACK_MESSAGE(msg);
 		msg->AddByte(0x90);
 		msg->AddU32(creature->getID());
-		msg->AddByte(player->getSkullClient(creature));
+		msg->AddByte(player->getSkullType(creature));
 	}
 }
 
@@ -2680,10 +2710,10 @@ void ProtocolGame::AddCreature(NetworkMessage_ptr msg, const Creature* creature,
 	msg->AddByte(lightInfo.color);
 
 	msg->AddU16(creature->getStepSpeed());
-	msg->AddByte(player->getSkullClient(creature));
+	msg->AddByte(player->getSkullType(creature));
 	msg->AddByte(player->getPartyShield(creature));
 	if(!known)
-		msg->AddByte(0x00); // war emblem
+		msg->AddByte(player->getGuildEmblem(creature));
 
 	msg->AddByte(!player->canWalkthrough(creature));
 }

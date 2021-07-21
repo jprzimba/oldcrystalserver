@@ -671,7 +671,7 @@ std::string convertIPAddress(uint32_t ip)
 	return buffer;
 }
 
-Skulls_t getSkull(std::string strValue)
+Skulls_t getSkulls(std::string strValue)
 {
 	std::string tmpStrValue = asLowerCaseString(strValue);
 	if(tmpStrValue == "black" || tmpStrValue == "5")
@@ -692,7 +692,7 @@ Skulls_t getSkull(std::string strValue)
 	return SKULL_NONE;
 }
 
-PartyShields_t getPartyShield(std::string strValue)
+PartyShields_t getShields(std::string strValue)
 {
 	std::string tmpStrValue = asLowerCaseString(strValue);
 	if(tmpStrValue == "whitenoshareoff" || tmpStrValue == "10")
@@ -726,6 +726,21 @@ PartyShields_t getPartyShield(std::string strValue)
 		return SHIELD_WHITEBLUE;
 
 	return SHIELD_NONE;
+}
+
+GuildEmblems_t getEmblems(std::string strValue)
+{
+	std::string tmpStrValue = asLowerCaseString(strValue);
+	if(tmpStrValue == "blue" || tmpStrValue == "3")
+		return EMBLEM_BLUE;
+
+	if(tmpStrValue == "red" || tmpStrValue == "2")
+		return EMBLEM_RED;
+
+	if(tmpStrValue == "green" || tmpStrValue == "1")
+		return EMBLEM_GREEN;
+
+	return EMBLEM_NONE;
 }
 
 Direction getDirection(std::string string)

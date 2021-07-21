@@ -950,10 +950,13 @@ bool Monsters::loadMonster(const std::string& file, const std::string& monsterNa
 		mType->manaCost = intValue;
 
 	if(readXMLString(root, "skull", strValue))
-		mType->skull = getSkull(strValue);
+		mType->skull = getSkulls(strValue);
 
 	if(readXMLString(root, "shield", strValue))
-		mType->partyShield = getPartyShield(strValue);
+		mType->partyShield = getShields(strValue);
+
+	if(readXMLString(root, "emblem", strValue))
+		mType->guildEmblem = getEmblems(strValue);
 
 	p = root->children;
 	while(p && monsterLoad)
@@ -1057,10 +1060,13 @@ bool Monsters::loadMonster(const std::string& file, const std::string& monsterNa
 						mType->isWalkable = booleanString(strValue);
 
 					if(readXMLString(tmpNode, "skull", strValue))
-						mType->skull = getSkull(strValue);
+						mType->skull = getSkulls(strValue);
 
 					if(readXMLString(tmpNode, "shield", strValue))
-						mType->partyShield = getPartyShield(strValue);
+						mType->partyShield = getShields(strValue);
+
+					if(readXMLString(tmpNode, "emblem", strValue))
+						mType->guildEmblem = getEmblems(strValue);
 				}
 
 				tmpNode = tmpNode->next;

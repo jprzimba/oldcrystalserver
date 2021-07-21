@@ -2334,6 +2334,12 @@ void LuaScriptInterface::registerFunctions()
 	//doRefreshMap()
 	lua_register(m_luaState, "doRefreshMap", LuaScriptInterface::luaDoRefreshMap);
 
+	//doGuildAddEnemy(guild, enemy, war, type)
+	lua_register(m_luaState, "doGuildAddEnemy", LuaScriptInterface::luaDoGuildAddEnemy);
+
+	//doGuildRemoveEnemy(guild, enemy)
+	lua_register(m_luaState, "doGuildRemoveEnemy", LuaScriptInterface::luaDoGuildRemoveEnemy);
+
 	//doUpdateHouseAuctions()
 	lua_register(m_luaState, "doUpdateHouseAuctions", LuaScriptInterface::luaDoUpdateHouseAuctions);
 
@@ -4596,9 +4602,9 @@ int32_t LuaScriptInterface::luaGetTileInfo(lua_State* L)
 		pushThing(L, tile->ground, env->addThing(tile->ground));
 
 		setFieldBool(L, "protection", tile->hasFlag(TILESTATE_PROTECTIONZONE));
-		setFieldBool(L, "nopvp", tile->hasFlag(TILESTATE_NOPVPZONE));
+		setFieldBool(L, "optional", tile->hasFlag(TILESTATE_OPTIONALZONE));
 		setFieldBool(L, "nologout", tile->hasFlag(TILESTATE_NOLOGOUT));
-		setFieldBool(L, "pvp", tile->hasFlag(TILESTATE_PVPZONE));
+		setFieldBool(L, "hardcore", tile->hasFlag(TILESTATE_HARDCOREZONE));
 		setFieldBool(L, "refresh", tile->hasFlag(TILESTATE_REFRESH));
 		setFieldBool(L, "trashed", tile->hasFlag(TILESTATE_TRASHED));
 		setFieldBool(L, "house", tile->hasFlag(TILESTATE_HOUSE));
@@ -5059,8 +5065,7 @@ int32_t LuaScriptInterface::luaSetWorldType(lua_State* L)
 {
 	//setWorldType(type)
 	WorldType_t type = (WorldType_t)popNumber(L);
-
-	if(type >= WORLD_TYPE_FIRST && type <= WORLD_TYPE_LAST)
+	if(type >= WORLDTYPE_FIRST && type <= WORLDTYPE_LAST)
 	{
 		g_game.setWorldType(type);
 		lua_pushboolean(L, true);
@@ -7804,7 +7809,7 @@ int32_t LuaScriptInterface::luaGetCreatureSkullType(lua_State* L)
 		if(!tid)
 			lua_pushnumber(L, creature->getSkull());
 		else if(Creature* target = env->getCreatureByUID(tid))
-			lua_pushnumber(L, creature->getSkullClient(target));
+			lua_pushnumber(L, creature->getSkullType(target));
 		else
 		{
 			errorEx(getError(LUA_ERROR_CREATURE_NOT_FOUND));
@@ -9050,6 +9055,46 @@ int32_t LuaScriptInterface::luaDoRefreshMap(lua_State* L)
 {
 	//doRefreshMap()
 	g_game.proceduralRefresh();
+	return 1;
+}
+
+int32_t LuaScriptInterface::luaDoGuildAddEnemy(lua_State* L)
+{
+	//doGuildAddEnemy(guild, enemy, war, type)
+	War_t war;
+	war.type = (WarType_t)popNumber(L);
+	war.war = popNumber(L);
+
+	uint32_t enemy = popNumber(L), guild = popNumber(L), count = 0;
+	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
+	{
+		if(it->second->isRemoved() || it->second->getGuildId() != guild)
+			continue;
+
+		++count;
+		it->second->addEnemy(enemy, war);
+		g_game.updateCreatureEmblem(it->second);
+	}
+
+	lua_pushnumber(L, count);
+	return 1;
+}
+
+int32_t LuaScriptInterface::luaDoGuildRemoveEnemy(lua_State* L)
+{
+	//doGuildRemoveEnemy(guild, enemy)
+	uint32_t enemy = popNumber(L), guild = popNumber(L), count = 0;
+	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
+	{
+		if(it->second->isRemoved() || it->second->getGuildId() != guild)
+			continue;
+
+		++count;
+		it->second->removeEnemy(enemy);
+		g_game.updateCreatureEmblem(it->second);
+	}
+
+	lua_pushnumber(L, count);
 	return 1;
 }
 

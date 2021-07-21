@@ -82,6 +82,7 @@
 	squareColor = 0
 	allowFightback = true
 	useCapSystem = true
+	optionalWarAttackableAlly = false
 
 	-- Charges
 	removeWeaponAmmunition = true
@@ -125,6 +126,7 @@
 	-- Database
 	-- NOTE: sqlFile is used only by sqlite database, and sqlKeepAlive by mysql database.
 	-- To disable sqlKeepAlive such as mysqlReadTimeout use 0 value.
+	-- encryptionType can be plain, md5, sha1	
 	sqlType = "sqlite"
 	sqlHost = "localhost"
 	sqlPort = 3306
@@ -289,6 +291,7 @@
 	rateStaminaAboveNormal = 1.5
 	rateStaminaUnderNormal = 0.5
 	staminaThresholdOnlyPremium = true
+	staminaLootLimit = 14 * 60
 
 	-- Party
 	-- NOTE: experienceShareLevelDifference is float number.

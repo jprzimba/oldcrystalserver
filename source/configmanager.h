@@ -167,6 +167,7 @@ class ConfigManager
 			MIN_GUILD_NICK,
 			MAX_GUILD_NICK,
 			AUTO_SAVE_EACH_MINUTES,
+			STAMINA_DESTROY_LOOT,
 			LAST_NUMBER_CONFIG /* this must be the last one */
 		};
 
@@ -272,6 +273,7 @@ class ConfigManager
 			REMOVE_BREAK,
 			SHOW_GAMEMASTERS_ONLINE,
 			SKIP_ITEMS_VERSION,
+			OPTIONAL_WAR_ATTACK_ALLY,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

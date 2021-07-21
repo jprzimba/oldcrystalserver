@@ -304,6 +304,8 @@ bool ConfigManager::load()
 	m_confBool[REMOVE_BREAK] = getGlobalBool("removeBreakWeaponsCharges", true);
 	m_confBool[SHOW_GAMEMASTERS_ONLINE] = getGlobalBool("displayGamemastersWithOnlineCommand", false);
 	m_confBool[SKIP_ITEMS_VERSION] = getGlobalBool("skipItemsVersionCheck", true);
+	m_confNumber[STAMINA_DESTROY_LOOT] = getGlobalNumber("staminaLootLimit", 14 * 60);
+	m_confBool[OPTIONAL_WAR_ATTACK_ALLY] = getGlobalBool("optionalWarAttackableAlly", false);
 
 	m_loaded = true;
 	return true;

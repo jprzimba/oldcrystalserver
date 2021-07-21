@@ -950,7 +950,7 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 				_creature->setNoMove(booleanString(parseParams(it, tokens.end())));
 			else if(action == "skull")
 			{
-				_creature->setSkull(getSkull(parseParams(it, tokens.end())));
+				_creature->setSkull(getSkulls(parseParams(it, tokens.end())));
 				g_game.updateCreatureSkull(_creature);
 			}
 			else if(action == "speaktype")
@@ -1284,45 +1284,35 @@ bool TalkAction::ghost(Creature* creature, const std::string& cmd, const std::st
 bool TalkAction::setWorldType(Creature* creature, const std::string &cmd, const std::string &param)
 {
 	Player* player = creature->getPlayer();
-
 	if(!player)
-	{
 		return false;
-	}	
 
-	    if (player->isRemoved())
-		{ 
-		    return false; 
-	    }
-	    
-		if(param == "")
-		{
-			player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Command requires param.");
-		 }
+	if(param == "")
+	{
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Command requires param.");
+		return false;
+	}
 
-		if(param == "nopvp" || param == "no-pvp" || 
-				 param == "non-pvp" || param == "nonpvp" || 
-				 param == "safe" || param == "optional" || 
-				 param == "optionalpvp" || param == "optional-pvp")
-		{
-			g_game.setWorldType(WORLD_TYPE_NO_PVP);
-			player->sendTextMessage(MSG_STATUS_WARNING, "Gameworld type set to: Optional-PvP.");
-		 }
-		if(param == "pvp" || param == "normal" || 
-				 param == "open" || param == "openpvp" || 
-				 param == "open-pvp")
-		{
-			g_game.setWorldType(WORLD_TYPE_NO_PVP);
-			player->sendTextMessage(MSG_STATUS_WARNING, "Gameworld type set to: Open-PvP.");
-		 }
-		if(param == "enforced" || param == "pvp-enforced" || 
-				 param == "pvpe" || param == "pvpenforced" || 
-				 param == "war" || param == "hardcore" || 
-				 param == "hardcore-pvp" || param == "hardcorepvp")
-		{
-			g_game.setWorldType(WORLD_TYPE_PVP_ENFORCED);
-			player->sendTextMessage(MSG_STATUS_WARNING, "Gameworld type set to: Hardcore-PvP.");
-		 }
+	if(param == "nopvp" || param == "no-pvp" || param == "non-pvp" || param == "nonpvp" || 
+		param == "safe" || param == "optional" || param == "optionalpvp" || param == "optional-pvp")
+	{
+		g_game.setWorldType(WORLDTYPE_OPTIONAL);
+		player->sendTextMessage(MSG_STATUS_WARNING, "Gameworld type set to: Optional-PvP.");
+	}
+	
+	if(param == "pvp" || param == "normal" || param == "open" || param == "openpvp" || param == "open-pvp")
+	{
+		g_game.setWorldType(WORLDTYPE_OPEN);
+		player->sendTextMessage(MSG_STATUS_WARNING, "Gameworld type set to: Open-PvP.");
+	}
+
+	if(param == "enforced" || param == "pvp-enforced" || param == "pvpe" || param == "pvpenforced" || param == "war" || 
+		 param == "hardcore" || param == "hardcore-pvp" || param == "hardcorepvp")
+	{
+		g_game.setWorldType(WORLDTYPE_HARDCORE);
+		player->sendTextMessage(MSG_STATUS_WARNING, "Gameworld type set to: Hardcore-PvP.");
+	}
+
 	return true;
 }
 
@@ -1335,27 +1325,26 @@ bool TalkAction::addPlayerPremium(Creature* creature, const std::string& cmd, co
 	std::getline(in, name, ',');
 	in >> premiumTime;	
 	
-	Player* player = g_game.getPlayerByName(name);
-	if(player){
-		if(premiumTime < 0 || premiumTime > 999)
-		{
-			premiumTime = 1;
-		}
+	Player* targetPlayer = g_game.getPlayerByName(name);
+	if(!targetPlayer)
+		return false;
+
+	if(premiumTime < 0 || premiumTime > 999)
+		premiumTime = 1;
 		
 	uint32_t days = premiumTime;
-	    
-     Account account = IOLoginData::getInstance()->loadAccount(player->getAccount());
-		if(player->premiumDays < 65535)
+	Account account = IOLoginData::getInstance()->loadAccount(targetPlayer->getAccount());
+	if(targetPlayer->premiumDays < 65535)
+	{
+		if(targetPlayer->premiumDays <= 50000 && days <= 10000)
 		{
-			if(player->premiumDays <= 50000 && days <= 10000)
-			{
-				account.premiumDays += days;
-				player->premiumDays += days;
-			}
-			IOLoginData::getInstance()->saveAccount(account);
-			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_WRAPS_BLUE);
-			return true;
+			account.premiumDays += days;
+			targetPlayer->premiumDays += days;
 		}
+
+		IOLoginData::getInstance()->saveAccount(account);
+		g_game.addMagicEffect(targetPlayer->getPosition(), MAGIC_EFFECT_WRAPS_BLUE);
+		return true;
 	}
     
 	return false;
@@ -1363,36 +1352,34 @@ bool TalkAction::addPlayerPremium(Creature* creature, const std::string& cmd, co
 
 bool TalkAction::openServer(Creature* creature, const std::string &cmd, const std::string &param)
 {
- 	 Player* player = creature->getPlayer();
-	if(!player){
+	Player* player = creature->getPlayer();
+	if(!player)
 		return false;
-	}
 	
 	g_game.setGameState(GAME_STATE_NORMAL);
 	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Server has been opened successfully.");
-
 	return true;
 }
 
 bool TalkAction::closeServer(Creature* creature, const std::string &cmd, const std::string &param)
 {
- 	 Player* player = creature->getPlayer();
-	if(!player){
+	Player* player = creature->getPlayer();
+	if(!player)
 		return false;
-	}
 	
 	g_game.setGameState(GAME_STATE_CLOSED);
-	
 	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
-       if(dynamic_cast<Player*>(it->second))
-		if(!(*it).second->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges)){
-			(*it).second->kickPlayer(true, true);
+	{
+		if(dynamic_cast<Player*>(it->second))
+		{
+			if(!(*it).second->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
+				(*it).second->kickPlayer(true, true);
 		}
+	}
 
 	bool payHouses = (param == "serversave");
 	g_game.saveGameState(payHouses);
 	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Server has been closed successfully.");
-
 	return true;
 }
 
@@ -1404,76 +1391,79 @@ bool TalkAction::broadcastMessage(Creature* creature, const std::string& cmd, co
 	if(!player)
 		return false;
 		
-		if(param == "")
-		{
-			player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Command requires param.");
-		}
+	if(param == "")
+	{
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Command requires param.");
+		return false;
+	}
 
 	return g_game.gmBroadcastMessage(player, param);
 }
 
 bool TalkAction::broadcastClass(Creature* creature, const std::string &cmd, const std::string &param)
 {
-    int a;
-    int colorInt;
-    Player* player = creature->getPlayer();
-    std::string message = param.c_str();
-    std::stringstream fullMessage;
-    std::string color;
-    MessageClasses mclass;
+	int32_t a;
+	int32_t colorInt;
+	Player* player = creature->getPlayer();
+	std::string message = param.c_str();
+	std::stringstream fullMessage;
+	std::string color;
+	MessageClasses mclass;
     
-    for(a=0; a<param.length(); ++a)
+	for(a=0; a<param.length(); ++a)
 	{
-       if(param[a] > 3 && param[a] == ' ')
-	   {
-         color = param;
-         color.erase(a,1-param.length());
-         message.erase(0,1+a);
-         break;
-       }
-       else
-          message = param.c_str();       
-    }
+		if(param[a] > 3 && param[a] == ' ')
+		{
+			color = param;
+			color.erase(a, 1 - param.length());
+			message.erase(0,1 + a);
+			break;
+		}
+		else
+			message = param.c_str();       
+	}
     
-    std::transform(color.begin(), color.end(), color.begin(), tolower);
-    fullMessage << message.c_str() <<std::endl; //Name: Message
+	std::transform(color.begin(), color.end(), color.begin(), tolower);
+	fullMessage << message.c_str() <<std::endl; //Name: Message
     
-    if(color == "blue")
-       mclass = MSG_STATUS_CONSOLE_BLUE;
-    else if(color == "red_warning")
+	if(color == "blue")
+		mclass = MSG_STATUS_CONSOLE_BLUE;
+	else if(color == "red-anonymous")
 	{
-       g_game.gmBroadcastMessage(player, fullMessage.str().c_str());
-       return false;
-    }
-    else if(color == "red")
-       mclass = MSG_STATUS_CONSOLE_RED;
-    else if(color == "advance")
-       mclass = MSG_EVENT_ADVANCE; //Invasion
-    else if(color == "event")
-       mclass = MSG_EVENT_ADVANCE; //Invasion
-    else if(color == "white")
-       mclass = MSG_EVENT_DEFAULT;
-    else if(color == "green")
-       mclass = MSG_INFO_DESCR;
-    else if(color == "info")
-       mclass = MSG_INFO_DESCR;
-    else if(color == "small")
-       mclass = MSG_STATUS_SMALL;                                      
-    else if(color == "warning")
-        mclass = MSG_STATUS_WARNING;
-    else if(color == "orange_event")
-        mclass = MSG_EVENT_ORANGE;
-    else if(color == "orange")
-        mclass = MSG_STATUS_CONSOLE_ORANGE;
-        
-    else{
-       player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "The options to colors are: blue, red, advance, event, white, green, info, small, warning, orange and orange_event.");
-       return false;
-    }
+		g_game.gmBroadcastMessage(player, fullMessage.str().c_str());
+		return false;
+	}
+	else if(color == "red")
+		mclass = MSG_STATUS_CONSOLE_RED;
+	else if(color == "advance")
+		mclass = MSG_EVENT_ADVANCE; //Invasion
+	else if(color == "event")
+		mclass = MSG_EVENT_ADVANCE; //Invasion
+	else if(color == "white")
+		mclass = MSG_EVENT_DEFAULT;
+	else if(color == "green")
+		mclass = MSG_INFO_DESCR;
+	else if(color == "info")
+		mclass = MSG_INFO_DESCR;
+	else if(color == "small")
+		mclass = MSG_STATUS_SMALL;                                      
+	else if(color == "warning")
+		mclass = MSG_STATUS_WARNING;
+	else if(color == "orange_event")
+		mclass = MSG_EVENT_ORANGE;
+	else if(color == "orange")
+		mclass = MSG_STATUS_CONSOLE_ORANGE;
+	else
+	{
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "The options to colors are: blue, red-anonymous, red, advance, event, white, green, info, small, warning, orange and orange_event.");
+		return false;
+	}
                       
 	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
-       if(dynamic_cast<Player*>(it->second))
-         (*it).second->sendTextMessage(mclass, fullMessage.str().c_str());
+	{
+		if(dynamic_cast<Player*>(it->second))
+			(*it).second->sendTextMessage(mclass, fullMessage.str().c_str());
+	}
     
     return true;
 }
@@ -1543,9 +1533,8 @@ ReturnValue TalkAction::placeSummon(Creature* creature, const std::string& name)
 {
 	Monster* monster = Monster::createMonster(name);
 	if(!monster)
-	{
 		return RET_NOTPOSSIBLE;
-	}
+
 	// Place the monster
 	creature->addSummon(monster);
 	if(!g_game.placeCreature(monster, creature->getPosition()))
@@ -1560,7 +1549,6 @@ ReturnValue TalkAction::placeSummon(Creature* creature, const std::string& name)
 bool TalkAction::placeSummon(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	ReturnValue ret = placeSummon(creature, param);
-
 	if(ret != RET_NOERROR)
 	{
 		if(Player* player = creature->getPlayer())
@@ -1574,15 +1562,17 @@ bool TalkAction::placeSummon(Creature* creature, const std::string& cmd, const s
 
 bool TalkAction::cleanMap(Creature* creature, const std::string &cmd, const std::string &param)
 {
+	Player* player = creature->getPlayer();
+	if(!player)
+		return false;
+
 	uint32_t count = 0;
 	g_game.cleanMap(count);
 	
 	char* buffer = new char[128];
 	sprintf(buffer, "Game map cleaned: Cleaned %d items from the map.", count);
-	
-	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
-       if(dynamic_cast<Player*>(it->second))
-         (*it).second->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, std::string(buffer));
+
+	g_game.gmBroadcastMessage(player, std::string(buffer));
 	delete [] buffer;
 	return true;
 }
@@ -1657,85 +1647,100 @@ bool TalkAction::kickPlayer(Creature* creature, const std::string& cmd, const st
 		playerKick->kickPlayer(true, true);
 		return true;
 	}
+
 	return false;
 }
 
 bool TalkAction::newType(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(player)
+	if(!player)
+		return false;
+
+	int32_t lookType = atoi(param.c_str());
+	if(lookType >= 0 && lookType != 1 && lookType != 135 && (lookType <= 160 || lookType >= 192) && lookType <= 351)
 	{
-		int32_t lookType = atoi(param.c_str());
-		if(lookType >= 0 && lookType != 1 && lookType != 135 && (lookType <= 160 || lookType >= 192) && lookType <= 351)
-		{
-			g_game.internalCreatureChangeOutfit(creature, (const Outfit_t&)lookType);
-			return true;
-		}
-		else
-			player->sendTextMessage(MSG_STATUS_SMALL, "This outfit does not exist.");
+		g_game.internalCreatureChangeOutfit(creature, (const Outfit_t&)lookType);
+		return true;
 	}
+	else
+	{
+		player->sendTextMessage(MSG_STATUS_SMALL, "This outfit does not exist.");
+		return false;
+	}
+
 	return false;
 }
 
 bool TalkAction::testCommand(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
+	if(!player)
+		return false;
+
 	int32_t effect = atoi(param.c_str());
-
     if(effect < 0 || effect > 68)
+    {
         player->sendCancel("Sorry, the effect can be 0 to 68 only.");
-        else
+        return false;
+	}
+	else
+	{
 		player->sendMagicEffect(player->getPosition(), effect);
+		return true;
+	}
 
 
-	return true;
+	return false;
 }
 
 bool TalkAction::testTutorialCommand(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	int32_t color = atoi(param.c_str());
+	if(!player)
+		return false;
 
+	int32_t color = atoi(param.c_str());
     if(color < 0 || color > 6)
         player->sendCancel("Sorry, the tutorials test can be 0 to 6 only.");
         else
 		player->sendTutorial(color);
 
-	return true;
+	return false;
 }
 
 bool TalkAction::creatorServer(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(player)
-	{
-		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, CREATOR_INFO);
-	}
-	return true;
+	if(!player)
+		return false;
+
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, CREATOR_INFO);
+	return false;
 }
 
 bool TalkAction::showExpForLevel(Creature* creature, const std::string &cmd, const std::string &param)
 {
-	if(Player* player = creature->getPlayer())
-	{
-		std::stringstream msg;
+	Player* player = creature->getPlayer();
+	if(!player)
+		return false;
+
+	std::stringstream msg;
 	msg << "You need " << player->getExpForLevel(player->getLevel() + 1) - player->getExperience() << " experience points to gain level" << std::endl;
-		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, msg.str().c_str());
-	}
-	
-	return true;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, msg.str().c_str());
+	return false;
 }
 
 bool TalkAction::showManaForLevel(Creature* creature, const std::string &cmd, const std::string &param)
 {
-	if(Player* player = creature->getPlayer())
-	{
-               std::stringstream msg;
-               msg << "You need to spent " << (long)player->vocation->getReqMana(player->getMagicLevel()+1) - player->getSpentMana() / g_config.getDouble(ConfigManager::RATE_MAGIC) << " mana to gain magic level" << std::endl;
-		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, msg.str().c_str());
-	}
+	Player* player = creature->getPlayer();
+	if(!player)
+		return false;
 
-	return true;
+	std::stringstream msg;
+	msg << "You need to spent " << (long)player->vocation->getReqMana(player->getMagicLevel()+1) - player->getSpentMana() / g_config.getDouble(ConfigManager::RATE_MAGIC) << " mana to gain magic level" << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, msg.str().c_str());
+	return false;
 }
 
 bool TalkAction::serverInfo(Creature* creature, const std::string& cmd, const std::string& param)
@@ -1759,28 +1764,24 @@ bool TalkAction::serverInfo(Creature* creature, const std::string& cmd, const st
 bool TalkAction::pvpInformation(Creature* creature, const std::string &cmd, const std::string &param)
 {
 	Player* player = creature->getPlayer();
-
 	if(!player)
-	{
 		return false;
-	}	
 
-		int type = g_game.getWorldType();
-
-		if (type == WORLD_TYPE_NO_PVP)
-		{
-			player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "World type is currently set to: Optional-PvP.");
-		}
-		else if (type == WORLD_TYPE_PVP)
-		{
-			player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "World type is currently set to: Open-PvP.");
-		}
-		else if (type == WORLD_TYPE_PVP_ENFORCED)
-		{
-			player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "World type is currently set to: Hardcore-PvP.");
-		}
+	int type = g_game.getWorldType();
+	if (type == WORLDTYPE_OPTIONAL)
+	{
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "World type is currently set to: Optional-PvP.");
+	}
+	else if (type == WORLDTYPE_OPEN)
+	{
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "World type is currently set to: Open-PvP.");
+	}
+	else if (type == WORLDTYPE_HARDCORE)
+	{
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "World type is currently set to: Hardcore-PvP.");
+	}
 			
-	return true;
+	return false;
 }
 
 bool TalkAction::checkMoney(Creature* creature, const std::string& cmd, const std::string& param)
@@ -1815,140 +1816,127 @@ bool TalkAction::checkMoney(Creature* creature, const std::string& cmd, const st
 bool TalkAction::showWorldUpTime(Creature* creature, const std::string &cmd, const std::string &param)
 {
 	Player* player = creature->getPlayer();
-
-		if(!player){
+	if(!player)
 		return false;
-	}	
-		
-    if (player->isRemoved())
-	{ 
-      return false; 
-    }
-	
-	if (player)
-	{
-		uint64_t uptime = (OTSYS_TIME() - Status::getInstance()->m_start)/1000;
-		int h = (int)floor(uptime / 3600.0);
-		int m = (int)floor((uptime - h*3600) / 60.0);
-		int s = (int)(uptime - h*3600 - m*60);
 
-		std::stringstream msg;
-		msg << "This server has been running for " << h << (h != 1? " hours " : " hour ") <<
-			m << (m != 1? " minutes " : " minute ") << s << (s != 1? " seconds. " : " second.") << std::ends;
+	uint64_t uptime = (OTSYS_TIME() - Status::getInstance()->m_start)/1000;
+	int h = (int)floor(uptime / 3600.0);
+	int m = (int)floor((uptime - h*3600) / 60.0);
+	int s = (int)(uptime - h*3600 - m*60);
 
-		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, msg.str().c_str());
-	}
+	std::stringstream msg;
+	msg << "This server has been running for " << h << (h != 1? " hours " : " hour ") << m << (m != 1? " minutes " : " minute ") << s << (s != 1? " seconds. " : " second.") << std::ends;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, msg.str().c_str());
 	return true;
 }
 
 bool TalkAction::showNotices(Creature* creature, const std::string &cmd, const std::string &param)
 {
- 	 Player* player = creature->getPlayer();
+	Player* player = creature->getPlayer();
+	if(!player)
+		return false;
 
-	    if(!player)
-		    return false;
-
-			g_game.sendNoticeBox(g_config.getString(ConfigManager::DATA_DIRECTORY), player);
-  return true;
+	g_game.sendNoticeBox(player);
+	return true;
 }
 
 
 bool TalkAction::whoIsOnline(Creature* creature, const std::string &cmd, const std::string &param)
 {
 	Player* player = creature->getPlayer();
-	if(player)
+	if(!player)
+		return false;
+
+	std::stringstream ss;
+	ss << "Players online:" << std::endl;
+
+	uint32_t i = 0;
+	AutoList<Player>::iterator it = Player::autoList.begin();
+	if(!g_config.getBool(ConfigManager::SHOW_GAMEMASTERS_ONLINE))
 	{
-		std::stringstream ss;
-		ss << "Players online:" << std::endl;
-
-		uint32_t i = 0;
-		AutoList<Player>::iterator it = Player::autoList.begin();
-		if(!g_config.getBool(ConfigManager::SHOW_GAMEMASTERS_ONLINE))
+		while(it != Player::autoList.end())
 		{
-			while(it != Player::autoList.end())
-			{
-				if(!(*it).second->getAccess() || player->getAccess() > 2)
-				{
-					ss << (i > 0 ? ", " : "") << (*it).second->name << " [" << (*it).second->level << "]";
-					++i;
-				}
-				++it;
-
-				if(i == 10)
-				{
-					ss << (it != Player::autoList.end() ? "," : ".");
-					player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, ss.str());
-					ss.str("");
-					i = 0;
-				}
-			}
-		}
-		else
-		{
-			while(it != Player::autoList.end())
+			if(!(*it).second->getAccess() || player->getAccess() > 2)
 			{
 				ss << (i > 0 ? ", " : "") << (*it).second->name << " [" << (*it).second->level << "]";
-				++it;
 				++i;
+			}
+			++it;
 
-				if(i == 10)
-				{
-					ss << (it != Player::autoList.end() ? "," : ".");
-					player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, ss.str());
-					ss.str("");
-					i = 0;
-				}
+			if(i == 10)
+			{
+				ss << (it != Player::autoList.end() ? "," : ".");
+				player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, ss.str());
+				ss.str("");
+				i = 0;
 			}
 		}
-
-		if(i > 0)
+	}
+	else
+	{
+		while(it != Player::autoList.end())
 		{
-			ss << ".";
-			player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, ss.str());
+			ss << (i > 0 ? ", " : "") << (*it).second->name << " [" << (*it).second->level << "]";
+			++it;
+			++i;
+
+			if(i == 10)
+			{
+				ss << (it != Player::autoList.end() ? "," : ".");
+				player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, ss.str());
+				ss.str("");
+				i = 0;
+			}
 		}
 	}
+
+	if(i > 0)
+	{
+		ss << ".";
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, ss.str());
+	}
+
 	return true;
 }
 
 bool TalkAction::goUp(Creature* creature, const std::string &cmd, const std::string &param)
 {
-	 	Position oldPos = creature->getPosition();
-		Position newPos = creature->getPosition();
+	Position oldPos = creature->getPosition();
+	Position newPos = creature->getPosition();
 	newPos.z--;
 	if(g_game.internalTeleport(creature, newPos, true) == RET_NOERROR)
 	{
-			g_game.addMagicEffect(oldPos, MAGIC_EFFECT_POFF);							 
-			g_game.addMagicEffect(newPos, MAGIC_EFFECT_ENERGY_AREA);
-
-	return true;
-    }
- return false;
+		g_game.addMagicEffect(oldPos, MAGIC_EFFECT_POFF);							 
+		g_game.addMagicEffect(newPos, MAGIC_EFFECT_ENERGY_AREA);
+		return true;
+	}
+	
+	return false;
 }
 
 bool TalkAction::goDown(Creature* creature, const std::string &cmd, const std::string &param)
 {
-	 	Position oldPos = creature->getPosition();
-		Position newPos = creature->getPosition();
+	Position oldPos = creature->getPosition();
+	Position newPos = creature->getPosition();
 	newPos.z++;
 	if(g_game.internalTeleport(creature, newPos, true) == RET_NOERROR)
 	{
-			g_game.addMagicEffect(oldPos, MAGIC_EFFECT_POFF);							 
-			g_game.addMagicEffect(newPos, MAGIC_EFFECT_ENERGY_AREA);
-
-	return true;
-    }
- return false;
+		g_game.addMagicEffect(oldPos, MAGIC_EFFECT_POFF);							 
+		g_game.addMagicEffect(newPos, MAGIC_EFFECT_ENERGY_AREA);
+		return true;
+	}
+	
+	return false;
 }
 
 bool TalkAction::teleportToTemple(Creature* creature, const std::string& cmd, const std::string& param)
 {
-	 	Position oldPos = creature->getPosition();
-		Position newPos = creature->getPosition();
-	
+	Position oldPos = creature->getPosition();
+	Position newPos = creature->getPosition();
 	if(g_game.internalTeleport(creature, creature->masterPosition, true) == RET_NOERROR)
 	{
-			g_game.addMagicEffect(oldPos, MAGIC_EFFECT_POFF);							 
-			g_game.addMagicEffect(newPos, MAGIC_EFFECT_ENERGY_AREA);
+		g_game.addMagicEffect(oldPos, MAGIC_EFFECT_POFF);							 
+		g_game.addMagicEffect(newPos, MAGIC_EFFECT_ENERGY_AREA);
 		return true;
 	}
 
@@ -1994,27 +1982,27 @@ bool TalkAction::teleportGoto(Creature* creature, const std::string& cmd, const 
 
 bool TalkAction::teleportNTiles(Creature* creature, const std::string& cmd, const std::string& param)
 {
-	int ntiles = atoi(param.c_str());
+	int32_t ntiles = atoi(param.c_str());
 	if(ntiles != 0)
 	{
-	 	Position oldPos = creature->getPosition();
+		Position oldPos = creature->getPosition();
 		Position newPos = creature->getPosition();
-	switch(creature->getDirection())
+		switch(creature->getDirection())
 		{
-		case NORTH:
-			newPos.y = newPos.y - ntiles;
-			break;
-		case SOUTH:
-			newPos.y = newPos.y + ntiles;
-			break;
-		case EAST:
-			newPos.x = newPos.x + ntiles;
-			break;
-		case WEST:
-			newPos.x = newPos.x - ntiles;
-			break;
-		default:
-			break;
+			case NORTH:
+				newPos.y = newPos.y - ntiles;
+				break;
+			case SOUTH:
+				newPos.y = newPos.y + ntiles;
+				break;
+			case EAST:
+				newPos.x = newPos.x + ntiles;
+				break;
+			case WEST:
+				newPos.x = newPos.x - ntiles;
+				break;
+			default:
+				break;
 		}
 
 		if(g_game.internalTeleport(creature, newPos, true) == RET_NOERROR)
@@ -2029,24 +2017,21 @@ bool TalkAction::teleportNTiles(Creature* creature, const std::string& cmd, cons
 
 bool TalkAction::teleportToTown(Creature* creature, const std::string& cmd, const std::string& param)
 {
-	std::string tmp = param;
 	Player* player = creature->getPlayer();
-
 	if(!player)
-	{
 		return false;
-	}
 
+	std::string tmp = param;
 	Town* town = Towns::getInstance()->getTown(tmp);
 	if(town)
 	{
-		if(g_game.internalTeleport(creature, town->getTemplePosition(), true) == RET_NOERROR) {
+		if(g_game.internalTeleport(creature, town->getTemplePosition(), true) == RET_NOERROR)
+		{
 			g_game.addMagicEffect(town->getTemplePosition(), MAGIC_EFFECT_ENERGY_AREA);
 			return true;
 		}
 	}
 
 	player->sendCancel("Could not find the town.");
-
 	return false;
 }

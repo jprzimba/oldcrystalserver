@@ -272,14 +272,14 @@ ReturnValue Combat::canDoCombat(const Creature* attacker, const Creature* target
 			return RET_YOUMAYNOTATTACKTHISPLAYER;
 
 		const Player* attackerPlayer = NULL;
-		if((attackerPlayer = attacker->getPlayer()) || (attacker->getMaster()
-			&& (attackerPlayer = attacker->getMaster()->getPlayer())))
+		if((attackerPlayer = attacker->getPlayer()) || (attackerPlayer = attacker->getPlayerMaster()))
 		{
 			checkZones = true;
-			if((g_game.getWorldType() == WORLD_TYPE_NO_PVP && !Combat::isInPvpZone(attacker, target)) ||
-				isProtected(const_cast<Player*>(attackerPlayer), const_cast<Player*>(targetPlayer))
-				|| (g_config.getBool(ConfigManager::CANNOT_ATTACK_SAME_LOOKFEET) &&
-				attackerPlayer->getDefaultOutfit().lookFeet == targetPlayer->getDefaultOutfit().lookFeet)
+			if((g_game.getWorldType() == WORLDTYPE_OPTIONAL && !Combat::isInPvpZone(attacker, target)
+				&& !attackerPlayer->isEnemy(targetPlayer, true)
+				) || isProtected(const_cast<Player*>(attackerPlayer), const_cast<Player*>(targetPlayer))
+				|| (g_config.getBool(ConfigManager::CANNOT_ATTACK_SAME_LOOKFEET)
+				&& attackerPlayer->getDefaultOutfit().lookFeet == targetPlayer->getDefaultOutfit().lookFeet)
 				|| !attackerPlayer->canSeeCreature(targetPlayer))
 				return RET_YOUMAYNOTATTACKTHISPLAYER;
 		}
@@ -290,24 +290,25 @@ ReturnValue Combat::canDoCombat(const Creature* attacker, const Creature* target
 			return RET_YOUMAYNOTATTACKTHISCREATURE;
 
 		const Player* attackerPlayer = NULL;
-		if((attackerPlayer = attacker->getPlayer()) || (attacker->getMaster()
-			&& (attackerPlayer = attacker->getMaster()->getPlayer())))
+		if((attackerPlayer = attacker->getPlayer()) || (attackerPlayer = attacker->getPlayerMaster()))
 		{
 			if(attackerPlayer->hasFlag(PlayerFlag_CannotAttackMonster))
 				return RET_YOUMAYNOTATTACKTHISCREATURE;
 
-			if(target->getMaster() && target->getMaster()->getPlayer())
+			if(target->isPlayerSummon())
 			{
 				checkZones = true;
-				if(g_game.getWorldType() == WORLD_TYPE_NO_PVP && !Combat::isInPvpZone(attacker, target))
+				if(g_game.getWorldType() == WORLDTYPE_OPTIONAL && !Combat::isInPvpZone(attacker, target)
+					&& !attackerPlayer->isEnemy(target->getPlayerMaster(), true)
+				)
 					return RET_YOUMAYNOTATTACKTHISCREATURE;
 			}
 		}
 	}
 
-	return checkZones && (target->getTile()->hasFlag(TILESTATE_NOPVPZONE) ||
-		(attacker->getTile()->hasFlag(TILESTATE_NOPVPZONE)
-		&& !target->getTile()->hasFlag(TILESTATE_NOPVPZONE) &&
+	return checkZones && (target->getTile()->hasFlag(TILESTATE_OPTIONALZONE) ||
+		(attacker->getTile()->hasFlag(TILESTATE_OPTIONALZONE)
+		&& !target->getTile()->hasFlag(TILESTATE_OPTIONALZONE) &&
 		!target->getTile()->hasFlag(TILESTATE_PROTECTIONZONE))) ?
 		RET_ACTIONNOTPERMITTEDINANOPVPZONE : RET_NOERROR;
 }
@@ -338,12 +339,12 @@ ReturnValue Combat::canTargetCreature(const Player* player, const Creature* targ
 		if(target->getZone() == ZONE_PROTECTION)
 			return RET_YOUMAYNOTATTACKAPERSONINPROTECTIONZONE;
 
-		if(target->getPlayer() || (target->getMaster() && target->getMaster()->getPlayer()))
+		if(target->getPlayer() || target->isPlayerSummon())
 		{
-			if(player->getZone() == ZONE_NOPVP)
+			if(player->getZone() == ZONE_OPTIONAL)
 				return RET_ACTIONNOTPERMITTEDINANOPVPZONE;
 
-			if(target->getZone() == ZONE_NOPVP)
+			if(target->getZone() == ZONE_OPTIONAL)
 				return RET_YOUMAYNOTATTACKAPERSONINPROTECTIONZONE;
 		}
 	}
@@ -351,7 +352,7 @@ ReturnValue Combat::canTargetCreature(const Player* player, const Creature* targ
 	if(player->hasFlag(PlayerFlag_CannotUseCombat) || !target->isAttackable())
 		return target->getPlayer() ? RET_YOUMAYNOTATTACKTHISPLAYER : RET_YOUMAYNOTATTACKTHISCREATURE;
 
-	if(target->getPlayer() && !Combat::isInPvpZone(player, target) && player->getSkullClient(target->getPlayer()) == SKULL_NONE)
+	if(target->getPlayer() && !Combat::isInPvpZone(player, target) && player->getSkullType(target->getPlayer()) == SKULL_NONE)
 	{
 		if(player->getSecureMode() == SECUREMODE_ON)
 			return RET_TURNSECUREMODETOATTACKUNMARKEDPLAYERS;
@@ -365,7 +366,7 @@ ReturnValue Combat::canTargetCreature(const Player* player, const Creature* targ
 
 bool Combat::isInPvpZone(const Creature* attacker, const Creature* target)
 {
-	return attacker->getZone() == ZONE_PVP && target->getZone() == ZONE_PVP;
+	return attacker->getZone() == ZONE_HARDCORE && target->getZone() == ZONE_HARDCORE;
 }
 
 bool Combat::isProtected(Player* attacker, Player* target)
@@ -373,7 +374,7 @@ bool Combat::isProtected(Player* attacker, Player* target)
 	if(attacker->hasFlag(PlayerFlag_CannotAttackPlayer) || !target->isAttackable())
 		return true;
 
-	if(attacker->getZone() == ZONE_PVP && target->getZone() == ZONE_PVP && g_config.getBool(ConfigManager::PVP_TILE_IGNORE_PROTECTION))
+	if(attacker->getZone() == ZONE_HARDCORE && target->getZone() == ZONE_HARDCORE && g_config.getBool(ConfigManager::PVP_TILE_IGNORE_PROTECTION))
 		return false;
 
 	if(attacker->hasCustomFlag(PlayerCustomFlag_IsProtected) || target->hasCustomFlag(PlayerCustomFlag_IsProtected))
@@ -624,7 +625,8 @@ void Combat::combatTileEffects(const SpectatorVec& list, Creature* caster, Tile*
 		if(player)
 		{
 			bool pzLock = false;
-			if(g_game.getWorldType() == WORLD_TYPE_NO_PVP || tile->hasFlag(TILESTATE_NOPVPZONE))
+			if((g_game.getWorldType() == WORLDTYPE_OPTIONAL && !tile->hasFlag(
+				TILESTATE_HARDCOREZONE)) || tile->hasFlag(TILESTATE_OPTIONALZONE))
 			{
 				switch(itemId)
 				{
@@ -1369,15 +1371,25 @@ void CombatArea::setupExtArea(const std::list<uint32_t>& list, uint32_t rows)
 
 bool MagicField::isBlocking(const Creature* creature) const
 {
-	if(id != ITEM_MAGICWALL_SAFE && id != ITEM_WILDGROWTH_SAFE)
+	if(!isUnstepable())
 		return Item::isBlocking(creature);
 
-	return !creature || !creature->getPlayer();
+	if(!creature || !creature->getPlayer())
+		return true;
+
+	uint32_t ownerId = getOwner();
+	if(!ownerId)
+		return false;
+
+	if(Creature* owner = g_game.getCreatureByID(ownerId))
+		return creature->getPlayer()->getGuildEmblem(owner) != EMBLEM_NONE;
+
+	return false;
 }
 
 void MagicField::onStepInField(Creature* creature, bool purposeful/* = true*/)
 {
-	if(id == ITEM_MAGICWALL_SAFE || id == ITEM_WILDGROWTH_SAFE || isBlocking(creature))
+	if(isUnstepable() || isBlocking(creature))
 	{
 		if(!creature->isGhost())
 			g_game.internalRemoveItem(creature, this, 1);
@@ -1392,14 +1404,14 @@ void MagicField::onStepInField(Creature* creature, bool purposeful/* = true*/)
 	if(!it.condition)
 		return;
 
-	Condition* condition = it.condition->clone();
 	uint32_t ownerId = getOwner();
-	if(ownerId && !getTile()->hasFlag(TILESTATE_PVPZONE))
+	Condition* condition = it.condition->clone();
+	if(ownerId && !getTile()->hasFlag(TILESTATE_HARDCOREZONE))
 	{
 		if(Creature* owner = g_game.getCreatureByID(ownerId))
 		{
 			bool harmful = true;
-			if((g_game.getWorldType() == WORLD_TYPE_NO_PVP || getTile()->hasFlag(TILESTATE_NOPVPZONE))
+			if((g_game.getWorldType() == WORLDTYPE_OPTIONAL || getTile()->hasFlag(TILESTATE_OPTIONALZONE))
 				&& (owner->getPlayer() || owner->isPlayerSummon()))
 				harmful = false;
 			else if(Player* targetPlayer = creature->getPlayer())

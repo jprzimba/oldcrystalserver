@@ -279,6 +279,40 @@ enum PlayerSex_t
 	// own use- each female should be even and male odd.
 };
 
+enum WarType_t
+{
+	WAR_FIRST = 0,
+	WAR_GUILD = WAR_FIRST,
+	WAR_ENEMY,
+	WAR_LAST = WAR_ENEMY
+};
+
+struct War_t
+{
+	War_t()
+	{
+		war = 0;
+		type = WAR_FIRST;
+
+		memset(ids, 0, sizeof(ids));
+		memset(frags, 0, sizeof(frags));
+
+		limit = end = status = payment = 0;
+	}
+
+	uint32_t war;
+	WarType_t type;
+
+	uint32_t ids[WAR_LAST + 1];
+	std::string names[WAR_LAST + 1];
+	uint16_t frags[WAR_LAST + 1];
+
+	uint16_t limit;
+	time_t end;
+	int8_t status;
+	uint64_t payment;
+};
+
 struct Outfit_t
 {
 	Outfit_t() {lookHead = lookBody = lookLegs = lookFeet = lookType = lookTypeEx = lookAddons = 0;}

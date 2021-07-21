@@ -49,11 +49,11 @@ enum stackposType_t
 
 enum WorldType_t
 {
-	WORLD_TYPE_FIRST = 1,
-	WORLD_TYPE_NO_PVP = WORLD_TYPE_FIRST,
-	WORLD_TYPE_PVP = 2,
-	WORLD_TYPE_PVP_ENFORCED = 3,
-	WORLD_TYPE_LAST = WORLD_TYPE_PVP_ENFORCED
+	WORLDTYPE_FIRST = 1,
+	WORLDTYPE_OPTIONAL = WORLDTYPE_FIRST,
+	WORLDTYPE_OPEN = 2,
+	WORLDTYPE_HARDCORE = 3,
+	WORLDTYPE_LAST = WORLDTYPE_HARDCORE
 };
 
 enum GameState_t
@@ -154,6 +154,8 @@ class Game
 		std::string getHighscoreString(uint16_t skill);
 		void checkHighscores();
 		bool reloadHighscores();
+
+		bool isSwimmingPool(Item* item, const Tile* tile, bool checkProtection) const;
 
 		void autoSave();
 		void prepareGlobalSave();
@@ -554,9 +556,12 @@ class Game
 		void changeSpeed(Creature* creature, int32_t varSpeedDelta);
 		void internalCreatureChangeOutfit(Creature* creature, const Outfit_t& oufit, bool forced = false);
 		void internalCreatureChangeVisible(Creature* creature, Visible_t visible);
+
 		void updateCreatureSkull(Creature* creature);
-		
-		void sendNoticeBox(const std::string& _datadir, Player* player);
+		void updateCreatureShield(Creature* creature);
+		void updateCreatureEmblem(Creature* creature);
+
+		void sendNoticeBox(Player* player);
 
 		GameState_t getGameState() const {return gameState;}
 		void setGameState(GameState_t newState);

@@ -165,6 +165,17 @@ bool ChatChannel::talk(Player* player, SpeakClasses type, const std::string& tex
 	return true;
 }
 
+bool ChatChannel::talk(std::string nick, SpeakClasses type, std::string text)
+{
+	for(UsersMap::iterator it = m_users.begin(); it != m_users.end(); ++it)
+		it->second->sendChannelMessage(nick, text, type, m_id);
+
+	if(hasFlag(CHANNELFLAG_LOGGED) && m_file->is_open())
+		*m_file << "[" << formatDate() << "] " << nick << ": " << text << std::endl;
+
+	return true;
+}
+
 Chat::~Chat()
 {
 	for(GuildChannelMap::iterator it = m_guildChannels.begin(); it != m_guildChannels.end(); ++it)
@@ -617,9 +628,14 @@ bool Chat::talkToChannel(Player* player, SpeakClasses type, const std::string& t
 	{
 		if(player->getGuildLevel() < GUILDLEVEL_LEADER)
 		{
-			sprintf(buffer, "%s has left the guild.", player->getName().c_str());
-			channel->talk(player, SPEAK_CHANNEL_W, buffer);
-			player->leaveGuild();
+			if(!player->hasEnemy())
+			{
+				sprintf(buffer, "%s has left the guild.", player->getName().c_str());
+				channel->talk(player, SPEAK_CHANNEL_W, buffer);
+				player->leaveGuild();
+			}
+			else
+				player->sendCancel("Your guild is currently at war, you cannot leave it right now.");
 		}
 		else
 			player->sendCancel("You cannot leave your guild because you are the leader of it, you have to pass the leadership to another member of your guild or disband the guild.");
@@ -765,9 +781,14 @@ bool Chat::talkToChannel(Player* player, SpeakClasses type, const std::string& t
 							{
 								if(player->getGuildLevel() > paramPlayer->getGuildLevel())
 								{
-									sprintf(buffer, "%s has been kicked from the guild by %s.", paramPlayer->getName().c_str(), player->getName().c_str());
-									channel->talk(player, SPEAK_CHANNEL_W, buffer);
-									paramPlayer->leaveGuild();
+									if(!player->hasEnemy())
+									{
+										sprintf(buffer, "%s has been kicked from the guild by %s.", paramPlayer->getName().c_str(), player->getName().c_str());
+										channel->talk(player, SPEAK_CHANNEL_W, buffer);
+										paramPlayer->leaveGuild();
+									}
+									else
+										player->sendCancel("Your guild is currently at war, you cannot kick right now.");
 								}
 								else
 									player->sendCancel("You may only kick players with a guild rank below your.");

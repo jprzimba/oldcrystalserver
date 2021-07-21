@@ -18,8 +18,12 @@
 #ifndef __IOGUILD__
 #define __IOGUILD__
 #include "otsystem.h"
+#include "enums.h"
 
-#include "player.h"
+struct DeathEntry;
+typedef std::vector<DeathEntry> DeathList;
+
+class Player;
 class IOGuild
 {
 	public:
@@ -62,6 +66,9 @@ class IOGuild
 
 		bool swapGuildIdToOwner(uint32_t& value);
 		bool updateOwnerId(uint32_t guild, uint32_t guid);
+
+		bool war(War_t& enemy);
+		void frag(Player* player, uint64_t deathId, const DeathList& list);
 
 	private:
 		IOGuild() {}

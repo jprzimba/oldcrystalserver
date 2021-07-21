@@ -21,7 +21,9 @@
 
 #include "configmanager.h"
 #include "game.h"
+#include "chat.h"
 
+extern Chat g_chat;
 extern Game g_game;
 extern ConfigManager g_config;
 
@@ -399,3 +401,122 @@ std::string IOGuild::getMotd(uint32_t guild)
 	result->free();
 	return motd;
 }
+
+bool IOGuild::war(War_t& enemy)
+{
+	Database* db = Database::getInstance();
+	DBResult* result;
+
+	DBQuery query;
+	query << "SELECT `g`.`name` AS `guild_name`, `e`.`name` AS `enemy_name`, `w`.* FROM `guild_wars` w INNER JOIN `guilds` g ON `w`.`guild_id` = `g`.`id` INNER JOIN `guilds` e ON `w`.`enemy_id` = `e`.`id` WHERE `w`.`id` = " << enemy.war;
+	if(!(result = db->storeQuery(query.str())))
+		return false;
+
+	enemy.ids[WAR_GUILD] = result->getDataInt("guild_id");
+	enemy.ids[WAR_ENEMY] = result->getDataInt("enemy_id");
+	enemy.names[WAR_GUILD] = result->getDataString("guild_name");
+	enemy.names[WAR_ENEMY] = result->getDataString("enemy_name");
+
+	enemy.frags[WAR_GUILD] = result->getDataInt("guild_kills");
+	enemy.frags[WAR_ENEMY] = result->getDataInt("enemy_kills");
+	enemy.frags[enemy.type]++;
+
+	enemy.limit = result->getDataInt("frags");
+	enemy.end = result->getDataInt("end");
+	enemy.status = result->getDataInt("status");
+	enemy.payment = result->getDataInt("payment");
+
+	result->free();
+	if(enemy.frags[WAR_GUILD] < enemy.limit && enemy.frags[WAR_ENEMY] < enemy.limit && (enemy.status != 1 || !enemy.end || enemy.end > time(NULL)))
+	{
+		query.str("");
+		query << "UPDATE `guild_wars` SET `guild_kills` = " << enemy.frags[WAR_GUILD] << ", `enemy_kills` = " << enemy.frags[WAR_ENEMY] << " WHERE `id` = " << enemy.war;
+		return db->executeQuery(query.str());
+	}
+
+	query.str("");
+	query << "UPDATE `guilds` SET `balance` = `balance` + " << (enemy.payment * 2) << " WHERE `id` = " << enemy.ids[enemy.type];
+	if(!db->executeQuery(query.str()))
+		return false;
+
+	query.str("");
+	query << "UPDATE `guild_wars` SET `guild_kills` = " << enemy.frags[WAR_GUILD] << ", `enemy_kills` = " << enemy.frags[WAR_ENEMY] << ", `end` = " << time(NULL) << ", `status` = 5 WHERE `id` = " << enemy.war;
+	if(!db->executeQuery(query.str()))
+		return false;
+
+	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
+	{
+		if(it->second->isRemoved())
+			continue;
+
+		bool update = false;
+		if(it->second->getGuildId() == enemy.ids[WAR_GUILD])
+		{
+			it->second->removeEnemy(enemy.ids[WAR_ENEMY]);
+			update = true;
+		}
+		else if(it->second->getGuildId() == enemy.ids[WAR_ENEMY])
+		{
+			it->second->removeEnemy(enemy.ids[WAR_GUILD]);
+			update = true;
+		}
+
+		if(update)
+			g_game.updateCreatureEmblem(it->second);
+	}
+
+	std::stringstream s;
+	s << enemy.names[enemy.type] << " has just won the war against " << enemy.names[enemy.type == WAR_GUILD] << ".";
+	return g_game.broadcastMessage(s.str().c_str(), MSG_EVENT_ADVANCE);
+}
+
+void IOGuild::frag(Player* player, uint64_t deathId, const DeathList& list)
+{
+	Database* db = Database::getInstance();
+	War_t war;
+
+	std::stringstream s;
+	for(DeathList::const_iterator it = list.begin(); it != list.end(); )
+	{
+		if(it->isLast())
+			war = it->getWar();
+
+		Creature* creature = it->getKillerCreature();
+		if(it != list.begin())
+		{
+			++it;
+			if(it == list.end())
+				s << " and ";
+			else
+				s << ", ";
+		}
+		else
+			++it;
+
+		s << creature->getName();
+	}
+
+	std::string killers = s.str();
+	s.str("");
+
+	ChatChannel* channel = NULL;
+	if((channel = g_chat.getChannel(player, CHANNEL_GUILD)))
+	{
+		s << "Guild member " << player->getName() << " was killed by " << killers << ". The new score is " << war.frags[
+			war.type == WAR_GUILD] << ":" << war.frags[war.type] << " frags (limit " << war.limit << ").";
+		channel->talk("", SPEAK_CHANNEL_RA, s.str());
+	}
+
+	s.str("");
+	if((channel = g_chat.getChannel(list[0].getKillerCreature()->getPlayer(), CHANNEL_GUILD)))
+	{
+		s << "Opponent " << player->getName() << " was killed by " << killers << ". The new score is " << war.frags[
+			war.type] << ":" << war.frags[war.type == WAR_GUILD] << " frags (limit " << war.limit << ").";
+		channel->talk("", SPEAK_CHANNEL_RA, s.str());
+	}
+
+	DBQuery query;
+	query << "INSERT INTO `guild_kills` (`guild_id`, `war_id`, `death_id`) VALUES (" << war.ids[war.type] << ", " << war.war << ", " << deathId << ");";
+	db->executeQuery(query.str());
+}
+

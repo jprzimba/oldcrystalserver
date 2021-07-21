@@ -57,14 +57,6 @@ enum lootDrop_t
 	LOOT_DROP_NONE
 };
 
-enum killflags_t
-{
-	KILLFLAG_NONE = 0,
-	KILLFLAG_LASTHIT = 1 << 0,
-	KILLFLAG_JUSTIFY = 1 << 1,
-	KILLFLAG_UNJUSTIFIED = 1 << 2
-};
-
 enum Visible_t
 {
 	VISIBLE_NONE = 0,
@@ -90,25 +82,41 @@ struct DeathLessThan;
 struct DeathEntry
 {
 		DeathEntry(std::string name, int32_t dmg):
-			data(name), damage(dmg), unjustified(false) {}
+			data(name), damage(dmg), last(false), justify(false), unjustified(false) {}
 		DeathEntry(Creature* killer, int32_t dmg):
-			data(killer), damage(dmg), unjustified(false) {}
-		void setUnjustified(bool v) {unjustified = v;}
+			data(killer), damage(dmg), last(false), justify(false), unjustified(false) {}
 
 		bool isCreatureKill() const {return data.type() == typeid(Creature*);}
 		bool isNameKill() const {return !isCreatureKill();}
+
+		void setWar(War_t v) {war = v;}
+		War_t getWar() const {return war;}
+
+		void setLast() {last = true;}
+		bool isLast() const {return last;}
+
+		void setJustify() {justify = true;}
+		bool isJustify() const {return justify;}
+
+		void setUnjustified() {unjustified = true;}
 		bool isUnjustified() const {return unjustified;}
 
 		const std::type_info& getKillerType() const {return data.type();}
+		int32_t getDamage() const {return damage;}
+
 		Creature* getKillerCreature() const {return boost::any_cast<Creature*>(data);}
 		std::string getKillerName() const {return boost::any_cast<std::string>(data);}
 
 	protected:
+		friend struct DeathLessThan;
+
 		boost::any data;
 		int32_t damage;
-		bool unjustified;
+		War_t war;
 
-		friend struct DeathLessThan;
+		bool last;
+		bool justify;
+		bool unjustified;
 };
 
 struct DeathLessThan
@@ -360,7 +368,7 @@ class Creature : public AutoId, virtual public Thing
 		virtual void onSummonAttackedCreatureDrain(Creature* summon, Creature* target, int32_t points) {}
 		virtual void onTargetCreatureGainHealth(Creature* target, int32_t points);
 		virtual void onAttackedCreatureKilled(Creature* target);
-		virtual bool onKilledCreature(Creature* target, uint32_t& flags);
+		virtual bool onKilledCreature(Creature* target, DeathEntry& entry);
 		virtual void onGainExperience(double& gainExp, bool fromMonster, bool multiplied);
 		virtual void onGainSharedExperience(double& gainExp, bool fromMonster, bool multiplied);
 		virtual void onAttackedCreatureBlockHit(Creature* target, BlockType_t blockType) {}
@@ -407,11 +415,15 @@ class Creature : public AutoId, virtual public Thing
 
 		virtual void setSkull(Skulls_t newSkull) {skull = newSkull;}
 		virtual Skulls_t getSkull() const {return skull;}
-		virtual Skulls_t getSkullClient(const Creature* creature) const {return creature->getSkull();}
+		virtual Skulls_t getSkullType(const Creature* creature) const {return creature->getSkull();}
 
 		virtual void setShield(PartyShields_t newPartyShield) {partyShield = newPartyShield;}
 		virtual PartyShields_t getShield() const {return partyShield;}
 		virtual PartyShields_t getPartyShield(const Creature* creature) const {return creature->getShield();}
+
+		virtual void setEmblem(GuildEmblems_t newGuildEmblem) {guildEmblem = newGuildEmblem;}
+		virtual GuildEmblems_t getEmblem() const {return guildEmblem;}
+		virtual GuildEmblems_t getGuildEmblem(const Creature* creature) const {return creature->getEmblem();}
 
 		void setDropLoot(lootDrop_t _lootDrop) {lootDrop = _lootDrop;}
 		void setLossSkill(bool _skillLoss) {skillLoss = _skillLoss;}
@@ -476,6 +488,7 @@ class Creature : public AutoId, virtual public Thing
 		lootDrop_t lootDrop;
 		Skulls_t skull;
 		PartyShields_t partyShield;
+		GuildEmblems_t guildEmblem;
 		Direction direction;
 		ConditionList conditions;
 		LightInfo internalLight;

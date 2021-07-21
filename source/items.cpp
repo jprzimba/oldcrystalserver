@@ -38,7 +38,7 @@ ItemType::ItemType()
 	type = ITEM_TYPE_NONE;
 	stackable = useable = alwaysOnTop = lookThrough = pickupable = rotable = hasHeight = forceSerialize = false;
 	blockSolid = blockProjectile = blockPathFind = allowPickupable = false;
-	moveable = true;
+	moveable = walkStack = true;
 	alwaysOnTopOrder = 0;
 	rotateTo = 0;
 
@@ -1709,6 +1709,11 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 			{
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
 					it.transformToFree = intValue;
+			}
+			else if(tmpStrValue == "walkstack")
+			{
+				if(readXMLInteger(itemAttributesNode, "value", intValue))
+					it.walkStack = (intValue != 0);
 			}
 			else
 				std::clog << "[Warning - Items::loadFromXml] Unknown key value " << strValue << std::endl;

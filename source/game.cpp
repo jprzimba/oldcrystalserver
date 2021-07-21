@@ -35,6 +35,7 @@
 #include "ioguild.h"
 
 #include "items.h"
+#include "trashholder.h"
 #include "container.h"
 #include "monsters.h"
 
@@ -73,7 +74,7 @@ extern GlobalEvents* g_globalEvents;
 Game::Game()
 {
 	gameState = GAME_STATE_NORMAL;
-	worldType = WORLD_TYPE_PVP;
+	worldType = WORLDTYPE_OPEN;
 	map = NULL;
 	playersRecord = lastStageLevel = 0;
 	for(int32_t i = 0; i < 3; i++)
@@ -502,6 +503,21 @@ void Game::refreshMap(RefreshTiles::iterator* it/* = NULL*/, uint32_t limit/* = 
 			}
 		}
 	}
+}
+
+bool Game::isSwimmingPool(Item* item, const Tile* tile, bool checkProtection) const
+{
+	if(!tile)
+		return false;
+
+	TrashHolder* trashHolder = NULL;
+	if(!item)
+		trashHolder = tile->getTrashHolder();
+	else
+		trashHolder = item->getTrashHolder();
+
+	return trashHolder && trashHolder->getEffect() == MAGIC_EFFECT_LOSE_ENERGY && (!checkProtection
+		|| tile->getZone() == ZONE_PROTECTION || tile->getZone() == ZONE_OPTIONAL);
 }
 
 Cylinder* Game::internalGetCylinder(Player* player, const Position& pos)
@@ -1041,8 +1057,8 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 		{
 			Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::playerAutoWalk,
 				this, player->getID(), listDir)));
-			SchedulerTask* task = createSchedulerTask(player->getStepDuration(), boost::bind(&Game::playerMoveCreature, this,
-				playerId, movingCreatureId, movingCreaturePos, toPos));
+			SchedulerTask* task = createSchedulerTask(player->getStepDuration(),
+				boost::bind(&Game::playerMoveCreature, this, playerId, movingCreatureId, movingCreaturePos, toPos));
 
 			player->setNextWalkActionTask(task);
 			return true;
@@ -1067,9 +1083,8 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 
 	//check throw distance
 	const Position& pos = movingCreature->getPosition();
-	if(!player->hasCustomFlag(PlayerCustomFlag_CanThrowAnywhere) && ((std::abs(pos.x - toPos.x) > movingCreature->getThrowRange()) || (std::abs(
-		pos.y - toPos.y) > movingCreature->getThrowRange()) || (std::abs(
-		pos.z - toPos.z) * 4 > movingCreature->getThrowRange())))
+	if(!player->hasCustomFlag(PlayerCustomFlag_CanThrowAnywhere) && ((std::abs(pos.x - toPos.x) > movingCreature->getThrowRange()) ||
+		(std::abs(pos.y - toPos.y) > movingCreature->getThrowRange()) || (std::abs(pos.z - toPos.z) * 4 > movingCreature->getThrowRange())))
 	{
 		player->sendCancelMessage(RET_DESTINATIONOUTOFREACH);
 		return false;
@@ -1083,19 +1098,33 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 			return false;
 		}
 
-		if((movingCreature->getZone() == ZONE_PROTECTION || movingCreature->getZone() == ZONE_NOPVP)
-			&& !toTile->hasFlag(TILESTATE_NOPVPZONE) && !toTile->hasFlag(TILESTATE_PROTECTIONZONE)
+		if((movingCreature->getZone() == ZONE_PROTECTION || movingCreature->getZone() == ZONE_OPTIONAL)
+			&& !toTile->hasFlag(TILESTATE_OPTIONALZONE) && !toTile->hasFlag(TILESTATE_PROTECTIONZONE)
 			&& !player->hasFlag(PlayerFlag_IgnoreProtectionZone))
 		{
 			player->sendCancelMessage(RET_NOTPOSSIBLE);
 			return false;
 		}
 
-		if(toTile->getCreatures() && !toTile->getCreatures()->empty()
-			&& !player->hasFlag(PlayerFlag_CanPushAllCreatures))
+		if(!player->hasFlag(PlayerFlag_CanPushAllCreatures))
 		{
-			player->sendCancelMessage(RET_NOTPOSSIBLE);
-			return false;
+			if(toTile->getCreatures() && !toTile->getCreatures()->empty())
+			{
+				player->sendCancelMessage(RET_NOTPOSSIBLE);
+				return false;
+			}
+
+			uint32_t protectionLevel = g_config.getNumber(ConfigManager::PROTECTION_LEVEL);
+			if(player->getLevel() < protectionLevel && player->getVocation()->isAttackable())
+			{
+				Player* movingPlayer = movingCreature->getPlayer();
+				if(movingPlayer && movingPlayer->getLevel() >= protectionLevel
+					&& movingPlayer->getVocation()->isAttackable())
+				{
+					player->sendCancelMessage(RET_PLAYERISNOTREACHABLE);
+					return false;
+				}
+			}
 		}
 	}
 
@@ -1125,7 +1154,7 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 			return true;
 		}
 
-		internalTeleport(movingCreature, toTile->getPosition(), true);
+		internalTeleport(movingCreature, toTile->getPosition(), false);
 		return true;
 	}
 
@@ -2180,6 +2209,7 @@ bool Game::gmBroadcastMessage(Player* player, const std::string& text)
 	std::clog << "" << player->getName() << " broadcasted: \"" << text << "\"." << std::endl;
 	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
 		(*it).second->sendCreatureSay(player, SPEAK_BROADCAST, text);
+
 	return true;
 }
 
@@ -4812,6 +4842,32 @@ void Game::updateCreatureSkull(Creature* creature)
 	}
 }
 
+void Game::updateCreatureShield(Creature* creature)
+{
+	const SpectatorVec& list = getSpectators(creature->getPosition());
+
+	//send to client
+	Player* tmpPlayer = NULL;
+	for(SpectatorVec::const_iterator it = list.begin(); it != list.end(); ++it)
+	{
+		if((tmpPlayer = (*it)->getPlayer()))
+			tmpPlayer->sendCreatureShield(creature);
+	}
+}
+
+void Game::updateCreatureEmblem(Creature* creature)
+{
+	const SpectatorVec& list = getSpectators(creature->getPosition());
+
+	//send to client
+	Player* tmpPlayer = NULL;
+	for(SpectatorVec::const_iterator it = list.begin(); it != list.end(); ++it)
+	{
+		if((tmpPlayer = (*it)->getPlayer()))
+			tmpPlayer->sendCreatureEmblem(creature);
+	}
+}
+
 bool Game::playerInviteToParty(uint32_t playerId, uint32_t invitedId)
 {
 	Player* player = getPlayerByID(playerId);
@@ -6203,7 +6259,7 @@ void Game::showHotkeyUseMessage(Player* player, Item* item)
 	player->sendTextMessage(MSG_INFO_DESCR, ss.str());
 }
 
-void Game::sendNoticeBox(const std::string& _datadir, Player* player)
+void Game::sendNoticeBox(Player* player)
 {	
 	
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "notices.xml").c_str());
@@ -6221,18 +6277,18 @@ void Game::sendNoticeBox(const std::string& _datadir, Player* player)
 
 		p = root->children;
 		std::string lastmsg;
-		while(p){
+		while(p)
+		{
 			if(xmlStrcmp(p->name, (const xmlChar*)"notice"))
 			{
 				std::string noticemsg;
-				
 				if(readXMLString(p, "id", noticemsg))
-				{
 					lastmsg += noticemsg + "\n";
-				}
 			}
+
 			p = p->next;
 		}
+
 		player->sendFYIBox(lastmsg);
 		xmlFreeDoc(doc);
 	}	

@@ -128,6 +128,7 @@ typedef std::map<uint32_t, uint32_t> MuteCountMap;
 typedef std::list<std::string> LearnedInstantSpellList;
 typedef std::list<uint32_t> InvitedToGuildsList;
 typedef std::list<Party*> PartyList;
+typedef std::map<uint32_t, War_t> WarMap;
 
 #define SPEED_MAX 9999
 #define SPEED_MIN 10
@@ -200,6 +201,7 @@ class Player : public Creature, public Cylinder
 
 		GuildLevel_t getGuildLevel() const {return guildLevel;}
 		bool setGuildLevel(GuildLevel_t newLevel, uint32_t rank = 0);
+		GuildEmblems_t getGuildEmblem(const Creature* creature) const;
 
 		const std::string& getGuildName() const {return guildName;}
 		void setGuildName(const std::string& newName) {guildName = newName;}
@@ -268,6 +270,16 @@ class Player : public Creature, public Cylinder
 
 		bool isPremium() const;
 		int32_t getPremiumDays() const {return premiumDays;}
+
+		bool hasEnemy() const {return !warMap.empty();}
+		bool getEnemy(const Player* player, War_t& data) const;
+
+		bool isEnemy(const Player* player, bool allies) const;
+		bool isAlly(const Player* player) const;
+
+		void addEnemy(uint32_t guild, War_t war)
+			{warMap[guild] = war;}
+		void removeEnemy(uint32_t guild) {warMap.erase(guild);}
 
 		uint32_t getLevel() const {return level;}
 		uint64_t getExperience() const {return experience;}
@@ -440,7 +452,7 @@ class Player : public Creature, public Cylinder
 		void removeExperience(uint64_t exp, bool updateStats = true);
 		void addManaSpent(uint64_t amount, bool useMultiplier = true);
 		void addSkillAdvance(skills_t skill, uint32_t count, bool useMultiplier = true);
-		bool addUnjustifiedKill(const Player* attacked);
+		bool addUnjustifiedKill(const Player* attacked, bool countNow);
 
 		virtual int32_t getArmor() const;
 		virtual int32_t getDefense() const;
@@ -448,7 +460,7 @@ class Player : public Creature, public Cylinder
 		virtual float getDefenseFactor() const;
 
 		void addExhaust(uint32_t ticks, Exhaust_t type);
-		void addInFightTicks(bool pzLock = false);
+		void addInFightTicks(bool pzLock, int32_t ticks = 0);
 		void addDefaultRegeneration(uint32_t addTicks);
 
 		virtual double getGainedExperience(Creature* attacker) const;
@@ -465,7 +477,7 @@ class Player : public Creature, public Cylinder
 		virtual void onAttackedCreatureDrain(Creature* target, int32_t points);
 		virtual void onSummonAttackedCreatureDrain(Creature* summon, Creature* target, int32_t points);
 		virtual void onTargetCreatureGainHealth(Creature* target, int32_t points);
-		virtual bool onKilledCreature(Creature* target, uint32_t& flags);
+		virtual bool onKilledCreature(Creature* target, DeathEntry& entry);
 		virtual void onGainExperience(double& gainExp, bool fromMonster, bool multiplied);
 		virtual void onGainSharedExperience(double& gainExp, bool fromMonster, bool multiplied);
 		virtual void onAttackedCreatureBlockHit(Creature* target, BlockType_t blockType);
@@ -477,7 +489,7 @@ class Player : public Creature, public Cylinder
 
 		virtual void getCreatureLight(LightInfo& light) const;
 		Skulls_t getSkull() const;
-		Skulls_t getSkullClient(const Creature* creature) const;
+		Skulls_t getSkullType(const Creature* creature) const;
 
 		bool hasAttacked(const Player* attacked) const;
 		void addAttacked(const Player* attacked);
@@ -525,8 +537,11 @@ class Player : public Creature, public Cylinder
 		void sendCreatureChangeVisible(const Creature* creature, Visible_t visible);
 		void sendCreatureLight(const Creature* creature)
 			{if(client) client->sendCreatureLight(creature);}
+
 		void sendCreatureShield(const Creature* creature)
 			{if(client) client->sendCreatureShield(creature);}
+		void sendCreatureEmblem(const Creature* creature)
+			{if(client) client->sendCreatureEmblem(creature);}
 
 		//container
 		void sendAddContainerItem(const Container* container, const Item* item);
@@ -893,6 +908,8 @@ class Player : public Creature, public Cylinder
 		PartyList invitePartyList;
 		OutfitMap outfits;
 		LearnedInstantSpellList learnedInstantSpellList;
+
+		WarMap warMap;
 
 		friend class Game;
 		friend class LuaScriptInterface;
