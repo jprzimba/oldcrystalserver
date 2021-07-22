@@ -74,6 +74,7 @@ class TalkAction : public Event
 
 		int32_t executeSay(Creature* creature, const std::string& words, std::string param, uint16_t channel);
 
+		std::string getFunctionName() const {return m_functionName;}
 		std::string getWords() const {return m_words;}
 		void setWords(const std::string& words) {m_words = words;}
 
@@ -107,40 +108,9 @@ class TalkAction : public Event
 		static TalkFunction diagnostics;
 		static TalkFunction addSkill;
 		static TalkFunction ghost;
+		static TalkFunction software;
 
-		static TalkFunction setWorldType;
-		static TalkFunction addPlayerPremium;
-		static TalkFunction openServer;
-		static TalkFunction closeServer;
-		static TalkFunction broadcastMessage;
-		static TalkFunction broadcastClass;
-		static TalkFunction placeNpc;
-		static TalkFunction placeMonster;
-		static TalkFunction placeSummon;
-		static TalkFunction cleanMap;
-		static TalkFunction multiClientCheck;
-		static TalkFunction kickPlayer;
-		static TalkFunction newType;
-		static TalkFunction testCommand;
-		static TalkFunction testTutorialCommand;
-		static TalkFunction creatorServer;
-		static TalkFunction showExpForLevel;
-		static TalkFunction showManaForLevel;
-		static TalkFunction serverInfo;
-		static TalkFunction pvpInformation;
-		static TalkFunction checkMoney;
-		static TalkFunction showWorldUpTime;
-		static TalkFunction showNotices;
-		static TalkFunction whoIsOnline;
-		static TalkFunction goUp;
-		static TalkFunction goDown;
-		static TalkFunction teleportToTemple;
-		static TalkFunction pushPlayer;
-		static TalkFunction teleportGoto;
-		static TalkFunction teleportNTiles;
-		static TalkFunction teleportToTown;
-
-		std::string m_words;
+		std::string m_words, m_functionName;
 		TalkFunction* m_function;
 		TalkActionFilter m_filter;
 		uint32_t m_access;

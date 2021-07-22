@@ -28,7 +28,7 @@
 #define SOFTWARE_DEVELOPERS "Tryller"
 #define CREATOR_INFO "Server created by Tryller."
 
-#define VERSION_DATABASE 23
+#define VERSION_DATABASE 26
 
 #undef MULTI_SQL_DRIVERS
 #define SQL_DRIVERS __USE_SQLITE__+__USE_MYSQL__

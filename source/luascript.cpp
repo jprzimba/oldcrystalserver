@@ -6572,8 +6572,9 @@ int32_t LuaScriptInterface::luaGetMonsterInfo(lua_State* L)
 int32_t LuaScriptInterface::luaGetTalkActionList(lua_State* L)
 {
 	//getTalkactionList()
-	TalkActionsMap::const_iterator it = g_talkActions->getFirstTalk();
 	lua_newtable(L);
+
+	TalkActionsMap::const_iterator it = g_talkActions->getFirstTalk();
 	for(uint32_t i = 1; it != g_talkActions->getLastTalk(); ++it, ++i)
 	{
 		createTable(L, i);
@@ -6581,8 +6582,11 @@ int32_t LuaScriptInterface::luaGetTalkActionList(lua_State* L)
 		setField(L, "access", it->second->getAccess());
 
 		setFieldBool(L, "log", it->second->isLogged());
+		setFieldBool(L, "logged", it->second->isLogged());
 		setFieldBool(L, "hide", it->second->isHidden());
+		setFieldBool(L, "hidden", it->second->isHidden());
 
+		setField(L, "functionName", it->second->getFunctionName());
 		setField(L, "channel", it->second->getChannel());
 		pushTable(L);
 	}

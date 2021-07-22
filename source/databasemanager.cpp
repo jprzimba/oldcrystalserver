@@ -1024,6 +1024,140 @@ uint32_t DatabaseManager::updateDatabase()
 			return 23;
 		}
 
+		case 23:
+		{
+			std::clog << "Updating database to version 24..." << std::endl;
+			query << "ALTER TABLE `guilds` ADD `checkdata` ";
+			if(db->getDatabaseEngine() == DATABASE_ENGINE_SQLITE)
+				query << "INTEGER NOT NULL;";
+			else
+				query << "INT NOT NULL AFTER `creationdata`;";
+
+			db->executeQuery(query.str());
+			query.str("");
+			registerDatabaseConfig("db_version", 24);
+			return 24;
+		}
+
+		case 24:
+		{
+			std::clog << "Updating database to version 25..." << std::endl;
+			switch(db->getDatabaseEngine())
+			{
+				case DATABASE_ENGINE_SQLITE:
+				{
+					db->executeQuery("CREATE TABLE IF NOT EXISTS `guild_wars` (\
+						`id` INTEGER NOT NULL,\
+						`guild_id` INT NOT NULL,\
+						`enemy_id` INT NOT NULL,\
+						`begin` BIGINT NOT NULL DEFAULT '0',\
+						`end` BIGINT NOT NULL DEFAULT '0',\
+						`frags` INT NOT NULL DEFAULT '0',\
+						`payment` BIGINT NOT NULL DEFAULT '0',\
+						`guild_kills` INT NOT NULL DEFAULT '0',\
+						`enemy_kills` INT NOT NULL DEFAULT '0',\
+						`status` TINYINT(1) NOT NULL DEFAULT '0',\
+						PRIMARY KEY (`id`),\
+						FOREIGN KEY (`guild_id`) REFERENCES `guilds`(`id`),\
+						FOREIGN KEY (`enemy_id`) REFERENCES `guilds`(`id`)\
+						);");
+
+					db->executeQuery("CREATE TABLE IF NOT EXISTS `guild_kills` (\
+						`id` INT NOT NULL PRIMARY KEY,\
+						`guild_id` INT NOT NULL,\
+						`war_id` INT NOT NULL,\
+						`death_id` INT NOT NULL\
+					);");
+					
+					db->executeQuery("CREATE TABLE IF NOT EXISTS `player_statements` (\
+						`id` INTEGER PRIMARY KEY,\
+						`player_id` INTEGER NOT NULL,\
+						`channel_id` INTEGER NOT NULL DEFAULT `0`,\
+						`text` VARCHAR (255) NOT NULL,\
+						`date` INTEGER NOT NULL DEFAULT `0`,\
+						FOREIGN KEY (`player_id`) REFERENCES `players` (`id`)\
+						);");
+
+					db->executeQuery("ALTER TABLE `guilds` ADD `balance` BIGINT NOT NULL DEFAULT '0';");
+					db->executeQuery("ALTER TABLE `killers` ADD `war` BIGINT NOT NULL DEFAULT 0;");
+					break;
+				}
+
+				default:
+					break;
+			}
+
+			registerDatabaseConfig("db_version", 25);
+			return 25;
+		}
+
+		case 25:
+		{
+			std::clog << "Updating database to version 26..." << std::endl;
+			if(db->getDatabaseEngine() == DATABASE_ENGINE_MYSQL)
+			{
+				query << "CREATE TABLE IF NOT EXISTS `player_statements`\
+(\
+	`id` INT NOT NULL AUTO_INCREMENT,\
+	`player_id` INT NOT NULL,\
+	`channel_id` INT NOT NULL DEFAULT 0,\
+	`text` VARCHAR (255) NOT NULL,\
+	`date` BIGINT NOT NULL DEFAULT 0,\
+	PRIMARY KEY (`id`), KEY (`player_id`), KEY (`channel_id`),\
+	FOREIGN KEY (`player_id`) REFERENCES `players`(`id`) ON DELETE CASCADE\
+) ENGINE = InnoDB;";
+
+				db->executeQuery(query.str());
+				query.str("");
+
+				query << "CREATE TABLE IF NOT EXISTS `guild_wars`\
+(\
+	`id` INT NOT NULL AUTO_INCREMENT,\
+	`guild_id` INT NOT NULL,\
+	`enemy_id` INT NOT NULL,\
+	`begin` BIGINT NOT NULL DEFAULT 0,\
+	`end` BIGINT NOT NULL DEFAULT 0,\
+	`frags` INT UNSIGNED NOT NULL DEFAULT 0,\
+	`payment` BIGINT UNSIGNED NOT NULL DEFAULT 0,\
+	`guild_kills` INT UNSIGNED NOT NULL DEFAULT 0,\
+	`enemy_kills` INT UNSIGNED NOT NULL DEFAULT 0,\
+	`status` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,\
+	PRIMARY KEY (`id`), KEY `status` (`status`),\
+	KEY `guild_id` (`guild_id`), KEY `enemy_id` (`enemy_id`),\
+	FOREIGN KEY (`guild_id`) REFERENCES `guilds`(`id`) ON DELETE CASCADE,\
+	FOREIGN KEY (`enemy_id`) REFERENCES `guilds`(`id`) ON DELETE CASCADE\
+) ENGINE=InnoDB;";
+
+				db->executeQuery(query.str());
+				query.str("");
+
+				query << "CREATE TABLE IF NOT EXISTS `guild_kills`\
+(\
+	`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,\
+	`guild_id` INT NOT NULL,\
+	`war_id` INT NOT NULL,\
+	`death_id` INT NOT NULL,\
+	FOREIGN KEY (`guild_id`) REFERENCES `guilds`(`id`) ON DELETE CASCADE,\
+	FOREIGN KEY (`war_id`) REFERENCES `guild_wars`(`id`) ON DELETE CASCADE,\
+	FOREIGN KEY (`death_id`) REFERENCES `player_deaths`(`id`) ON DELETE CASCADE\
+) ENGINE = InnoDB;";
+
+				db->executeQuery(query.str());
+				query.str("");
+
+				query << "ALTER TABLE `killers` ADD `war` INT NOT NULL DEFAULT 0;";
+				db->executeQuery(query.str());
+				query.str("");
+
+				query << "ALTER TABLE `guilds` ADD `balance` BIGINT UNSIGNED NOT NULL AFTER `motd`;";
+				db->executeQuery(query.str());
+				query.str("");
+			}
+
+			registerDatabaseConfig("db_version", 26);
+			return 26;
+		}
+
 		default:
 			break;
 	}

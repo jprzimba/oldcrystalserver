@@ -7,7 +7,6 @@ local reloadInfo = {
 	{RELOAD_GLOBALEVENTS, "globalevents", "global events", "globalevent", "global event"},
 	{RELOAD_GROUPS, "groups", "playergroups", "group"},
 	{RELOAD_HIGHSCORES, "highscores", "scores", "highscore", "score"},
-	{RELOAD_HOUSEPRICES, "houseprices", "house prices", "prices"},
 	{RELOAD_ITEMS, "items", "item"},
 	{RELOAD_MONSTERS, "monsters", "monster"},
 	{RELOAD_MOVEEVENTS, "moveevents", "move events", "movements", "move", "movement"},

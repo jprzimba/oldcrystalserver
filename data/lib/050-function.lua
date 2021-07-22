@@ -660,3 +660,11 @@ function getMonsterSummonList(name)
 	local monster = getMonsterInfo(name)
 	return monster and monster.summons or false
 end
+
+function doNumberFormat(i)
+	local str, found = string.gsub(i, "(%d)(%d%d%d)$", "%1,%2", 1), 0
+	repeat
+		str, found = string.gsub(ret, "(%d)(%d%d%d),", "%1,%2,", 1)
+	until found == 0
+	return str
+end

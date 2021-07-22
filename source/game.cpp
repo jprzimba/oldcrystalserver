@@ -1876,17 +1876,13 @@ uint32_t Game::getMoney(const Cylinder* cylinder)
 
 	std::list<Container*> listContainer;
 	Container* tmpContainer = NULL;
-
-	Thing* thing = NULL;
 	Item* item = NULL;
 
-	uint32_t moneyCount = 0;
+	Thing* thing = NULL;
+	uint64_t moneyCount = 0;
 	for(int32_t i = cylinder->__getFirstIndex(); i < cylinder->__getLastIndex(); ++i)
 	{
-		if(!(thing = cylinder->__getThing(i)))
-			continue;
-
-		if(!(item = thing->getItem()))
+		if(!(thing = cylinder->__getThing(i)) || !(item = thing->getItem()))
 			continue;
 
 		if((tmpContainer = item->getContainer()))
