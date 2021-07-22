@@ -1,0 +1,41 @@
+[ CHANGELOG
+	Project Name
+		Crystal Server
+
+	Version
+		0.1.8
+
+	Website
+		https://github.com/tryller/crystalserver
+
+	License
+		GNU GPLv3
+]
+
+[ File changes:
+	D = Deleted,
+	M = Modified,
+	A = Added.
+
+	[ 0.1.8
+		[ A...
+
+		]
+
+		[ M...
+
+		]
+
+		[ D...
+
+		]
+	]
+]
+
+[ Charges made
+	[ 0.1.8
+		Game protocol 8.60. (Tryller)
+		War system (Tryller, Elf)
+		Auto stacking items (Elf)
+	]
+]

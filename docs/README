@@ -1,0 +1,80 @@
+[ README
+	Project Name
+		Crystal Server
+
+	Version
+		0.1.8
+
+	Website
+		https://github.com/tryller/crystalserver
+
+	License
+		GNU GPLv3
+
+]
+
+[ CREDITS
+	First of all, credits to the developers of this project, found in the
+	DEVELOPERS part of this file.
+
+	This server is based on the OpenTibia project which is developed by:
+		http://sourceforge.net/project/memberlist.php?group_id=32523
+
+	.. also a thanks to the following people who has helped this
+	project by contributing something:
+		Stian, Cayan, TheMask, Kiper, King Komic, Rafael Hamdan,
+		Fare, Kiwi Dan, Piotrek1447, Hermes, Gesior.pl, levandi,
+		Casa, Winghawk, Nexoz, Chojrak, Pietia, Lithium, Jonern.
+]
+
+[ LICENSE
+	This project is licensed under GPLv3, you should have received a copy
+	of this license with this project.
+]
+
+[ DEVELOPERS
+	C++ Programmer
+		Tryller
+
+	Lua Scripts
+		Tryller
+]
+
+[ TFS DEVELOPERS
+	Project Manager(s)
+		Elf
+		Talaturen
+
+	Founder(s)
+		Talaturen
+
+	C++ Programmer(s)
+		Elf
+		Dalkon
+		Fallen
+		Talaturen
+
+	Lua Scripter(s)
+		Dalkon
+		Elf
+		BeniS
+
+	Data Directory Manager(s)
+		Elf
+		Dalkon
+		Fallen
+		BeniS
+
+	Documentation Manager(s)
+		Shinmaru
+		BeniS
+
+	Mapper(s)
+		Leftwing
+		Siramix
+]
+
+[ WEBSITE
+	Mainly english, with native chatboards for some other languages:
+		https://github.com/tryller/crystalserver
+]
