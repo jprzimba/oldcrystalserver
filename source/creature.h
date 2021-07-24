@@ -202,7 +202,7 @@ class Creature : public AutoId, virtual public Thing
 
 		virtual bool canSee(const Position& pos) const;
 		virtual bool canSeeCreature(const Creature* creature) const;
-		virtual bool canWalkthrough(const Creature* creature) const {return creature->isWalkable() || creature->isGhost();}
+		virtual bool canWalkthrough(const Creature* creature) const;
 
 		Direction getDirection() const {return direction;}
 		void setDirection(Direction dir) {direction = dir;}
@@ -536,6 +536,7 @@ class Creature : public AutoId, virtual public Thing
 
 		void updateTileCache(const Tile* tile, int32_t dx, int32_t dy);
 		void updateTileCache(const Tile* tile, const Position& pos);
+		void updateTileCache(const Tile* tile);
 
 		bool hasEventRegistered(CreatureEventType_t event) const {return (0 != (scriptEventsBitField & ((uint32_t)1 << event)));}
 		virtual bool hasExtraSwing() {return false;}

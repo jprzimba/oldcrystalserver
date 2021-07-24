@@ -844,23 +844,43 @@ bool Player::canSeeCreature(const Creature* creature) const
 
 bool Player::canWalkthrough(const Creature* creature) const
 {
-	if(creature == this || hasCustomFlag(PlayerCustomFlag_CanWalkthrough) || creature->isWalkable() ||
-		(creature->getMaster() && creature->getMaster() != this && canWalkthrough(creature->getMaster())))
+	if(creature == this || hasFlag(PlayerFlag_CanPassThroughAllCreatures) || creature->isWalkable() ||
+		std::find(forceWalkthrough.begin(), forceWalkthrough.end(), creature->getID()) != forceWalkthrough.end()
+		|| (creature->getMaster() && creature->getMaster() != this && canWalkthrough(creature->getMaster())))
 		return true;
 
 	const Player* player = creature->getPlayer();
 	if(!player)
 		return false;
 
-	if((((g_game.getWorldType() == WORLDTYPE_OPTIONAL && !player->isEnemy(this, true) &&
-		player->getVocation()->isAttackable()) || player->getTile()->hasFlag(TILESTATE_PROTECTIONZONE) || (player->getVocation()->isAttackable() &&
-		player->getLevel() < (uint32_t)g_config.getNumber(ConfigManager::PROTECTION_LEVEL))) && player->getTile()->ground &&
-		Item::items[player->getTile()->ground->getID()].walkStack) && (!player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges)
+	if(((g_game.getWorldType() == WORLDTYPE_OPTIONAL && !player->isEnemy(this, true) &&
+		!player->isProtected()) || player->getTile()->hasFlag(TILESTATE_PROTECTIONZONE) || player->isProtected()) && player->getTile()->ground
+		&& Item::items[player->getTile()->ground->getID()].walkStack && (!player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges)
 		|| player->getAccess() <= getAccess()))
 		return true;
 
 	return (player->isGhost() && getGhostAccess() < player->getGhostAccess())
 		|| (isGhost() && getGhostAccess() > player->getGhostAccess());
+}
+
+void Player::setWalkthrough(const Creature* creature, bool walkthrough)
+{
+	std::vector<uint32_t>::iterator it = std::find(forceWalkthrough.begin(),
+		forceWalkthrough.end(), creature->getID());
+	bool update = false;
+	if(walkthrough && it == forceWalkthrough.end())
+	{
+		forceWalkthrough.push_back(creature->getID());
+		update = true;
+	}
+	else if(!walkthrough && it != forceWalkthrough.end())
+	{
+		forceWalkthrough.erase(it);
+		update = true;
+	}
+
+	if(update)
+		sendCreatureWalkthrough(creature, !walkthrough ? canWalkthrough(creature) : walkthrough);
 }
 
 Depot* Player::getDepot(uint32_t depotId, bool autoCreateDepot)
@@ -1375,11 +1395,16 @@ void Player::onFollowCreatureDisappear(bool isLogout)
 
 void Player::onChangeZone(ZoneType_t zone)
 {
-	if(attackedCreature && zone == ZONE_PROTECTION && !hasFlag(PlayerFlag_IgnoreProtectionZone))
+	if(zone == ZONE_PROTECTION && !hasFlag(PlayerFlag_IgnoreProtectionZone))
 	{
-		setAttackedCreature(NULL);
-		onAttackedCreatureDisappear(false);
+		if(attackedCreature)
+		{
+			setAttackedCreature(NULL);
+			onAttackedCreatureDisappear(false);
+		}
 	}
+
+	g_game.updateCreatureWalkthrough(this);
 	sendIcons();
 }
 
@@ -1540,6 +1565,10 @@ void Player::onCreatureMove(const Creature* creature, const Tile* newTile, const
 				addCondition(condition);
 		}
 	}
+
+	if(getZone() == ZONE_PROTECTION && newTile->ground && oldTile->ground &&
+		Item::items[newTile->ground->getID()].walkStack != Item::items[oldTile->ground->getID()].walkStack)
+		g_game.updateCreatureWalkthrough(this);
 }
 
 void Player::onAddContainerItem(const Container* container, const Item* item)
@@ -1850,6 +1879,7 @@ void Player::addManaSpent(uint64_t amount, bool useMultiplier/* = true*/)
 
 void Player::addExperience(uint64_t exp)
 {
+	bool attackable = isProtected(); 	 
 	uint32_t prevLevel = level;
 	uint64_t nextLevelExp = Player::getExpForLevel(level + 1);
 	if(Player::getExpForLevel(level) > nextLevelExp)
@@ -1885,13 +1915,16 @@ void Player::addExperience(uint64_t exp)
 		if(getParty())
 			getParty()->updateSharedExperience();
 
-		char advMsg[60];
-		sprintf(advMsg, "You advanced from Level %d to Level %d.", prevLevel, level);
-		sendTextMessage(MSG_EVENT_ADVANCE, advMsg);
-
 		CreatureEventList advanceEvents = getCreatureEvents(CREATURE_EVENT_ADVANCE);
 		for(CreatureEventList::iterator it = advanceEvents.begin(); it != advanceEvents.end(); ++it)
 			(*it)->executeAdvance(this, SKILL__LEVEL, prevLevel, level);
+
+		std::stringstream s;
+		s << "You advanced from Level " << prevLevel << " to Level " << level << ".";
+		sendTextMessage(MSG_EVENT_ADVANCE, s.str());
+
+		if(isProtected() != attackable)
+			g_game.updateCreatureWalkthrough(this);
 	}
 
 	uint64_t currLevelExp = Player::getExpForLevel(level);
@@ -1906,6 +1939,8 @@ void Player::addExperience(uint64_t exp)
 void Player::removeExperience(uint64_t exp, bool updateStats/* = true*/)
 {
 	uint32_t prevLevel = level;
+	bool attackable = isProtected();
+
 	experience -= std::min(exp, experience);
 	while(level > 1 && experience < Player::getExpForLevel(level))
 	{
@@ -1926,9 +1961,12 @@ void Player::removeExperience(uint64_t exp, bool updateStats/* = true*/)
 			g_game.addCreatureHealth(this);
 		}
 
-		char advMsg[90];
-		sprintf(advMsg, "You were downgraded from Level %d to Level %d.", prevLevel, level);
-		sendTextMessage(MSG_EVENT_ADVANCE, advMsg);
+		std::stringstream s;
+		s << "You were downgraded from Level " << prevLevel << " to Level " << level << ".";
+		sendTextMessage(MSG_EVENT_ADVANCE, s.str());
+
+		if(!isProtected() != attackable)
+			g_game.updateCreatureWalkthrough(this);
 	}
 
 	uint64_t currLevelExp = Player::getExpForLevel(level);
@@ -2871,7 +2909,6 @@ void Player::__addThing(Creature* actor, int32_t index, Thing* thing)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__addThing], " << "player: " << getName() << ", index: " << index << ", index < 0 || index > 11" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2880,7 +2917,6 @@ void Player::__addThing(Creature* actor, int32_t index, Thing* thing)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__addThing], " << "player: " << getName() << ", index == 0" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTENOUGHROOM*/;
 	}
@@ -2890,7 +2926,7 @@ void Player::__addThing(Creature* actor, int32_t index, Thing* thing)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__addThing], " << "player: " << getName() << ", item == NULL" << std::endl;
-		DEBUG_REPORT
+
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2912,7 +2948,6 @@ void Player::__updateThing(Thing* thing, uint16_t itemId, uint32_t count)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__updateThing], " << "player: " << getName() << ", index == -1" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2922,7 +2957,6 @@ void Player::__updateThing(Thing* thing, uint16_t itemId, uint32_t count)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__updateThing], " << "player: " << getName() << ", item == NULL" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2945,7 +2979,6 @@ void Player::__replaceThing(uint32_t index, Thing* thing)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__replaceThing], " << "player: " << getName() << ", index: " << index << ", index < 0 || index > 11" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2955,7 +2988,6 @@ void Player::__replaceThing(uint32_t index, Thing* thing)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__updateThing], " << "player: " << getName() << ", oldItem == NULL" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2965,7 +2997,6 @@ void Player::__replaceThing(uint32_t index, Thing* thing)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__updateThing], " << "player: " << getName() << ", item == NULL" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2989,7 +3020,6 @@ void Player::__removeThing(Thing* thing, uint32_t count)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__removeThing], " << "player: " << getName() << ", item == NULL" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -2999,7 +3029,6 @@ void Player::__removeThing(Thing* thing, uint32_t count)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__removeThing], " << "player: " << getName() << ", index == -1" << std::endl;
-		DEBUG_REPORT
 #endif
 		return /*RET_NOTPOSSIBLE*/;
 	}
@@ -3249,7 +3278,6 @@ void Player::__internalAddThing(uint32_t index, Thing* thing)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__internalAddThing] index == 0" << std::endl;
-		DEBUG_REPORT
 #endif
 		return;
 	}
@@ -3260,7 +3288,6 @@ void Player::__internalAddThing(uint32_t index, Thing* thing)
 		{
 #ifdef __DEBUG_MOVESYS__
 			std::clog << "Warning: [Player::__internalAddThing], player: " << getName() << ", items[index] is not empty." << std::endl;
-			//DEBUG_REPORT
 #endif
 			return;
 		}
@@ -3857,6 +3884,11 @@ bool Player::isImmune(CombatType_t type) const
 bool Player::isImmune(ConditionType_t type) const
 {
 	return hasCustomFlag(PlayerCustomFlag_IsImmune) || Creature::isImmune(type);
+}
+
+bool Player::isProtected() const
+{
+	return (vocation && !vocation->isAttackable()) || hasCustomFlag(PlayerCustomFlag_IsProtected) || level < g_config.getNumber(ConfigManager::PROTECTION_LEVEL);
 }
 
 bool Player::isAttackable() const

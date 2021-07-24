@@ -939,9 +939,18 @@ bool Game::removeCreature(Creature* creature, bool isLogout /*= true*/)
 
 	Tile* tile = creature->getTile();
 	SpectatorVec list;
+	getSpectators(list, tile->getPosition(), false, true);
 
 	SpectatorVec::iterator it;
-	getSpectators(list, tile->getPosition(), false, true);
+	for(it = list.begin(); it != list.end(); ++it)
+		(*it)->onCreatureDisappear(creature, isLogout);
+
+	if(tile != creature->getTile())
+	{
+		list.clear();
+		tile = creature->getTile();
+		getSpectators(list, tile->getPosition(), false, true);
+	}
 
 	Player* player = NULL;
 	std::vector<uint32_t> oldStackPosVector;
@@ -959,16 +968,16 @@ bool Game::removeCreature(Creature* creature, bool isLogout /*= true*/)
 	uint32_t i = 0;
 	for(it = list.begin(); it != list.end(); ++it)
 	{
+		if(creature != (*it))
+			(*it)->updateTileCache(tile);
+
 		if(!(player = (*it)->getPlayer()) || !player->canSeeCreature(creature))
 			continue;
 
+		player->setWalkthrough(creature, false);
 		player->sendCreatureDisappear(creature, oldStackPosVector[i]);
 		++i;
 	}
-
-	//event method
-	for(it = list.begin(); it != list.end(); ++it)
-		(*it)->onCreatureDisappear(creature, isLogout);
 
 	creature->getParent()->postRemoveNotification(NULL, creature, NULL, oldIndex, true);
 	creature->onRemovedCreature();
@@ -1108,20 +1117,29 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 
 		if(!player->hasFlag(PlayerFlag_CanPushAllCreatures))
 		{
-			if(toTile->getCreatures() && !toTile->getCreatures()->empty())
+			if(toTile->getCreatureCount() && !Item::items[
+				movingCreature->getTile()->ground->getID()].walkStack)
 			{
-				player->sendCancelMessage(RET_NOTPOSSIBLE);
+				player->sendCancelMessage(RET_NOTENOUGHROOM);
 				return false;
 			}
 
-			uint32_t protectionLevel = g_config.getNumber(ConfigManager::PROTECTION_LEVEL);
-			if(player->getLevel() < protectionLevel && player->getVocation()->isAttackable())
+			if(MagicField* field = toTile->getFieldItem())
+			{
+				if(field->isUnstepable() || field->isBlocking(movingCreature)
+					|| !movingCreature->isImmune(field->getCombatType()))
+				{
+					player->sendCancelMessage(RET_NOTPOSSIBLE);
+					return false;
+				}
+			}
+
+			if(player->isProtected())
 			{
 				Player* movingPlayer = movingCreature->getPlayer();
-				if(movingPlayer && movingPlayer->getLevel() >= protectionLevel
-					&& movingPlayer->getVocation()->isAttackable())
+				if(movingPlayer && !movingPlayer->isProtected())
 				{
-					player->sendCancelMessage(RET_PLAYERISNOTREACHABLE);
+					player->sendCancelMessage(RET_NOTMOVEABLE);
 					return false;
 				}
 			}
@@ -4216,7 +4234,7 @@ bool Game::combatBlockHit(CombatType_t combatType, Creature* attacker, Creature*
 
 	const Position& targetPos = target->getPosition();
 	const SpectatorVec& list = getSpectators(targetPos);
-	if(!target->isAttackable() || Combat::canDoCombat(attacker, target) != RET_NOERROR)
+	if(Combat::canDoCombat(attacker, target, true) != RET_NOERROR)
 	{
 		addMagicEffect(list, targetPos, MAGIC_EFFECT_POFF, target->isGhost());
 		return true;
@@ -4305,7 +4323,7 @@ bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creat
 	else
 	{
 		const SpectatorVec& list = getSpectators(targetPos);
-		if(!target->isAttackable() || Combat::canDoCombat(attacker, target) != RET_NOERROR)
+		if(!target->isAttackable() || Combat::canDoCombat(attacker, target, true) != RET_NOERROR)
 		{
 			addMagicEffect(list, targetPos, MAGIC_EFFECT_POFF);
 			return true;
@@ -4516,7 +4534,7 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaCh
 	else
 	{
 		const SpectatorVec& list = getSpectators(targetPos);
-		if(!target->isAttackable() || Combat::canDoCombat(attacker, target) != RET_NOERROR)
+		if(!target->isAttackable() || Combat::canDoCombat(attacker, target, true) != RET_NOERROR)
 		{
 			addMagicEffect(list, targetPos, MAGIC_EFFECT_POFF);
 			return false;
@@ -4861,6 +4879,19 @@ void Game::updateCreatureEmblem(Creature* creature)
 	{
 		if((tmpPlayer = (*it)->getPlayer()))
 			tmpPlayer->sendCreatureEmblem(creature);
+	}
+}
+
+void Game::updateCreatureWalkthrough(Creature* creature)
+{
+	const SpectatorVec& list = getSpectators(creature->getPosition());
+
+	//send to client
+	Player* tmpPlayer = NULL;
+	for(SpectatorVec::const_iterator it = list.begin(); it != list.end(); ++it)
+	{
+		if((tmpPlayer = (*it)->getPlayer()))
+			tmpPlayer->sendCreatureWalkthrough(creature, (*it)->canWalkthrough(creature));
 	}
 }
 
@@ -6253,39 +6284,4 @@ void Game::showHotkeyUseMessage(Player* player, Item* item)
 		ss << "Using one of " << count << " " << it.pluralName.c_str() << "...";
 
 	player->sendTextMessage(MSG_INFO_DESCR, ss.str());
-}
-
-void Game::sendNoticeBox(Player* player)
-{	
-	
-	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "notices.xml").c_str());
-	if(doc)
-	{
-		xmlNodePtr root, p;
-		unsigned long id = 0;
-		root = xmlDocGetRootElement(doc);
-
-		if(xmlStrcmp(root->name,(const xmlChar*)"notices"))
-		{
-			xmlFreeDoc(doc);
-			return;
-		}
-
-		p = root->children;
-		std::string lastmsg;
-		while(p)
-		{
-			if(xmlStrcmp(p->name, (const xmlChar*)"notice"))
-			{
-				std::string noticemsg;
-				if(readXMLString(p, "id", noticemsg))
-					lastmsg += noticemsg + "\n";
-			}
-
-			p = p->next;
-		}
-
-		player->sendFYIBox(lastmsg);
-		xmlFreeDoc(doc);
-	}	
 }

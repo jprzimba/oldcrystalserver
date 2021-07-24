@@ -243,6 +243,7 @@ int32_t Items::loadFromOtb(std::string file)
 		iType->rotable = hasBitSet(FLAG_ROTABLE, flags);
 		iType->canReadText = hasBitSet(FLAG_READABLE, flags);
 		iType->lookThrough = hasBitSet(FLAG_LOOKTHROUGH, flags);
+		iType->walkStack = hasBitSet(FLAG_WALKSTACK, flags);
 
 		attribute_t attr;
 		while(props.GET_VALUE(attr))

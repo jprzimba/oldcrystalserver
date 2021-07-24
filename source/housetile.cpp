@@ -69,7 +69,7 @@ ReturnValue HouseTile::__queryAdd(int32_t index, const Thing* thing, uint32_t co
 	{
 		if(const Player* player = creature->getPlayer())
 		{
-			if(!house->isInvited(player))
+			if(!house->isInvited(player) && !player->hasCustomFlag(PlayerCustomFlag_CanMoveAnywhere))
 				return RET_PLAYERISNOTINVITED;
 		}
 		else
@@ -77,7 +77,7 @@ ReturnValue HouseTile::__queryAdd(int32_t index, const Thing* thing, uint32_t co
 	}
 	else if(thing->getItem())
 	{
-		const uint32_t itemLimit = g_config.getNumber(ConfigManager::ITEMLIMIT_HOUSETILE);
+		const uint32_t itemLimit = g_config.getNumber(ConfigManager::HOUSE_TILE_LIMIT);
 		if(itemLimit && getThingCount() > itemLimit)
 			return RET_TILEISFULL;
 	}

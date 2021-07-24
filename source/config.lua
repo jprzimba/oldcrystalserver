@@ -227,10 +227,11 @@
 	-- Limits
 	idleWarningTime = 14 * 60 * 1000
 	idleKickTime = 15 * 60 * 1000
-	expireReportsAfterReads = 1
+	reportsExpirationAfterReads = 1
 	playerQueryDeepness = 2
-	maxItemsPerPZTile = 0
-	maxItemsPerHouseTile = 0
+	tileLimit = 0
+	protectionTileLimit = 0
+	houseTileLimit = 0
 
 	-- Premium account
 	freePremium = false

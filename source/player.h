@@ -130,7 +130,7 @@ typedef std::list<uint32_t> InvitedToGuildsList;
 typedef std::list<Party*> PartyList;
 typedef std::map<uint32_t, War_t> WarMap;
 
-#define SPEED_MAX 9999
+#define SPEED_MAX 1500
 #define SPEED_MIN 10
 #define STAMINA_MAX (42 * 60 * 60 * 1000)
 #define STAMINA_MULTIPLIER (60 * 1000)
@@ -357,6 +357,7 @@ class Player : public Creature, public Cylinder
 		virtual bool canSee(const Position& pos) const;
 		virtual bool canSeeCreature(const Creature* creature) const;
 		virtual bool canWalkthrough(const Creature* creature) const;
+		void setWalkthrough(const Creature* creature, bool walkthrough);
 
 		virtual bool canSeeInvisibility() const {return hasFlag(PlayerFlag_CanSenseInvisibility);}
 
@@ -419,9 +420,11 @@ class Player : public Creature, public Cylinder
 
 		//combat functions
 		virtual bool setAttackedCreature(Creature* creature);
+		bool hasShield() const;
+
 		bool isImmune(CombatType_t type) const;
 		bool isImmune(ConditionType_t type) const;
-		bool hasShield() const;
+		bool isProtected() const;
 		virtual bool isAttackable() const;
 
 		virtual void changeHealth(int32_t healthChange);
@@ -542,6 +545,8 @@ class Player : public Creature, public Cylinder
 			{if(client) client->sendCreatureShield(creature);}
 		void sendCreatureEmblem(const Creature* creature)
 			{if(client) client->sendCreatureEmblem(creature);}
+		void sendCreatureWalkthrough(const Creature* creature, bool walkthrough)
+			{if(client) client->sendCreatureWalkthrough(creature, walkthrough);}
 
 		//container
 		void sendAddContainerItem(const Container* container, const Item* item);
@@ -901,6 +906,8 @@ class Player : public Creature, public Cylinder
 		Item* writeItem;
 		House* editHouse;
 		Npc* shopOwner;
+
+		std::vector<uint32_t> forceWalkthrough;
 
 		typedef std::set<uint32_t> AttackedSet;
 		AttackedSet attackedSet;

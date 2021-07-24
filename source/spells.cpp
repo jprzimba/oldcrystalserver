@@ -709,7 +709,7 @@ bool Spell::playerInstantSpellCheck(Player* player, Creature* creature)
 	}
 
 	ReturnValue ret;
-	if((ret = Combat::canDoCombat(player, tile, isAggressive)) != RET_NOERROR)
+	if((ret = Combat::canDoCombat(player, tile, isAggressive, false)) != RET_NOERROR)
 	{
 		player->sendCancelMessage(ret);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -800,7 +800,7 @@ bool Spell::playerInstantSpellCheck(Player* player, const Position& toPos)
 	}
 
 	ReturnValue ret;
-	if((ret = Combat::canDoCombat(player, tile, isAggressive)) != RET_NOERROR)
+	if((ret = Combat::canDoCombat(player, tile, isAggressive, false)) != RET_NOERROR)
 	{
 		player->sendCancelMessage(ret);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -870,7 +870,7 @@ bool Spell::playerRuneSpellCheck(Player* player, const Position& toPos)
 	}
 
 	ReturnValue ret;
-	if((ret = Combat::canDoCombat(player, tile, isAggressive)) != RET_NOERROR)
+	if((ret = Combat::canDoCombat(player, tile, isAggressive, false)) != RET_NOERROR)
 	{
 		player->sendCancelMessage(ret);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);

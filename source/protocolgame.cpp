@@ -1562,6 +1562,21 @@ void ProtocolGame::sendWorldLight(const LightInfo& lightInfo)
 	}
 }
 
+void ProtocolGame::sendCreatureWalkthrough(const Creature* creature, bool walkthrough)
+{
+	if(!canSee(creature))
+		return;
+
+	NetworkMessage_ptr msg = getOutputBuffer();
+	if(!msg)
+		return;
+
+	TRACK_MESSAGE(msg);
+	msg->AddByte(0x92);
+	msg->AddU32(creature->getID());
+	msg->AddByte(!walkthrough);
+}
+
 void ProtocolGame::sendCreatureShield(const Creature* creature)
 {
 	if(!canSee(creature))

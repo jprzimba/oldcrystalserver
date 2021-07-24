@@ -87,15 +87,8 @@
 	#endif
 #endif
 
-#ifdef __DEBUG_EXCEPTION_REPORT__
-	#define DEBUG_REPORT int *a = NULL; *a = 1;
-#else
-	#ifdef __EXCEPTION_TRACER__
-		#include "exception.h"
-		#define DEBUG_REPORT ExceptionHandler::dumpStack();
-	#else
-		#define DEBUG_REPORT
-	#endif
+#ifndef __EXCEPTION_TRACER__
+	#define DEBUG_REPORT
 #endif
 
 #define BOOST_ASIO_ENABLE_CANCELIO 1

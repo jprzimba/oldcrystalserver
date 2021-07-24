@@ -7,6 +7,7 @@ function onSay(cid, words, param, channel)
 		save(tmp * 60 * 1000)
 	elseif(param == '') then
 		doSaveServer()
+		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Server saved.")
 	else
 		local tid = getPlayerByNameWildcard(param)
 		if(not tid or (isPlayerGhost(tid) and getPlayerGhostAccess(tid) > getPlayerGhostAccess(cid))) then

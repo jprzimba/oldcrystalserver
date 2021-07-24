@@ -137,6 +137,21 @@ bool Creature::canSeeCreature(const Creature* creature) const
 	return creature == this || (!creature->isGhost() && (!creature->isInvisible() || canSeeInvisibility()));
 }
 
+bool Creature::canWalkthrough(const Creature* creature) const
+{
+	if(creature == this)
+		return true;
+
+	if(const Creature* _master = creature->getMaster())
+	{
+		if(_master != this && canWalkthrough(_master))
+			return true;
+	}
+
+	return creature->isGhost() || creature->isWalkable() || (master &&
+		master != creature && master->canWalkthrough(creature));
+}
+
 int64_t Creature::getTimeSinceLastMove() const
 {
 	if(lastStep)
@@ -389,6 +404,12 @@ void Creature::updateTileCache(const Tile* tile, const Position& pos)
 	const Position& myPos = getPosition();
 	if(pos.z == myPos.z)
 		updateTileCache(tile, pos.x - myPos.x, pos.y - myPos.y);
+}
+
+void Creature::updateTileCache(const Tile* tile)
+{
+	if(isMapLoaded && tile->getPosition().z == getPosition().z)
+		updateTileCache(tile, tile->getPosition());
 }
 
 int32_t Creature::getWalkCache(const Position& pos) const

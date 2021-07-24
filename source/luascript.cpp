@@ -2334,6 +2334,9 @@ void LuaScriptInterface::registerFunctions()
 	//doRefreshMap()
 	lua_register(m_luaState, "doRefreshMap", LuaScriptInterface::luaDoRefreshMap);
 
+	//doPlayerSetWalkthrough(cid, uid, walkthrough)
+	lua_register(m_luaState, "doPlayerSetWalkthrough", LuaScriptInterface::luaDoPlayerSetWalkthrough);
+
 	//doGuildAddEnemy(guild, enemy, war, type)
 	lua_register(m_luaState, "doGuildAddEnemy", LuaScriptInterface::luaDoGuildAddEnemy);
 
@@ -9059,6 +9062,40 @@ int32_t LuaScriptInterface::luaDoRefreshMap(lua_State* L)
 {
 	//doRefreshMap()
 	g_game.proceduralRefresh();
+	return 1;
+}
+
+int32_t LuaScriptInterface::luaDoPlayerSetWalkthrough(lua_State* L)
+{
+	//doPlayerSetWalkthrough(cid, uid, walkthrough)
+	bool walkthrough = popBoolean(L);
+	uint32_t uid = popNumber(L);
+
+	ScriptEnviroment* env = getEnv();
+	Player* player = env->getPlayerByUID(popNumber(L));
+	if(!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	Creature* creature = env->getCreatureByUID(uid);
+	if(!creature)
+	{
+		errorEx(getError(LUA_ERROR_CREATURE_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	if(player != creature)
+	{
+		player->setWalkthrough(creature, walkthrough);
+		lua_pushboolean(L, true);
+	}
+	else
+		lua_pushboolean(L, false);
+
 	return 1;
 }
 

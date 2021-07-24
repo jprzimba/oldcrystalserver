@@ -136,7 +136,9 @@ enum itemflags_t
 	FLAG_ALLOWDISTREAD = 1 << 20,
 	FLAG_UNUSED = 1 << 21,
 	FLAG_CLIENTCHARGES = 1 << 22, //deprecated
-	FLAG_LOOKTHROUGH = 1 << 23
+	FLAG_LOOKTHROUGH = 1 << 23,
+	FLAG_ANIMATION = 1 << 24,
+	FLAG_WALKSTACK = 1 << 25
 };
 
 #pragma pack(1)

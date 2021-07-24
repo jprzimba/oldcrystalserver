@@ -530,6 +530,7 @@ class LuaScriptInterface
 		static int32_t luaDoCreatureSetStorage(lua_State* L);
 		static int32_t luaDoPlayerAddBlessing(lua_State* L);
 		static int32_t luaGetPlayerBlessing(lua_State* L);
+		static int32_t luaDoPlayerSetWalkthrough(lua_State* L);
 
 		static int32_t luaDoGuildAddEnemy(lua_State* L);
 		static int32_t luaDoGuildRemoveEnemy(lua_State* L);
