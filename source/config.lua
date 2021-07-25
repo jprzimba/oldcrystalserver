@@ -5,6 +5,7 @@
 	namelockManager = true
 	newPlayerChooseVoc = true
 	generateAccountNumber = false
+	generateAccountSalt = false
 	minPasswordLength = 6
 	minAccountNameLength = 3
 	maxAccountNameLength = 25
@@ -126,7 +127,7 @@
 	-- Database
 	-- NOTE: sqlFile is used only by sqlite database, and sqlKeepAlive by mysql database.
 	-- To disable sqlKeepAlive such as mysqlReadTimeout use 0 value.
-	-- encryptionType can be plain, md5, sha1	
+	-- encryptionType can be plain, md5, sha1, sha256 and sha512	
 	sqlType = "sqlite"
 	sqlHost = "localhost"
 	sqlPort = 3306
@@ -137,7 +138,7 @@
 	sqlKeepAlive = 0
 	mysqlReadTimeout = 10
 	mysqlWriteTimeout = 10
-	encryptionType = "plain"
+	encryptionType = "sha1"
 
 	-- Deathlist
 	deathListEnabled = true

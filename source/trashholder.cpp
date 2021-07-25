@@ -52,7 +52,7 @@ void TrashHolder::__addThing(Creature* actor, int32_t index, Thing* thing)
 		{
 			//player has just logged in a swimming pool
 			static Outfit_t outfit;
-			outfit.lookType = 267;
+			outfit.lookType = SWIMMING_OUTFIT;
 			Spell::CreateIllusion(player, outfit, -1);
 		}
 	}

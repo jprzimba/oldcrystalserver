@@ -135,11 +135,11 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 		return false;
 	}
 
-	Account account = IOLoginData::getInstance()->loadAccount(id);
-	if(!encryptTest(password, account.password))
+	Account account;
+	if(!IOLoginData::getInstance()->loadAccount(account, name) || !encryptTest(account.salt + password, account.password))
 	{
 		ConnectionManager::getInstance()->addAttempt(clientIp, protocolId, false);
-		disconnectClient(0x0A, "Invalid password.");
+		disconnectClient(0x0A, "Invalid account name or password.");
 		return false;
 	}
 
@@ -237,7 +237,7 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 
 		//Add premium days
 		if(g_config.getBool(ConfigManager::FREE_PREMIUM))
-			output->AddU16(65535); //client displays free premium
+			output->AddU16(GRATIS_PREMIUM);
 		else
 			output->AddU16(account.premiumDays);
 

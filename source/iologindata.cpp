@@ -43,55 +43,86 @@ extern Game g_game;
 
 Account IOLoginData::loadAccount(uint32_t accountId, bool preLoad/* = false*/)
 {
-	Account account;
 	Database* db = Database::getInstance();
 	DBQuery query;
 
-	query << "SELECT `id`, `name`, `password`, `premdays`, `lastday`, `key`, `warnings` FROM `accounts` WHERE `id` = " << accountId << " LIMIT 1";
+	query << "SELECT `name`, `password`, `salt`, `premdays`, `lastday`, `key`, `warnings` FROM `accounts` WHERE `id` = " << accountId << " LIMIT 1";
 	DBResult* result;
 	if(!(result = db->storeQuery(query.str())))
-		return account;
+		return Account();
 
-	account.number = result->getDataInt("id");
+	Account account;
+	account.number = accountId;
 	account.name = result->getDataString("name");
 	account.password = result->getDataString("password");
-	account.premiumDays = result->getDataInt("premdays");
+	account.salt = result->getDataString("salt");
+	account.premiumDays = std::max((int32_t)0, std::min((int32_t)GRATIS_PREMIUM, result->getDataInt("premdays")));
 	account.lastDay = result->getDataInt("lastday");
 	account.recoveryKey = result->getDataString("key");
 	account.warnings = result->getDataInt("warnings");
 
-	query.str("");
 	result->free();
-	if(preLoad)
-		return account;
+	if(!preLoad)
+		loadCharacters(account);
+
+	return account;
+}
+
+bool IOLoginData::loadAccount(Account& account, const std::string& name)
+{
+	Database* db = Database::getInstance();
+	DBQuery query;
+
+	query << "SELECT `id`, `password`, `salt`, `premdays`, `lastday`, `key`, `warnings` FROM `accounts` WHERE `name` " << db->getStringComparison() << db->escapeString(name) << " LIMIT 1";
+	DBResult* result;
+	if(!(result = db->storeQuery(query.str())))
+		return false;
+
+	account.number = result->getDataInt("id");
+	account.name = name;
+	account.password = result->getDataString("password");
+	account.salt = result->getDataString("salt");
+	account.premiumDays = std::max((int32_t)0, std::min((int32_t)GRATIS_PREMIUM, result->getDataInt("premdays")));
+	account.lastDay = result->getDataInt("lastday");
+	account.recoveryKey = result->getDataString("key");
+	account.warnings = result->getDataInt("warnings");
+
+	result->free();
+	loadCharacters(account);
+	return true;
+}
+
+void IOLoginData::loadCharacters(Account& account)
+{
+	Database* db = Database::getInstance();
+	DBQuery query;
 
 #ifndef __LOGIN_SERVER__
-	query << "SELECT `name` FROM `players` WHERE `account_id` = " << accountId << " AND `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID) << " AND `deleted` = 0";
+	query << "SELECT `name` FROM `players` WHERE `account_id` = " << account.number << " AND `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID) << " AND `deleted` = 0";
 #else
-	query << "SELECT `name`, `world_id` FROM `players` WHERE `account_id` = " << accountId << " AND `deleted` = 0";
+	query << "SELECT `id`, `name`, `world_id`, `online` FROM `players` WHERE `account_id` = " << account.number << " AND `deleted` = 0";
 #endif
+	DBResult* result;
 	if(!(result = db->storeQuery(query.str())))
-		return account;
+		return;
 
 	do
 	{
-		std::string ss = result->getDataString("name");
 #ifndef __LOGIN_SERVER__
-		account.charList.push_back(ss.c_str());
+		account.charList.push_back(result->getDataString("name"));
 #else
-		if(GameServer* server = GameServers::getInstance()->getServerById(result->getDataInt("world_id")))
-			account.charList[ss] = server;
+		std::string name = result->getDataString("name");
+		if(GameServer* srv = GameServers::getInstance()->getServerById(result->getDataInt("world_id")))
+			account.charList[name] = Character(name, srv, result->getDataInt("online"));
 		else
-			std::clog << "[Warning - IOLoginData::loadAccount] Invalid server for player '" << ss << "'." << std::endl;
+			std::clog << "[Warning - IOLoginData::loadAccount] Invalid server for player '" << name << "'." << std::endl;
 #endif
 	}
 	while(result->next());
 	result->free();
 #ifndef __LOGIN_SERVER__
-
 	account.charList.sort();
 #endif
-	return account;
 }
 
 bool IOLoginData::saveAccount(Account account)
@@ -229,27 +260,26 @@ bool IOLoginData::accountNameExists(const std::string& name)
 	return true;
 }
 
-bool IOLoginData::getPassword(uint32_t accountId, std::string& password, std::string name/* = ""*/)
+bool IOLoginData::getPassword(uint32_t accountId, std::string& password, std::string& salt, std::string name/* = ""*/)
 {
 	Database* db = Database::getInstance();
 	DBQuery query;
-	query << "SELECT `password` FROM `accounts` WHERE `id` = " << accountId << " LIMIT 1";
+	query << "SELECT `password`, `salt` FROM `accounts` WHERE `id` = " << accountId << " LIMIT 1";
 
 	DBResult* result;
 	if(!(result = db->storeQuery(query.str())))
 		return false;
 
+	std::string tmpPassword = result->getDataString("password"), tmpSalt = result->getDataString("salt");
+	result->free();
 	if(name.empty() || name == "Account Manager")
 	{
-		password = result->getDataString("password");
-		result->free();
+		password = tmpPassword;
+		salt = tmpSalt;
 		return true;
 	}
 
-	std::string tmpPassword = result->getDataString("password");
-	result->free();
 	query.str("");
-
 	query << "SELECT `name` FROM `players` WHERE `account_id` = " << accountId;
 	if(!(result = db->storeQuery(query.str())))
 		return false;
@@ -260,6 +290,8 @@ bool IOLoginData::getPassword(uint32_t accountId, std::string& password, std::st
 			continue;
 
 		password = tmpPassword;
+		salt = tmpSalt;
+
 		result->free();
 		return true;
 	}
@@ -270,11 +302,18 @@ bool IOLoginData::getPassword(uint32_t accountId, std::string& password, std::st
 
 bool IOLoginData::setPassword(uint32_t accountId, std::string newPassword)
 {
-	_encrypt(newPassword, false);
-	Database* db = Database::getInstance();
+	std::string salt;
+	if(g_config.getBool(ConfigManager::GENERATE_ACCOUNT_SALT))
+	{
+		salt = generateRecoveryKey(2, 19, true);
+		newPassword = salt + newPassword;
+	}
 
+	Database* db = Database::getInstance();
 	DBQuery query;
-	query << "UPDATE `accounts` SET `password` = " << db->escapeString(newPassword) << " WHERE `id` = " << accountId << db->getUpdateLimiter();
+
+	_encrypt(newPassword, false);
+	query << "UPDATE `accounts` SET `password` = " << db->escapeString(newPassword) << ", `salt` = "<< db->escapeString(salt) << " WHERE `id` = " << accountId << db->getUpdateLimiter();
 	return db->executeQuery(query.str());
 }
 
@@ -307,11 +346,14 @@ bool IOLoginData::setRecoveryKey(uint32_t accountId, std::string newRecoveryKey)
 
 uint64_t IOLoginData::createAccount(std::string name, std::string password)
 {
+	std::string salt = generateRecoveryKey(2, 19, true);
+	password = salt + password;
 	_encrypt(password, false);
-	Database* db = Database::getInstance();
 
+	Database* db = Database::getInstance();
 	DBQuery query;
-	query << "INSERT INTO `accounts` (`id`, `name`, `password`) VALUES (NULL, " << db->escapeString(name) << ", " << db->escapeString(password) << ")";
+
+	query << "INSERT INTO `accounts` (`id`, `name`, `password`, `salt`) VALUES (NULL, " << db->escapeString(name) << ", " << db->escapeString(password) << ", " << db->escapeString(salt) << ")";
 	if(!db->executeQuery(query.str()))
 		return 0;
 
@@ -320,24 +362,42 @@ uint64_t IOLoginData::createAccount(std::string name, std::string password)
 
 void IOLoginData::removePremium(Account account)
 {
+	bool save = false;
 	uint64_t timeNow = time(NULL);
-	if(account.premiumDays > 0 && account.premiumDays < 65535)
+	if(account.premiumDays != 0 && account.premiumDays != (uint16_t)GRATIS_PREMIUM)
 	{
-		uint32_t days = (uint32_t)std::ceil((timeNow - account.lastDay) / 86400);
-		if(days > 0)
+		if(account.lastDay == 0)
 		{
-			if(account.premiumDays >= days)
-				account.premiumDays -= days;
-			else
-				account.premiumDays = 0;
-
 			account.lastDay = timeNow;
+			save = true;
+		}
+		else
+		{
+			uint32_t days = (timeNow - account.lastDay) / 86400;
+			if(days > 0)
+			{
+				if(account.premiumDays >= days)
+				{
+					account.premiumDays -= days;
+					uint32_t remainder = (timeNow - account.lastDay) % 86400;
+					account.lastDay = timeNow - remainder;
+				}
+				else
+				{
+					account.premiumDays = 0;
+					account.lastDay = 0;
+				}
+				save = true;
+			}
 		}
 	}
-	else
-		account.lastDay = timeNow;
+	else if(account.lastDay != 0)
+	{
+		account.lastDay = 0;
+		save = true;
+	}
 
-	if(!saveAccount(account))
+	if(save && !saveAccount(account))
 		std::clog << "ERROR: Failed to save account: " << account.name << "!" << std::endl;
 }
 
@@ -1323,7 +1383,7 @@ bool IOLoginData::isPremium(uint32_t guid)
 	const uint32_t account = result->getDataInt("account_id");
 
 	result->free();
-	if(group && group->hasCustomFlag(PlayerFlag_IsAlwaysPremium))
+	if(group && group->hasFlag(PlayerFlag_IsAlwaysPremium))
 		return true;
 
 	query.str("");
@@ -1333,7 +1393,7 @@ bool IOLoginData::isPremium(uint32_t guid)
 
 	const uint32_t premium = result->getDataInt("premdays");
 	result->free();
-	return premium;
+	return premium > 0;
 }
 
 bool IOLoginData::playerExists(uint32_t guid, bool multiworld /*= false*/, bool checkCache /*= true*/)

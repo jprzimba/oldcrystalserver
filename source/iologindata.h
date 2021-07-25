@@ -48,6 +48,7 @@ class IOLoginData
 		}
 
 		Account loadAccount(uint32_t accountId, bool preLoad = false);
+		bool loadAccount(Account& account, const std::string& name);
 		bool saveAccount(Account account);
 
 		bool getAccountId(const std::string& name, uint32_t& number);
@@ -61,7 +62,7 @@ class IOLoginData
 		bool accountIdExists(uint32_t accountId);
 		bool accountNameExists(const std::string& name);
 
-		bool getPassword(uint32_t accountId, std::string& password, std::string name = "");
+		bool getPassword(uint32_t accountId, std::string& password, std::string& salt, std::string name = "");
 		bool setPassword(uint32_t accountId, std::string newPassword);
 		bool validRecoveryKey(uint32_t accountId, std::string recoveryKey);
 		bool setRecoveryKey(uint32_t accountId, std::string newRecoveryKey);
@@ -128,6 +129,7 @@ class IOLoginData
 		bool saveItems(const Player* player, const ItemBlockList& itemList, DBInsert& query_insert);
 		void loadItems(ItemMap& itemMap, DBResult* result);
 
+		void loadCharacters(Account& account);
 		bool storeNameByGuid(uint32_t guid);
 };
 #endif

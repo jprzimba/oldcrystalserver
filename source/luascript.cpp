@@ -2452,7 +2452,10 @@ const luaL_Reg LuaScriptInterface::luaStdTable[] =
 
 	{"md5", LuaScriptInterface::luaStdMD5},
 	{"sha1", LuaScriptInterface::luaStdSHA1},
+	{"sha256", LuaScriptInterface::luaStdSHA256},
+	{"sha512", LuaScriptInterface::luaStdSHA512},
 
+	{"checkName", LuaScriptInterface::luaStdCheckName},
 	{NULL, NULL}
 };
 
@@ -7729,25 +7732,10 @@ int32_t LuaScriptInterface::luaDoPlayerAddPremiumDays(lua_State* L)
 {
 	//doPlayerAddPremiumDays(cid, days)
 	int32_t days = popNumber(L);
-
 	ScriptEnviroment* env = getEnv();
 	if(Player* player = env->getPlayerByUID(popNumber(L)))
 	{
-		if(player->premiumDays < 65535)
-		{
-			Account account = IOLoginData::getInstance()->loadAccount(player->getAccount());
-			if(days < 0)
-			{
-				account.premiumDays = std::max((uint32_t)0, uint32_t(account.premiumDays + (int32_t)days));
-				player->premiumDays = std::max((uint32_t)0, uint32_t(player->premiumDays + (int32_t)days));
-			}
-			else
-			{
-				account.premiumDays = std::min((uint32_t)65534, uint32_t(account.premiumDays + (uint32_t)days));
-				player->premiumDays = std::min((uint32_t)65534, uint32_t(player->premiumDays + (uint32_t)days));
-			}
-			IOLoginData::getInstance()->saveAccount(account);
-		}
+		player->addPremiumDays(days);
 		lua_pushboolean(L, true);
 	}
 	else
@@ -9973,7 +9961,7 @@ EXPOSE_LOG(Clog, std::clog)
 
 int32_t LuaScriptInterface::luaStdMD5(lua_State* L)
 {
-	//std.md5(string[, upperCase])
+	//std.md5(string[, upperCase = false])
 	bool upperCase = false;
 	if(lua_gettop(L) > 1)
 		upperCase = popNumber(L);
@@ -9990,6 +9978,39 @@ int32_t LuaScriptInterface::luaStdSHA1(lua_State* L)
 		upperCase = popNumber(L);
 
 	lua_pushstring(L, transformToSHA1(popString(L), upperCase).c_str());
+	return 1;
+}
+
+int32_t LuaScriptInterface::luaStdSHA256(lua_State* L)
+{
+	//std.sha256(string[, upperCase = false])
+	bool upperCase = false;
+	if(lua_gettop(L) > 1)
+		upperCase = popBoolean(L);
+
+	lua_pushstring(L, transformToSHA256(popString(L), upperCase).c_str());
+	return 1;
+}
+
+int32_t LuaScriptInterface::luaStdSHA512(lua_State* L)
+{
+	//std.sha512(string[, upperCase = false])
+	bool upperCase = false;
+	if(lua_gettop(L) > 1)
+		upperCase = popBoolean(L);
+
+	lua_pushstring(L, transformToSHA512(popString(L), upperCase).c_str());
+	return 1;
+}
+
+int32_t LuaScriptInterface::luaStdCheckName(lua_State* L)
+{
+	//std.checkName(string[, forceUppercaseOnFirstLetter = true])
+	bool forceUppercaseOnFirstLetter = true;
+	if(lua_gettop(L) > 1)
+		forceUppercaseOnFirstLetter = popBoolean(L);
+
+	lua_pushboolean(L, isValidName(popString(L), forceUppercaseOnFirstLetter));
 	return 1;
 }
 
