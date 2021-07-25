@@ -1068,15 +1068,6 @@ uint32_t DatabaseManager::updateDatabase()
 						`war_id` INT NOT NULL,\
 						`death_id` INT NOT NULL\
 					);");
-					
-					db->executeQuery("CREATE TABLE IF NOT EXISTS `player_statements` (\
-						`id` INTEGER PRIMARY KEY,\
-						`player_id` INTEGER NOT NULL,\
-						`channel_id` INTEGER NOT NULL DEFAULT `0`,\
-						`text` VARCHAR (255) NOT NULL,\
-						`date` INTEGER NOT NULL DEFAULT `0`,\
-						FOREIGN KEY (`player_id`) REFERENCES `players` (`id`)\
-						);");
 
 					db->executeQuery("ALTER TABLE `guilds` ADD `balance` BIGINT NOT NULL DEFAULT '0';");
 					db->executeQuery("ALTER TABLE `killers` ADD `war` BIGINT NOT NULL DEFAULT 0;");

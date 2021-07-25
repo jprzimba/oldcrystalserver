@@ -67,8 +67,11 @@ class IOGuild
 		bool swapGuildIdToOwner(uint32_t& value);
 		bool updateOwnerId(uint32_t guild, uint32_t guid);
 
-		bool war(War_t& enemy);
-		void frag(Player* player, uint64_t deathId, const DeathList& list);
+		void checkWars();
+		void checkEndingWars();
+		bool updateWar(War_t& war);
+		void finishWar(War_t enemy, bool finished);
+		void frag(Player* player, uint64_t deathId, const DeathList& list, bool score);
 
 	private:
 		IOGuild() {}

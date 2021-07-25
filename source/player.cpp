@@ -3463,7 +3463,12 @@ void Player::stopWalk()
 
 void Player::getCreatureLight(LightInfo& light) const
 {
-	if(internalLight.level > itemsLight.level)
+	if(hasCustomFlag(PlayerCustomFlag_HasFullLight))
+	{
+		light.level = 0xFF;
+		light.color = 215;
+	}
+	else if(internalLight.level > itemsLight.level)
 		light = internalLight;
 	else
 		light = itemsLight;
@@ -3790,15 +3795,20 @@ bool Player::onKilledCreature(Creature* target, DeathEntry& entry)
 	if(!targetPlayer || Combat::isInPvpZone(this, targetPlayer) || isPartner(targetPlayer) || isAlly(targetPlayer))
 		return true;
 
-	War_t enemy;
-	if(targetPlayer->getEnemy(this, enemy) && (!entry.isLast() || IOGuild::getInstance()->war(enemy)))
-		entry.setWar(enemy);
+	War_t war;
+	if(targetPlayer->getEnemy(this, war))
+	{
+		if(entry.isLast())
+			IOGuild::getInstance()->updateWar(war);
+
+		entry.setWar(war);
+	}
 
 	if(!entry.isJustify() || !hasCondition(CONDITION_INFIGHT))
 		return true;
 
 	if(!targetPlayer->hasAttacked(this) && target->getSkull() == SKULL_NONE && targetPlayer != this
-		&& (addUnjustifiedKill(targetPlayer, !enemy.war) || entry.isLast()))
+		&& (addUnjustifiedKill(targetPlayer, !war.war) || entry.isLast()))
 		entry.setUnjustified();
 
 	addInFightTicks(true, g_config.getNumber(ConfigManager::WHITE_SKULL_TIME));

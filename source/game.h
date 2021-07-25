@@ -137,6 +137,7 @@ typedef std::map<int32_t, float> StageList;
 #define EVENT_DECAYINTERVAL 1000
 #define EVENT_DECAYBUCKETS 16
 #define STATE_DELAY 1000
+#define EVENT_WARSINTERVAL 450000
 
 /**
   * Main Game class.
@@ -581,6 +582,7 @@ class Game
 		void checkCreatureAttack(uint32_t creatureId);
 		void checkCreatures();
 		void checkLight();
+		void checkWars();
 
 		bool combatBlockHit(CombatType_t combatType, Creature* attacker, Creature* target,
 			int32_t& healthChange, bool checkDefense, bool checkArmor);
@@ -674,6 +676,8 @@ class Game
 		int32_t lastMotdId;
 		uint32_t playersRecord;
 		uint32_t checkLightEvent, checkCreatureEvent, checkDecayEvent, saveEvent;
+		uint32_t checkWarsEvent;
+		bool checkEndingWars;
 		bool globalSaveMessage[2];
 
 		RefreshTiles refreshTiles;

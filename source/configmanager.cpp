@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "configmanager.h"
+#include "house.h"
 #include "tools.h"
 
 ConfigManager::ConfigManager()
@@ -39,7 +40,7 @@ bool ConfigManager::load()
 	if(L)
 		lua_close(L);
 
-	L = lua_open();
+	L = luaL_newstate();
 	if(!L)
 		return false;
 
@@ -307,6 +308,7 @@ bool ConfigManager::load()
 	m_confBool[SKIP_ITEMS_VERSION] = getGlobalBool("skipItemsVersionCheck", true);
 	m_confNumber[STAMINA_DESTROY_LOOT] = getGlobalNumber("staminaLootLimit", 14 * 60);
 	m_confBool[OPTIONAL_WAR_ATTACK_ALLY] = getGlobalBool("optionalWarAttackableAlly", false);
+	m_confBool[EXTERNAL_GUILD_WARS_MANAGEMENT] = getGlobalBool("externalGuildWarsManagement", false);
 
 	m_loaded = true;
 	return true;
@@ -317,8 +319,32 @@ bool ConfigManager::reload()
 	if(!m_loaded)
 		return false;
 
+	uint32_t tmp = m_confNumber[HOUSE_PRICE];
 	if(!load())
 		return false;
+
+	if((uint32_t)m_confNumber[HOUSE_PRICE] == tmp)
+		return true;
+
+	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin();
+		it != Houses::getInstance()->getHouseEnd(); ++it)
+	{
+		uint32_t price = it->second->getTilesCount() * m_confNumber[HOUSE_PRICE];
+		if(m_confBool[HOUSE_RENTASPRICE])
+		{
+			uint32_t rent = it->second->getRent();
+			if(!m_confBool[HOUSE_PRICEASRENT] && it->second->getPrice() != rent)
+				price = rent;
+		}
+
+		it->second->setPrice(price);
+		if(m_confBool[HOUSE_PRICEASRENT])
+			it->second->setRent(price);
+
+		if(!it->second->getOwner())
+			it->second->updateDoorDescription();
+	}
+
 
 	return true;
 }
@@ -388,5 +414,17 @@ bool ConfigManager::setNumber(uint32_t _what, int32_t _value)
 	}
 
 	std::clog << "[Warning - ConfigManager::setNumber] " << _what << std::endl;
+	return false;
+}
+
+bool ConfigManager::setBool(uint32_t _what, bool _value)
+{
+	if(_what < LAST_BOOL_CONFIG)
+	{
+		m_confBool[_what] = _value;
+		return true;
+	}
+
+	std::clog << "[Warning - ConfigManager::setBool] " << _what << std::endl;
 	return false;
 }

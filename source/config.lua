@@ -146,6 +146,8 @@
 	maxDeathRecords = 5
 
 	-- Guilds
+	-- NOTE: externalGuildWarsManagement supports Automatic Account Creator(webpage or whatever you want)
+	externalGuildWarsManagement = false
 	ingameGuildManagement = true
 	levelToFormGuild = 8
 	premiumDaysToFormGuild = 0

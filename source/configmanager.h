@@ -275,6 +275,7 @@ class ConfigManager
 			SHOW_GAMEMASTERS_ONLINE,
 			SKIP_ITEMS_VERSION,
 			OPTIONAL_WAR_ATTACK_ALLY,
+			EXTERNAL_GUILD_WARS_MANAGEMENT,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 
@@ -292,10 +293,13 @@ class ConfigManager
 
 		bool setString(uint32_t _what, const std::string& _value);
 		bool setNumber(uint32_t _what, int32_t _value);
+		bool setBool(uint32_t _what, bool _value);
 
 		void getValue(const std::string& key, lua_State* _L) {LuaScriptInterface::getValue(key, L, _L);}
 
 	private:
+		static void moveValue(lua_State* fromL, lua_State* toL);
+
 		std::string getGlobalString(const std::string& _identifier, const std::string& _default = "")
 		{
 			return LuaScriptInterface::getGlobalString(L, _identifier, _default);
@@ -315,7 +319,6 @@ class ConfigManager
 
 		bool m_loaded, m_startup;
 		lua_State* L;
-		static void moveValue(lua_State* fromL, lua_State* toL);
 
 		std::string m_confString[LAST_STRING_CONFIG];
 		bool m_confBool[LAST_BOOL_CONFIG];
