@@ -157,6 +157,11 @@
 	guildNickMinLength = 3
 	guildNickMaxLength = 25
 
+	-- VIP list
+	separateVipListPerCharacter = false
+	vipListDefaultLimit = 20
+	vipListDefaultPremiumLimit = 100
+
 	-- Highscores
 	highscoreDisplayPlayers = 15
 	updateHighscoresAfterMinutes = 10
@@ -221,7 +226,6 @@
 	storePlayerDirection = false
 	monsterLootMessage = 3
 	monsterLootMessageType = 25
-	separateViplistPerCharacter = false
 
 	-- Ghost mode
 	ghostModeInvisibleEffect = false

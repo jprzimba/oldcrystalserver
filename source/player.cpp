@@ -2474,7 +2474,7 @@ bool Player::addVIP(uint32_t _guid, std::string& name, bool isOnline, bool inter
 		return false;
 	}
 
-	if(VIPList.size() > (group ? group->getMaxVips(isPremium()) : 20))
+	if(VIPList.size() > (group ? group->getMaxVips(isPremium()) : g_config.getNumber(ConfigManager::VIPLIST_DEFAULT_LIMIT)))
 	{
 		if(!internal)
 			sendTextMessage(MSG_STATUS_SMALL, "You cannot add more buddies.");

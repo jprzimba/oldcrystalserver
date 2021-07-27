@@ -169,6 +169,8 @@ class ConfigManager
 			STAMINA_DESTROY_LOOT,
 			TILE_LIMIT,
 			PROTECTION_TILE_LIMIT,
+			VIPLIST_DEFAULT_LIMIT,
+			VIPLIST_DEFAULT_PREMIUM_LIMIT,
 			LAST_NUMBER_CONFIG /* this must be the last one */
 		};
 
