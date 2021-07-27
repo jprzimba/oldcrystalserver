@@ -24,8 +24,8 @@ typedef std::list<std::string> Characters;
 #else
 #include "gameservers.h"
 typedef std::map<std::string, GameServer*> Characters;
-
 #endif
+
 class Account
 {
 	public:
