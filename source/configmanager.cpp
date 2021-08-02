@@ -312,6 +312,7 @@ bool ConfigManager::load()
 	m_confBool[EXTERNAL_GUILD_WARS_MANAGEMENT] = getGlobalBool("externalGuildWarsManagement", false);
 	m_confNumber[VIPLIST_DEFAULT_LIMIT] = getGlobalNumber("vipListDefaultLimit", 20);
 	m_confNumber[VIPLIST_DEFAULT_PREMIUM_LIMIT] = getGlobalNumber("vipListDefaultPremiumLimit", 100);
+	m_confNumber[FIST_BASE_ATTACK] = getGlobalNumber("fistBaseAttack", 7);
 
 	m_loaded = true;
 	return true;

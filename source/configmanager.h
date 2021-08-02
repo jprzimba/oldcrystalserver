@@ -171,6 +171,7 @@ class ConfigManager
 			PROTECTION_TILE_LIMIT,
 			VIPLIST_DEFAULT_LIMIT,
 			VIPLIST_DEFAULT_PREMIUM_LIMIT,
+			FIST_BASE_ATTACK,
 			LAST_NUMBER_CONFIG /* this must be the last one */
 		};
 

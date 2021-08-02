@@ -87,6 +87,7 @@ Player::Player(const std::string& _name, ProtocolGame* p):
 	tradeItem = NULL;
 	tradePartner = NULL;
 	walkTask = NULL;
+	weapon = NULL;
 
 	setVocation(0);
 	setParty(NULL);
@@ -269,53 +270,63 @@ void Player::setConditionSuppressions(uint32_t conditions, bool remove)
 		conditionSuppressions &= ~conditions;
 }
 
-Item* Player::getWeapon(bool ignoreAmmo /*= false*/)
+Item* Player::getWeapon(bool ignoreAmmo)
 {
-	Item* item;
-	for(uint32_t slot = SLOT_RIGHT; slot <= SLOT_LEFT; slot++)
+	if(weapon)
+		return weapon;
+
+	Item* item = NULL;
+	for(int32_t slot = SLOT_RIGHT; slot <= SLOT_LEFT; ++slot)
 	{
-		item = getEquippedItem((slots_t)slot);
-		if(!item)
+		if(!(item = getEquippedItem((slots_t)slot)) || item->getWeaponType() != WEAPON_DIST)
+			continue;
+
+		if(!ignoreAmmo && item->getAmmoType() != AMMO_NONE)
+		{
+			Item* ammoItem = getInventoryItem(SLOT_AMMO);
+			if(ammoItem && ammoItem->getAmmoType() == item->getAmmoType())
+			{
+				if(g_weapons->getWeapon(ammoItem))
+				{
+					shootRange = item->getShootRange();
+					return ammoItem;
+				}
+			}
+		}
+		else if(g_weapons->getWeapon(item))
+		{
+			shootRange = item->getShootRange();
+			return item;
+		}
+	}
+
+	return NULL;
+}
+
+ItemVector Player::getWeapons() const
+{
+	Item* item = NULL;
+	ItemVector weapons;
+	for(int32_t slot = SLOT_RIGHT; slot <= SLOT_LEFT; ++slot)
+	{
+		if(!(item = getEquippedItem((slots_t)slot)))
 			continue;
 
 		switch(item->getWeaponType())
 		{
-			case WEAPON_SWORD:
-			case WEAPON_AXE:
-			case WEAPON_CLUB:
-			case WEAPON_WAND:
-			case WEAPON_FIST:
-			{
-				const Weapon* weapon = g_weapons->getWeapon(item);
-				if(weapon)
-					return item;
-				break;
-			}
-
 			case WEAPON_DIST:
+				if(item->getAmmoType() != AMMO_NONE)
+					break;
+
+			case WEAPON_SWORD:
+			case WEAPON_CLUB:
+			case WEAPON_AXE:
+			case WEAPON_FIST:
+			case WEAPON_WAND:
 			{
-				if(!ignoreAmmo && item->getAmmoType() != AMMO_NONE)
-				{
-					Item* ammoItem = getInventoryItem(SLOT_AMMO);
-					if(ammoItem && ammoItem->getAmmoType() == item->getAmmoType())
-					{
-						const Weapon* weapon = g_weapons->getWeapon(ammoItem);
-						if(weapon)
-						{
-							shootRange = item->getShootRange();
-							return ammoItem;
-						}
-					}
-				}
-				else
-				{
-					const Weapon* weapon = g_weapons->getWeapon(item);
-					if(weapon)
-					{
-						shootRange = item->getShootRange();
-						return item;
-					}
-				}
+				if(g_weapons->getWeapon(item))
+					weapons.push_back(item);
+
 				break;
 			}
 
@@ -324,12 +335,28 @@ Item* Player::getWeapon(bool ignoreAmmo /*= false*/)
 		}
 	}
 
-	return NULL;
+	return weapons;
+}
+
+void Player::updateWeapon()
+{
+	ItemVector weapons = getWeapons();
+	if(weapons.empty())
+		weapon = NULL;
+	else if(!weapon || weapons.size() == 1 || weapons[1] == weapon)
+		weapon = weapons[0];
+	else if(weapons[0] == weapon)
+		weapon = weapons[1];
+	else
+		weapon = NULL;
+
+	if(weapon)
+		shootRange = weapon->getShootRange();
 }
 
 WeaponType_t Player::getWeaponType()
 {
-	if(Item* item = getWeapon())
+	if(Item* item = getWeapon(false))
 		return item->getWeaponType();
 
 	return WEAPON_NONE;
@@ -474,7 +501,7 @@ float Player::getDefenseFactor() const
 
 		case FIGHTMODE_DEFENSE:
 		{
-			if((OTSYS_TIME() - lastAttack) < const_cast<Player*>(this)->getAttackSpeed()) //attacking will cause us to get into normal defense
+			if((OTSYS_TIME() - lastAttack) < getAttackSpeed()) //attacking will cause us to get into normal defense
 				return 1.0f;
 
 			return 2.0f;
@@ -3350,7 +3377,7 @@ void Player::getPathSearchParams(const Creature* creature, FindPathParams& fpp) 
 	fpp.fullPathSearch = true;
 }
 
-void Player::doAttacking(uint32_t interval)
+void Player::doAttacking(uint32_t)
 {
 	if(!lastAttack)
 		lastAttack = OTSYS_TIME() - getAttackSpeed() - 1;
@@ -3363,16 +3390,22 @@ void Player::doAttacking(uint32_t interval)
 		return;
 	}
 
-	Item* tool = getWeapon();
-	if(const Weapon* weapon = g_weapons->getWeapon(tool))
+	Item* item = getWeapon(false);
+	if(const Weapon* _weapon = g_weapons->getWeapon(item))
 	{
-		if(weapon->interruptSwing() && !canDoAction())
+		if(_weapon->interruptSwing() && !canDoAction())
 		{
-			SchedulerTask* task = createSchedulerTask(getNextActionTime(), boost::bind(&Game::checkCreatureAttack, &g_game, getID()));
+			SchedulerTask* task = createSchedulerTask(getNextActionTime(),
+				boost::bind(&Game::checkCreatureAttack, &g_game, getID()));
 			setNextActionTask(task);
 		}
-		else if((!weapon->hasExhaustion() || !hasCondition(CONDITION_EXHAUST, EXHAUST_COMBAT)) && weapon->useWeapon(this, tool, attackedCreature))
-			lastAttack = OTSYS_TIME();
+		else
+		{
+			if((!_weapon->hasExhaustion() || !hasCondition(CONDITION_EXHAUST, EXHAUST_COMBAT)) && _weapon->useWeapon(this, item, attackedCreature))
+				lastAttack = OTSYS_TIME();
+
+			updateWeapon();
+		}
 	}
 	else if(Weapon::useFist(this, attackedCreature))
 		lastAttack = OTSYS_TIME();
@@ -4250,13 +4283,9 @@ uint64_t Player::getLostExperience() const
 	return (uint64_t)std::floor((double)(lost * percent));
 }
 
-uint32_t Player::getAttackSpeed()
+uint32_t Player::getAttackSpeed() const
 {
-	Item* weapon = getWeapon();
-	if(weapon && weapon->getAttackSpeed() != 0)
-		return weapon->getAttackSpeed();
-
-	return vocation->getAttackSpeed();
+	return ((weapon && weapon->getAttackSpeed() != 0) ? weapon->getAttackSpeed() : (vocation->getAttackSpeed() / std::max((size_t)1, getWeapons().size())));
 }
 
 void Player::learnInstantSpell(const std::string& name)
@@ -4901,11 +4930,11 @@ void Player::setGroupId(int32_t newId)
 
 void Player::setGroup(Group* newGroup)
 {
-	if(newGroup)
-	{
-		group = newGroup;
-		groupId = group->getId();
-	}
+	if(!newGroup)
+		return;
+
+	group = newGroup;
+	groupId = group->getId();
 }
 
 PartyShields_t Player::getPartyShield(const Creature* creature) const
@@ -4918,34 +4947,30 @@ PartyShields_t Player::getPartyShield(const Creature* creature) const
 	{
 		if(party->getLeader() == player)
 		{
-			if(party->isSharedExperienceActive())
-			{
-				if(party->isSharedExperienceEnabled())
-					return SHIELD_YELLOW_SHAREDEXP;
+			if(!party->isSharedExperienceActive())
+				return SHIELD_YELLOW;
 
-				if(party->canUseSharedExperience(player))
-					return SHIELD_YELLOW_NOSHAREDEXP;
+			if(party->isSharedExperienceEnabled())
+				return SHIELD_YELLOW_SHAREDEXP;
 
-				return SHIELD_YELLOW_NOSHAREDEXP_BLINK;
-			}
+			if(party->canUseSharedExperience(player))
+				return SHIELD_YELLOW_NOSHAREDEXP;
 
-			return SHIELD_YELLOW;
+			return SHIELD_YELLOW_NOSHAREDEXP_BLINK;
 		}
 
 		if(party->isPlayerMember(player))
 		{
-			if(party->isSharedExperienceActive())
-			{
-				if(party->isSharedExperienceEnabled())
-					return SHIELD_BLUE_SHAREDEXP;
+			if(!party->isSharedExperienceActive())
+				return SHIELD_BLUE;
 
-				if(party->canUseSharedExperience(player))
-					return SHIELD_BLUE_NOSHAREDEXP;
+			if(party->isSharedExperienceEnabled())
+				return SHIELD_BLUE_SHAREDEXP;
 
-				return SHIELD_BLUE_NOSHAREDEXP_BLINK;
-			}
+			if(party->canUseSharedExperience(player))
+				return SHIELD_BLUE_NOSHAREDEXP;
 
-			return SHIELD_BLUE;
+			return SHIELD_BLUE_NOSHAREDEXP_BLINK;
 		}
 
 		if(isInviting(player))
@@ -4972,6 +4997,14 @@ bool Player::isPartner(const Player* player) const
 		return false;
 
 	return (getParty() == player->getParty());
+}
+
+bool Player::getHideHealth() const
+{
+	if(hasFlag(PlayerFlag_HideHealth))
+		return true;
+
+	return hideHealth;
 }
 
 void Player::sendPlayerPartyIcons(Player* player)
@@ -5033,16 +5066,12 @@ void Player::increaseCombatValues(int32_t& min, int32_t& max, bool useCharges, b
 	else
 		max = (int32_t)(max * vocation->getMultiplier(MULTIPLIER_MAGIC));
 
-	Item* weapon = NULL;
-	if(!countWeapon)
-		weapon = getWeapon();
-
 	Item* item = NULL;
-	int32_t minValue = 0, maxValue = 0;
-	for(int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
+	int32_t minValue = 0, maxValue = 0, i = SLOT_FIRST;
+	for(; i < SLOT_LAST; ++i)
 	{
-		if(!(item = getInventoryItem((slots_t)i)) || (g_moveEvents->hasEquipEvent(item)
-			&& !isItemAbilityEnabled((slots_t)i)))
+		if(!(item = getInventoryItem((slots_t)i)) || item->isRemoved() ||
+			(g_moveEvents->hasEquipEvent(item) && !isItemAbilityEnabled((slots_t)i)))
 			continue;
 
 		const ItemType& it = Item::items[item->getID()];
@@ -5082,7 +5111,7 @@ void Player::increaseCombatValues(int32_t& min, int32_t& max, bool useCharges, b
 			break;
 		}
 
-		if(useCharges && removeCharges && item != weapon && item->hasCharges())
+		if(useCharges && removeCharges && (countWeapon || item != weapon) && item->hasCharges())
 			g_game.transformItem(item, item->getID(), std::max((int32_t)0, (int32_t)item->getCharges() - 1));
 	}
 

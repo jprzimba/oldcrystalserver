@@ -187,12 +187,16 @@ class Player : public Creature, public Cylinder
 		void setParty(Party* _party) {party = _party;}
 		Party* getParty() const {return party;}
 		PartyShields_t getPartyShield(const Creature* creature) const;
+
 		bool isInviting(const Player* player) const;
 		bool isPartner(const Player* player) const;
+
 		void sendPlayerPartyIcons(Player* player);
 		bool addPartyInvitation(Party* party);
 		bool removePartyInvitation(Party* party);
 		void clearPartyInvitations();
+
+		bool getHideHealth() const;
 
 		uint32_t getGuildId() const {return guildId;}
 		void setGuildId(uint32_t newId) {guildId = newId;}
@@ -444,7 +448,9 @@ class Player : public Creature, public Cylinder
 		bool getAddAttackSkill() const {return addAttackSkillPoint;}
 		BlockType_t getLastAttackBlockType() const {return lastAttackBlockType;}
 
-		Item* getWeapon(bool ignoreAmmo = false);
+		Item* getWeapon(bool ignoreAmmo);
+		ItemVector getWeapons() const;
+
 		virtual WeaponType_t getWeaponType();
 		int32_t getWeaponSkill(const Item* item) const;
 		void getShieldAndWeapon(const Item* &shield, const Item* &weapon) const;
@@ -687,7 +693,7 @@ class Player : public Creature, public Cylinder
 
 		void receivePing() {lastPong = OTSYS_TIME();}
 		virtual void onThink(uint32_t interval);
-		uint32_t getAttackSpeed();
+		uint32_t getAttackSpeed() const;
 
 		virtual void postAddNotification(Creature* actor, Thing* thing, const Cylinder* oldParent,
 			int32_t index, cylinderlink_t link = LINK_OWNER);
@@ -735,6 +741,7 @@ class Player : public Creature, public Cylinder
 		void updateInventoryWeight();
 		void updateInventoryGoods(uint32_t itemId);
 		void updateItemsLight(bool internal = false);
+		void updateWeapon();
 
 		void setNextWalkActionTask(SchedulerTask* task);
 		void setNextWalkTask(SchedulerTask* task);
@@ -907,6 +914,7 @@ class Player : public Creature, public Cylinder
 		Item* writeItem;
 		House* editHouse;
 		Npc* shopOwner;
+		Item* weapon;
 
 		std::vector<uint32_t> forceWalkthrough;
 
