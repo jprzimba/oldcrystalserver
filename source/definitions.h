@@ -26,9 +26,8 @@
 #define SOFTWARE_NAME "Crystal Server"
 #define SOFTWARE_VERSION "0.1.8"
 #define SOFTWARE_DEVELOPERS "Tryller"
-#define CREATOR_INFO "Server created by Tryller."
 
-#define VERSION_DATABASE 27
+#define VERSION_DATABASE 28
 
 #undef MULTI_SQL_DRIVERS
 #define SQL_DRIVERS __USE_SQLITE__+__USE_MYSQL__

@@ -1,5 +1,5 @@
 -- Advanced NPC System (Created by Jiddo),
--- Modified by Talaturen.
+-- Modified by TheForgottenServer Team.
 
 if(KeywordHandler == nil) then
 	BEHAVIOR_SIMPLE = 1 -- Does not support nested keywords. If you choose this setting you must use a variable such as 'talkState' to keep track of how to handle keywords.

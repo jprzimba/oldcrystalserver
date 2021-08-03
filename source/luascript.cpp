@@ -628,6 +628,7 @@ LuaInterface::LuaInterface(std::string interfaceName)
 	m_luaState = NULL;
 	m_interfaceName = interfaceName;
 	m_lastEventTimerId = 1000;
+	m_errors = true;
 }
 
 LuaInterface::~LuaInterface()
@@ -711,13 +712,18 @@ bool LuaInterface::loadFile(const std::string& file, Npc* npc/* = NULL*/)
 	return true;
 }
 
-bool LuaInterface::loadDirectory(const std::string& dir, Npc* npc/* = NULL*/)
+bool LuaInterface::loadDirectory(const std::string& dir, Npc* npc/* = NULL*/, bool recursively/* = false*/)
 {
 	StringVec files;
 	for(boost::filesystem::directory_iterator it(dir), end; it != end; ++it)
 	{
 		std::string s = it->leaf();
-		if(!boost::filesystem::is_directory(it->status()) && (s.size() > 4 ? s.substr(s.size() - 4) : "") == ".lua")
+		if(boost::filesystem::is_directory(it->status()))
+		{
+			if(recursively && !loadDirectory(it->path().filename() + "/" + s, npc, recursively))
+				return false;
+		}
+		else if((s.size() > 4 ? s.substr(s.size() - 4) : "") == ".lua")
 			files.push_back(s);
 	}
 
@@ -750,7 +756,7 @@ int32_t LuaInterface::getEvent(const std::string& eventName)
 	}
 
 	//save in our events table
-	lua_pushnumber(m_luaState, m_runningEventId);
+	lua_pushnumber(m_luaState, m_runningEvent);
 	lua_pushvalue(m_luaState, -2);
 
 	lua_rawset(m_luaState, -4);
@@ -760,9 +766,9 @@ int32_t LuaInterface::getEvent(const std::string& eventName)
 	lua_pushnil(m_luaState);
 	lua_setglobal(m_luaState, eventName.c_str());
 
-	m_cacheFiles[m_runningEventId] = m_loadingFile + ":" + eventName;
-	++m_runningEventId;
-	return m_runningEventId - 1;
+	m_cacheFiles[m_runningEvent] = m_loadingFile + ":" + eventName;
+	++m_runningEvent;
+	return m_runningEvent - 1;
 }
 
 std::string LuaInterface::getScript(int32_t scriptId)
@@ -790,23 +796,26 @@ void LuaInterface::error(const char* function, const std::string& desc)
 	getEnv()->getInfo(script, event, interface, callback, timer);
 	if(interface)
 	{
-		std::cout << std::endl << "[Error - " << interface->getName() << "] " << std::endl;
+ 		if(!interface->m_errors)
+			return;
+
+		std::clog << std::endl << "[Error - " << interface->getName() << "] " << std::endl;
 		if(callback)
 			std::clog << "In a callback: " << interface->getScript(callback) << std::endl;
 
 		if(timer)
-			std::cout << (callback ? "from" : "In") << " a timer event called from: " << std::endl;
+			std::clog << (callback ? "from" : "In") << " a timer event called from: " << std::endl;
 
-		std::cout << interface->getScript(script) << std::endl << "Description: ";
+		std::clog << interface->getScript(script) << std::endl << "Description: ";
 	}
 	else
-		std::cout << std::endl << "[Lua Error] ";
+		std::clog << std::endl << "[Lua Error] ";
 
-	std::cout << event << std::endl;
+	std::clog << event << std::endl;
 	if(function)
 		std::clog << "(" << function << ") ";
 
-	std::cout << desc << std::endl;
+	std::clog << desc << std::endl;
 }
 
 bool LuaInterface::pushFunction(int32_t function)
@@ -832,6 +841,7 @@ bool LuaInterface::initState()
 		return false;
 
 	luaL_openlibs(m_luaState);
+
 	registerFunctions();
 	if(!loadDirectory(getFilePath(FILE_TYPE_OTHER, "lib/"), NULL))
 		std::clog << "[Warning - LuaInterface::initState] Cannot load " << getFilePath(FILE_TYPE_OTHER, "lib/") << std::endl;
@@ -839,7 +849,7 @@ bool LuaInterface::initState()
 	lua_newtable(m_luaState);
 	lua_setfield(m_luaState, LUA_REGISTRYINDEX, "EVENTS");
 
-	m_runningEventId = EVENT_ID_USER;
+	m_runningEvent = EVENT_ID_USER;
 	return true;
 }
 
@@ -2352,8 +2362,14 @@ void LuaInterface::registerFunctions()
 	//domodlib(lib)
 	lua_register(m_luaState, "domodlib", LuaInterface::luaL_domodlib);
 
-	//dodirectory(dir)
+	//dodirectory(dir[, recursively = false])
 	lua_register(m_luaState, "dodirectory", LuaInterface::luaL_dodirectory);
+
+	//errors(var)
+	lua_register(m_luaState, "errors", LuaInterface::luaL_errors);
+
+	//os table
+	luaL_register(m_luaState, "os", LuaInterface::luaSystemTable);
 
 	//db table
 	luaL_register(m_luaState, "db", LuaInterface::luaDatabaseTable);
@@ -2371,6 +2387,14 @@ void LuaInterface::registerFunctions()
 	lua_register(m_luaState, "doAnonymousBroadcast", LuaInterface::luaAnonymousBroadcastMessage);
 
 }
+
+const luaL_Reg LuaInterface::luaSystemTable[] =
+{
+	//os.mtime()
+	{"mtime", LuaInterface::luaSystemTime},
+
+	{NULL, NULL}
+};
 
 const luaL_Reg LuaInterface::luaDatabaseTable[] =
 {
@@ -4536,7 +4560,7 @@ int32_t LuaInterface::luaDoCreateTeleport(lua_State* L)
 int32_t LuaInterface::luaGetCreatureStorage(lua_State* L)
 {
 	//getCreatureStorage(cid, key)
-	uint32_t key = popNumber(L);
+	std::string key = popString(L);
 	ScriptEnviroment* env = getEnv();
 	if(Creature* creature = env->getCreatureByUID(popNumber(L)))
 	{
@@ -4577,7 +4601,7 @@ int32_t LuaInterface::luaDoCreatureSetStorage(lua_State* L)
 			lua_pop(L, 1);
 	}
 
-	uint32_t key = popNumber(L);
+	std::string key = popString(L);
 	ScriptEnviroment* env = getEnv();
 	if(Creature* creature = env->getCreatureByUID(popNumber(L)))
 	{
@@ -9927,8 +9951,13 @@ int32_t LuaInterface::luaL_domodlib(lua_State* L)
 
 int32_t LuaInterface::luaL_dodirectory(lua_State* L)
 {
+	//dodirectory(dir[, recursively = false])
+	bool recursively = false;
+	if(lua_gettop(L) > 1)
+		recursively = popNumber(L);
+
 	std::string dir = popString(L);
-	if(!getEnv()->getInterface()->loadDirectory(dir, NULL))
+	if(!getEnv()->getInterface()->loadDirectory(dir, NULL, recursively))
 	{
 		errorEx("Failed to load directory " + dir + ".");
 		lua_pushboolean(L, false);
@@ -9939,6 +9968,13 @@ int32_t LuaInterface::luaL_dodirectory(lua_State* L)
 	return 1;
 }
 
+int32_t LuaInterface::luaL_errors(lua_State* L)
+{
+	//errors(var)
+	lua_pushboolean(L, getEnv()->getInterface()->m_errors);
+	getEnv()->getInterface()->m_errors = popNumber(L);
+	return 1;
+}
 #define EXPOSE_LOG(Name, Stream)\
 	int32_t LuaInterface::luaStd##Name(lua_State* L)\
 	{\
@@ -10011,6 +10047,13 @@ int32_t LuaInterface::luaStdCheckName(lua_State* L)
 		forceUppercaseOnFirstLetter = popBoolean(L);
 
 	lua_pushboolean(L, isValidName(popString(L), forceUppercaseOnFirstLetter));
+	return 1;
+}
+
+int32_t LuaInterface::luaSystemTime(lua_State* L)
+{
+	//os.mtime()
+	lua_pushnumber(L, OTSYS_TIME());
 	return 1;
 }
 

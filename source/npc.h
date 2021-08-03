@@ -24,10 +24,6 @@
 #include "luascript.h"
 
 class Npc;
-class Player;
-class NpcResponse;
-
-struct NpcState;
 typedef std::list<Npc*> NpcList;
 
 class Npcs
@@ -39,29 +35,24 @@ class Npcs
 		void reload();
 };
 
-class NpcScriptInterface : public LuaInterface
+class NpcState;
+class NpcScript : public LuaInterface
 {
 	public:
-		NpcScriptInterface();
-		virtual ~NpcScriptInterface();
+		NpcScript();
+		virtual ~NpcScript() {}
 
-		bool loadNpcLib(std::string file);
-
-		static void pushState(lua_State *L, NpcState* state);
-		static void popState(lua_State *L, NpcState* &state);
+		static void pushState(lua_State* L, NpcState* state);
+		static void popState(lua_State* L, NpcState* &state);
 
 	protected:
 		virtual void registerFunctions();
+
 		static int32_t luaActionFocus(lua_State* L);
 		static int32_t luaActionSay(lua_State* L);
-
-		static int32_t luaActionTurn(lua_State* L);
-		static int32_t luaActionMove(lua_State* L);
-		static int32_t luaActionMoveTo(lua_State* L);
 		static int32_t luaActionFollow(lua_State* L);
 
 		static int32_t luaGetNpcId(lua_State* L);
-		static int32_t luaGetNpcDistanceTo(lua_State* L);
 		static int32_t luaGetNpcParameter(lua_State* L);
 
 		static int32_t luaGetNpcState(lua_State* L);
@@ -69,44 +60,14 @@ class NpcScriptInterface : public LuaInterface
 
 		static int32_t luaOpenShopWindow(lua_State* L);
 		static int32_t luaCloseShopWindow(lua_State* L);
-
-	private:
-		bool m_libLoaded;
-
-		virtual bool initState();
-		virtual bool closeState();
 };
 
-class NpcEventsHandler
+class Player;
+class NpcEvents
 {
 	public:
-		NpcEventsHandler(Npc* npc);
-		virtual ~NpcEventsHandler() {}
-
-		virtual void onCreatureAppear(const Creature* creature) {}
-		virtual void onCreatureDisappear(const Creature* creature) {}
-
-		virtual void onCreatureMove(const Creature* creature, const Position& oldPos, const Position& newPos) {}
-		virtual void onCreatureSay(const Creature* creature, SpeakClasses, const std::string& text, Position* pos = NULL) {}
-
-		virtual void onPlayerTrade(const Player* player, int32_t callback, uint16_t itemid,
-			uint8_t count, uint8_t amount, bool ignoreCap, bool inBackpacks) {}
-		virtual void onPlayerEndTrade(const Player* player) {}
-		virtual void onPlayerCloseChannel(const Player* player) {}
-
-		virtual void onThink() {}
-		bool isLoaded();
-
-	protected:
-		Npc* m_npc;
-		bool m_loaded;
-};
-
-class NpcScript : public NpcEventsHandler
-{
-	public:
-		NpcScript(std::string file, Npc* npc);
-		virtual ~NpcScript() {}
+		NpcEvents(std::string file, Npc* npc);
+		virtual ~NpcEvents() {}
 
 		virtual void onCreatureAppear(const Creature* creature);
 		virtual void onCreatureDisappear(const Creature* creature);
@@ -120,9 +81,12 @@ class NpcScript : public NpcEventsHandler
 		virtual void onPlayerCloseChannel(const Player* player);
 
 		virtual void onThink();
+		bool isLoaded() const {return m_loaded;}
 
 	private:
-		NpcScriptInterface* m_interface;
+		Npc* m_npc;
+		bool m_loaded;
+		NpcScript* m_interface;
 		int32_t m_onCreatureAppear, m_onCreatureDisappear, m_onCreatureMove, m_onCreatureSay,
 			m_onPlayerCloseChannel, m_onPlayerEndTrade, m_onThink;
 };
@@ -224,14 +188,15 @@ struct ResponseAction
 		ResponseAction()
 		{
 			actionType = ACTION_NONE;
-			key = intValue = 0;
+			intValue = 0;
+			key = "";
 			strValue = "";
 			pos = Position();
 		}
 
 		ReponseActionParam_t actionType;
-		int32_t key, intValue;
-		std::string strValue;
+		int32_t intValue;
+		std::string key, strValue;
 		Position pos;
 };
 
@@ -263,9 +228,11 @@ struct ScriptVars
 };
 
 typedef std::list<ResponseAction> ActionList;
-typedef std::list<NpcResponse*> ResponseList;
-typedef std::map<std::string, int32_t> ResponseScriptMap;
 
+class NpcResponse;
+typedef std::list<NpcResponse*> ResponseList;
+
+typedef std::map<std::string, int32_t> ResponseScriptMap;
 class NpcResponse
 {
 	public:
@@ -274,13 +241,10 @@ class NpcResponse
 			ResponseProperties()
 			{
 				topic = amount = focusStatus = -1;
-				output = "";
 				interactType = INTERACT_TEXT;
 				responseType = RESPONSE_DEFAULT;
 				params = 0;
-				storageId = -1;
 				storageComp = STORAGE_EQUAL;
-				knowSpell = "";
 				publicize = true;
 			}
 
@@ -288,9 +252,9 @@ class NpcResponse
 			InteractType_t interactType;
 			ResponseType_t responseType;
 			StorageComparision_t storageComp;
-			int32_t topic, amount, focusStatus, storageId;
+			int32_t topic, amount, focusStatus;
 			uint32_t params;
-			std::string output, knowSpell, storageValue;
+			std::string output, knowSpell, storageId, storageValue;
 			ActionList actionList;
 			std::list<std::string> inputList;
 			std::list<ListItem> itemList;
@@ -328,7 +292,7 @@ class NpcResponse
 		std::string getInputText() const {return (prop.inputList.empty() ? "" : *prop.inputList.begin());}
 		int32_t getTopic() const {return prop.topic;}
 		int32_t getFocusState() const {return prop.focusStatus;}
-		int32_t getStorageId() const {return prop.storageId;}
+		std::string getStorageId() const {return prop.storageId;}
 		std::string getStorage() const {return prop.storageValue;}
 		ResponseType_t getResponseType() const {return prop.responseType;}
 		InteractType_t getInteractType() const {return prop.interactType;}
@@ -398,6 +362,7 @@ class Npc : public Creature
 		virtual bool isWalkable() const {return walkable;}
 
 		virtual bool canSee(const Position& pos) const;
+		virtual bool canSeeInvisibility() const {return true;}
 
 		bool isLoaded() {return loaded;}
 		bool load();
@@ -407,9 +372,6 @@ class Npc : public Creature
 		virtual const std::string& getNameDescription() const {return nameDescription;}
 
 		void doSay(const std::string& text, SpeakClasses type, Player* player);
-		void doTurn(Direction dir);
-		void doMove(Direction dir);
-		void doMoveTo(Position pos);
 
 		void onPlayerTrade(Player* player, ShopEvent_t type, int32_t callback, uint16_t itemId, uint8_t count,
 			uint8_t amount, bool ignoreCap = false, bool inBackpacks = false);
@@ -418,7 +380,7 @@ class Npc : public Creature
 		void onPlayerCloseChannel(const Player* player);
 
 		void setCreatureFocus(Creature* creature);
-		NpcScriptInterface* getInterface();
+		NpcScript* getInterface();
 
 	protected:
 		Npc(const std::string& _name);
@@ -431,10 +393,10 @@ class Npc : public Creature
 		virtual void onCreatureSay(const Creature* creature, SpeakClasses type, const std::string& text, Position* pos = NULL);
 		virtual void onThink(uint32_t interval);
 
-		bool isImmune(CombatType_t type) const {return true;}
-		bool isImmune(ConditionType_t type) const {return true;}
+		bool isImmune(CombatType_t) const {return true;}
+		bool isImmune(ConditionType_t) const {return true;}
 
-		virtual std::string getDescription(int32_t lookDistance) const {return nameDescription + ".";}
+		virtual std::string getDescription(int32_t) const {return nameDescription + ".";}
 		virtual bool getNextStep(Direction& dir, uint32_t& flags);
 		bool getRandomStep(Direction& dir);
 
@@ -494,10 +456,10 @@ class Npc : public Creature
 		ResponseScriptMap responseScriptMap;
 		ResponseList responseList;
 
-		NpcEventsHandler* m_npcEventHandler;
-		static NpcScriptInterface* m_interface;
+		NpcEvents* m_npcEventHandler;
+		static NpcScript* m_interface;
 
 		friend class Npcs;
-		friend class NpcScriptInterface;
+		friend class NpcScript;
 };
 #endif

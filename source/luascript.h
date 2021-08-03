@@ -247,7 +247,7 @@ class LuaInterface
 
 		bool loadBuffer(const std::string& text, Npc* npc = NULL);
 		bool loadFile(const std::string& file, Npc* npc = NULL);
-		bool loadDirectory(const std::string& dir, Npc* npc = NULL);
+		bool loadDirectory(const std::string& dir, Npc* npc = NULL, bool recursively = false);
 
 		std::string getName() {return m_interfaceName;}
 		std::string getScript(int32_t scriptId);
@@ -649,9 +649,13 @@ class LuaInterface
 		static int32_t luaGetConfigValue(lua_State* L);
 		static int32_t luaGetModList(lua_State* L);
 
+		static int32_t luaL_errors(lua_State* L);
 		static int32_t luaL_loadmodlib(lua_State* L);
 		static int32_t luaL_domodlib(lua_State* L);
 		static int32_t luaL_dodirectory(lua_State* L);
+
+		static const luaL_Reg luaSystemTable[2];
+		static int32_t luaSystemTime(lua_State* L);
 
 		static const luaL_Reg luaDatabaseTable[8];
 		static int32_t luaDatabaseExecute(lua_State* L);
@@ -696,6 +700,7 @@ class LuaInterface
 		static int32_t luaStdCheckName(lua_State* L);
 
 		lua_State* m_luaState;
+		bool m_errors;
 		std::string m_lastError;
 
 	private:
@@ -744,7 +749,7 @@ class LuaInterface
 		};
 		static int32_t internalGetPlayerInfo(lua_State* L, PlayerInfo_t info);
 
-		int32_t m_runningEventId;
+		int32_t m_runningEvent;
 		uint32_t m_lastEventTimerId;
 		std::string m_loadingFile, m_interfaceName;
 

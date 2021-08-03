@@ -25,7 +25,8 @@ bool Mission::isStarted(Player* player)
 		return false;
 
 	std::string value;
-	return player->getStorage(storageId, value) && atoi(value.c_str()) >= startValue;
+	player->getStorage(storageId, value);
+	return atoi(value.c_str()) >= startValue;
 }
 
 bool Mission::isCompleted(Player* player)
@@ -34,34 +35,42 @@ bool Mission::isCompleted(Player* player)
 		return false;
 
 	std::string value;
-	return player->getStorage(storageId, value) && atoi(value.c_str()) >= endValue;
+	player->getStorage(storageId, value);
+	return atoi(value.c_str()) >= endValue;
+}
+
+std::string Mission::parseStorages(std::string state, std::string value)
+{
+	/*std::string::size_type start, end;
+	while((start = state.find("|STORAGE:")) != std::string::npos)
+	{
+		if((end = state.find("|", start)) = std::string::npos)
+			continue;
+
+		std::string value, storage = state.substr(start, end - start)
+		player->getStorage(storage, value);
+		state.replace(start, end, value);
+	} requires testing and probably fixing, inspired by QuaS code*/
+
+	replaceString(state, "|STATE|", value);
+	return state;
 }
 
 std::string Mission::getDescription(Player* player)
 {
 	std::string value;
-	if(!player->getStorage(storageId, value))
-		return "Couldn't retrieve a valid player storage, please report to a gamemaster.";
-
+	player->getStorage(storageId, value);
 	if(state.size())
-	{
-		std::string ret = state;
-		replaceString(ret, "|STATE|", value);
-		return ret;
-	}
+		return parseStorages(state, value);
 
 	if(atoi(value.c_str()) >= endValue)
-		return states.rbegin()->second;
+		return parseStorages(states.rbegin()->second, value);
 
 	for(int32_t i = endValue; i >= startValue; --i)
 	{
-		if(!player->getStorage(storageId, value) || atoi(value.c_str()) != i)
-			continue;
-
-		std::string ret = states[i - startValue];
-		replaceString(ret, "|STATE|", value);
-		return ret;
-
+		player->getStorage(storageId, value);
+		if(atoi(value.c_str()) == i)
+			return parseStorages(states[i - startValue], value);
 	}
 
 	return "Couldn't retrieve any mission description, please report to a gamemaster.";
@@ -81,7 +90,8 @@ bool Quest::isStarted(Player* player)
 		return false;
 
 	std::string value;
-	return player->getStorage(storageId, value) && atoi(value.c_str()) >= storageValue;
+	player->getStorage(storageId, value);
+	return atoi(value.c_str()) >= storageValue;
 }
 
 bool Quest::isCompleted(Player* player) const
@@ -127,7 +137,7 @@ bool Quests::loadFromXml()
 	if(!doc)
 	{
 		std::clog << "[Warning - Quests::loadFromXml] Cannot load quests file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << getLastXMLError() << std::endl;
 		return false;
 	}
 
@@ -170,9 +180,9 @@ bool Quests::parseQuestNode(xmlNodePtr p, bool checkDuplicate)
 	if(readXMLString(p, "name", strValue))
 		name = strValue;
 
-	uint32_t startStorageId = 0;
-	if(readXMLInteger(p, "startstorageid", intValue) || readXMLInteger(p, "storageId", intValue))
-		startStorageId = intValue;
+	std::string startStorageId;
+	if(readXMLString(p, "startstorageid", strValue) || readXMLString(p, "storageId", strValue))
+		startStorageId = strValue;
 
 	int32_t startStorageValue = 0;
 	if(readXMLInteger(p, "startstoragevalue", intValue) || readXMLInteger(p, "storageValue", intValue))
@@ -187,22 +197,21 @@ bool Quests::parseQuestNode(xmlNodePtr p, bool checkDuplicate)
 		if(xmlStrcmp(missionNode->name, (const xmlChar*)"mission"))
 			continue;
 
-		std::string missionName, missionState;
+		std::string missionName, missionState, storageId;
 		if(readXMLString(missionNode, "name", strValue))
 			missionName = strValue;
 
 		if(readXMLString(missionNode, "state", strValue) || readXMLString(missionNode, "description", strValue))
 			missionState = strValue;
 
-		uint32_t storageId = 0;
-		if(readXMLInteger(missionNode, "storageid", intValue) || readXMLInteger(p, "storageId", intValue))
-			storageId = intValue;
+		if(readXMLString(missionNode, "storageid", strValue) || readXMLString(missionNode, "storageId", strValue))
+			storageId = strValue;
 
 		int32_t startValue = 0, endValue = 0;
-		if(readXMLInteger(missionNode, "startvalue", intValue) || readXMLInteger(p, "startValue", intValue))
+		if(readXMLInteger(missionNode, "startvalue", intValue) || readXMLInteger(missionNode, "startValue", intValue))
 			startValue = intValue;
 
-		if(readXMLInteger(missionNode, "endvalue", intValue) || readXMLInteger(p, "endValue", intValue))
+		if(readXMLInteger(missionNode, "endvalue", intValue) || readXMLInteger(missionNode, "endValue", intValue))
 			endValue = intValue;
 
 		if(Mission* mission = new Mission(missionName, missionState, storageId, startValue, endValue))

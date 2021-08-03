@@ -1,6 +1,7 @@
 --[[
  * File containing deprecated functions and constants used by alot of scripts and other engines
 ]]--
+
 TRUE = true
 FALSE = false
 LUA_ERROR = false
@@ -147,6 +148,7 @@ print = std.cout
 getPosByDir = getPositionByDirection
 db.updateQueryLimitOperator = db.updateLimiter
 db.stringComparisonOperator = db.stringComparison
+isNumeric = isNumber
 
 PlayerFlag_CannotUseCombat = 0
 PlayerFlag_CannotAttackPlayer = 1
