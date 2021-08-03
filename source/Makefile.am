@@ -1,9 +1,9 @@
 noinst_PROGRAMS = crystalserver
 
-CXXFLAGS = -g -O1
+CXXFLAGS = -pipe
 AM_CXXFLAGS = $(XML_CPPFLAGS) $(OTSERV_FLAGS) $(LUA_CFLAGS) $(DEBUG_FLAGS)\
-$(MYSQL_FLAGS) $(SQLITE_FLAGS) $(ODBC_FLAGS) $(PGSQL_FLAGS)\
-$(PROFILER_FLAGS) $(OPTIONAL_FLAGS) -D_THREAD_SAFE -D_REENTRANT -Wall
+$(MYSQL_FLAGS) $(SQLITE_FLAGS) $(PROFILER_FLAGS)\
+$(OPTIONAL_FLAGS) -D_THREAD_SAFE -D_REENTRANT -Wall -Wextra -Werror -Wno-strict-aliasing -Wno-unused-parameter
 
 crystalserver_LDADD = $(LUA_LIBS)
 
@@ -20,30 +20,29 @@ endif
 crystalserver_SOURCES = account.h actions.cpp actions.h \
 	allocator.cpp allocator.h baseevents.cpp baseevents.h beds.cpp \
 	beds.h chat.cpp chat.h combat.cpp combat.h condition.cpp condition.h \
-	config.h configmanager.cpp configmanager.h connection.cpp \
-	connection.h const.h container.cpp container.h creature.cpp \
-	creature.h creatureevent.cpp creatureevent.h cylinder.cpp cylinder.h \
-	database.cpp database.h databasemanager.cpp databasemanager.h \
-	$(MAYBE_MYSQL) $(MAYBE_SQLITE) \
-	depot.cpp depot.h exception.cpp exception.h fileloader.cpp \
-	fileloader.h game.cpp game.h $(MAYBE_LOGIN) globalevent.cpp \
-	globalevent.h group.cpp group.h house.cpp house.h \
-	housetile.cpp housetile.h ioban.cpp ioban.h \
-	ioguild.cpp ioguild.h iologindata.cpp iologindata.h iomap.cpp \
+	config.h configmanager.cpp configmanager.h connection.cpp connection.h \
+	const.h container.cpp container.h creature.cpp creature.h \
+	creatureevent.cpp creatureevent.h cylinder.cpp cylinder.h database.cpp \
+	database.h databasemanager.cpp databasemanager.h $(MAYBE_MYSQL) \
+	$(MAYBE_SQLITE) depot.cpp depot.h dispatcher.cpp \
+	dispatcher.h exception.cpp exception.h fileloader.cpp fileloader.h \
+	game.cpp game.h $(MAYBE_LOGIN) globalevent.cpp globalevent.h group.cpp \
+	group.h house.cpp house.h housetile.cpp housetile.h ioban.cpp ioban.h \
+	ioguild.cpp ioguild.h iologindata.cpp iologindata.h iomap.cpp iomap.h \
 	iomapserialize.cpp iomapserialize.h item.cpp item.h itemattributes.cpp \
 	itemattributes.h items.cpp items.h luascript.cpp luascript.h \
-	mailbox.cpp mailbox.h map.cpp map.h md5.cpp md5.h monster.cpp \
+	mailbox.cpp mailbox.h map.cpp map.h monster.cpp \
 	monster.h monsters.cpp monsters.h movement.cpp movement.h \
-	networkmessage.cpp networkmessage.h npc.cpp npc.h otpch.h \
-	otserv.cpp otsystem.h outfit.cpp outfit.h outputmessage.cpp \
-	outputmessage.h party.cpp party.h \
-	player.cpp player.h position.cpp position.h protocol.cpp protocol.h \
-	protocolgame.cpp protocolgame.h protocollogin.cpp protocollogin.h \
-	protocolold.cpp protocolold.h quests.cpp quests.h raids.cpp raids.h \
-	resources.h rsa.cpp rsa.h scheduler.cpp scheduler.h scriptmanager.cpp \
-	scriptmanager.h server.cpp server.h sha1.cpp sha1.h spawn.cpp spawn.h \
-	spells.cpp spells.h status.cpp status.h talkaction.cpp talkaction.h \
-	tasks.cpp tasks.h teleport.cpp teleport.h templates.h textlogger.cpp \
-	textlogger.h thing.cpp thing.h tile.cpp tile.h tools.cpp tools.h \
-	town.h trashholder.cpp trashholder.h waitlist.cpp waitlist.h \
-	waypoints.h weapons.cpp weapons.h vocation.cpp vocation.h
+	networkmessage.cpp networkmessage.h npc.cpp npc.h otpch.h otserv.cpp \
+	otsystem.h outfit.cpp outfit.h outputmessage.cpp outputmessage.h \
+	party.cpp party.h player.cpp player.h position.cpp position.h \
+	protocol.cpp protocol.h protocolgame.cpp protocolgame.h \
+	protocolhttp.cpp protocolhttp.h protocollogin.cpp protocollogin.h \
+	protocolold.cpp protocolold.h quests.cpp quests.h rsa.cpp rsa.h raids.cpp raids.h \
+	scheduler.cpp scheduler.h scriptmanager.cpp \
+	scriptmanager.h server.cpp server.h spawn.cpp spawn.h spells.cpp \
+	spells.h status.cpp status.h talkaction.cpp talkaction.h teleport.cpp \
+	teleport.h templates.h textlogger.cpp textlogger.h thing.cpp thing.h \
+	tile.cpp tile.h tools.cpp tools.h town.h trashholder.cpp trashholder.h \
+	waitlist.cpp waitlist.h waypoints.h weapons.cpp weapons.h vocation.cpp \
+	vocation.h

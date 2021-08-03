@@ -18,6 +18,17 @@
 #ifndef __LUASCRIPT__
 #define __LUASCRIPT__
 #include "otsystem.h"
+#ifdef __LUAJIT__
+#include <luajit-2.0/lua.hpp>
+
+
+extern "C"
+{
+	#include <luajit-2.0/luajit.h>
+	#include <luajit-2.0/lauxlib.h>
+	#include <luajit-2.0/lualib.h>
+}
+#else
 
 extern "C"
 {
@@ -25,6 +36,7 @@ extern "C"
 	#include "lualib.h"
 	#include "lauxlib.h"
 }
+#endif
 
 #include "database.h"
 #include "position.h"
