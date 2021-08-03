@@ -1794,38 +1794,37 @@ bool Player::isMuted(uint16_t channelId, SpeakClasses type, uint32_t& time)
 	}
 
 	time = (uint32_t)muteTicks / 1000;
-	return time > 0 && type != SPEAK_PRIVATE_PN && (type != SPEAK_CHANNEL_Y || (channelId != CHANNEL_GUILD && !g_chat.isPrivateChannel(channelId)));
+	return type != SPEAK_PRIVATE_PN && (type != SPEAK_CHANNEL_Y || (channelId != CHANNEL_GUILD && !g_chat.isPrivateChannel(channelId)));
 }
 
 void Player::addMessageBuffer()
 {
-	if(!hasFlag(PlayerFlag_CannotBeMuted) && g_config.getNumber(
-		ConfigManager::MAX_MESSAGEBUFFER) != 0 && messageBuffer > 0)
+	if(!hasFlag(PlayerFlag_CannotBeMuted) && g_config.getNumber(ConfigManager::MAX_MESSAGEBUFFER) && messageBuffer)
 		messageBuffer--;
 }
 
 void Player::removeMessageBuffer()
 {
+	if(hasFlag(PlayerFlag_CannotBeMuted))
+		return;
+
 	int32_t maxBuffer = g_config.getNumber(ConfigManager::MAX_MESSAGEBUFFER);
-	if(!hasFlag(PlayerFlag_CannotBeMuted) && maxBuffer != 0 && messageBuffer <= maxBuffer + 1)
-	{
-		if(++messageBuffer > maxBuffer)
-		{
-			uint32_t muteCount = 1;
-			MuteCountMap::iterator it = muteCountMap.find(guid);
-			if(it != muteCountMap.end())
-				muteCount = it->second;
+	if(!maxBuffer || messageBuffer > maxBuffer + 1 || ++messageBuffer <= maxBuffer)
+		return;
 
-			uint32_t muteTime = 5 * muteCount * muteCount;
-			muteCountMap[guid] = muteCount + 1;
-			if(Condition* condition = Condition::createCondition(CONDITIONID_DEFAULT, CONDITION_MUTED, muteTime * 1000))
-				addCondition(condition);
+	uint32_t muteCount = 1;
+	MuteCountMap::iterator it = muteCountMap.find(guid);
+	if(it != muteCountMap.end())
+		muteCount = it->second;
 
-			char buffer[50];
-			sprintf(buffer, "You are muted for %d seconds.", muteTime);
-			sendTextMessage(MSG_STATUS_SMALL, buffer);
-		}
-	}
+	uint32_t muteTime = 5 * muteCount * muteCount;
+	muteCountMap[guid] = muteCount + 1;
+	if(Condition* condition = Condition::createCondition(CONDITIONID_DEFAULT, CONDITION_MUTED, muteTime * 1000))
+		addCondition(condition);
+
+	char buffer[50];
+	sprintf(buffer, "You are muted for %d seconds.", muteTime);
+	sendTextMessage(MSG_STATUS_SMALL, buffer);
 }
 
 void Player::drainHealth(Creature* attacker, CombatType_t combatType, int32_t damage)
@@ -2376,7 +2375,8 @@ Item* Player::createCorpse(DeathList deathList)
 
 void Player::addExhaust(uint32_t ticks, Exhaust_t type)
 {
-	if(Condition* condition = Condition::createCondition(CONDITIONID_DEFAULT, CONDITION_EXHAUST, ticks, 0, false, type))
+	if(Condition* condition = Condition::createCondition(CONDITIONID_DEFAULT,
+		CONDITION_EXHAUST, ticks, 0, false, (uint32_t)type))
 		addCondition(condition);
 }
 
@@ -2450,7 +2450,7 @@ void Player::addList()
 	autoList[id] = this;
 }
 
-void Player::kickPlayer(bool displayEffect, bool forceLogout)
+void Player::kick(bool displayEffect, bool forceLogout)
 {
 	if(!client)
 	{
@@ -3719,7 +3719,7 @@ void Player::onPlacedCreature()
 {
 	//scripting event - onLogin
 	if(!g_creatureEvents->playerLogin(this))
-		kickPlayer(true, true);
+		kick(true, true);
 }
 
 void Player::onAttackedCreatureDrain(Creature* target, int32_t points)

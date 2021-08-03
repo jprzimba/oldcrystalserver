@@ -158,7 +158,7 @@ class Player : public Creature, public Cylinder
 
 		void manageAccount(const std::string& text);
 		bool isAccountManager() const {return (accountManager != MANAGER_NONE);}
-		void kickPlayer(bool displayEffect, bool forceLogout);
+		void kick(bool displayEffect, bool forceLogout);
 
 		void setGUID(uint32_t _guid) {guid = _guid;}
 		uint32_t getGUID() const {return guid;}
@@ -928,7 +928,7 @@ class Player : public Creature, public Cylinder
 		WarMap warMap;
 
 		friend class Game;
-		friend class LuaScriptInterface;
+		friend class LuaInterface;
 		friend class Npc;
 		friend class Map;
 		friend class Actions;

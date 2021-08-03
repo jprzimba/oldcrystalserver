@@ -2462,7 +2462,7 @@ NpcScriptInterface* Npc::getInterface()
 }
 
 NpcScriptInterface::NpcScriptInterface() :
-	LuaScriptInterface("Npc interface")
+	LuaInterface("Npc interface")
 {
 	m_libLoaded = false;
 	initState();
@@ -2476,13 +2476,13 @@ NpcScriptInterface::~NpcScriptInterface()
 
 bool NpcScriptInterface::initState()
 {
-	return LuaScriptInterface::initState();
+	return LuaInterface::initState();
 }
 
 bool NpcScriptInterface::closeState()
 {
 	m_libLoaded = false;
-	return LuaScriptInterface::closeState();
+	return LuaInterface::closeState();
 }
 
 bool NpcScriptInterface::loadNpcLib(std::string file)
@@ -2502,7 +2502,7 @@ bool NpcScriptInterface::loadNpcLib(std::string file)
 
 void NpcScriptInterface::registerFunctions()
 {
-	LuaScriptInterface::registerFunctions();
+	LuaInterface::registerFunctions();
 	lua_register(m_luaState, "selfFocus", NpcScriptInterface::luaActionFocus);
 	lua_register(m_luaState, "selfSay", NpcScriptInterface::luaActionSay);
 
@@ -2989,8 +2989,8 @@ void NpcScript::onCreatureMove(const Creature* creature, const Position& oldPos,
 		m_interface->pushFunction(m_onCreatureMove);
 		lua_pushnumber(L, env->addThing(const_cast<Creature*>(creature)));
 
-		LuaScriptInterface::pushPosition(L, oldPos, 0);
-		LuaScriptInterface::pushPosition(L, newPos, 0);
+		LuaInterface::pushPosition(L, oldPos, 0);
+		LuaInterface::pushPosition(L, newPos, 0);
 
 		m_interface->callFunction(3);
 		m_interface->releaseEnv();
@@ -3056,7 +3056,7 @@ void NpcScript::onPlayerTrade(const Player* player, int32_t callback, uint16_t i
 		env->setNpc(m_npc);
 
 		uint32_t cid = env->addThing(const_cast<Player*>(player));
-		LuaScriptInterface::pushCallback(L, callback);
+		LuaInterface::pushCallback(L, callback);
 
 		lua_pushnumber(L, cid);
 		lua_pushnumber(L, itemid);

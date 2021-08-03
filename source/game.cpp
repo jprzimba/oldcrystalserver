@@ -205,7 +205,7 @@ void Game::setGameState(GameState_t newState)
 				AutoList<Player>::iterator it = Player::autoList.begin();
 				while(it != Player::autoList.end()) //kick all players that are still online
 				{
-					it->second->kickPlayer(true, true);
+					it->second->kick(true, true);
 					it = Player::autoList.begin();
 				}
 
@@ -225,7 +225,7 @@ void Game::setGameState(GameState_t newState)
 				{
 					if(!it->second->hasFlag(PlayerFlag_CanAlwaysLogin))
 					{
-						it->second->kickPlayer(true, true);
+						it->second->kick(true, true);
 						it = Player::autoList.begin();
 					}
 					else
@@ -5368,7 +5368,7 @@ void Game::kickPlayer(uint32_t playerId, bool displayEffect)
 	if(!player || player->isRemoved())
 		return;
 
-	player->kickPlayer(displayEffect, true);
+	player->kick(displayEffect, true);
 }
 
 bool Game::broadcastMessage(const std::string& text, MessageClasses type)

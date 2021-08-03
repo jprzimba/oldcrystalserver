@@ -84,7 +84,6 @@
 	allowFightback = true
 	useCapSystem = true
 	optionalWarAttackableAlly = false
-	fistBaseAttack = 7
 
 	-- Charges
 	removeWeaponAmmunition = true

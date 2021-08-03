@@ -72,8 +72,8 @@ class MoveEvents : public BaseEvents
 		virtual Event* getEvent(const std::string& nodeName);
 		virtual bool registerEvent(Event* event, xmlNodePtr p, bool override);
 
-		virtual LuaScriptInterface& getInterface() {return m_interface;}
-		LuaScriptInterface m_interface;
+		virtual LuaInterface& getInterface() {return m_interface;}
+		LuaInterface m_interface;
 
 		void registerItemID(int32_t itemId, MoveEvent_t eventType);
 		void registerActionID(int32_t actionId, MoveEvent_t eventType);
@@ -102,7 +102,7 @@ typedef uint32_t (EquipFunction)(MoveEvent* moveEvent, Player* player, Item* ite
 class MoveEvent : public Event
 {
 	public:
-		MoveEvent(LuaScriptInterface* _interface);
+		MoveEvent(LuaInterface* _interface);
 		MoveEvent(const MoveEvent* copy);
 		virtual ~MoveEvent();
 
