@@ -111,13 +111,13 @@ void Protocol::XTEA_encrypt(OutputMessage& msg)
 	for(uint8_t i = 0; i < 4; i++)
 		k[i] = m_key[i];
 
-	int32_t messageLength = msg.getMessageLength();
+	int32_t messageLength = msg.size();
 	//add bytes until reach 8 multiple
 	uint32_t n;
 	if((messageLength % 8) != 0)
 	{
 		n = 8 - (messageLength % 8);
-		msg.AddPaddingBytes(n);
+		msg.putPadding(n);
 		messageLength = messageLength + n;
 	}
 
@@ -141,7 +141,7 @@ void Protocol::XTEA_encrypt(OutputMessage& msg)
 
 bool Protocol::XTEA_decrypt(NetworkMessage& msg)
 {
-	if((msg.getMessageLength() - 6) % 8 != 0)
+	if((msg.size() - 6) % 8 != 0)
 	{
 		std::clog << "[Failure - Protocol::XTEA_decrypt] Not valid encrypted message size";
 		int32_t ip = getIP();
@@ -156,8 +156,8 @@ bool Protocol::XTEA_decrypt(NetworkMessage& msg)
 	for(uint8_t i = 0; i < 4; i++)
 		k[i] = m_key[i];
 
-	int32_t messageLength = msg.getMessageLength() - 6, readPos = 0;
-	uint32_t* buffer = (uint32_t*)(msg.getBuffer() + msg.getReadPos());
+	int32_t messageLength = msg.size() - 6, readPos = 0;
+	uint32_t* buffer = (uint32_t*)(msg.buffer() + msg.position());
 	while(readPos < messageLength / 4)
 	{
 		uint32_t v0 = buffer[readPos], v1 = buffer[readPos + 1], delta = 0x61C88647, sum = 0xC6EF3720;
@@ -174,8 +174,8 @@ bool Protocol::XTEA_decrypt(NetworkMessage& msg)
 	}
 	//
 
-	int32_t tmp = msg.GetU16();
-	if(tmp > msg.getMessageLength() - 8)
+	int32_t tmp = msg.get<uint16_t>();
+	if(tmp > msg.size() - 8)
 	{
 		std::clog << "[Failure - Protocol::XTEA_decrypt] Not valid unencrypted message size";
 		uint32_t ip = getIP();
@@ -186,13 +186,13 @@ bool Protocol::XTEA_decrypt(NetworkMessage& msg)
 		return false;
 	}
 
-	msg.setMessageLength(tmp);
+	msg.setSize(tmp);
 	return true;
 }
 
 bool Protocol::RSA_decrypt(NetworkMessage& msg)
 {
-	if(msg.getMessageLength() - msg.getReadPos() != 128)
+	if(msg.size() - msg.position() != 128)
 	{
 		std::clog << "[Warning - Protocol::RSA_decrypt] Not valid packet size";
 		int32_t ip = getIP();
@@ -203,13 +203,12 @@ bool Protocol::RSA_decrypt(NetworkMessage& msg)
 		return false;
 	}
 
-	//rsa->decrypt((char*)(msg.getBuffer() + msg.getReadPos()), 128);
-	uint16_t size = msg.getMessageLength();
-	RSA_private_decrypt(128, (uint8_t*)(msg.getBuffer() + msg.getReadPos()), (uint8_t*)msg.getBuffer(), g_RSA, RSA_NO_PADDING);
-	msg.setMessageLength(size);
+	uint16_t size = msg.size();
+	RSA_private_decrypt(128, (uint8_t*)(msg.buffer() + msg.position()), (uint8_t*)msg.buffer(), g_RSA, RSA_NO_PADDING);
+	msg.setSize(size);
 
-	msg.setReadPos(0);
-	if(!msg.GetByte())
+	msg.setPosition(0);
+	if(!msg.get<char>())
 		return true;
 
 	std::clog << "[Warning - Protocol::RSA_decrypt] First byte != 0";
@@ -223,8 +222,8 @@ bool Protocol::RSA_decrypt(NetworkMessage& msg)
 
 uint32_t Protocol::getIP() const
 {
-	if(getConnection())
-		return getConnection()->getIP();
+	if(Connection_ptr connection = getConnection())
+		return connection->getIP();
 
 	return 0;
 }

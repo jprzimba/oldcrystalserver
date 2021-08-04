@@ -29,7 +29,10 @@
 #include "teleport.h"
 #include "beds.h"
 
+#include "configmanager.h"
 #include "game.h"
+
+extern ConfigManager g_config;
 extern Game g_game;
 
 typedef uint8_t attribute_t;
@@ -587,4 +590,20 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 	}
 
 	return true;
+}
+
+bool IOMap::loadSpawns(Map* map)
+{
+	if(map->spawnfile.empty())
+		map->spawnfile =  g_config.getString(ConfigManager::MAP_NAME) + "-spawn.xml";
+
+	return Spawns::getInstance()->loadFromXml(map->spawnfile);
+}
+
+bool IOMap::loadHouses(Map* map)
+{
+	if(map->housefile.empty())
+		map->housefile = g_config.getString(ConfigManager::MAP_NAME) + "-house.xml";
+
+	return Houses::getInstance()->loadFromXml(map->housefile);
 }

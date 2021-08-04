@@ -71,12 +71,12 @@ void OutputMessagePool::send(OutputMessage_ptr msg)
 		}
 		#ifdef __DEBUG_NET__
 		else
-			std::clog << "Error: [OutputMessagePool::send] NULL connection." << std::endl;
+			std::clog << "[Error - OutputMessagePool::send] NULL connection." << std::endl;
 		#endif
 	}
 	#ifdef __DEBUG_NET__
 	else
-		std::clog << "Warning: [OutputMessagePool::send] State != STATE_ALLOCATED_NO_AUTOSEND" << std::endl;
+		std::clog << "[Warning - OutputMessagePool::send] State != STATE_ALLOCATED_NO_AUTOSEND" << std::endl;
 	#endif
 }
 
@@ -110,7 +110,7 @@ void OutputMessagePool::sendAll()
 		if(true)
 		#else
 		//It will send only messages bigger then 1 kb or with a lifetime greater than 10 ms
-		if(omsg->getMessageLength() > 1024 || (m_frameTime - omsg->getFrame() > 10))
+		if(omsg->size() > 1024 || (m_frameTime - omsg->getFrame() > 10))
 		#endif
 		{
 			#ifdef __DEBUG_NET_DETAIL__
@@ -123,7 +123,7 @@ void OutputMessagePool::sendAll()
 			}
 			#ifdef __DEBUG_NET__
 			else
-				std::clog << "Error: [OutputMessagePool::send] NULL connection." << std::endl;
+				std::clog << "[Error - OutputMessagePool::send] NULL connection." << std::endl;
 			#endif
 
 			it = m_autoSend.erase(it);
@@ -161,7 +161,7 @@ void OutputMessagePool::internalReleaseMessage(OutputMessage* msg)
 	m_outputPoolLock.unlock();
 }
 
-OutputMessage_ptr OutputMessagePool::getOutputMessage(Protocol* protocol, bool autoSend /*= true*/)
+OutputMessage_ptr OutputMessagePool::getOutputMessage(Protocol* protocol, bool autoSend/* = true*/)
 {
 	#ifdef __DEBUG_NET_DETAIL__
 	std::clog << "request output message - auto = " << autoSend << std::endl;
@@ -197,7 +197,7 @@ OutputMessage_ptr OutputMessagePool::getOutputMessage(Protocol* protocol, bool a
 void OutputMessagePool::configureOutputMessage(OutputMessage_ptr msg, Protocol* protocol, bool autoSend)
 {
 	TRACK_MESSAGE(msg);
-	msg->Reset();
+	msg->reset();
 	if(autoSend)
 	{
 		msg->setState(OutputMessage::STATE_ALLOCATED);

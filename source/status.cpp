@@ -53,11 +53,12 @@ void ProtocolStatus::onRecvFirstMessage(NetworkMessage& msg)
 	}
 
 	ipConnectMap[getIP()] = OTSYS_TIME();
-	switch(msg.GetByte())
+	uint8_t type = msg.get<char>();
+	switch(type)
 	{
 		case 0xFF:
 		{
-			if(msg.GetString(4) == "info")
+			if(msg.getString(false, 4) == "info")
 			{
 				if(OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false))
 				{
@@ -65,11 +66,10 @@ void ProtocolStatus::onRecvFirstMessage(NetworkMessage& msg)
 					if(Status* status = Status::getInstance())
 					{
 						bool sendPlayers = false;
-						if(msg.getMessageLength() > msg.getReadPos())
-							sendPlayers = msg.GetByte() == 0x01;
+						if(msg.size() > msg.position())
+							sendPlayers = msg.get<char>() == 0x01;
 
-						std::string str = status->getStatusString(sendPlayers);
-						output->AddBytes(str.c_str(), str.size());
+						output->putString(status->getStatusString(sendPlayers), false);
 					}
 
 					setRawMessages(true); // we dont want the size header, nor encryption
@@ -82,7 +82,7 @@ void ProtocolStatus::onRecvFirstMessage(NetworkMessage& msg)
 
 		case 0x01:
 		{
-			uint32_t requestedInfo = msg.GetU16(); //Only a Byte is necessary, though we could add new infos here
+			uint32_t requestedInfo = msg.get<uint16_t>(); // only a byte is necessary, though we could add new infos here
 			if(OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false))
 			{
 				TRACK_MESSAGE(output);
@@ -133,7 +133,7 @@ std::string Status::getStatusString(bool sendPlayers) const
 	xmlSetProp(p, (const xmlChar*)"url", (const xmlChar*)g_config.getString(ConfigManager::URL).c_str());
 	xmlSetProp(p, (const xmlChar*)"server", (const xmlChar*)SOFTWARE_NAME);
 	xmlSetProp(p, (const xmlChar*)"version", (const xmlChar*)SOFTWARE_VERSION);
-	xmlSetProp(p, (const xmlChar*)"client", (const xmlChar*)CLIENT_VERSION_PROTOCOL);
+	xmlSetProp(p, (const xmlChar*)"client", (const xmlChar*)SOFTWARE_PROTOCOL);
 	xmlAddChild(root, p);
 
 	p = xmlNewNode(NULL,(const xmlChar*)"owner");
@@ -178,7 +178,7 @@ std::string Status::getStatusString(bool sendPlayers) const
 	xmlAddChild(root, p);
 
 	p = xmlNewNode(NULL,(const xmlChar*)"map");
-	xmlSetProp(p, (const xmlChar*)"name", (const xmlChar*)m_mapName.c_str());
+	xmlSetProp(p, (const xmlChar*)"name", (const xmlChar*)g_config.getString(ConfigManager::MAP_NAME).c_str());
 	xmlSetProp(p, (const xmlChar*)"author", (const xmlChar*)g_config.getString(ConfigManager::MAP_AUTHOR).c_str());
 
 	uint32_t mapWidth, mapHeight;
@@ -209,57 +209,57 @@ void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMe
 {
 	if(requestedInfo & REQUEST_BASIC_SERVER_INFO)
 	{
-		output->AddByte(0x10);
-		output->AddString(g_config.getString(ConfigManager::SERVER_NAME).c_str());
-		output->AddString(g_config.getString(ConfigManager::IP).c_str());
+		output->put<char>(0x10);
+		output->putString(g_config.getString(ConfigManager::SERVER_NAME).c_str());
+		output->putString(g_config.getString(ConfigManager::IP).c_str());
 
 		char buffer[10];
 		sprintf(buffer, "%d", g_config.getNumber(ConfigManager::LOGIN_PORT));
-		output->AddString(buffer);
+		output->putString(buffer);
 	}
 
 	if(requestedInfo & REQUEST_SERVER_OWNER_INFO)
 	{
-		output->AddByte(0x11);
-		output->AddString(g_config.getString(ConfigManager::OWNER_NAME).c_str());
-		output->AddString(g_config.getString(ConfigManager::OWNER_EMAIL).c_str());
+		output->put<char>(0x11);
+		output->putString(g_config.getString(ConfigManager::OWNER_NAME).c_str());
+		output->putString(g_config.getString(ConfigManager::OWNER_EMAIL).c_str());
 	}
 
 	if(requestedInfo & REQUEST_MISC_SERVER_INFO)
 	{
-		output->AddByte(0x12);
-		output->AddString(g_config.getString(ConfigManager::MOTD).c_str());
-		output->AddString(g_config.getString(ConfigManager::LOCATION).c_str());
-		output->AddString(g_config.getString(ConfigManager::URL).c_str());
+		output->put<char>(0x12);
+		output->putString(g_config.getString(ConfigManager::MOTD).c_str());
+		output->putString(g_config.getString(ConfigManager::LOCATION).c_str());
+		output->putString(g_config.getString(ConfigManager::URL).c_str());
 
 		uint64_t uptime = getUptime();
-		output->AddU32((uint32_t)(uptime >> 32));
-		output->AddU32((uint32_t)(uptime));
+		output->put<uint32_t>((uint32_t)(uptime >> 32));
+		output->put<uint32_t>((uint32_t)(uptime));
 	}
 
 	if(requestedInfo & REQUEST_PLAYERS_INFO)
 	{
-		output->AddByte(0x20);
-		output->AddU32(g_game.getPlayersOnline());
-		output->AddU32(g_config.getNumber(ConfigManager::MAX_PLAYERS));
-		output->AddU32(g_game.getPlayersRecord());
+		output->put<char>(0x20);
+		output->put<uint32_t>(g_game.getPlayersOnline());
+		output->put<uint32_t>(g_config.getNumber(ConfigManager::MAX_PLAYERS));
+		output->put<uint32_t>(g_game.getPlayersRecord());
 	}
 
 	if(requestedInfo & REQUEST_SERVER_MAP_INFO)
 	{
-		output->AddByte(0x30);
-		output->AddString(m_mapName.c_str());
-		output->AddString(g_config.getString(ConfigManager::MAP_AUTHOR).c_str());
+		output->put<char>(0x30);
+		output->putString(g_config.getString(ConfigManager::MAP_NAME).c_str());
+		output->putString(g_config.getString(ConfigManager::MAP_AUTHOR).c_str());
 
 		uint32_t mapWidth, mapHeight;
 		g_game.getMapDimensions(mapWidth, mapHeight);
-		output->AddU16(mapWidth);
-		output->AddU16(mapHeight);
+		output->put<uint16_t>(mapWidth);
+		output->put<uint16_t>(mapHeight);
 	}
 
 	if(requestedInfo & REQUEST_EXT_PLAYERS_INFO)
 	{
-		output->AddByte(0x21);
+		output->put<char>(0x21);
 		std::list<std::pair<std::string, uint32_t> > players;
 		for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
 		{
@@ -267,31 +267,31 @@ void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMe
 				players.push_back(std::make_pair(it->second->getName(), it->second->getLevel()));
 		}
 
-		output->AddU32(players.size());
+		output->put<uint32_t>(players.size());
 		for(std::list<std::pair<std::string, uint32_t> >::iterator it = players.begin(); it != players.end(); ++it)
 		{
-			output->AddString(it->first);
-			output->AddU32(it->second);
+			output->putString(it->first);
+			output->put<uint32_t>(it->second);
 		}
 	}
 
 	if(requestedInfo & REQUEST_PLAYER_STATUS_INFO)
 	{
-		output->AddByte(0x22);
-		const std::string name = msg.GetString();
+		output->put<char>(0x22);
+		const std::string name = msg.getString();
 
 		Player* p = NULL;
 		if(g_game.getPlayerByNameWildcard(name, p) == RET_NOERROR && !p->isGhost())
-			output->AddByte(0x01);
+			output->put<char>(0x01);
 		else
-			output->AddByte(0x00);
+			output->put<char>(0x00);
 	}
 
 	if(requestedInfo & REQUEST_SERVER_SOFTWARE_INFO)
 	{
-		output->AddByte(0x23);
-		output->AddString(SOFTWARE_NAME);
-		output->AddString(SOFTWARE_VERSION);
-		output->AddString(CLIENT_VERSION_PROTOCOL);
+		output->put<char>(0x23);
+		output->putString(SOFTWARE_NAME);
+		output->putString(SOFTWARE_VERSION);
+		output->putString(SOFTWARE_PROTOCOL);
 	}
 }

@@ -21,11 +21,11 @@
 #define CLIENT_VERSION_MIN 860
 #define CLIENT_VERSION_MAX 860
 #define CLIENT_VERSION_STRING "Only clients with protocol 8.6 allowed!"
-#define CLIENT_VERSION_PROTOCOL "8.6"
 
 #define SOFTWARE_NAME "Crystal Server"
 #define SOFTWARE_VERSION "0.1.8"
 #define SOFTWARE_DEVELOPERS "Tryller"
+#define SOFTWARE_PROTOCOL "8.6"
 
 #define VERSION_DATABASE 28
 
@@ -90,8 +90,10 @@
 	#define DEBUG_REPORT
 #endif
 
-#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
-#define CRYPTOPP_DEFAULT_NO_DLL
+#ifndef __NO_CRYPTOPP__
+	#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+	#define CRYPTOPP_DEFAULT_NO_DLL
+#endif
 
 #define BOOST_ASIO_ENABLE_CANCELIO 1
 #if defined WINDOWS

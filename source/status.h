@@ -78,9 +78,6 @@ class Status
 		std::string getStatusString(bool sendPlayers) const;
 		void getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMessage& msg) const;
 
-		const std::string& getMapName() const {return m_mapName;}
-		void setMapName(std::string mapName) {m_mapName = mapName;}
-
 		uint32_t getUptime() const {return (OTSYS_TIME() - m_start) / 1000;}
 		int64_t getStart() const {return m_start;}
 
@@ -91,9 +88,7 @@ class Status
 		}
 
 
-	public:
-		int64_t m_start;
 	private:
-		std::string m_mapName;
+		int64_t m_start;
 };
 #endif
