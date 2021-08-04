@@ -586,7 +586,6 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 			else if(tmpStrValue == "weight")
 			{
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
-				if(g_config.getBool(ConfigManager::SYSTEM_CAP))
 					it.weight = intValue / 100.f;
 			}
 			else if(tmpStrValue == "showcount")

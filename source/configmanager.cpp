@@ -303,7 +303,7 @@ bool ConfigManager::load()
 	m_confNumber[CRITICAL_HIT_CHANCE] = getGlobalNumber("criticalHitChance", 5);
 	m_confDouble[CRITICAL_HIT_MUL] = getGlobalDouble("criticalHitMultiplier", 1);
 	m_confNumber[CRITICAL_COLOR] = getGlobalNumber("criticalHitColor", COLOR_TEAL);
-	m_confBool[SYSTEM_CAP] = getGlobalBool("useCapSystem", false);
+	m_confBool[USE_CAPACITY] = getGlobalBool("useCapSystem", true);
 	m_confBool[SHOW_DESCR] = getGlobalBool("showDescriptionItems", false);
 	m_confNumber[MIN_GUILD_NICK] = getGlobalNumber("guildNickMinLength", 2);
 	m_confNumber[MAX_GUILD_NICK] = getGlobalNumber("guildNickMaxLength", 25);

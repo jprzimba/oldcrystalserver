@@ -1525,8 +1525,6 @@ bool ConjureSpell::loadFunction(const std::string& functionName)
 	std::string tmpFunctionName = asLowerCaseString(functionName);
 	if(tmpFunctionName == "conjureitem" || tmpFunctionName == "conjurerune")
 		function = ConjureItem;
-	else if(tmpFunctionName == "conjurefood")
-		function = ConjureFood;
 	else
 	{
 		std::clog << "[Warning - ConjureSpell::loadFunction] Function \"" << functionName << "\" does not exist." << std::endl;
@@ -1538,7 +1536,7 @@ bool ConjureSpell::loadFunction(const std::string& functionName)
 }
 
 ReturnValue ConjureSpell::internalConjureItem(Player* player, uint32_t conjureId, uint32_t conjureCount,
-	bool transform/* = false*/, uint32_t reagentId/* = 0*/, slots_t slot/* = SLOT_WHEREVER*/, bool test/* = false*/)
+	bool transform/* = false*/, uint32_t reagentId/* = 0*/)
 {
 	if(!transform)
 	{
@@ -1556,27 +1554,57 @@ ReturnValue ConjureSpell::internalConjureItem(Player* player, uint32_t conjureId
 	if(!reagentId)
 		return RET_NOTPOSSIBLE;
 
-	Item* item = player->getInventoryItem(slot);
-	if(item && item->getID() == reagentId)
+	std::list<Container*> containers;
+	Item *item = NULL, *fromItem = NULL;
+	for(int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
 	{
-		if(item->isStackable() && item->getItemCount() != 1)
-			return RET_YOUNEEDTOSPLITYOURSPEARS;
+		if(!(item = player->getInventoryItem((slots_t)i)))
+			continue;
 
-		if(test)
-			return RET_NOERROR;
-
-		Item* newItem = g_game.transformItem(item, conjureId, conjureCount);
-		if(!newItem)
-			return RET_NOTPOSSIBLE;
-
-		g_game.startDecay(newItem);
-		return RET_NOERROR;
+		if(!fromItem && item->getID() == reagentId)
+			fromItem = item;
+		else if(Container* container = item->getContainer())
+			containers.push_back(container);
 	}
 
-	return RET_YOUNEEDAMAGICITEMTOCASTSPELL;
+	if(!fromItem)
+	{
+		for(std::list<Container*>::iterator cit = containers.begin(); cit != containers.end(); ++cit)
+		{
+			for(ItemList::const_reverse_iterator it = (*cit)->getReversedItems(); it != (*cit)->getReversedEnd(); ++it)
+			{
+				if((*it)->getID() == reagentId)
+				{
+					fromItem = (*it);
+					break;
+				}
+
+				if(Container* tmp = (*it)->getContainer())
+					containers.push_back(tmp);
+			}
+		}
+	}
+
+	if(!fromItem)
+		return RET_YOUNEEDAMAGICITEMTOCASTSPELL;
+
+	if(Item::items[conjureId].stackable || fromItem->isStackable())
+	{
+		item = Item::CreateItem(conjureId, conjureCount);
+		ReturnValue ret = g_game.internalPlayerAddItem(NULL, player, item, false);
+		if(ret != RET_NOERROR)
+			return ret;
+
+		g_game.transformItem(fromItem, reagentId, std::max((int32_t)0, ((int32_t)fromItem->getItemCount()) - 1));
+		g_game.startDecay(item);
+	}
+	else
+		g_game.transformItem(fromItem, conjureId);
+	
+	return RET_NOERROR;
 }
 
-bool ConjureSpell::ConjureItem(const ConjureSpell* spell, Creature* creature, const std::string& param)
+bool ConjureSpell::ConjureItem(const ConjureSpell* spell, Creature* creature, const std::string&)
 {
 	Player* player = creature->getPlayer();
 	if(!player)
@@ -1589,85 +1617,25 @@ bool ConjureSpell::ConjureItem(const ConjureSpell* spell, Creature* creature, co
 		return false;
 	}
 
-	ReturnValue result = RET_NOERROR;
+	ReturnValue result = RET_NOTPOSSIBLE;
 	if(spell->getReagentId() != 0)
 	{
-		ReturnValue resLeft = internalConjureItem(player, spell->getConjureId(), spell->getConjureCount(),
-			true, spell->getReagentId(), SLOT_LEFT, true);
-		if(resLeft == RET_NOERROR)
+		if((result = internalConjureItem(player, spell->getConjureId(), spell->getConjureCount(), true, spell->getReagentId())) == RET_NOERROR)
 		{
-			resLeft = internalConjureItem(player, spell->getConjureId(), spell->getConjureCount(),
-				true, spell->getReagentId(), SLOT_LEFT);
-			if(resLeft == RET_NOERROR)
-				spell->postCastSpell(player, false);
-		}
-
-		ReturnValue resRight = internalConjureItem(player, spell->getConjureId(), spell->getConjureCount(),
-			true, spell->getReagentId(), SLOT_RIGHT, true);
-		if(resRight == RET_NOERROR)
-		{
-			if(resLeft == RET_NOERROR && !spell->playerSpellCheck(player))
-				return false;
-
-			resRight = internalConjureItem(player, spell->getConjureId(), spell->getConjureCount(),
-				true, spell->getReagentId(), SLOT_RIGHT);
-			if(resRight == RET_NOERROR)
-				spell->postCastSpell(player, false);
-		}
-
-		if(resLeft == RET_NOERROR || resRight == RET_NOERROR)
-		{
-			spell->postCastSpell(player, true, false);
+			spell->postCastSpell(player);
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_WRAPS_RED);
 			return true;
 		}
-
-		result = resLeft;
-		if((result == RET_NOERROR && resRight != RET_NOERROR) ||
-			(result == RET_YOUNEEDAMAGICITEMTOCASTSPELL && resRight == RET_YOUNEEDTOSPLITYOURSPEARS))
-			result = resRight;
 	}
-	else if(internalConjureItem(player, spell->getConjureId(), spell->getConjureCount()) == RET_NOERROR)
+	else if((result = internalConjureItem(player, spell->getConjureId(), spell->getConjureCount())) == RET_NOERROR)
 	{
 		spell->postCastSpell(player);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_WRAPS_RED);
 		return true;
 	}
 
-	if(result != RET_NOERROR)
-		player->sendCancelMessage(result);
-
+	player->sendCancelMessage(result);
 	g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
-	return false;
-}
-
-bool ConjureSpell::ConjureFood(const ConjureSpell* spell, Creature* creature, const std::string& param)
-{
-	Player* player = creature->getPlayer();
-	if(!player)
-		return false;
-
-	static uint32_t foodType[] =
-	{
-		ITEM_MEAT,
-		ITEM_HAM,
-		ITEM_GRAPE,
-		ITEM_APPLE,
-		ITEM_BREAD,
-		ITEM_CHEESE,
-		ITEM_ROLL
-	};
-
-	if(internalConjureItem(player, foodType[random_range(0, (sizeof(foodType) / sizeof(uint32_t)) - 1)], 1) == RET_NOERROR)
-	{
-		if(random_range(0, 100) > 50)
-			internalConjureItem(player, foodType[random_range(0, (sizeof(foodType) / sizeof(uint32_t)) - 1)], 1);
-
-		spell->postCastSpell(player);
-		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_WRAPS_GREEN);
-		return true;
-	}
-
 	return false;
 }
 

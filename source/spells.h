@@ -236,10 +236,9 @@ class ConjureSpell : public InstantSpell
 		virtual std::string getScriptEventParams() const {return "cid, var";}
 
 		static ReturnValue internalConjureItem(Player* player, uint32_t conjureId, uint32_t conjureCount,
-			bool transform = false, uint32_t reagentId = 0, slots_t slot = SLOT_WHEREEVER, bool test = false);
+			bool transform = false, uint32_t reagentId = 0);
 
 		static ConjureSpellFunction ConjureItem;
-		static ConjureSpellFunction ConjureFood;
 
 		bool internalCastSpell(Creature* creature, const LuaVariant& var);
 		Position getCasterPosition(Creature* creature);
