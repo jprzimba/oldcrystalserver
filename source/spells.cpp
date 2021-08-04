@@ -69,6 +69,7 @@ ReturnValue Spells::onPlayerSay(Player* player, const std::string& words)
 		trimString(reParam);
 	}
 
+	Position pos = player->getPosition();
 	if(!instantSpell->playerCastInstant(player, reParam))
 		return RET_NEEDEXCHANGE;
 
@@ -77,8 +78,17 @@ ReturnValue Spells::onPlayerSay(Player* player, const std::string& words)
 		type = SPEAK_MONSTER_SAY;
 
 	if(!g_config.getBool(ConfigManager::SPELL_NAME_INSTEAD_WORDS))
+	{
+		if(g_config.getBool(ConfigManager::UNIFIED_SPELLS))
+		{
+			reWords = instantSpell->getWords();
+			if(instantSpell->getHasParam())
+				reWords += " \"" + reParam + "\"";
+		}
+
 		return g_game.internalCreatureSay(player, type, reWords, player->isGhost()) ?
 			RET_NOERROR : RET_NOTPOSSIBLE;
+	}
 
 	std::string ret = instantSpell->getName();
 	if(param.length())
@@ -94,8 +104,8 @@ ReturnValue Spells::onPlayerSay(Player* player, const std::string& words)
 		ret += ": " + param.substr(tmp, rtmp);
 	}
 
-	return g_game.internalCreatureSay(player, type, ret, player->isGhost()) ?
-		RET_NOERROR : RET_NOTPOSSIBLE;
+	return g_game.internalCreatureSay(player, type, ret, player->isGhost(),
+		NULL, &pos) ? RET_NOERROR : RET_NOTPOSSIBLE;
 }
 
 void Spells::clear()

@@ -211,6 +211,7 @@ bool ConfigManager::load()
 	m_confBool[CLEAN_PROTECTED_ZONES] = getGlobalBool("cleanProtectedZones", true);
 	m_confBool[SPELL_NAME_INSTEAD_WORDS] = getGlobalBool("spellNameInsteadOfWords", false);
 	m_confBool[EMOTE_SPELLS] = getGlobalBool("emoteSpells", false);
+	m_confBool[UNIFIED_SPELLS] = getGlobalBool("unifiedSpells", true);
 	m_confNumber[MAX_PLAYER_SUMMONS] = getGlobalNumber("maxPlayerSummons", 2);
 	m_confBool[SAVE_GLOBAL_STORAGE] = getGlobalBool("saveGlobalStorage", true);
 	m_confBool[FORCE_CLOSE_SLOW_CONNECTION] = getGlobalBool("forceSlowConnectionsToDisconnect", false);

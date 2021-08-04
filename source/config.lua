@@ -75,7 +75,7 @@
 	-- advancedFragList is not advised if you use huge frags
 	-- requirements.
 	redSkullLength = 3 * 24 * 60 * 60 -- this is 3 days of red skull
-	blackSkullLength = 4 * 24 * 60 * 60 -- this is 4 days of red skull
+	blackSkullLength = 4 * 24 * 60 * 60 -- this is 4 days of black skull
 	dailyFragsToRedSkull = 3
 	weeklyFragsToRedSkull = 5
 	monthlyFragsToRedSkull = 10
@@ -134,6 +134,14 @@
 	useCapSystem = true
 	optionalWarAttackableAlly = false
 	fistBaseAttack = 7
+
+	-- Spells
+	formulaLevel = 5.0
+	formulaMagic = 1.0
+	bufferMutedOnSpellFailure = false
+	spellNameInsteadOfWords = false
+	emoteSpells = false
+	unifiedSpells = true
 
 	-- Charges
 	removeWeaponAmmunition = true
@@ -201,7 +209,7 @@
 	-- NOTE: storeTrash costs more memory, but will perform alot faster cleaning.
 	-- useHouseDataStorage usage may be found at README.
 	mapName = "dnsend"
-	mapAuthor = "Komic"
+	mapAuthor = ""
 	randomizeTiles = true
 	useHouseDataStorage = false
 	storeTrash = true
@@ -219,10 +227,6 @@
 	removePremiumOnInit = true
 	skipItemsVersionCheck = false
 
-	-- Muted buffer
-	maxMessageBuffer = 4
-	bufferMutedOnSpellFailure = false
-
 	-- Miscellaneous
 	-- NOTE: promptExceptionTracerErrorBox works only with precompiled support feature,
 	-- called "exception tracer" (__EXCEPTION_TRACER__ flag).
@@ -231,12 +235,11 @@
 	bankSystem = true
 	saveGlobalStorage = true
 	displaySkillLevelOnAdvance = false
-	spellNameInsteadOfWords = false
-	emoteSpells = false
 	promptExceptionTracerErrorBox = true
 	storePlayerDirection = false
 	monsterLootMessage = 3
 	monsterLootMessageType = 25
+	maxMessageBuffer = 4
 
 	-- Ghost mode
 	ghostModeInvisibleEffect = false
