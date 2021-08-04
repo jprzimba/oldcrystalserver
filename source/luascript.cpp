@@ -132,7 +132,7 @@ bool ScriptEnviroment::saveGameState()
 	DBQuery query;
 
 	query << "DELETE FROM `global_storage` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID) << ";";
-	if(!db->executeQuery(query.str()))
+	if(!db->query(query.str()))
 		return false;
 
 	DBInsert query_insert(db);
@@ -2401,8 +2401,8 @@ const luaL_Reg LuaInterface::luaSystemTable[] =
 
 const luaL_Reg LuaInterface::luaDatabaseTable[] =
 {
-	//db.executeQuery(query)
-	{"executeQuery", LuaInterface::luaDatabaseExecute},
+	//db.query(query)
+	{"query", LuaInterface::luaDatabaseExecute},
 
 	//db.storeQuery(query)
 	{"storeQuery", LuaInterface::luaDatabaseStoreQuery},
@@ -2416,8 +2416,8 @@ const luaL_Reg LuaInterface::luaDatabaseTable[] =
 	//db.lastInsertId()
 	{"lastInsertId", LuaInterface::luaDatabaseLastInsertId},
 
-	//db.stringComparison()
-	{"stringComparison", LuaInterface::luaDatabaseStringComparison},
+	//db.stringComparer()
+	{"stringComparer", LuaInterface::luaDatabaseStringComparer},
 
 	//db.updateLimiter()
 	{"updateLimiter", LuaInterface::luaDatabaseUpdateLimiter},
@@ -10062,9 +10062,9 @@ int32_t LuaInterface::luaSystemTime(lua_State* L)
 
 int32_t LuaInterface::luaDatabaseExecute(lua_State* L)
 {
-	//db.executeQuery(query)
+	//db.query(query)
 	DBQuery query; //lock mutex
-	lua_pushboolean(L, Database::getInstance()->executeQuery(popString(L)));
+	lua_pushboolean(L, Database::getInstance()->query(popString(L)));
 	return 1;
 }
 
@@ -10108,10 +10108,10 @@ int32_t LuaInterface::luaDatabaseLastInsertId(lua_State* L)
 	return 1;
 }
 
-int32_t LuaInterface::luaDatabaseStringComparison(lua_State* L)
+int32_t LuaInterface::luaDatabaseStringComparer(lua_State* L)
 {
-	//db.stringComparison()
-	lua_pushstring(L, Database::getInstance()->getStringComparison().c_str());
+	//db.stringComparer()
+	lua_pushstring(L, Database::getInstance()->getStringComparer().c_str());
 	return 1;
 }
 

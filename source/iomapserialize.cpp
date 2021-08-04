@@ -28,15 +28,36 @@ extern Game g_game;
 
 bool IOMapSerialize::loadMap(Map* map)
 {
-	if(g_config.getBool(ConfigManager::HOUSE_STORAGE))
-		return loadMapBinary(map);
+	std::string config = asLowerCaseString(g_config.getString(ConfigManager::HOUSE_STORAGE));
+	bool result = false;
+	if(config == "binary-tilebased")
+		result = loadMapBinaryTileBased(map);
+	else if(config == "binary")
+		result = loadMapBinary(map);
+	else
+		result = loadMapRelational(map);
 
-	return loadMapRelational(map);
+	if(!result)
+		return false;
+
+	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin();
+		it != Houses::getInstance()->getHouseEnd(); ++it)
+	{
+		if(!it->second->hasSyncFlag(House::HOUSE_SYNC_UPDATE))
+			continue;
+
+		it->second->resetSyncFlag(House::HOUSE_SYNC_UPDATE);
+		it->second->updateDoorDescription();
+	}
+	return true;
 }
 
 bool IOMapSerialize::saveMap(Map* map)
 {
-	if(g_config.getBool(ConfigManager::HOUSE_STORAGE))
+	std::string config = asLowerCaseString(g_config.getString(ConfigManager::HOUSE_STORAGE));
+	if(config == "binary-tilebased")
+		return saveMapBinaryTileBased(map);
+	else if(config == "binary")
 		return saveMapBinary(map);
 
 	return saveMapRelational(map);
@@ -61,7 +82,7 @@ bool IOMapSerialize::updateAuctions()
 		query.str("");
 		query << "DELETE FROM `house_auctions` WHERE `house_id` = " << result->getDataInt("house_id");
 		if(!(house = Houses::getInstance()->getHouse(result->getDataInt(
-			"house_id"))) || !db->executeQuery(query.str()))
+			"house_id"))) || !db->query(query.str()))
 		{
 			success = false;
 			continue;
@@ -93,11 +114,14 @@ bool IOMapSerialize::loadHouses()
 
 		house->setRentWarnings(result->getDataInt("warnings"));
 		house->setLastWarning(result->getDataInt("lastwarning"));
-		house->setPaidUntil(result->getDataInt("paid"));
 
-		house->setOwner(result->getDataInt("owner"));
+		house->setPaidUntil(result->getDataInt("paid"));
 		if(result->getDataInt("clear"))
 			house->setPendingTransfer(true);
+
+		house->setOwner(result->getDataInt("owner"));
+		if(house->getOwner() && house->hasSyncFlag(House::HOUSE_SYNC_UPDATE))
+			house->resetSyncFlag(House::HOUSE_SYNC_UPDATE);
 	}
 	while(result->next());
 	result->free();
@@ -133,10 +157,13 @@ bool IOMapSerialize::updateHouses()
 		if(!(house = it->second))
 			continue;
 
-		query << "SELECT `id` FROM `houses` WHERE `id` = " << house->getId() << " AND `world_id` = "
+		query << "SELECT `price` FROM `houses` WHERE `id` = " << house->getId() << " AND `world_id` = "
 			<< g_config.getNumber(ConfigManager::WORLD_ID) << " LIMIT 1";
 		if(DBResult* result = db->storeQuery(query.str()))
 		{
+			if((uint32_t)result->getDataInt("price") != house->getPrice())
+				house->setSyncFlag(House::HOUSE_SYNC_UPDATE);
+
 			result->free();
 			query.str("");
 
@@ -176,7 +203,7 @@ bool IOMapSerialize::updateHouses()
 				<< house->getTilesCount() << ", " << house->isGuild() << ")";
 		}
 
-		if(!db->executeQuery(query.str()))
+		if(!db->query(query.str()))
 			return false;
 
 		query.str("");
@@ -205,13 +232,13 @@ bool IOMapSerialize::saveHouse(Database* db, House* house)
 		<< house->getPaidUntil() << ", `warnings` = " << house->getRentWarnings() << ", `lastwarning` = "
 		<< house->getLastWarning() << ", `clear` = 0 WHERE `id` = " << house->getId() << " AND `world_id` = "
 		<< g_config.getNumber(ConfigManager::WORLD_ID) << db->getUpdateLimiter();
-	if(!db->executeQuery(query.str()))
+	if(!db->query(query.str()))
 		return false;
 
 	query.str("");
 	query << "DELETE FROM `house_lists` WHERE `house_id` = " << house->getId() << " AND `world_id` = "
 		<< g_config.getNumber(ConfigManager::WORLD_ID);
-	if(!db->executeQuery(query.str()))
+	if(!db->query(query.str()))
 		return false;
 
 	DBInsert queryInsert(db);
@@ -361,12 +388,12 @@ bool IOMapSerialize::saveMapRelational(Map* map)
 	//clear old tile data
 	DBQuery query;
 	query << "DELETE FROM `tile_items` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID);
-	if(!db->executeQuery(query.str()))
+	if(!db->query(query.str()))
 		return false;
 
 	query.str("");
 	query << "DELETE FROM `tiles` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID);
-	if(!db->executeQuery(query.str()))
+	if(!db->query(query.str()))
 		return false;
 
 	uint32_t tileId = 0;
@@ -458,7 +485,7 @@ bool IOMapSerialize::saveMapBinary(Map* map)
 
 	DBQuery query;
 	query << "DELETE FROM `house_data` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID);
-	if(!db->executeQuery(query.str()))
+	if(!db->query(query.str()))
  		return false;
 
 	DBInsert stmt(db);
@@ -481,6 +508,121 @@ bool IOMapSerialize::saveMapBinary(Map* map)
 			<< ", " << db->escapeBlob(attributes, attributesSize);
 		if(!stmt.addRow(query))
 			return false;
+ 	}
+
+	query.str("");
+	if(!stmt.execute())
+		return false;
+
+ 	//End the transaction
+ 	return transaction.commit();
+}
+
+
+bool IOMapSerialize::loadMapBinaryTileBased(Map* map)
+{
+	Database* db = Database::getInstance();
+	DBResult* result;
+
+	DBQuery query;
+	query << "SELECT `house_id`, `data` FROM `tile_store` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID);
+	if(!(result = db->storeQuery(query.str())))
+		return false;
+
+	House* house = NULL;
+	do
+	{
+		int32_t houseId = result->getDataInt("house_id");
+		house = Houses::getInstance()->getHouse(houseId);
+
+		uint64_t attrSize = 0;
+		const char* attr = result->getDataStream("data", attrSize);
+
+		PropStream propStream;
+		propStream.init(attr, attrSize);
+		while(propStream.size())
+		{
+			uint16_t x = 0, y = 0;
+			uint8_t z = 0;
+
+			propStream.GET_USHORT(x);
+			propStream.GET_USHORT(y);
+			propStream.GET_UCHAR(z);
+
+			uint32_t itemCount = 0;
+			propStream.GET_ULONG(itemCount);
+
+			Position pos(x, y, (int16_t)z);
+			if(house && house->hasPendingTransfer())
+			{
+				if(Player* player = g_game.getPlayerByGuidEx(house->getOwner()))
+				{
+					Depot* depot = player->getDepot(player->getTown(), true);
+					while(itemCount--)
+						loadItem(propStream, depot, true);
+
+					if(player->isVirtual())
+					{
+						IOLoginData::getInstance()->savePlayer(player);
+						delete player;
+					}
+				}
+			}
+			else if(Tile* tile = map->getTile(pos))
+			{
+				while(itemCount--)
+					loadItem(propStream, tile, false);
+			}
+			else
+			{
+				std::clog << "[Error - IOMapSerialize::loadMapBinary] Unserialization of invalid tile"
+					<< " at position " << pos << std::endl;
+				break;
+			}
+ 		}
+	}
+	while(result->next());
+	result->free();
+ 	return true;
+}
+
+bool IOMapSerialize::saveMapBinaryTileBased(Map*)
+{
+ 	Database* db = Database::getInstance();
+	//Start the transaction
+ 	DBTransaction transaction(db);
+ 	if(!transaction.begin())
+ 		return false;
+
+	DBQuery query;
+	query << "DELETE FROM `tile_store` WHERE `world_id` = " << g_config.getNumber(ConfigManager::WORLD_ID);
+	if(!db->query(query.str()))
+ 		return false;
+
+	DBInsert stmt(db);
+	stmt.setQuery("INSERT INTO `tile_store` (`house_id`, `world_id`, `data`) VALUES ");
+ 	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin(); it != Houses::getInstance()->getHouseEnd(); ++it)
+	{
+ 		//save house items
+		House* house = it->second;
+		for(HouseTileList::iterator tit = house->getHouseTileBegin(); tit != house->getHouseTileEnd(); ++tit)
+		{
+			PropWriteStream stream;
+			saveTile(stream, *tit);
+
+			uint32_t attributesSize = 0;
+			const char* attributes = stream.getStream(attributesSize);
+
+			query.str("");
+			if(attributesSize > 0)
+			{
+				query << it->second->getId() << ", " << g_config.getNumber(ConfigManager::WORLD_ID)
+					<< ", " << db->escapeBlob(attributes, attributesSize);
+
+				if(!stmt.addRow(query))
+					return false;
+			}
+ 		}
  	}
 
 	query.str("");
@@ -634,7 +776,7 @@ bool IOMapSerialize::saveItems(Database* db, uint32_t& tileId, uint32_t houseId,
 			query << "INSERT INTO `tiles` (`id`, `world_id`, `house_id`, `x`, `y`, `z`) VALUES ("
 			<< tileId << ", " << g_config.getNumber(ConfigManager::WORLD_ID) << ", " << houseId << ", "
 			<< tilePosition.x << ", " << tilePosition.y << ", " << tilePosition.z << ")";
-			if(!db->executeQuery(query.str()))
+			if(!db->query(query.str()))
 				return false;
 
 			stored = true;

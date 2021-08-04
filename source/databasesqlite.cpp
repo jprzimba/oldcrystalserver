@@ -23,6 +23,7 @@
 
 #include "tools.h"
 #include "configmanager.h"
+
 extern ConfigManager g_config;
 
 #if SQLITE_VERSION_NUMBER < 3003009
@@ -42,11 +43,12 @@ DatabaseSQLite::DatabaseSQLite()
 	// Initialize sqlite
 	if(sqlite3_open(g_config.getString(ConfigManager::SQL_FILE).c_str(), &m_handle) != SQLITE_OK)
 	{
-		std::clog << "Failed to initialize SQLite connection." << std::endl;
+		std::clog << "Failed to initialize SQLite connection: " << sqlite3_errmsg(m_handle) << " (" << sqlite3_errcode(m_handle) << ")" << std::endl;
 		sqlite3_close(m_handle);
+		return;
 	}
-	else
-		m_connected = true;
+
+	m_connected = true;
 }
 
 bool DatabaseSQLite::getParam(DBParam_t param)
@@ -61,7 +63,7 @@ bool DatabaseSQLite::getParam(DBParam_t param)
 	return false;
 }
 
-std::string DatabaseSQLite::_parse(const std::string &s)
+std::string DatabaseSQLite::_parse(const std::string& s)
 {
 	std::string query = "";
 	query.reserve(s.size());
@@ -87,17 +89,16 @@ std::string DatabaseSQLite::_parse(const std::string &s)
 	return query;
 }
 
-bool DatabaseSQLite::executeQuery(const std::string &query)
+bool DatabaseSQLite::query(const std::string& query)
 {
 	boost::recursive_mutex::scoped_lock lockClass(sqliteLock);
 	if(!m_connected)
 		return false;
 
-	#ifdef __SQL_QUERY_DEBUG__
-	std::clog << "SQLITE QUERY: " << query << std::endl;
-	#endif
-
 	std::string buf = _parse(query);
+#ifdef __SQL_QUERY_DEBUG__
+	std::clog << "SQLLITE DEBUG, query: " << buf << std::endl;
+#endif
 	sqlite3_stmt* stmt;
 	// prepares statement
 	if(OTSYS_SQLITE3_PREPARE(m_handle, buf.c_str(), buf.length(), &stmt, NULL) != SQLITE_OK)
@@ -122,17 +123,16 @@ bool DatabaseSQLite::executeQuery(const std::string &query)
 	return true;
 }
 
-DBResult* DatabaseSQLite::storeQuery(const std::string &query)
+DBResult* DatabaseSQLite::storeQuery(const std::string& query)
 {
 	boost::recursive_mutex::scoped_lock lockClass(sqliteLock);
 	if(!m_connected)
 		return NULL;
 
-	#ifdef __SQL_QUERY_DEBUG__
-	std::clog << "SQLITE QUERY: " << query << std::endl;
-	#endif
-
 	std::string buf = _parse(query);
+#ifdef __SQL_QUERY_DEBUG__
+	std::clog << "SQLLITE DEBUG, storeQuery: " << buf << std::endl;
+#endif
 	sqlite3_stmt* stmt;
 	// prepares statement
 	if(OTSYS_SQLITE3_PREPARE(m_handle, buf.c_str(), buf.length(), &stmt, NULL) != SQLITE_OK)
@@ -146,7 +146,7 @@ DBResult* DatabaseSQLite::storeQuery(const std::string &query)
 	return verifyResult(result);
 }
 
-std::string DatabaseSQLite::escapeString(const std::string &s)
+std::string DatabaseSQLite::escapeString(const std::string& s)
 {
 	// remember about quoiting even an empty string!
 	if(!s.size())
@@ -184,7 +184,7 @@ std::string DatabaseSQLite::escapeBlob(const char* s, uint32_t length)
 	return buf;
 }
 
-int32_t SQLiteResult::getDataInt(const std::string &s)
+int32_t SQLiteResult::getDataInt(const std::string& s)
 {
 	listNames_t::iterator it = m_listNames.find(s);
 	if(it != m_listNames.end())
@@ -194,7 +194,7 @@ int32_t SQLiteResult::getDataInt(const std::string &s)
 	return 0; // Failed
 }
 
-int64_t SQLiteResult::getDataLong(const std::string &s)
+int64_t SQLiteResult::getDataLong(const std::string& s)
 {
 	listNames_t::iterator it = m_listNames.find(s);
 	if(it != m_listNames.end())
@@ -204,7 +204,7 @@ int64_t SQLiteResult::getDataLong(const std::string &s)
 	return 0; // Failed
 }
 
-std::string SQLiteResult::getDataString(const std::string &s)
+std::string SQLiteResult::getDataString(const std::string& s)
 {
 	listNames_t::iterator it = m_listNames.find(s);
 	if(it != m_listNames.end() )
@@ -217,7 +217,7 @@ std::string SQLiteResult::getDataString(const std::string &s)
 	return std::string(""); // Failed
 }
 
-const char* SQLiteResult::getDataStream(const std::string &s, uint64_t &size)
+const char* SQLiteResult::getDataStream(const std::string& s, uint64_t& size)
 {
 	listNames_t::iterator it = m_listNames.find(s);
 	if(it != m_listNames.end())
@@ -233,22 +233,31 @@ const char* SQLiteResult::getDataStream(const std::string &s, uint64_t &size)
 
 void SQLiteResult::free()
 {
-	if(m_handle)
+	if(!m_handle)
 	{
-		sqlite3_finalize(m_handle);
-		delete this;
+		std::clog << "[Critical - SQLiteResult::free] Trying to free already freed result!!!" << std::endl;
+		return;
 	}
-	else
-		std::clog << "[Warning - SQLiteResult::free] Trying to free already freed result." << std::endl;
+
+	sqlite3_finalize(m_handle);
+	m_handle = NULL;
+	m_listNames.clear();
+	delete this;
+}
+
+SQLiteResult::~SQLiteResult()
+{
+	if(!m_handle)
+		return;
+
+	sqlite3_finalize(m_handle);
+	m_listNames.clear();
 }
 
 SQLiteResult::SQLiteResult(sqlite3_stmt* stmt)
 {
 	if(!stmt)
-	{
-		delete this;
 		return;
-	}
 
 	m_handle = stmt;
 	m_listNames.clear();

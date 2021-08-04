@@ -207,14 +207,18 @@
 
 	-- Map
 	-- NOTE: storeTrash costs more memory, but will perform alot faster cleaning.
-	-- useHouseDataStorage usage may be found at README.
 	mapName = "dnsend"
 	mapAuthor = ""
 	randomizeTiles = true
-	useHouseDataStorage = false
 	storeTrash = true
 	cleanProtectedZones = true
 	mailboxDisabledTowns = "-1"
+	
+	-- Saving-related
+	-- houseDataStorage can be binary, relational and binary-tilebased
+	saveGlobalStorage = true
+	houseDataStorage = "binary"
+	storePlayerDirection = false
 
 	-- Startup
 	-- NOTE: defaultPriority works only on Windows and niceLevel on *nix
@@ -233,10 +237,8 @@
 	-- monsterLootMessage 0 to disable, 1 - only party, 2 - only player, 3 - party or player (like Tibia's)
 	dataDirectory = "data/"
 	bankSystem = true
-	saveGlobalStorage = true
 	displaySkillLevelOnAdvance = false
 	promptExceptionTracerErrorBox = true
-	storePlayerDirection = false
 	monsterLootMessage = 3
 	monsterLootMessageType = 25
 	maxMessageBuffer = 4

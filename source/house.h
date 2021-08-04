@@ -155,7 +155,8 @@ class House
 			HOUSE_SYNC_SIZE = 1 << 2,
 			HOUSE_SYNC_GUILD = 1 << 3,
 			HOUSE_SYNC_PRICE = 1 << 4,
-			HOUSE_SYNC_RENT = 1 << 5
+			HOUSE_SYNC_RENT = 1 << 5,
+			HOUSE_SYNC_UPDATE = 1 << 6
 		};
 
 		House(uint32_t houseId);
@@ -203,6 +204,7 @@ class House
 		uint32_t getTilesCount() const {return houseTiles.size();}
 
 		bool hasSyncFlag(syncflags_t flag) const {return ((syncFlags & (uint32_t)flag) == (uint32_t)flag);}
+		void setSyncFlag(syncflags_t flag) {syncFlags |= (uint32_t)flag;}
 		void resetSyncFlag(syncflags_t flag) {syncFlags &= ~(uint32_t)flag;}
 
 		bool canEditAccessList(uint32_t listId, const Player* player);

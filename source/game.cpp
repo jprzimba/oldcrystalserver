@@ -260,16 +260,14 @@ void Game::saveGameState(bool shallow)
 		io->savePlayer(it->second, false, shallow);
 	}
 
-	std::string storage = "relational";
-	if(g_config.getBool(ConfigManager::HOUSE_STORAGE))
-		storage = "binary";
-
 	map->saveMap();
 	ScriptEnviroment::saveGameState();
 	if(gameState == GAME_STATE_MAINTAIN)
 		setGameState(GAME_STATE_NORMAL);
 
-	std::clog << "SAVE: Complete in " << (OTSYS_TIME() - start) / (1000.) << " seconds using " << storage << " house storage." << std::endl;
+	std::clog << "Save completed in " << (OTSYS_TIME() - start) / (1000.) << " seconds using "
+		<< asLowerCaseString(g_config.getString(ConfigManager::HOUSE_STORAGE))
+		<< " house storage." << std::endl;
 }
 
 int32_t Game::loadMap(std::string filename)
@@ -5869,7 +5867,7 @@ int32_t Game::getMotdId()
 
 	DBQuery query;
 	query << "INSERT INTO `server_motd` (`id`, `world_id`, `text`) VALUES (" << ++lastMotdId << ", " << g_config.getNumber(ConfigManager::WORLD_ID) << ", " << db->escapeString(lastMotd) << ")";
-	if(db->executeQuery(query.str()))
+	if(db->query(query.str()))
 		return lastMotdId;
 
 	return --lastMotdId;

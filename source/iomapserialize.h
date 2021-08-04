@@ -58,6 +58,10 @@ class IOMapSerialize
 		bool loadMapBinary(Map* map);
 		bool saveMapBinary(Map* map);
 
+		// Binary-tilebased storage uses a BLOB field for each tile in houses, so that corrupt blobs will only wipe tiles instead of entire houses
+		bool loadMapBinaryTileBased(Map* map);
+		bool saveMapBinaryTileBased(Map* map);
+
 		bool loadItems(Database* db, DBResult* result, Cylinder* parent, bool depotTransfer);
 		bool saveItems(Database* db, uint32_t& tileId, uint32_t houseId, const Tile* tile);
 

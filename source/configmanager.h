@@ -65,6 +65,7 @@ class ConfigManager
 			PREFIX_CHANNEL_LOGS,
 			CORES_USED,
 			MAILBOX_DISABLED_TOWNS,
+			HOUSE_STORAGE,
 			LAST_STRING_CONFIG /* this must be the last one */
 		};
 
@@ -257,7 +258,6 @@ class ConfigManager
 			OPTIMIZE_DATABASE,
 			OLD_CONDITION_ACCURACY,
 			STORE_TRASH,
-			HOUSE_STORAGE,
 			TRUNCATE_LOGS,
 			TRACER_BOX,
 			STORE_DIRECTION,

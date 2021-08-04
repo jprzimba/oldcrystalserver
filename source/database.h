@@ -25,7 +25,7 @@
 #ifdef MULTI_SQL_DRIVERS
 #define DATABASE_VIRTUAL virtual
 #define DATABASE_CLASS _Database
-#define DBRES_CLASS _DBResult
+#define RESULT_CLASS _DBResult
 class _Database;
 class _DBResult;
 #else
@@ -33,13 +33,13 @@ class _DBResult;
 
 #if defined(__USE_MYSQL__)
 #define DATABASE_CLASS DatabaseMySQL
-#define DBRES_CLASS MySQLResult
+#define RESULT_CLASS MySQLResult
 class DatabaseMySQL;
 class MySQLResult;
 
 #elif defined(__USE_SQLITE__)
 #define DATABASE_CLASS DatabaseSQLite
-#define DBRES_CLASS SQLiteResult
+#define RESULT_CLASS SQLiteResult
 class DatabaseSQLite;
 class SQLiteResult;
 
@@ -53,9 +53,8 @@ class SQLiteResult;
 #define Database void
 #else
 typedef DATABASE_CLASS Database;
-typedef DBRES_CLASS DBResult;
+typedef RESULT_CLASS DBResult;
 
-class DBQuery;
 enum DBParam_t
 {
 	DBPARAM_MULTIINSERT = 1
@@ -81,7 +80,7 @@ class _Database
 		* @param DBParam_t parameter to get
 		* @return suitable for given parameter
 		*/
-		DATABASE_VIRTUAL bool getParam(DBParam_t param) {return false;}
+		DATABASE_VIRTUAL bool getParam(DBParam_t) {return false;}
 
 		/**
 		* Database connected.
@@ -95,7 +94,7 @@ class _Database
 		/**
 		* Database ...
 		*/
-		DATABASE_VIRTUAL void use() {m_use = time(NULL);}
+		DATABASE_VIRTUAL void use() {m_use = OTSYS_TIME();}
 
 	protected:
 		/**
@@ -122,7 +121,7 @@ class _Database
 		* @param std::string query command
 		* @return true on success, false on error
 		*/
-		DATABASE_VIRTUAL bool executeQuery(const std::string &query) {return 0;}
+		DATABASE_VIRTUAL bool query(const std::string&) {return 0;}
 
 		/**
 		* Queries database.
@@ -132,7 +131,7 @@ class _Database
 		* @param std::string query
 		* @return results object (null on error)
 		*/
-		DATABASE_VIRTUAL DBResult* storeQuery(const std::string &query) {return 0;}
+		DATABASE_VIRTUAL DBResult* storeQuery(const std::string&) {return 0;}
 
 		/**
 		* Escapes string for query.
@@ -142,7 +141,7 @@ class _Database
 		* @param std::string string to be escaped
 		* @return quoted string
 		*/
-		DATABASE_VIRTUAL std::string escapeString(const std::string &s) {return "''";}
+		DATABASE_VIRTUAL std::string escapeString(const std::string&) {return "''";}
 
 		/**
 		* Escapes binary stream for query.
@@ -153,7 +152,7 @@ class _Database
 		* @param long stream length
 		* @return quoted string
 		*/
-		DATABASE_VIRTUAL std::string escapeBlob(const char* s, uint32_t length) {return "''";}
+		DATABASE_VIRTUAL std::string escapeBlob(const char*, uint32_t) {return "''";}
 
 		/**
 		 * Retrieve id of last inserted row
@@ -167,7 +166,7 @@ class _Database
 		*
 		* @return the case insensitive operator
 		*/
-		DATABASE_VIRTUAL std::string getStringComparison() {return "= ";}
+		DATABASE_VIRTUAL std::string getStringComparer() {return "= ";}
 		DATABASE_VIRTUAL std::string getUpdateLimiter() {return " LIMIT 1;";}
 
 		/**
@@ -178,13 +177,13 @@ class _Database
 		DATABASE_VIRTUAL DatabaseEngine_t getDatabaseEngine() {return DATABASE_ENGINE_NONE;}
 
 	protected:
-		_Database() {}
+		_Database() {m_connected = false;}
 		DATABASE_VIRTUAL ~_Database() {}
 
 		DBResult* verifyResult(DBResult* result);
 
 		bool m_connected;
-		time_t m_use;
+		int64_t m_use;
 
 	private:
 		static Database* _instance;
@@ -197,29 +196,29 @@ class _DBResult
 		*\returns The Integer value of the selected field and row
 		*\param s The name of the field
 		*/
-		DATABASE_VIRTUAL int32_t getDataInt(const std::string &s) {return 0;}
+		DATABASE_VIRTUAL int32_t getDataInt(const std::string&) {return 0;}
 
 		/** Get the Long value of a field in database
 		*\returns The Long value of the selected field and row
 		*\param s The name of the field
 		*/
-		DATABASE_VIRTUAL int64_t getDataLong(const std::string &s) {return 0;}
+		DATABASE_VIRTUAL int64_t getDataLong(const std::string&) {return 0;}
 
 		/** Get the String of a field in database
 		*\returns The String of the selected field and row
 		*\param s The name of the field
 		*/
-		DATABASE_VIRTUAL std::string getDataString(const std::string &s) {return "''";}
+		DATABASE_VIRTUAL std::string getDataString(const std::string&) {return "''";}
 
 		/** Get the blob of a field in database
 		*\returns a PropStream that is initiated with the blob data field, if not exist it returns NULL.
 		*\param s The name of the field
 		*/
-		DATABASE_VIRTUAL const char* getDataStream(const std::string &s, uint64_t &size) {return 0;}
+		DATABASE_VIRTUAL const char* getDataStream(const std::string&, uint64_t&) {return 0;}
 
 		/** Result freeing
 		*/
-		DATABASE_VIRTUAL void free() {/*delete this;*/}
+		DATABASE_VIRTUAL void free() {}
 
 		/** Moves to next result in set
 		*\returns true if moved, false if there are no more results.
@@ -337,15 +336,12 @@ class DBTransaction
 
 	private:
 		Database* m_database;
-
 		enum TransactionStates_t
 		{
 			STATE_NO_START,
 			STATE_START,
 			STEATE_COMMIT
-		};
-
-		TransactionStates_t m_state;
+		} m_state;
 };
 #endif
 #endif
