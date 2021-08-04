@@ -51,6 +51,12 @@ class ConfigManager
 			#endif
 			SQL_FILE,
 			ENCRYPTION_TYPE,
+			ENCRYPTION_KEY,
+			RSA_PRIME1,
+			RSA_PRIME2,
+			RSA_PUBLIC,
+			RSA_MODULUS,
+			RSA_PRIVATE,
 			MAP_AUTHOR,
 			RUNFILE,
 			OUT_LOG,

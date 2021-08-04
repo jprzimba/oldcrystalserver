@@ -34,7 +34,6 @@
 #include "game.h"
 #include "chat.h"
 #include "tools.h"
-#include "rsa.h"
 #include "textlogger.h"
 
 #include "protocollogin.h"
@@ -61,6 +60,10 @@
 #include "exception.h"
 #endif
 
+#include <openssl/rsa.h>
+#include <openssl/bn.h>
+#include <openssl/err.h>
+
 #ifdef __NO_BOOST_EXCEPTIONS__
 #include <exception>
 
@@ -75,7 +78,7 @@ Game g_game;
 Monsters g_monsters;
 Npcs g_npcs;
 
-RSA g_RSA;
+RSA* g_RSA;
 Chat g_chat;
 
 boost::mutex g_loaderLock;
@@ -444,17 +447,40 @@ void otserv(StringVec, ServiceManager* services)
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_SHA512);
 		std::clog << "> Using SHA512 encryption" << std::endl;
 	}
+	else if(encryptionType == "vahash")
+	{
+		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_VAHASH);
+		std::clog << "> Using VAHash encryption" << std::endl;
+	}
 	else
 	{
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_PLAIN);
-		std::clog << "Using plaintext encryption" << std::endl;
+		std::clog << "Using plaintext encryption" << std::endl << std::endl
+			<< "WARNING: This method is completely unsafe!" << std::endl
+			<< "Please set encryptionType = \"sha1\" (or any other available method) in config.lua" << std::endl;
+		boost::this_thread::sleep(boost::posix_time::seconds(30));
 	}
 
 	std::clog << "Loading RSA key" << std::endl;
-	const char* p("14299623962416399520070177382898895550795403345466153217470516082934737582776038882967213386204600674145392845853859217990626450972452084065728686565928113");
-	const char* q("7630979195970404721891201847792002125535401292779123937207447574596692788513647179235335529307251350570728407373705564708871762033017096809910315212884101");
-	const char* d("46730330223584118622160180015036832148732986808519344675210555262940258739805766860224610646919605860206328024326703361630109888417839241959507572247284807035235569619173792292786907845791904955103601652822519121908367187885509270025388641700821735345222087940578381210879116823013776808975766851829020659073");
-	g_RSA.setKey(p, q, d);
+	g_RSA = RSA_new();
+
+	BN_dec2bn(&g_RSA->p, g_config.getString(ConfigManager::RSA_PRIME1).c_str());
+	BN_dec2bn(&g_RSA->q, g_config.getString(ConfigManager::RSA_PRIME2).c_str());
+	BN_dec2bn(&g_RSA->d, g_config.getString(ConfigManager::RSA_PRIVATE).c_str());
+	BN_dec2bn(&g_RSA->n, g_config.getString(ConfigManager::RSA_MODULUS).c_str());
+	BN_dec2bn(&g_RSA->e, g_config.getString(ConfigManager::RSA_PUBLIC).c_str());
+	// TODO: dmp1, dmq1, iqmp?
+	
+	// This check will verify keys set in config.lua
+	if(!RSA_check_key(g_RSA))
+	{
+		std::stringstream s;
+		s << "OpenSSL failed - ";
+	
+		ERR_load_crypto_strings();
+		s << ERR_error_string(ERR_get_error(), NULL);
+		startupErrorMessage(s.str());
+	}
 
 	std::clog << "Starting SQL connection" << std::endl;
 	Database* db = Database::getInstance();

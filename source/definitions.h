@@ -90,6 +90,9 @@
 	#define DEBUG_REPORT
 #endif
 
+#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+#define CRYPTOPP_DEFAULT_NO_DLL
+
 #define BOOST_ASIO_ENABLE_CANCELIO 1
 #if defined WINDOWS
 #if defined _MSC_VER && defined NDEBUG

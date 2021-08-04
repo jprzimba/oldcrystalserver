@@ -17,8 +17,6 @@
 #include "otpch.h"
 
 #include "protocolold.h"
-#include "rsa.h"
-
 #include "outputmessage.h"
 #include "connection.h"
 

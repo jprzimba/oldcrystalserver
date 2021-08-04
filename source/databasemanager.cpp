@@ -1205,7 +1205,24 @@ bool DatabaseManager::getDatabaseConfig(std::string config, int32_t &value)
 	if(!(result = db->storeQuery(query.str())))
 		return false;
 
-	value = result->getDataInt("value");
+	value = atoi(result->getDataString("value").c_str());
+	result->free();
+	return true;
+}
+
+bool DatabaseManager::getDatabaseConfig(std::string config, std::string &value)
+{
+	value = "";
+
+	Database* db = Database::getInstance();
+	DBResult* result;
+
+	DBQuery query;
+	query << "SELECT `value` FROM `server_config` WHERE `config` = " << db->escapeString(config) << ";";
+	if(!(result = db->storeQuery(query.str())))
+		return false;
+
+	value = result->getDataString("value");
 	result->free();
 	return true;
 }
@@ -1217,17 +1234,40 @@ void DatabaseManager::registerDatabaseConfig(std::string config, int32_t value)
 
 	int32_t tmp = 0;
 	if(!getDatabaseConfig(config, tmp))
-		query << "INSERT INTO `server_config` VALUES (" << db->escapeString(config) << ", " << value << ");";
+		query << "INSERT INTO `server_config` VALUES (" << db->escapeString(config) << ", '" << value << "');";
 	else
-		query << "UPDATE `server_config` SET `value` = " << value << " WHERE `config` = " << db->escapeString(config) << ";";
+		query << "UPDATE `server_config` SET `value` = '" << value << "' WHERE `config` = " << db->escapeString(config) << ";";
+
+	db->executeQuery(query.str());
+}
+
+void DatabaseManager::registerDatabaseConfig(std::string config, std::string value)
+{
+	Database* db = Database::getInstance();
+	DBQuery query;
+
+	std::string tmp;
+	if(!getDatabaseConfig(config, tmp))
+		query << "INSERT INTO `server_config` VALUES (" << db->escapeString(config) << ", " << db->escapeString(value) << ");";
+	else
+		query << "UPDATE `server_config` SET `value` = " << db->escapeString(value) << " WHERE `config` = " << db->escapeString(config) << ";";
 
 	db->executeQuery(query.str());
 }
 
 void DatabaseManager::checkEncryption()
 {
+	std::string key;
+	if(!getDatabaseConfig("vahash_key", key))
+	{
+		key = generateRecoveryKey(4, 4);
+		registerDatabaseConfig("vahash_key", key);
+	}
+
 	Encryption_t newValue = (Encryption_t)g_config.getNumber(ConfigManager::ENCRYPTION);
 	int32_t value = (int32_t)ENCRYPTION_PLAIN;
+
+	g_config.setString(ConfigManager::ENCRYPTION_KEY, key);
 	if(getDatabaseConfig("encryption", value))
 	{
 		if(newValue != (Encryption_t)value)
@@ -1354,6 +1394,32 @@ void DatabaseManager::checkEncryption()
 					break;
 				}
 
+				case ENCRYPTION_VAHASH:
+				{
+					if((Encryption_t)value != ENCRYPTION_PLAIN)
+					{
+						std::clog << "WARNING: You cannot change the encryption to VAHash, change it back in config.lua." << std::endl;
+						return;
+					}
+
+					Database* db = Database::getInstance();
+					DBQuery query;
+					if(DBResult* result = db->storeQuery("SELECT `id`, `password`, `key` FROM `accounts`;"))
+					{
+						do
+						{
+							query << "UPDATE `accounts` SET `password` = " << db->escapeString(transformToVAHash(result->getDataString("password"), false)) << ", `key` = " << db->escapeString(transformToVAHash(result->getDataString("key"), false)) << " WHERE `id` = " << result->getDataInt("id") << ";";
+							db->executeQuery(query.str());
+						}
+						while(result->next());
+						result->free();
+					}
+
+					registerDatabaseConfig("encryption", (int32_t)newValue);
+					std::clog << "Encryption set to VAHash." << std::endl;
+					break;
+				}
+
 				default:
 				{
 					std::clog << "WARNING: You cannot switch from hashed passwords to plain text, change back the passwordType in config.lua to the passwordType you were previously using." << std::endl;
@@ -1401,6 +1467,15 @@ void DatabaseManager::checkEncryption()
 					Database* db = Database::getInstance();
 					DBQuery query;
 					query << "UPDATE `accounts` SET `password` = " << db->escapeString(transformToSHA512("1", false)) << " WHERE `id` = 1 AND `password` = '1';";
+					db->executeQuery(query.str());
+					break;
+				}
+
+				case ENCRYPTION_VAHASH:
+				{
+					Database* db = Database::getInstance();
+					DBQuery query;
+					query << "UPDATE `accounts` SET `password` = " << db->escapeString(transformToVAHash("1", false)) << " WHERE `id` = 1 AND `password` = '1';";
 					db->executeQuery(query.str());
 					break;
 				}

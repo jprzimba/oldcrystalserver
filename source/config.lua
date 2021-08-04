@@ -1,4 +1,53 @@
-	-- Crystal Server:
+	-- Crystal Server
+
+	-- Database
+	-- NOTE: sqlFile is used only by sqlite database, and sqlKeepAlive by mysql database.
+	-- To disable sqlKeepAlive such as mysqlReadTimeout use 0 value.
+	-- encryptionType can be plain, md5, sha1, sha256 and sha512	
+	sqlType = "sqlite"
+	sqlHost = "localhost"
+	sqlPort = 3306
+	sqlUser = "root"
+	sqlPass = ""
+	sqlDatabase = "crystalserver"
+	sqlFile = "crystalserver.s3db"
+	sqlKeepAlive = 0
+	mysqlReadTimeout = 10
+	mysqlWriteTimeout = 10
+	encryptionType = "sha1"
+
+	-- Connection config
+	worldId = 0
+	ip = "127.0.0.1"
+	bindOnlyGlobalAddress = false
+	loginPort = 7171
+	gamePort = 7172
+	statusPort = 7171
+	loginTries = 10
+	retryTimeout = 5 * 1000
+	loginTimeout = 60 * 1000
+	maxPlayers = 1000
+	motd = "Welcome to the Crystal Server!"
+	displayOnOrOffAtCharlist = false
+	onePlayerOnlinePerAccount = true
+	allowClones = false
+	serverName = "Crystal"
+	loginMessage = "Welcome to the Crystal Server!"
+	statusTimeout = 5 * 60 * 1000
+	replaceKickOnLogin = true
+	forceSlowConnectionsToDisconnect = false
+	loginOnlyWithLoginServer = false
+	premiumPlayerSkipWaitList = false
+
+	-- RSA
+	-- NOTE: These should not be changed unless you know what your doing!
+	-- Prime1 - known as p; Prime2 - known as q; Public - known as e;
+	-- Modulus - known as n; Private - known as d.
+	rsaPrime1 = "14299623962416399520070177382898895550795403345466153217470516082934737582776038882967213386204600674145392845853859217990626450972452084065728686565928113"
+	rsaPrime2 = "7630979195970404721891201847792002125535401292779123937207447574596692788513647179235335529307251350570728407373705564708871762033017096809910315212884101"
+	rsaPublic = "65537"
+	rsaModulus = "109120132967399429278860960508995541528237502902798129123468757937266291492576446330739696001110603907230888610072655818825358503429057592827629436413108566029093628212635953836686562675849720620786279431090218017681061521755056710823876476444260558147179707119674283982419152118103759076030616683978566631413"
+	rsaPrivate = "46730330223584118622160180015036832148732986808519344675210555262940258739805766860224610646919605860206328024326703361630109888417839241959507572247284807035235569619173792292786907845791904955103601652822519121908367187885509270025388641700821735345222087940578381210879116823013776808975766851829020659073"
 
 	-- Account manager
 	accountManager = true
@@ -101,45 +150,6 @@
 	-- Gamemasters
 	displayGamemastersWithOnlineCommand = false
 	showDescriptionItems = true
-
-	-- Connection config
-	worldId = 0
-	ip = "127.0.0.1"
-	bindOnlyGlobalAddress = false
-	loginPort = 7171
-	gamePort = 7172
-	statusPort = 7171
-	loginTries = 10
-	retryTimeout = 5 * 1000
-	loginTimeout = 60 * 1000
-	maxPlayers = 1000
-	motd = "Welcome to the Crystal Server!"
-	displayOnOrOffAtCharlist = false
-	onePlayerOnlinePerAccount = true
-	allowClones = false
-	serverName = "Crystal"
-	loginMessage = "Welcome to the Crystal Server!"
-	statusTimeout = 5 * 60 * 1000
-	replaceKickOnLogin = true
-	forceSlowConnectionsToDisconnect = false
-	loginOnlyWithLoginServer = false
-	premiumPlayerSkipWaitList = false
-
-	-- Database
-	-- NOTE: sqlFile is used only by sqlite database, and sqlKeepAlive by mysql database.
-	-- To disable sqlKeepAlive such as mysqlReadTimeout use 0 value.
-	-- encryptionType can be plain, md5, sha1, sha256 and sha512	
-	sqlType = "sqlite"
-	sqlHost = "localhost"
-	sqlPort = 3306
-	sqlUser = "root"
-	sqlPass = ""
-	sqlDatabase = "crystalserver"
-	sqlFile = "crystalserver.s3db"
-	sqlKeepAlive = 0
-	mysqlReadTimeout = 10
-	mysqlWriteTimeout = 10
-	encryptionType = "sha1"
 
 	-- Deathlist
 	deathListEnabled = true

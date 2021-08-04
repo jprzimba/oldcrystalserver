@@ -2481,8 +2481,8 @@ const luaL_Reg LuaInterface::luaStdTable[] =
 	{"sha1", LuaInterface::luaStdSHA1},
 	{"sha256", LuaInterface::luaStdSHA256},
 	{"sha512", LuaInterface::luaStdSHA512},
+	{"vahash", LuaInterface::luaStdVAHash},
 
-	{"checkName", LuaInterface::luaStdCheckName},
 	{NULL, NULL}
 };
 
@@ -10042,14 +10042,14 @@ int32_t LuaInterface::luaStdSHA512(lua_State* L)
 	return 1;
 }
 
-int32_t LuaInterface::luaStdCheckName(lua_State* L)
+int32_t LuaInterface::luaStdVAHash(lua_State* L)
 {
-	//std.checkName(string[, forceUppercaseOnFirstLetter = true])
-	bool forceUppercaseOnFirstLetter = true;
+	//std.vahash(string[, upperCase = false])
+	bool upperCase = false;
 	if(lua_gettop(L) > 1)
-		forceUppercaseOnFirstLetter = popBoolean(L);
+		upperCase = popNumber(L);
 
-	lua_pushboolean(L, isValidName(popString(L), forceUppercaseOnFirstLetter));
+	lua_pushstring(L, transformToVAHash(popString(L), upperCase).c_str());
 	return 1;
 }
 

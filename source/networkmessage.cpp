@@ -19,7 +19,6 @@
 
 #include "networkmessage.h"
 #include "position.h"
-#include "rsa.h"
 
 #include "container.h"
 #include "creature.h"
