@@ -208,7 +208,7 @@
 
 	-- Map
 	-- NOTE: storeTrash costs more memory, but will perform alot faster cleaning.
-	mapName = "dnsend"
+	mapName = "world"
 	mapAuthor = ""
 	randomizeTiles = true
 	storeTrash = true

@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<houses>
+	<house name="Dn'House 1" houseid="1" entryx="384" entryy="109" entryz="7" rent="3000" townid="0" size="58" />
+	<house name="Dn'House 2" houseid="2" entryx="369" entryy="84" entryz="7" rent="2000" townid="0" size="33" />
+	<house name="Dn'House 3" houseid="3" entryx="376" entryy="84" entryz="7" rent="2000" townid="0" size="33" />
+	<house name="Dn'House 4" houseid="4" entryx="383" entryy="84" entryz="7" rent="2000" townid="0" size="33" />
+	<house name="Dn'House 5" houseid="5" entryx="390" entryy="84" entryz="7" rent="2000" townid="0" size="33" />
+	<house name="Dn'House 6" houseid="6" entryx="397" entryy="84" entryz="7" rent="2000" townid="0" size="33" />
+	<house name="Dn'House 7" houseid="7" entryx="403" entryy="84" entryz="7" rent="2000" townid="0" size="33" />
+	<house name="Dn'House 8" houseid="8" entryx="411" entryy="84" entryz="7" rent="2000" townid="0" size="42" />
+	<house name="Dn'House 9" houseid="9" entryx="416" entryy="95" entryz="7" rent="1000" townid="0" size="31" />
+	<house name="Dn'House 10" houseid="10" entryx="405" entryy="95" entryz="7" rent="4000" townid="0" size="77" />
+	<house name="Dn'House 11" houseid="11" entryx="391" entryy="95" entryz="7" rent="4000" townid="0" size="83" />
+	<house name="Dn'House 12" houseid="12" entryx="378" entryy="95" entryz="7" rent="4000" townid="0" size="117" />
+	<house name="Dn'House 13" houseid="13" entryx="356" entryy="92" entryz="7" rent="2000" townid="0" size="35" />
+	<house name="Dn'House 14" houseid="14" entryx="355" entryy="100" entryz="7" rent="2000" townid="0" size="23" />
+	<house name="Dn'House 15" houseid="15" entryx="355" entryy="107" entryz="7" rent="2000" townid="0" size="29" />
+	<house name="Dn'House 16" houseid="16" entryx="367" entryy="99" entryz="7" rent="3000" townid="0" size="38" />
+	<house name="Dn'House 17" houseid="17" entryx="380" entryy="103" entryz="7" rent="3000" townid="0" size="52" />
+	<house name="Dn'House 18" houseid="18" entryx="391" entryy="105" entryz="7" rent="0" townid="0" size="66" />
+	<house name="Dn'House 19" houseid="19" entryx="402" entryy="104" entryz="7" rent="3000" townid="0" size="66" />
+	<house name="Dn'House 20" houseid="20" entryx="412" entryy="104" entryz="7" rent="2000" townid="0" size="30" />
+	<house name="Dn'House 21" houseid="21" entryx="404" entryy="139" entryz="7" rent="4000" townid="0" size="68" />
+	<house name="Dn'House 22" houseid="22" entryx="413" entryy="139" entryz="7" rent="4000" townid="0" size="112" />
+	<house name="Dn'House 23" houseid="23" entryx="396" entryy="147" entryz="7" rent="3000" townid="0" size="28" />
+	<house name="Dn'House 24" houseid="24" entryx="405" entryy="149" entryz="7" rent="3000" townid="0" size="33" />
+	<house name="Dn'House 25" houseid="25" entryx="416" entryy="149" entryz="7" rent="3000" townid="0" size="33" />
+	<house name="Dn'House 26" houseid="26" entryx="381" entryy="154" entryz="7" rent="1500" townid="0" size="28" />
+	<house name="Dn'House 27" houseid="27" entryx="389" entryy="154" entryz="7" rent="4000" townid="0" size="55" />
+	<house name="Dn'House 28" houseid="28" entryx="403" entryy="159" entryz="7" rent="3000" townid="0" size="38" />
+	<house name="Dn'House 29" houseid="29" entryx="414" entryy="159" entryz="7" rent="3000" townid="0" size="38" />
+	<house name="Dn'House 30" houseid="30" entryx="375" entryy="159" entryz="7" rent="3000" townid="0" size="69" />
+	<house name="Dn'House 31" houseid="31" entryx="382" entryy="165" entryz="7" rent="3000" townid="0" size="33" />
+	<house name="Dn'House 32" houseid="32" entryx="393" entryy="165" entryz="7" rent="3000" townid="0" size="40" />
+	<house name="Dn'House 33" houseid="33" entryx="411" entryy="169" entryz="7" rent="2000" townid="0" size="28" />
+	<house name="Dn'House 34" houseid="34" entryx="420" entryy="171" entryz="7" rent="3000" townid="0" size="33" />
+	<house name="Dn'House 35" houseid="35" entryx="633" entryy="707" entryz="7" rent="3000" townid="0" size="33" />
+	<house name="Dn'House 36" houseid="36" entryx="641" entryy="711" entryz="7" rent="4000" townid="0" size="75" />
+	<house name="Dn'House 37" houseid="37" entryx="647" entryy="708" entryz="7" rent="3000" townid="0" size="28" />
+	<house name="Dn'House 38" houseid="38" entryx="654" entryy="709" entryz="7" rent="0" townid="0" size="33" />
+	<house name="Dn'House 39" houseid="39" entryx="633" entryy="721" entryz="7" rent="2000" townid="0" size="33" />
+	<house name="Dn'House 40" houseid="40" entryx="638" entryy="724" entryz="7" rent="15000" townid="0" size="56" />
+	<house name="Dn'House 41" houseid="41" entryx="679" entryy="708" entryz="7" rent="10000" townid="0" size="38" />
+	<house name="Dn'House 42" houseid="42" entryx="686" entryy="707" entryz="7" rent="12000" townid="0" size="38" />
+	<house name="Dn'House 43" houseid="43" entryx="694" entryy="704" entryz="7" rent="12000" townid="0" size="38" />
+	<house name="Dn'House 44" houseid="44" entryx="685" entryy="725" entryz="7" rent="12000" townid="0" size="38" />
+	<house name="Dn'House 45" houseid="45" entryx="694" entryy="723" entryz="7" rent="13000" townid="0" size="38" />
+	<house name="Dn'House 46" houseid="46" entryx="653" entryy="735" entryz="7" rent="12000" townid="0" size="80" />
+	<house name="Dn'House 47" houseid="47" entryx="669" entryy="736" entryz="7" rent="20000" townid="0" size="56" />
+	<house name="Dn'House 48" houseid="48" entryx="364" entryy="177" entryz="7" rent="20000" townid="0" size="76" />
+	<house name="Dn'House 49" houseid="49" entryx="462" entryy="497" entryz="7" rent="0" townid="0" size="36" />
+	<house name="Dn'Orncity 1" houseid="50" entryx="567" entryy="89" entryz="7" rent="10000" townid="0" size="35" />
+	<house name="Dn'Orncity 2" houseid="51" entryx="591" entryy="85" entryz="7" rent="12000" townid="0" size="48" />
+	<house name="Dn'Orncity 3" houseid="52" entryx="576" entryy="98" entryz="7" rent="14000" townid="0" size="66" />
+	<house name="Dn'Orncity 4" houseid="53" entryx="591" entryy="97" entryz="7" rent="13000" townid="0" size="55" />
+	<house name="Dn'Orncity 5" houseid="54" entryx="603" entryy="99" entryz="7" rent="12000" townid="0" size="45" />
+	<house name="Dn'Orncity 6" houseid="55" entryx="604" entryy="110" entryz="7" rent="12000" townid="0" size="48" />
+	<house name="Dn'Orncity 7" houseid="56" entryx="593" entryy="116" entryz="7" rent="8000" townid="0" size="42" />
+	<house name="Dn'Orncity 8" houseid="57" entryx="584" entryy="116" entryz="7" rent="9000" townid="0" size="48" />
+	<house name="Dn'Orncity 9" houseid="58" entryx="584" entryy="112" entryz="7" rent="17000" townid="0" size="90" />
+	<house name="Dn'Orncity 10" houseid="59" entryx="576" entryy="117" entryz="7" rent="7800" townid="0" size="35" />
+	<house name="Dn'IceHouse 8" houseid="60" entryx="780" entryy="239" entryz="7" rent="6000" townid="0" size="36" />
+	<house name="Dn'IceHouse 3" houseid="61" entryx="770" entryy="239" entryz="7" rent="3000" townid="0" size="28" />
+	<house name="Dn'IceHouse 4" houseid="62" entryx="746" entryy="238" entryz="7" rent="2000" townid="0" size="20" />
+	<house name="Dn'IceHouse 5" houseid="63" entryx="746" entryy="244" entryz="7" rent="2000" townid="0" size="16" />
+	<house name="Dn'IceHouse 6" houseid="64" entryx="747" entryy="254" entryz="7" rent="3000" townid="0" size="36" />
+	<house name="Dn'IceHouse 7" houseid="65" entryx="759" entryy="240" entryz="7" rent="3000" townid="0" size="45" />
+	<house name="Dn'IceHouse 9" houseid="66" entryx="769" entryy="248" entryz="7" rent="17000" townid="0" size="42" />
+	<house name="Dn'Tiquanda 1" houseid="67" entryx="204" entryy="412" entryz="7" rent="10000" townid="0" size="33" />
+	<house name="Dn'Tiquanda 2" houseid="68" entryx="198" entryy="418" entryz="7" rent="15000" townid="0" size="66" />
+	<house name="Dn'Tiquanda 3" houseid="69" entryx="195" entryy="421" entryz="6" rent="12000" townid="0" size="42" />
+	<house name="Dn'Tiquanda 4" houseid="70" entryx="215" entryy="435" entryz="6" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 5" houseid="71" entryx="215" entryy="440" entryz="6" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 6" houseid="72" entryx="215" entryy="445" entryz="6" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 7" houseid="73" entryx="215" entryy="450" entryz="6" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 8" houseid="74" entryx="215" entryy="455" entryz="6" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 9" houseid="75" entryx="215" entryy="435" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 10" houseid="76" entryx="215" entryy="440" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 11" houseid="77" entryx="215" entryy="445" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 12" houseid="78" entryx="215" entryy="450" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 13" houseid="79" entryx="215" entryy="455" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 14" houseid="80" entryx="219" entryy="435" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 15" houseid="81" entryx="219" entryy="440" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 16" houseid="82" entryx="219" entryy="445" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 17" houseid="83" entryx="219" entryy="450" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 18" houseid="84" entryx="219" entryy="455" entryz="7" rent="8000" townid="0" size="28" />
+	<house name="Dn'Tiquanda 19" houseid="85" entryx="236" entryy="454" entryz="7" rent="10000" townid="0" size="48" />
+	<house name="Dn'Tiquanda 20" houseid="86" entryx="235" entryy="443" entryz="7" rent="12000" townid="0" size="40" />
+	<house name="Dn'Tiquanda 21" houseid="87" entryx="251" entryy="447" entryz="7" rent="8000" townid="0" size="56" />
+	<house name="Dn'Tiquanda 22" houseid="88" entryx="251" entryy="453" entryz="7" rent="13000" townid="0" size="54" />
+	<house name="Dn'Tiquanda 23" houseid="89" entryx="247" entryy="423" entryz="7" rent="15000" townid="0" size="60" />
+	<house name="VIP House &quot;2&quot;" houseid="90" entryx="470" entryy="497" entryz="7" rent="0" townid="0" size="18" />
+	<house name="VIP House &quot;3&quot;" houseid="91" entryx="478" entryy="495" entryz="7" rent="0" townid="0" size="30" />
+	<house name="VIP House &quot;4&quot;" houseid="92" entryx="470" entryy="505" entryz="7" rent="0" townid="0" size="23" />
+	<house name="VIP House &quot;5&quot;" houseid="93" entryx="463" entryy="513" entryz="7" rent="0" townid="0" size="30" />
+	<house name="VIP House &quot;6&quot;" houseid="94" entryx="471" entryy="513" entryz="7" rent="0" townid="0" size="40" />
+	<house name="VIP House &quot;7&quot;" houseid="95" entryx="479" entryy="495" entryz="7" rent="0" townid="0" size="10" />
+	<house name="VIP House &quot;8&quot;" houseid="96" entryx="484" entryy="495" entryz="7" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;9&quot;" houseid="97" entryx="491" entryy="495" entryz="7" rent="0" townid="0" size="10" />
+	<house name="VIP House &quot;10&quot;" houseid="98" entryx="479" entryy="500" entryz="7" rent="0" townid="0" size="10" />
+	<house name="VIP House &quot;11&quot;" houseid="99" entryx="485" entryy="500" entryz="7" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;12&quot;" houseid="100" entryx="489" entryy="500" entryz="7" rent="0" townid="0" size="10" />
+	<house name="VIP House &quot;13&quot;" houseid="101" entryx="498" entryy="495" entryz="7" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;57&quot;" houseid="103" entryx="464" entryy="544" entryz="7" rent="0" townid="0" size="82" />
+	<house name="VIP House &quot;58&quot;" houseid="104" entryx="475" entryy="544" entryz="7" rent="0" townid="0" size="82" />
+	<house name="VIP House &quot;59&quot;" houseid="105" entryx="493" entryy="544" entryz="7" rent="0" townid="0" size="47" />
+	<house name="Vip house 17" houseid="106" entryx="444" entryy="556" entryz="7" rent="0" townid="0" size="46" />
+	<house name="Vip House 18" houseid="107" entryx="447" entryy="567" entryz="7" rent="0" townid="0" size="42" />
+	<house name="VIP House &quot;14&quot;" houseid="110" entryx="498" entryy="500" entryz="7" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;15&quot;" houseid="111" entryx="484" entryy="515" entryz="7" rent="0" townid="0" size="30" />
+	<house name="VIP House &quot;16&quot;" houseid="112" entryx="485" entryy="508" entryz="7" rent="0" townid="0" size="32" />
+	<house name="VIP House &quot;17&quot;" houseid="113" entryx="497" entryy="509" entryz="7" rent="0" townid="0" size="28" />
+	<house name="VIP House &quot;18&quot;" houseid="114" entryx="498" entryy="514" entryz="7" rent="0" townid="0" size="21" />
+	<house name="VIP House &quot;19&quot;" houseid="115" entryx="442" entryy="507" entryz="7" rent="0" townid="0" size="42" />
+	<house name="VIP House &quot;20&quot;" houseid="116" entryx="449" entryy="507" entryz="7" rent="0" townid="0" size="36" />
+	<house name="VIP House &quot;21&quot;" houseid="117" entryx="437" entryy="519" entryz="7" rent="0" townid="0" size="42" />
+	<house name="VIP House &quot;22&quot;" houseid="118" entryx="448" entryy="520" entryz="7" rent="0" townid="0" size="42" />
+	<house name="VIP House &quot;23&quot;" houseid="119" entryx="464" entryy="524" entryz="7" rent="0" townid="0" size="32" />
+	<house name="VIP House &quot;63&quot;" houseid="120" entryx="460" entryy="566" entryz="7" rent="0" townid="0" size="40" />
+	<house name="VIP House &quot;64&quot;" houseid="121" entryx="469" entryy="566" entryz="7" rent="0" townid="0" size="40" />
+	<house name="VIP House &quot;65&quot;" houseid="122" entryx="482" entryy="566" entryz="7" rent="0" townid="0" size="25" />
+	<house name="VIP House &quot;24&quot;" houseid="123" entryx="474" entryy="523" entryz="7" rent="0" townid="0" size="32" />
+	<house name="Vip Island" houseid="124" entryx="389" entryy="190" entryz="7" rent="99999999" townid="0" size="0" />
+	<house name="VIP House &quot;66&quot;" houseid="125" entryx="399" entryy="555" entryz="7" rent="0" townid="0" size="140" />
+	<house name="VIP House &quot;25&quot;" houseid="126" entryx="484" entryy="523" entryz="7" rent="0" townid="0" size="28" />
+	<house name="VIP House &quot;26&quot;" houseid="127" entryx="495" entryy="522" entryz="7" rent="0" townid="0" size="28" />
+	<house name="VIP House &quot;27&quot;" houseid="128" entryx="430" entryy="520" entryz="7" rent="0" townid="0" size="42" />
+	<house name="VIP House &quot;28&quot;" houseid="129" entryx="419" entryy="520" entryz="7" rent="0" townid="0" size="42" />
+	<house name="VIP House &quot;29&quot;" houseid="130" entryx="407" entryy="518" entryz="7" rent="0" townid="0" size="36" />
+	<house name="VIP House &quot;30&quot;" houseid="131" entryx="413" entryy="509" entryz="7" rent="0" townid="0" size="60" />
+	<house name="VIP House &quot;31&quot;" houseid="132" entryx="397" entryy="519" entryz="7" rent="0" townid="0" size="49" />
+	<house name="VIP House &quot;32&quot;" houseid="133" entryx="397" entryy="512" entryz="7" rent="0" townid="0" size="42" />
+	<house name="VIP House &quot;33&quot;" houseid="134" entryx="396" entryy="503" entryz="7" rent="0" townid="0" size="32" />
+	<house name="VIP House &quot;34&quot;" houseid="135" entryx="413" entryy="495" entryz="7" rent="0" townid="0" size="60" />
+	<house name="VIP House &quot;35&quot;" houseid="136" entryx="427" entryy="496" entryz="7" rent="0" townid="0" size="48" />
+	<house name="VIP House &quot;36&quot;" houseid="137" entryx="425" entryy="484" entryz="7" rent="0" townid="0" size="30" />
+	<house name="VIP House &quot;37&quot;" houseid="138" entryx="438" entryy="496" entryz="7" rent="0" townid="0" size="40" />
+	<house name="VIP House &quot;38&quot;" houseid="139" entryx="451" entryy="495" entryz="7" rent="0" townid="0" size="30" />
+	<house name="VIP House &quot;39&quot;" houseid="140" entryx="424" entryy="510" entryz="7" rent="0" townid="0" size="36" />
+	<house name="VIP House &quot;40&quot;" houseid="141" entryx="479" entryy="496" entryz="6" rent="0" townid="0" size="10" />
+	<house name="VIP House &quot;41&quot;" houseid="142" entryx="485" entryy="495" entryz="6" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;42&quot;" houseid="143" entryx="489" entryy="495" entryz="6" rent="0" townid="0" size="10" />
+	<house name="VIP House &quot;43&quot;" houseid="144" entryx="497" entryy="495" entryz="6" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;44&quot;" houseid="145" entryx="480" entryy="500" entryz="6" rent="0" townid="0" size="10" />
+	<house name="VIP House &quot;45&quot;" houseid="146" entryx="485" entryy="500" entryz="6" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;46&quot;" houseid="147" entryx="489" entryy="500" entryz="6" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;47&quot;" houseid="148" entryx="495" entryy="500" entryz="6" rent="0" townid="0" size="8" />
+	<house name="VIP House &quot;48&quot;" houseid="149" entryx="437" entryy="468" entryz="6" rent="0" townid="0" size="29" />
+	<house name="VIP House &quot;49&quot;" houseid="150" entryx="445" entryy="467" entryz="6" rent="0" townid="0" size="35" />
+	<house name="VIP House &quot;50&quot;" houseid="151" entryx="458" entryy="468" entryz="6" rent="0" townid="0" size="35" />
+	<house name="VIP House &quot;51&quot;" houseid="152" entryx="469" entryy="467" entryz="6" rent="0" townid="0" size="40" />
+	<house name="VIP House &quot;52&quot;" houseid="153" entryx="478" entryy="467" entryz="6" rent="0" townid="0" size="35" />
+	<house name="VIP House &quot;53&quot;" houseid="154" entryx="490" entryy="467" entryz="6" rent="0" townid="0" size="35" />
+	<house name="VIP House &quot;54&quot;" houseid="155" entryx="496" entryy="468" entryz="6" rent="0" townid="0" size="35" />
+	<house name="VIP House &quot;56&quot;" houseid="157" entryx="447" entryy="542" entryz="7" rent="0" townid="0" size="37" />
+	<house name="VIP House &quot;60&quot;" houseid="158" entryx="462" entryy="554" entryz="7" rent="0" townid="0" size="45" />
+	<house name="VIP House &quot;61&quot;" houseid="159" entryx="475" entryy="553" entryz="7" rent="0" townid="0" size="40" />
+	<house name="VIP House &quot;62&quot;" houseid="160" entryx="485" entryy="554" entryz="7" rent="0" townid="0" size="38" />
+	<house name="Enigma Square I" houseid="161" entryx="1011" entryy="990" entryz="7" rent="3500" townid="0" size="64" />
+	<house name="Enigma Square II" houseid="162" entryx="1003" entryy="990" entryz="7" rent="3150" townid="0" size="56" />
+	<house name="Enigma Square III" houseid="163" entryx="992" entryy="990" entryz="7" rent="2700" townid="0" size="48" />
+	<house name="Enigma Square IV" houseid="164" entryx="990" entryy="994" entryz="7" rent="3800" townid="0" size="69" />
+	<house name="Enigma Square V" houseid="165" entryx="990" entryy="1003" entryz="7" rent="3700" townid="0" size="67" />
+	<house name="Enigma Square VI" houseid="166" entryx="1000" entryy="1007" entryz="7" rent="3100" townid="0" size="55" />
+	<house name="Enigma Square VII" houseid="167" entryx="1008" entryy="1007" entryz="7" rent="3500" townid="0" size="64" />
+	<house name="Enigma Square VIII" houseid="168" entryx="1010" entryy="1003" entryz="7" rent="4150" townid="0" size="77" />
+	<house name="Enigma Square IX" houseid="169" entryx="1010" entryy="997" entryz="7" rent="3050" townid="0" size="57" />
+	<house name="Enigma Plaza I" houseid="170" entryx="985" entryy="1017" entryz="7" rent="1050" townid="0" size="16" />
+	<house name="Enigma Plaza II" houseid="171" entryx="985" entryy="1021" entryz="7" rent="1450" townid="0" size="24" />
+	<house name="Enigma Plaza III" houseid="172" entryx="988" entryy="1022" entryz="7" rent="1100" townid="0" size="17" />
+	<house name="Enigma Plaza IV" houseid="173" entryx="996" entryy="1021" entryz="7" rent="1750" townid="0" size="30" />
+	<house name="Boat Lane I" houseid="174" entryx="959" entryy="981" entryz="7" rent="6300" townid="0" size="119" />
+	<house name="Boat Lane II" houseid="175" entryx="977" entryy="979" entryz="7" rent="4000" townid="0" size="72" />
+	<house name="Western Flat I" houseid="176" entryx="993" entryy="972" entryz="7" rent="1600" townid="0" size="28" />
+	<house name="Western Flat II" houseid="177" entryx="1003" entryy="972" entryz="7" rent="1600" townid="0" size="28" />
+	<house name="Western Flat III" houseid="178" entryx="997" entryy="968" entryz="6" rent="1550" townid="0" size="28" />
+	<house name="Western Flat IV" houseid="179" entryx="999" entryy="968" entryz="6" rent="1550" townid="0" size="28" />
+	<house name="Western Flat V" houseid="180" entryx="997" entryy="968" entryz="5" rent="1550" townid="0" size="28" />
+	<house name="Western Flat VI" houseid="181" entryx="999" entryy="968" entryz="5" rent="1550" townid="0" size="30" />
+	<house name="Eastern Flat I" houseid="182" entryx="1010" entryy="972" entryz="7" rent="1600" townid="0" size="28" />
+	<house name="Eastern Flat II" houseid="183" entryx="1020" entryy="972" entryz="7" rent="1600" townid="0" size="28" />
+	<house name="Eastern Flat III" houseid="184" entryx="1014" entryy="968" entryz="6" rent="1550" townid="0" size="28" />
+	<house name="Eastern Flat IV" houseid="185" entryx="1016" entryy="968" entryz="6" rent="1550" townid="0" size="28" />
+	<house name="Eastern Flat V" houseid="186" entryx="1014" entryy="968" entryz="5" rent="1550" townid="0" size="30" />
+	<house name="Eastern Flat VI" houseid="187" entryx="1016" entryy="968" entryz="5" rent="1550" townid="0" size="28" />
+	<house name="Ocean Mansion" houseid="188" entryx="1010" entryy="956" entryz="7" rent="2000" townid="0" size="74" />
+	<house name="Ocean Plaza I" houseid="189" entryx="1012" entryy="950" entryz="7" rent="850" townid="0" size="14" />
+	<house name="Ocean Plaza II" houseid="190" entryx="1017" entryy="950" entryz="7" rent="850" townid="0" size="14" />
+	<house name="Ocean Plaza III" houseid="191" entryx="1022" entryy="950" entryz="7" rent="850" townid="0" size="14" />
+	<house name="Guildhouse of the Park" houseid="192" entryx="1059" entryy="1002" entryz="7" rent="11500" townid="0" size="225" />
+	<house name="Dream Lane I" houseid="193" entryx="1026" entryy="956" entryz="7" rent="1250" townid="0" size="22" />
+	<house name="Dream Lane II" houseid="194" entryx="1026" entryy="961" entryz="7" rent="1650" townid="0" size="30" />
+	<house name="Dream Lane III" houseid="195" entryx="1026" entryy="965" entryz="7" rent="1250" townid="0" size="22" />
+	<house name="Dream Lane IV" houseid="196" entryx="1026" entryy="969" entryz="7" rent="1250" townid="0" size="22" />
+	<house name="Park Flat I" houseid="197" entryx="1047" entryy="976" entryz="7" rent="1750" townid="0" size="26" />
+	<house name="Park Flat II" houseid="198" entryx="1049" entryy="976" entryz="7" rent="1500" townid="0" size="22" />
+	<house name="Park Flat III" houseid="199" entryx="1047" entryy="976" entryz="6" rent="1450" townid="0" size="26" />
+	<house name="Park Lane I" houseid="200" entryx="1026" entryy="1015" entryz="7" rent="3750" townid="0" size="71" />
+	<house name="Park Lane II" houseid="201" entryx="1035" entryy="1015" entryz="7" rent="3750" townid="0" size="71" />
+	<house name="River Street I" houseid="202" entryx="963" entryy="1001" entryz="7" rent="1250" townid="0" size="20" />
+	<house name="River Street II" houseid="203" entryx="963" entryy="994" entryz="7" rent="1250" townid="0" size="20" />
+	<house name="River Street III" houseid="204" entryx="963" entryy="987" entryz="7" rent="1250" townid="0" size="20" />
+	<house name="Wizard's House I" houseid="205" entryx="974" entryy="1000" entryz="7" rent="1250" townid="0" size="22" />
+	<house name="Wizard's House II" houseid="206" entryx="974" entryy="1005" entryz="7" rent="1250" townid="0" size="22" />
+	<house name="Wizard's House III" houseid="207" entryx="974" entryy="1000" entryz="6" rent="1250" townid="0" size="22" />
+	<house name="Mystical House" houseid="208" entryx="974" entryy="987" entryz="7" rent="2000" townid="0" size="67" />
+	<house name="Guildhouse of the River" houseid="209" entryx="972" entryy="1017" entryz="7" rent="11400" townid="0" size="201" />
+</houses>
