@@ -2087,11 +2087,11 @@ void ProtocolGame::sendSkills()
 void ProtocolGame::sendPing()
 {
 	NetworkMessage_ptr msg = getOutputBuffer();
-	if(!msg)
-		return;
-	
-	TRACK_MESSAGE(msg);
-	msg->put<char>(0x1E);
+	if(msg)
+	{
+		TRACK_MESSAGE(msg);
+		msg->put<char>(0x1E);
+	}
 }
 
 void ProtocolGame::sendDistanceShoot(const Position& from, const Position& to, uint8_t type)
@@ -2100,11 +2100,11 @@ void ProtocolGame::sendDistanceShoot(const Position& from, const Position& to, u
 		return;
 
 	NetworkMessage_ptr msg = getOutputBuffer();
-	if(!msg)
-		return;
-	
-	TRACK_MESSAGE(msg);
-	AddDistanceShoot(msg, from, to, type);
+	if(msg)
+	{
+		TRACK_MESSAGE(msg);
+		AddDistanceShoot(msg, from, to, type);
+	}
 }
 
 void ProtocolGame::sendMagicEffect(const Position& pos, uint8_t type)
@@ -2113,11 +2113,11 @@ void ProtocolGame::sendMagicEffect(const Position& pos, uint8_t type)
 		return;
 
 	NetworkMessage_ptr msg = getOutputBuffer();
-	if(!msg)
-		return;
-	
-	TRACK_MESSAGE(msg);
-	AddMagicEffect(msg, pos, type);
+	if(msg)
+	{
+		TRACK_MESSAGE(msg);
+		AddMagicEffect(msg, pos, type);
+	}
 }
 
 void ProtocolGame::sendAnimatedText(const Position& pos, uint8_t color, std::string text)
@@ -2126,11 +2126,11 @@ void ProtocolGame::sendAnimatedText(const Position& pos, uint8_t color, std::str
 		return;
 
 	NetworkMessage_ptr msg = getOutputBuffer();
-	if(!msg)
-		return;
-	
-	TRACK_MESSAGE(msg);
-	AddAnimatedText(msg, pos, color, text);
+	if(msg)
+	{
+		TRACK_MESSAGE(msg);
+		AddAnimatedText(msg, pos, color, text);
+	}
 }
 
 void ProtocolGame::sendCreatureHealth(const Creature* creature)
@@ -2139,11 +2139,11 @@ void ProtocolGame::sendCreatureHealth(const Creature* creature)
 		return;
 
 	NetworkMessage_ptr msg = getOutputBuffer();
-	if(!msg)
-		return;
-	
-	TRACK_MESSAGE(msg);
-	AddCreatureHealth(msg, creature);
+	if(msg)
+	{
+		TRACK_MESSAGE(msg);
+		AddCreatureHealth(msg, creature);
+	}
 }
 
 void ProtocolGame::sendFYIBox(const std::string& message)

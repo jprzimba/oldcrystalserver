@@ -780,7 +780,7 @@ void Player::closeContainer(uint32_t cid)
 
 bool Player::canOpenCorpse(uint32_t ownerId)
 {
-	return getID() == ownerId || (party && party->canOpenCorpse(ownerId)) || hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges);
+	return guid == ownerId || (party && party->canOpenCorpse(ownerId)) || hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges);
 }
 
 uint16_t Player::getLookCorpse() const
@@ -1370,6 +1370,7 @@ void Player::onCreatureAppear(const Creature* creature)
 		g_moveEvents->onPlayerEquip(this, item, (slots_t)slot, false);
 	}
 
+	updateWeapon();
 	if(BedItem* bed = Beds::getInstance()->getBedBySleeper(guid))
 		bed->wakeUp();
 
@@ -3207,6 +3208,7 @@ void Player::postAddNotification(Creature* actor, Thing* thing, const Cylinder* 
 
 		updateInventoryWeight();
 		updateItemsLight();
+		updateWeapon();
 		sendStats();
 	}
 
@@ -3254,6 +3256,7 @@ void Player::postRemoveNotification(Creature* actor, Thing* thing, const Cylinde
 
 		updateInventoryWeight();
 		updateItemsLight();
+		updateWeapon();
 		sendStats();
 	}
 
