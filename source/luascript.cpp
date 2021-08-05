@@ -1722,7 +1722,7 @@ void LuaInterface::registerFunctions()
 	//doCreateTeleport(itemid, topos, createpos)
 	lua_register(m_luaState, "doCreateTeleport", LuaInterface::luaDoCreateTeleport);
 
-	//doCreateMonster(name, pos[, displayError = true])
+	//doCreateMonster(name, pos[, extend = false[, force = false[, displayError = true]]])
 	lua_register(m_luaState, "doCreateMonster", LuaInterface::luaDoCreateMonster);
 
 	//doCreateNpc(name, pos[, displayError = true])
@@ -4693,10 +4693,17 @@ int32_t LuaInterface::luaGetHouseFromPos(lua_State* L)
 
 int32_t LuaInterface::luaDoCreateMonster(lua_State* L)
 {
-	//doCreateMonster(name, pos[, displayError = true])
-	bool displayError = true;
-	if(lua_gettop(L) > 2)
-		displayError = popNumber(L);
+	//doCreateMonster(name, pos[, extend = false[, force = false[, displayError = true]]])
+	bool displayError = true, force = false, extend = false;
+	int32_t params = lua_gettop(L);
+	if(params > 4)
+		displayError = popBoolean(L);
+
+	if(params > 3)
+		force = popBoolean(L);
+
+	if(params > 2)
+		extend = popBoolean(L);
 
 	PositionEx pos;
 	popPosition(L, pos);
@@ -4712,13 +4719,13 @@ int32_t LuaInterface::luaDoCreateMonster(lua_State* L)
 		return 1;
 	}
 
-	if(!g_game.placeCreature(monster, pos))
+	if(!g_game.placeCreature(monster, pos, extend, force))
 	{
 		delete monster;
 		if(displayError)
 			errorEx("Cannot create monster: " + name);
 
-		lua_pushboolean(L, true);
+		lua_pushboolean(L, false);
 		return 1;
 	}
 
