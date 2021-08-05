@@ -134,6 +134,7 @@
 	useCapSystem = true
 	optionalWarAttackableAlly = false
 	fistBaseAttack = 7
+	classicEquipmentSlots = false
 
 	-- Spells
 	formulaLevel = 5.0

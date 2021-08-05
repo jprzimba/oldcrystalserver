@@ -69,7 +69,7 @@ class ConfigManager
 			LAST_STRING_CONFIG /* this must be the last one */
 		};
 
-		enum number_config_t
+		enum integer_config_t
 		{
 			LOGIN_TRIES = 0,
 			RETRY_TIMEOUT,
@@ -179,7 +179,7 @@ class ConfigManager
 			VIPLIST_DEFAULT_LIMIT,
 			VIPLIST_DEFAULT_PREMIUM_LIMIT,
 			FIST_BASE_ATTACK,
-			LAST_NUMBER_CONFIG /* this must be the last one */
+			LAST_INTEGER_CONFIG /* this must be the last one */
 		};
 
 		enum double_config_t
@@ -287,6 +287,7 @@ class ConfigManager
 			SKIP_ITEMS_VERSION,
 			OPTIONAL_WAR_ATTACK_ALLY,
 			EXTERNAL_GUILD_WARS_MANAGEMENT,
+			CLASSIC_EQUIPMENT_SLOTS,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 
@@ -331,9 +332,9 @@ class ConfigManager
 		bool m_loaded, m_startup;
 		lua_State* L;
 
-		std::string m_confString[LAST_STRING_CONFIG];
-		bool m_confBool[LAST_BOOL_CONFIG];
-		int32_t m_confNumber[LAST_NUMBER_CONFIG];
+		std::string string[LAST_STRING_CONFIG];
+		bool boolean[LAST_BOOL_CONFIG];
+		int32_t integer[LAST_INTEGER_CONFIG];
 		double m_confDouble[LAST_DOUBLE_CONFIG];
 };
 #endif
