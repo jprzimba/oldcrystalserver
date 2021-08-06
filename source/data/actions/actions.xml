@@ -287,12 +287,8 @@
 	<action itemid="5791" event="script" value="other/stuffeddragon.lua"/>
 	<action itemid="6566" event="script" value="other/stuffeddragon.lua"/>
 
-	<action uniqueid="8000" event="script" value="systemPotions/healthpotion.lua"/>
-	<action uniqueid="8001" event="script" value="systemPotions/stronghp.lua"/>
-	<action uniqueid="8002" event="script" value="systemPotions/greathp.lua"/>
-	<action uniqueid="8003" event="script" value="systemPotions/manapotion.lua"/>
-	<action uniqueid="8004" event="script" value="systemPotions/strongmp.lua"/>
-	<action uniqueid="8005" event="script" value="systemPotions/greatmp.lua"/>
-	<action uniqueid="8006" event="script" value="systemPotions/spiritpotion.lua"/>
-	<action uniqueid="8007" event="script" value="systemPotions/ultimatehp.lua"/>
+	<!-- Levers -->
+	<action uniqueid="7001" event="script" value="levers/arena_pvp.lua"/>
+	<action uniqueid="7002" event="script" value="levers/walllever.lua"/>
+	<action uniqueid="7003" event="script" value="levers/walllever2.lua"/>
 </actions>
