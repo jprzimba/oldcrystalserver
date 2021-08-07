@@ -4736,10 +4736,17 @@ int32_t LuaInterface::luaDoCreateMonster(lua_State* L)
 
 int32_t LuaInterface::luaDoCreateNpc(lua_State* L)
 {
-	//doCreateNpc(name, pos[, displayError = true])
-	bool displayError = true;
-	if(lua_gettop(L) > 2)
-		displayError = popNumber(L);
+	//doCreateNpc(name, pos[, extend = false[, force = false[, displayError = true]]])
+	bool displayError = true, force = false, extend = false;
+	int32_t params = lua_gettop(L);
+	if(params > 4)
+		displayError = popBoolean(L);
+
+	if(params > 3)
+		force = popBoolean(L);
+
+	if(params > 2)
+		extend = popBoolean(L);
 
 	PositionEx pos;
 	popPosition(L, pos);
@@ -4755,7 +4762,7 @@ int32_t LuaInterface::luaDoCreateNpc(lua_State* L)
 		return 1;
 	}
 
-	if(!g_game.placeCreature(npc, pos))
+	if(!g_game.placeCreature(npc, pos, extend, force))
 	{
 		delete npc;
 		if(displayError)

@@ -23,8 +23,8 @@
 	<movevent type="StepOut" itemid="3217" event="script" value="tiles.lua"/>
 	<movevent type="StepIn" itemid="3202" event="script" value="tiles.lua"/>
 	<movevent type="StepOut" itemid="3215" event="script" value="tiles.lua"/>
-	<movevent type="StepIn" itemid="11059" event="script" value="tiles.lua"/>
-	<movevent type="StepOut" itemid="11060" event="script" value="tiles.lua"/>
+	<movevent type="StepIn" itemid="11062" event="script" value="tiles.lua"/>
+	<movevent type="StepOut" itemid="11063" event="script" value="tiles.lua"/>
 	<!-- <movevent type="StepIn" itemid="8714" event="script" value="tiles.lua"/> -->
 
 	<!-- Traps -->
@@ -110,10 +110,10 @@
 	<movevent type="StepOut" itemid="10476" event="script" value="closingdoor.lua"/>
 	<movevent type="StepOut" itemid="10483" event="script" value="closingdoor.lua"/>
 	<movevent type="StepOut" itemid="10485" event="script" value="closingdoor.lua"/>
-	<movevent type="StepOut" itemid="10780" event="script" value="closingdoor.lua"/>
-	<movevent type="StepOut" itemid="10782" event="script" value="closingdoor.lua"/>
-	<movevent type="StepOut" itemid="10789" event="script" value="closingdoor.lua"/>
-	<movevent type="StepOut" itemid="10791" event="script" value="closingdoor.lua"/>
+	<movevent type="StepOut" itemid="10781" event="script" value="closingdoor.lua"/>
+	<movevent type="StepOut" itemid="10783" event="script" value="closingdoor.lua"/>
+	<movevent type="StepOut" itemid="10790" event="script" value="closingdoor.lua"/>
+	<movevent type="StepOut" itemid="10792" event="script" value="closingdoor.lua"/>
 	<movevent type="StepIn" itemid="1228" event="script" value="walkback.lua"/>
 	<movevent type="StepIn" itemid="1230" event="script" value="walkback.lua"/>
 	<movevent type="StepIn" itemid="1246" event="script" value="walkback.lua"/>
@@ -180,10 +180,10 @@
 	<movevent type="StepIn" itemid="10476" event="script" value="walkback.lua"/>
 	<movevent type="StepIn" itemid="10483" event="script" value="walkback.lua"/>
 	<movevent type="StepIn" itemid="10485" event="script" value="walkback.lua"/>
-	<movevent type="StepIn" itemid="10780" event="script" value="walkback.lua"/>
-	<movevent type="StepIn" itemid="10782" event="script" value="walkback.lua"/>
-	<movevent type="StepIn" itemid="10789" event="script" value="walkback.lua"/>
-	<movevent type="StepIn" itemid="10791" event="script" value="walkback.lua"/>
+	<movevent type="StepIn" itemid="10781" event="script" value="walkback.lua"/>
+	<movevent type="StepIn" itemid="10783" event="script" value="walkback.lua"/>
+	<movevent type="StepIn" itemid="10790" event="script" value="walkback.lua"/>
+	<movevent type="StepIn" itemid="10792" event="script" value="walkback.lua"/>
 
 	<!-- Snow footprint tiles -->
 	<movevent type="StepIn" itemid="670" event="script" value="snow.lua"/>
@@ -202,6 +202,9 @@
 	<movevent type="AddItem" itemid="1424" event="function" value="onAddField"/>
 	<movevent type="StepIn" itemid="1425" event="function" value="onStepInField"/>
 	<movevent type="AddItem" itemid="1425" event="function" value="onAddField"/>
+
+	<!-- Others -->
+	<movevent type="StepIn" itemid="8072" event="script" value="yellowpillow.lua"/>
 
 	<!-- Fields -->
 	<movevent type="StepIn" itemid="1487" event="function" value="onStepInField"/>
@@ -798,8 +801,8 @@
 		<vocation id="7" showInDescription="0"/>
 	</movevent>
 	<movevent type="DeEquip" itemid="9777" slot="legs" event="function" value="onDeEquipItem"/>
-	<movevent type="Equip" itemid="11297" slot="legs" event="function" value="onEquipItem"/>
-	<movevent type="DeEquip" itemid="11297" slot="legs" event="function" value="onDeEquipItem"/>
+	<movevent type="Equip" itemid="11298" slot="legs" event="function" value="onEquipItem"/>
+	<movevent type="DeEquip" itemid="11298" slot="legs" event="function" value="onDeEquipItem"/>
 
 	<!-- Shields -->
 	<movevent type="Equip" fromid="8905" toid="8909" slot="shield" level="100" event="function" value="onEquipItem">
