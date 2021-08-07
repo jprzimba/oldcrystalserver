@@ -71,6 +71,7 @@ Creature::Creature()
 	hasFollowPath = false;
 	removed = false;
 	eventWalk = 0;
+	cancelNextWalk = false;
 	forceUpdateFollowPath = false;
 	isMapLoaded = false;
 	isUpdatingPath = false;
@@ -85,7 +86,6 @@ Creature::Creature()
 	walkUpdateTicks = 0;
 	checkVector = -1;
 
-	scriptEventsBitField = 0;
 	onIdleStatus();
 }
 
@@ -249,12 +249,23 @@ void Creature::onWalk()
 	{
 		Direction dir;
 		uint32_t flags = FLAG_IGNOREFIELDDAMAGE;
-		if(getNextStep(dir, flags) && g_game.internalMoveCreature(this, dir, flags) != RET_NOERROR)
+		if(!getNextStep(dir, flags))
+		{
+			if(listWalkDir.empty())
+				onWalkComplete();
+
+			stopEventWalk();
+		}
+		else if(g_game.internalMoveCreature(this, dir, flags) != RET_NOERROR)
 			forceUpdateFollowPath = true;
 	}
 
-	if(listWalkDir.empty())
-		onWalkComplete();
+	if(cancelNextWalk)
+	{
+		cancelNextWalk = false;
+		listWalkDir.clear();
+		onWalkAborted();
+ 	}
 
 	if(eventWalk)
 	{
@@ -311,19 +322,25 @@ bool Creature::startAutoWalk(std::list<Direction>& listDir)
 	}
 
 	listWalkDir = listDir;
-	addEventWalk();
+	addEventWalk(listDir.size() == 1);
 	return true;
 }
 
-void Creature::addEventWalk()
+void Creature::addEventWalk(bool firstStep/* = false*/)
 {
-	if(eventWalk)
+	cancelNextWalk = false;
+	if(getStepSpeed() < 1 || eventWalk)
 		return;
 
-	int64_t ticks = getEventStepTicks();
-	if(ticks > 0)
-		eventWalk = Scheduler::getInstance().addEvent(createSchedulerTask(ticks,
-			boost::bind(&Game::checkCreatureWalk, &g_game, getID())));
+	int64_t ticks = getEventStepTicks(firstStep);
+	if(ticks < 1)
+		return;
+
+	if(ticks == 1)
+		g_game.checkCreatureWalk(getID());
+
+	eventWalk = Scheduler::getInstance().addEvent(createSchedulerTask(std::max((int64_t)SCHEDULER_MINTICKS, ticks),
+		boost::bind(&Game::checkCreatureWalk, &g_game, id)));
 }
 
 void Creature::stopEventWalk()
@@ -1535,13 +1552,16 @@ int32_t Creature::getStepDuration() const
 	return ((1000 * Item::items[tile->ground->getID()].speed) / stepSpeed) * lastStepCost;
 }
 
-int64_t Creature::getEventStepTicks() const
+int64_t Creature::getEventStepTicks(bool onlyDelay/* = false*/) const
 {
 	int64_t ret = getWalkDelay();
 	if(ret > 0)
 		return ret;
 
-	return getStepDuration();
+	if(!onlyDelay)
+		return getStepDuration();
+
+	return 1;
 }
 
 void Creature::getCreatureLight(LightInfo& light) const
@@ -1557,7 +1577,7 @@ void Creature::setNormalCreatureLight()
 bool Creature::registerCreatureEvent(const std::string& name)
 {
 	CreatureEvent* event = g_creatureEvents->getEventByName(name);
-	if(!event) //check for existance
+	if(!event || !event->isLoaded()) //check for existance
 		return false;
 
 	for(CreatureEventList::iterator it = eventsList.begin(); it != eventsList.end(); ++it)
@@ -1566,22 +1586,34 @@ bool Creature::registerCreatureEvent(const std::string& name)
 			return false;
 	}
 
-	if(!hasEventRegistered(event->getEventType())) //there's no such type registered yet, so set the bit in the bitfield
-		scriptEventsBitField |= ((uint32_t)1 << event->getEventType());
-
 	eventsList.push_back(event);
 	return true;
+}
+
+bool Creature::unregisterCreatureEvent(const std::string& name)
+{
+	CreatureEvent* event = g_creatureEvents->getEventByName(name);
+	if(!event || !event->isLoaded()) //check for existance
+		return false;
+
+	for(CreatureEventList::iterator it = eventsList.begin(); it != eventsList.end(); ++it)
+	{
+		if((*it) != event)
+			continue;
+
+		eventsList.erase(it);
+		return true; // we shouldn't have a duplicate
+	}
+
+	return false;
 }
 
 CreatureEventList Creature::getCreatureEvents(CreatureEventType_t type)
 {
 	CreatureEventList retList;
-	if(!hasEventRegistered(type))
-		return retList;
-
 	for(CreatureEventList::iterator it = eventsList.begin(); it != eventsList.end(); ++it)
 	{
-		if((*it)->getEventType() == type)
+		if((*it)->getEventType() == type && (*it)->isLoaded())
 			retList.push_back(*it);
 	}
 

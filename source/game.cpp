@@ -4072,11 +4072,11 @@ bool Game::getPathToEx(const Creature* creature, const Position& targetPos, std:
 void Game::checkCreatureWalk(uint32_t creatureId)
 {
 	Creature* creature = getCreatureByID(creatureId);
-	if(creature && creature->getHealth() > 0)
-	{
-		creature->onWalk();
-		cleanup();
-	}
+	if(!creature || creature->getHealth() < 1)
+		return;
+
+	creature->onWalk();
+	cleanup();
 }
 
 void Game::updateCreatureWalk(uint32_t creatureId)
