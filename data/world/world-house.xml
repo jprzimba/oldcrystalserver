@@ -49,4 +49,110 @@
 	<house name="Wizard's House III" houseid="47" entryx="973" entryy="1000" entryz="6" rent="1250" townid="1" size="24" />
 	<house name="Mystical House" houseid="48" entryx="973" entryy="987" entryz="7" rent="0" townid="1" size="71" />
 	<house name="Guildhouse of the River" houseid="49" entryx="971" entryy="1017" entryz="7" rent="11400" townid="1" size="217" />
+	<house name="Karmia House I" houseid="50" entryx="464" entryy="512" entryz="7" rent="10000" townid="0" size="38" />
+	<house name="Karmia House II" houseid="51" entryx="457" entryy="526" entryz="7" rent="7000" townid="0" size="32" />
+	<house name="Karmia House III" houseid="52" entryx="464" entryy="526" entryz="7" rent="7000" townid="0" size="32" />
+	<house name="Karmia House IV" houseid="53" entryx="457" entryy="532" entryz="7" rent="7000" townid="0" size="32" />
+	<house name="Karmia House V" houseid="54" entryx="464" entryy="532" entryz="7" rent="7000" townid="0" size="32" />
+	<house name="Karmia House VI" houseid="55" entryx="479" entryy="527" entryz="7" rent="12000" townid="0" size="57" />
+	<house name="Karmia House VII" houseid="56" entryx="475" entryy="534" entryz="7" rent="12000" townid="0" size="54" />
+	<house name="Karmia House VIII" houseid="57" entryx="482" entryy="534" entryz="7" rent="12000" townid="0" size="58" />
+	<house name="Karmia House IX" houseid="58" entryx="486" entryy="530" entryz="7" rent="12000" townid="0" size="53" />
+	<house name="Karmia House X" houseid="59" entryx="459" entryy="512" entryz="6" rent="10000" townid="0" size="40" />
+	<house name="Karmia House XI" houseid="60" entryx="464" entryy="512" entryz="6" rent="10000" townid="0" size="37" />
+	<house name="Karmia House XII" houseid="61" entryx="479" entryy="497" entryz="7" rent="6000" townid="0" size="23" />
+	<house name="Karmia House XIII" houseid="62" entryx="484" entryy="501" entryz="7" rent="6000" townid="0" size="26" />
+	<house name="Karmia House XIV" houseid="63" entryx="486" entryy="498" entryz="6" rent="4000" townid="0" size="18" />
+	<house name="Desert House I" houseid="64" entryx="360" entryy="506" entryz="7" rent="5000" townid="2" size="35" />
+	<house name="Desert House II" houseid="65" entryx="342" entryy="505" entryz="7" rent="5000" townid="2" size="35" />
+	<house name="Desert House III" houseid="66" entryx="320" entryy="491" entryz="7" rent="5000" townid="2" size="36" />
+	<house name="Desert House IV" houseid="67" entryx="327" entryy="491" entryz="7" rent="5000" townid="2" size="42" />
+	<house name="Desert House V" houseid="68" entryx="320" entryy="494" entryz="7" rent="5000" townid="2" size="36" />
+	<house name="Desert House VI" houseid="69" entryx="327" entryy="494" entryz="7" rent="5000" townid="2" size="43" />
+	<house name="Desert House VII" houseid="70" entryx="329" entryy="489" entryz="6" rent="8000" townid="2" size="50" />
+	<house name="Desert House VIII" houseid="71" entryx="329" entryy="496" entryz="6" rent="8000" townid="2" size="60" />
+	<house name="Desert House IX" houseid="72" entryx="327" entryy="493" entryz="5" rent="8000" townid="2" size="48" />
+	<house name="Desert House X" houseid="73" entryx="348" entryy="472" entryz="7" rent="7000" townid="2" size="45" />
+	<house name="Desert House XI" houseid="74" entryx="348" entryy="476" entryz="7" rent="7000" townid="2" size="45" />
+	<house name="Desert House XII" houseid="75" entryx="350" entryy="471" entryz="6" rent="5000" townid="2" size="30" />
+	<house name="Desert House XIII" houseid="76" entryx="350" entryy="478" entryz="6" rent="5000" townid="2" size="30" />
+	<house name="Desert House XIV" houseid="77" entryx="374" entryy="474" entryz="6" rent="1000" townid="2" size="49" />
+	<house name="Desert House XV" houseid="78" entryx="379" entryy="495" entryz="7" rent="4500" townid="2" size="30" />
+	<house name="Desert House XVI" houseid="79" entryx="379" entryy="498" entryz="7" rent="4500" townid="2" size="30" />
+	<house name="Inferno House II" houseid="80" entryx="491" entryy="425" entryz="7" rent="12000" townid="4" size="72" />
+	<house name="Inferno House III" houseid="81" entryx="502" entryy="425" entryz="7" rent="12000" townid="4" size="72" />
+	<house name="Inferno House V" houseid="82" entryx="501" entryy="407" entryz="7" rent="10000" townid="4" size="44" />
+	<house name="Inferno House VI" houseid="83" entryx="479" entryy="412" entryz="7" rent="10000" townid="4" size="44" />
+	<house name="Inferno House VII" houseid="84" entryx="474" entryy="398" entryz="7" rent="12000" townid="4" size="55" />
+	<house name="Inferno House IV" houseid="85" entryx="502" entryy="421" entryz="7" rent="12000" townid="4" size="72" />
+	<house name="Inferno House I" houseid="86" entryx="491" entryy="421" entryz="7" rent="12000" townid="4" size="72" />
+	<house name="Inferno House VIII" houseid="87" entryx="495" entryy="401" entryz="7" rent="8000" townid="4" size="35" />
+	<house name="Inferno House IX" houseid="88" entryx="488" entryy="396" entryz="6" rent="8000" townid="4" size="36" />
+	<house name="Inferno House X" houseid="89" entryx="511" entryy="408" entryz="7" rent="4000" townid="4" size="20" />
+	<house name="Inferno House XI" houseid="90" entryx="511" entryy="415" entryz="7" rent="4000" townid="4" size="20" />
+	<house name="Inferno House XII" houseid="91" entryx="511" entryy="422" entryz="7" rent="4000" townid="4" size="20" />
+	<house name="Tiquanda House I" houseid="92" entryx="532" entryy="465" entryz="6" rent="15000" townid="3" size="45" />
+	<house name="Tiquanda House II" houseid="93" entryx="541" entryy="471" entryz="6" rent="15000" townid="3" size="45" />
+	<house name="Tiquanda House III" houseid="94" entryx="551" entryy="466" entryz="6" rent="15000" townid="3" size="45" />
+	<house name="Tiquanda House IV" houseid="95" entryx="549" entryy="454" entryz="6" rent="15000" townid="3" size="45" />
+	<house name="Tiquanda House V" houseid="96" entryx="539" entryy="455" entryz="6" rent="15000" townid="3" size="45" />
+	<house name="Venore House I" houseid="97" entryx="404" entryy="406" entryz="6" rent="20000" townid="5" size="96" />
+	<house name="Venore House II" houseid="98" entryx="412" entryy="405" entryz="6" rent="20000" townid="5" size="96" />
+	<house name="Venore House III" houseid="99" entryx="407" entryy="410" entryz="6" rent="11000" townid="5" size="53" />
+	<house name="Venore House IV" houseid="100" entryx="394" entryy="405" entryz="6" rent="11000" townid="5" size="53" />
+	<house name="Venore House V" houseid="101" entryx="387" entryy="397" entryz="6" rent="11000" townid="5" size="42" />
+	<house name="Venore House VI" houseid="102" entryx="413" entryy="423" entryz="6" rent="11000" townid="5" size="53" />
+	<house name="Venore House VII" houseid="103" entryx="416" entryy="414" entryz="6" rent="11000" townid="5" size="53" />
+	<house name="Venore House VIII" houseid="104" entryx="422" entryy="402" entryz="6" rent="11000" townid="5" size="63" />
+	<house name="Venore House IX" houseid="105" entryx="414" entryy="392" entryz="6" rent="11000" townid="5" size="53" />
+	<house name="Venore House X" houseid="106" entryx="371" entryy="406" entryz="6" rent="8000" townid="5" size="22" />
+	<house name="Venore House XI" houseid="107" entryx="371" entryy="407" entryz="6" rent="8000" townid="5" size="22" />
+	<house name="Venore House XII" houseid="108" entryx="371" entryy="406" entryz="7" rent="8000" townid="5" size="22" />
+	<house name="Venore House XIII" houseid="109" entryx="371" entryy="408" entryz="7" rent="8000" townid="5" size="22" />
+	<house name="Venore House XIV" houseid="110" entryx="400" entryy="435" entryz="7" rent="8000" townid="5" size="24" />
+	<house name="Venore House XV" houseid="111" entryx="405" entryy="435" entryz="7" rent="8000" townid="5" size="24" />
+	<house name="Premmy Island House I" houseid="112" entryx="447" entryy="632" entryz="7" rent="10500" townid="6" size="37" />
+	<house name="Premmy Island House II" houseid="113" entryx="461" entryy="632" entryz="7" rent="10500" townid="6" size="37" />
+	<house name="Premmy Island House III" houseid="114" entryx="458" entryy="645" entryz="7" rent="20000" townid="5" size="74" />
+	<house name="Premmy Island House IV" houseid="115" entryx="458" entryy="653" entryz="7" rent="20000" townid="6" size="74" />
+	<house name="Premmy Island House V" houseid="116" entryx="463" entryy="645" entryz="7" rent="20000" townid="6" size="74" />
+	<house name="Premmy Island House VI" houseid="117" entryx="463" entryy="653" entryz="7" rent="20000" townid="6" size="74" />
+	<house name="Premmy Island House VII" houseid="118" entryx="433" entryy="664" entryz="7" rent="10500" townid="6" size="37" />
+	<house name="Premmy Island House VIII" houseid="119" entryx="447" entryy="664" entryz="7" rent="10500" townid="6" size="37" />
+	<house name="Premmy Island HouseIX" houseid="120" entryx="429" entryy="672" entryz="7" rent="11000" townid="6" size="39" />
+	<house name="Premmy Island House X" houseid="121" entryx="434" entryy="672" entryz="7" rent="11000" townid="6" size="36" />
+	<house name="Premmy Island House XI" houseid="122" entryx="421" entryy="659" entryz="7" rent="9000" townid="6" size="36" />
+	<house name="Premmy Island House XII" houseid="123" entryx="421" entryy="651" entryz="7" rent="9000" townid="6" size="42" />
+	<house name="Premmy Island House XIII" houseid="124" entryx="421" entryy="643" entryz="7" rent="9000" townid="6" size="42" />
+	<house name="Premmy Island House XIV" houseid="125" entryx="420" entryy="658" entryz="6" rent="7500" townid="6" size="30" />
+	<house name="Premmy Island House XV" houseid="126" entryx="420" entryy="651" entryz="6" rent="7500" townid="6" size="35" />
+	<house name="Premmy Island House XVI" houseid="127" entryx="420" entryy="643" entryz="6" rent="7500" townid="6" size="35" />
+	<house name="Venore House XVI" houseid="128" entryx="404" entryy="405" entryz="7" rent="10000" townid="5" size="48" />
+	<house name="Venore House XVII" houseid="129" entryx="413" entryy="405" entryz="7" rent="10000" townid="5" size="48" />
+	<house name="Folda House I" houseid="130" entryx="255" entryy="309" entryz="7" rent="10000" townid="7" size="27" />
+	<house name="Folda House II" houseid="131" entryx="255" entryy="309" entryz="6" rent="10000" townid="7" size="27" />
+	<house name="Folda House III" houseid="132" entryx="231" entryy="317" entryz="7" rent="10000" townid="7" size="30" />
+	<house name="Folda House IV" houseid="133" entryx="231" entryy="323" entryz="7" rent="10000" townid="7" size="30" />
+	<house name="Folda House V" houseid="134" entryx="231" entryy="329" entryz="7" rent="10000" townid="7" size="30" />
+	<house name="Folda House VI" houseid="135" entryx="239" entryy="341" entryz="7" rent="1000" townid="7" size="84" />
+	<house name="Folda House VII" houseid="136" entryx="251" entryy="338" entryz="7" rent="1000" townid="7" size="20" />
+	<house name="Folda House VIII" houseid="137" entryx="256" entryy="338" entryz="7" rent="1000" townid="7" size="20" />
+	<house name="Folda House IX" houseid="138" entryx="238" entryy="322" entryz="7" rent="1000" townid="7" size="28" />
+	<house name="Libera Bay House I" houseid="139" entryx="563" entryy="684" entryz="7" rent="10000" townid="8" size="97" />
+	<house name="Libera Bay House II" houseid="140" entryx="561" entryy="706" entryz="7" rent="10000" townid="8" size="84" />
+	<house name="Libera Bay House III" houseid="141" entryx="552" entryy="676" entryz="6" rent="10000" townid="8" size="35" />
+	<house name="Libera Bay House IV" houseid="142" entryx="547" entryy="679" entryz="7" rent="10000" townid="8" size="20" />
+	<house name="Libera Bay House V" houseid="143" entryx="552" entryy="679" entryz="7" rent="10000" townid="8" size="20" />
+	<house name="Libera Bay House VI" houseid="144" entryx="542" entryy="688" entryz="7" rent="10000" townid="8" size="20" />
+	<house name="Libera Bay House VII" houseid="145" entryx="533" entryy="681" entryz="7" rent="10000" townid="8" size="72" />
+	<house name="Libera Bay House VIII" houseid="146" entryx="532" entryy="685" entryz="7" rent="10000" townid="8" size="24" />
+	<house name="Libera Bay House IX" houseid="147" entryx="532" entryy="695" entryz="7" rent="10000" townid="8" size="24" />
+	<house name="Libera Bay House X" houseid="148" entryx="533" entryy="701" entryz="7" rent="10000" townid="8" size="84" />
+	<house name="Libera Bay House XI" houseid="149" entryx="535" entryy="692" entryz="6" rent="10000" townid="8" size="24" />
+	<house name="Libera Bay House XII" houseid="150" entryx="535" entryy="689" entryz="6" rent="10000" townid="8" size="24" />
+	<house name="Libera Bay House XIII" houseid="151" entryx="529" entryy="713" entryz="7" rent="10000" townid="8" size="60" />
+	<house name="Libera Bay House XIV" houseid="152" entryx="533" entryy="716" entryz="6" rent="10000" townid="8" size="42" />
+	<house name="Libera Bay House XV" houseid="153" entryx="517" entryy="683" entryz="7" rent="10000" townid="8" size="20" />
+	<house name="Libera Bay House XVI" houseid="154" entryx="516" entryy="691" entryz="7" rent="10000" townid="8" size="25" />
+	<house name="Libera Bay House XVII" houseid="155" entryx="518" entryy="698" entryz="7" rent="10000" townid="8" size="25" />
 </houses>

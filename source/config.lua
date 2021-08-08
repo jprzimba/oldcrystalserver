@@ -60,9 +60,9 @@
 	maxAccountNameLength = 25
 	newCharacterMinNameLength = 3
 	newCharacterMaxNameLength = 25
-	newPlayerSpawnPosX = 377
-	newPlayerSpawnPosY = 140
-	newPlayerSpawnPosZ = 6
+	newPlayerSpawnPosX = 438
+	newPlayerSpawnPosY = 503
+	newPlayerSpawnPosZ = 8
 	newPlayerTownId = 1
 	newPlayerLevel = 8
 	newPlayerMagicLevel = 0

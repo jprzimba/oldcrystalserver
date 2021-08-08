@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="Nimral" script="carpetman.lua" walkinterval="2000" floorchange="0">
+	<health now="150" max="150"/>
+	<look type="146" head="112" body="100" legs="121" feet="114" corpse="2212"/>
+	<parameters>
+		
+	</parameters>
+</npc>
