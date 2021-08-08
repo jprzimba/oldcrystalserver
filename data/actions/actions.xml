@@ -378,6 +378,10 @@
 	<action uniqueid="7002" event="script" value="map/levers/walllever.lua"/>
 	<action uniqueid="7003" event="script" value="map/levers/walllever2.lua"/>
 	<action uniqueid="14030" event="script" value="map/levers/hydras_camp.lua"/>
+	<action uniqueid="12151" event="script" value="map/levers/ferumbras_wall.lua"/>
+	<action uniqueid="12152" event="script" value="map/levers/ferumbras_wall2.lua"/>
+	<action uniqueid="12153" event="script" value="map/levers/ferumbras_wall3.lua"/>
+	<action uniqueid="5169" event="script" value="map/levers/ferumbras_stair.lua"/>
 
 	<action itemid="1485" event="script" value="map/teleinferna.lua"/>
 
