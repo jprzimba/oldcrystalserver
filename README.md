@@ -8,3 +8,4 @@ Crystal Server is a server application written in C++ for the MMORPG Tibia. It i
 * Add trainers to the map.
 * Remove and fix duplicated chest item id.
 * Add feature to prevent trash in depot.
+* Make the map like 8.6 style without changing it's essence.
