@@ -572,17 +572,19 @@ void otserv(StringVec, ServiceManager* services)
 
 	std::clog << "Checking world type... ";
 	std::string worldType = asLowerCaseString(g_config.getString(ConfigManager::WORLD_TYPE));
-	if(worldType == "open" || worldType == "2" || worldType == "openpvp")
+	if(worldType == "open" || worldType == "2" || worldType == "openpvp" || worldType == "pvp" || worldType == "normal")
 	{
 		g_game.setWorldType(WORLDTYPE_OPEN);
 		std::clog << "Open PvP" << std::endl;
 	}
-	else if(worldType == "optional" || worldType == "1" || worldType == "optionalpvp")
+	else if(worldType == "optional" || worldType == "1" || worldType == "optionalpvp" || worldType == "safe" ||
+    worldType == "nopvp" || worldType == "no-pvp" || worldType == "secure")
 	{
 		g_game.setWorldType(WORLDTYPE_OPTIONAL);
 		std::clog << "Optional PvP" << std::endl;
 	}
-	else if(worldType == "hardcore" || worldType == "3" || worldType == "hardcorepvp")
+	else if(worldType == "hardcore" || worldType == "3" || worldType == "hardcorepvp" || worldType == "war" ||
+    worldType == "pvp-enforced" || worldType == "enforced")
 	{
 		g_game.setWorldType(WORLDTYPE_HARDCORE);
 		std::clog << "Hardcore PvP" << std::endl;
