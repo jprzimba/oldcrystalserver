@@ -390,6 +390,7 @@
 	<action uniqueid="5002" event="script" value="map/quests/full_annilator.lua"/> 
 	<action uniqueid="5003" event="script" value="map/quests/full_annilator.lua"/> 
 	<action uniqueid="5004" event="script" value="map/quests/full_annilator.lua"/>
+	<action uniqueid="9010" event="script" value="map/quests/vocation_quest.lua"/>
 
 	<action itemid="2709" event="script" value="map/quests/chest.lua"/>
 	<action itemid="2720" event="script" value="map/quests/chest.lua"/>
