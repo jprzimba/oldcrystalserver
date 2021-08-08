@@ -47,8 +47,8 @@ CREATE TABLE `accounts`
 	PRIMARY KEY (`id`), UNIQUE (`name`)
 ) ENGINE = InnoDB;
 
-INSERT INTO `accounts` VALUES (1, '1', '1', 65535, 0, '', '0', 0, 0, 1);
-INSERT INTO `accounts` VALUES (2, '222222', 'tibia', 65535, 0, '', '0', 0, 0, 6);
+INSERT INTO `accounts` VALUES (1, '356a192b7913b04c54574d18c28d46e6395428ab', '1', 65535, 0, '', '0', 0, 0, 1);
+INSERT INTO `accounts` VALUES (2, '41da8bef22aaef9d7c5821fa0f0de7cccc4dda4d', 'tibia', 65535, 0, '', '0', 0, 0, 6);
 
 CREATE TABLE `players`
 (
@@ -109,8 +109,8 @@ CREATE TABLE `players`
 	FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
-INSERT INTO `players` VALUES (1, 'Account Manager', 0, 1, 1, 1, 0, 150, 150, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 50, 50, 7, '', 400, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 201660000, 0, 100, 100, 100, 100, 100, 0, 0, 0, 0, 0, '');
-INSERT INTO `players` VALUES (2, 'God Crystal', 0, 6, 2, 1, 0, 150, 150, 0, 0, 0, 0, 0, 300, 0, 0, 0, 0, 0, 0, 0, 50, 50, 7, '', 400, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 201660000, 0, 100, 100, 100, 100, 100, 0, 0, 0, 0, 0, '');
+INSERT INTO `players` VALUES (1, 'Account Manager', 0, 1, 1, 1, 0, 150, 150, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 1, 1000 1000, 7, '', 400, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 201660000, 0, 100, 100, 100, 100, 100, 0, 0, 0, 0, 0, '');
+INSERT INTO `players` VALUES (2, 'God Crystal', 0, 6, 2, 1, 0, 150, 150, 0, 0, 0, 0, 0, 300, 0, 0, 0, 0, 0, 0, 1, 1000, 1000, 7, '', 400, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 201660000, 0, 100, 100, 100, 100, 100, 0, 0, 0, 0, 0, '');
 
 CREATE TABLE `account_viplist`
 (

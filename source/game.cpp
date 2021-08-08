@@ -73,7 +73,7 @@ extern GlobalEvents* g_globalEvents;
 
 Game::Game()
 {
-	gameState = GAME_STATE_NORMAL;
+	gameState = GAMESTATE_NORMAL;
 	worldType = WORLDTYPE_OPEN;
 	map = NULL;
 	playersRecord = lastStageLevel = 0;
@@ -172,7 +172,7 @@ void Game::loadGameState()
 
 void Game::setGameState(GameState_t newState)
 {
-	if(gameState == GAME_STATE_SHUTDOWN)
+	if(gameState == GAMESTATE_SHUTDOWN)
 		return; //this cannot be stopped
 
 	if(gameState != newState)
@@ -180,7 +180,7 @@ void Game::setGameState(GameState_t newState)
 		gameState = newState;
 		switch(newState)
 		{
-			case GAME_STATE_INIT:
+			case GAMESTATE_INIT:
 			{
 				Spawns::getInstance()->startup();
 				Raids::getInstance()->loadFromXml();
@@ -199,9 +199,9 @@ void Game::setGameState(GameState_t newState)
 				break;
 			}
 
-			case GAME_STATE_SHUTDOWN:
+			case GAMESTATE_SHUTDOWN:
 			{
-				g_globalEvents->execute(GLOBAL_EVENT_SHUTDOWN);
+				g_globalEvents->execute(GLOBALEVENT_SHUTDOWN);
 				AutoList<Player>::iterator it = Player::autoList.begin();
 				while(it != Player::autoList.end()) //kick all players that are still online
 				{
@@ -218,7 +218,7 @@ void Game::setGameState(GameState_t newState)
 				break;
 			}
 
-			case GAME_STATE_CLOSED:
+			case GAMESTATE_CLOSED:
 			{
 				AutoList<Player>::iterator it = Player::autoList.begin();
 				while(it != Player::autoList.end()) //kick all players who not allowed to stay
@@ -236,10 +236,10 @@ void Game::setGameState(GameState_t newState)
 				break;
 			}
 
-			case GAME_STATE_NORMAL:
-			case GAME_STATE_MAINTAIN:
-			case GAME_STATE_STARTUP:
-			case GAME_STATE_CLOSING:
+			case GAMESTATE_NORMAL:
+			case GAMESTATE_MAINTAIN:
+			case GAMESTATE_STARTUP:
+			case GAMESTATE_CLOSING:
 			default:
 				break;
 		}
@@ -250,8 +250,8 @@ void Game::saveGameState(bool shallow)
 {
 	std::clog << "Saving server..." << std::endl;
 	uint64_t start = OTSYS_TIME();
-	if(gameState == GAME_STATE_NORMAL)
-		setGameState(GAME_STATE_MAINTAIN);
+	if(gameState == GAMESTATE_NORMAL)
+		setGameState(GAMESTATE_MAINTAIN);
 
 	IOLoginData* io = IOLoginData::getInstance();
 	for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
@@ -262,8 +262,8 @@ void Game::saveGameState(bool shallow)
 
 	map->saveMap();
 	ScriptEnviroment::saveGameState();
-	if(gameState == GAME_STATE_MAINTAIN)
-		setGameState(GAME_STATE_NORMAL);
+	if(gameState == GAMESTATE_MAINTAIN)
+		setGameState(GAMESTATE_NORMAL);
 
 	std::clog << "Save completed in " << (OTSYS_TIME() - start) / (1000.) << " seconds using "
 		<< asLowerCaseString(g_config.getString(ConfigManager::HOUSE_STORAGE))
@@ -284,8 +284,8 @@ void Game::cleanMap(uint32_t& count)
 	uint32_t tiles = 0; count = 0;
 
 	int32_t marked = -1;
-	if(gameState == GAME_STATE_NORMAL)
-		setGameState(GAME_STATE_MAINTAIN);
+	if(gameState == GAMESTATE_NORMAL)
+		setGameState(GAMESTATE_MAINTAIN);
 
 	Tile* tile = NULL;
 	ItemVector::iterator tit;
@@ -419,8 +419,8 @@ void Game::cleanMap(uint32_t& count)
 		}
 	}
 
-	if(gameState == GAME_STATE_MAINTAIN)
-		setGameState(GAME_STATE_NORMAL);
+	if(gameState == GAMESTATE_MAINTAIN)
+		setGameState(GAMESTATE_NORMAL);
 
 	std::clog << "CLEAN: Removed " << count << " item" << (count != 1 ? "s" : "")
 		<< " from " << tiles << " tile" << (tiles != 1 ? "s" : "");
@@ -5899,7 +5899,7 @@ void Game::checkPlayersRecord(Player* player)
 	if(count <= playersRecord)
 		return;
 
-	GlobalEventMap recordEvents = g_globalEvents->getEventMap(GLOBAL_EVENT_RECORD);
+	GlobalEventMap recordEvents = g_globalEvents->getEventMap(GLOBALEVENT_RECORD);
 	for(GlobalEventMap::iterator it = recordEvents.begin(); it != recordEvents.end(); ++it)
 		it->second->executeRecord(count, playersRecord, player);
 
@@ -5992,10 +5992,10 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 
 		case RELOAD_GROUPS:
 		{
-			//if(Groups::getInstance()->reload())
+			/*if(Groups::getInstance()->reload())
 				done = true;
-			//else
-			//	std::clog << "[Error - Game::reloadInfo] Failed to reload groups." << std::endl;
+			else
+				std::clog << "[Error - Game::reloadInfo] Failed to reload groups." << std::endl;*/
 
 			break;
 		}
@@ -6006,16 +6006,6 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 				done = true;
 			else
 				std::clog << "[Error - Game::reloadInfo] Failed to reload highscores." << std::endl;
-
-			break;
-		}
-
-		case RELOAD_HOUSEPRICES:
-		{
-			if(Houses::getInstance()->reloadPrices())
-				done = true;
-			else
-				std::clog << "[Error - Game::reloadInfo] Failed to reload house prices." << std::endl;
 
 			break;
 		}
@@ -6193,7 +6183,7 @@ void Game::prepareGlobalSave()
 {
 	if(!globalSaveMessage[0])
 	{
-		setGameState(GAME_STATE_CLOSING);
+		setGameState(GAMESTATE_CLOSING);
 		globalSaveMessage[0] = true;
 
 		broadcastMessage("Server is going down for a global save within 5 minutes. Please logout.", MSG_STATUS_WARNING);
@@ -6220,12 +6210,12 @@ void Game::globalSave()
 	if(g_config.getBool(ConfigManager::SHUTDOWN_AT_GLOBALSAVE))
 	{
 		//shutdown server
-		Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAME_STATE_SHUTDOWN)));
+		Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAMESTATE_SHUTDOWN)));
 		return;
 	}
 
 	//close server
-	Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAME_STATE_CLOSED)));
+	Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAMESTATE_CLOSED)));
 	//clean map if configured to
 	if(g_config.getBool(ConfigManager::CLEAN_MAP_AT_GLOBALSAVE))
 	{
@@ -6250,7 +6240,7 @@ void Game::globalSave()
 	//prepare for next global save after 24 hours
 	Scheduler::getInstance().addEvent(createSchedulerTask(86100000, boost::bind(&Game::prepareGlobalSave, this)));
 	//open server
-	Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAME_STATE_NORMAL)));
+	Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAMESTATE_NORMAL)));
 }
 
 void Game::shutdown()

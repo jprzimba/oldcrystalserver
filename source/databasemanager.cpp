@@ -1029,7 +1029,7 @@ uint32_t DatabaseManager::updateDatabase()
 			std::clog << "Updating database to version 24..." << std::endl;
 			query << "ALTER TABLE `guilds` ADD `checkdata` ";
 			if(db->getDatabaseEngine() == DATABASE_ENGINE_SQLITE)
-				query << "INTEGER NOT NULL;";
+				query << "INTEGER;";
 			else
 				query << "INT NOT NULL AFTER `creationdata`;";
 

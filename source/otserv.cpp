@@ -300,7 +300,7 @@ void otserv(StringVec, ServiceManager* services)
 	SetConsoleTitle(SOFTWARE_NAME);
 
 #endif
-	g_game.setGameState(GAME_STATE_STARTUP);
+	g_game.setGameState(GAMESTATE_STARTUP);
 #if !defined(WINDOWS) && !defined(__ROOT_PERMISSION__)
 	if(!getuid() || !geteuid())
 	{
@@ -594,7 +594,7 @@ void otserv(StringVec, ServiceManager* services)
 	}
 
 	std::clog << "Initializing game state and binding services..." << std::endl;
-	g_game.setGameState(GAME_STATE_INIT);
+	g_game.setGameState(GAMESTATE_INIT);
 
 	IPAddressList ipList;
 
@@ -685,7 +685,7 @@ void otserv(StringVec, ServiceManager* services)
 		std::clog << (*it) << "\t";
 
 	std::clog << std::endl << "Everything smells good, server is starting up..." << std::endl;
-	g_game.setGameState(GAME_STATE_NORMAL);
 	g_game.start(services);
+	g_game.setGameState(GAMESTATE_NORMAL);
 	g_loaderSignal.notify_all();
 }
