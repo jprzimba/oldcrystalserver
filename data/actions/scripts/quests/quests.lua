@@ -1,6 +1,6 @@
-function onUse(cid, item, frompos, item2, topos)
-local prize = item.uid
-local count = item.actionid
+function onUse(cid, item, fromPosition, itemEx, toPosition)
+	local prize = item.uid
+	local count = item.actionid
 	if prize > 0 and prize < 9000 then
 		local queststatus = getPlayerStorageValue(cid, prize)
 		if queststatus == -1 then
@@ -17,8 +17,8 @@ local count = item.actionid
 			doPlayerSendTextMessage(cid, MESSAGE_INFO_DESCR, "It is empty.")
 		end
 
-		return 1
+		return true
 	else
-		return 0
+		return false
 	end
 end

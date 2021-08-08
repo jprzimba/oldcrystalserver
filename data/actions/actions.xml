@@ -373,8 +373,26 @@
 	<action itemid="7735" event="script" value="other/spellwand.lua"/>
 	<action itemid="7537" script="other/spideregg.lua" />
 
-	<!-- Levers -->
-	<action uniqueid="7001" event="script" value="levers/arena_pvp.lua"/>
-	<action uniqueid="7002" event="script" value="levers/walllever.lua"/>
-	<action uniqueid="7003" event="script" value="levers/walllever2.lua"/>
+	<!-- Map -->
+	<action uniqueid="7001" event="script" value="map/levers/arena_pvp.lua"/>
+	<action uniqueid="7002" event="script" value="map/levers/walllever.lua"/>
+	<action uniqueid="7003" event="script" value="map/levers/walllever2.lua"/>
+	<action uniqueid="14030" event="script" value="map/levers/hydras_camp.lua"/>
+
+	<action itemid="1485" event="script" value="map/teleinferna.lua"/>
+
+	<action uniqueid="5000" event="script" value="map/quests/full_annilator.lua"/> 
+	<action uniqueid="5001" event="script" value="map/quests/full_annilator.lua"/> 
+	<action uniqueid="5002" event="script" value="map/quests/full_annilator.lua"/> 
+	<action uniqueid="5003" event="script" value="map/quests/full_annilator.lua"/> 
+	<action uniqueid="5004" event="script" value="map/quests/full_annilator.lua"/>
+
+	<action itemid="2709" event="script" value="map/quests/chest.lua"/>
+	<action itemid="2720" event="script" value="map/quests/chest.lua"/>
+	<action itemid="1413" event="script" value="map/quests/chest.lua"/>
+	<action itemid="1740" event="script" value="map/quests/chest.lua"/>
+	<action itemid="1747" event="script" value="map/quests/chest.lua"/>
+	<action itemid="1748" event="script" value="map/quests/chest.lua"/>
+	<action itemid="1749" event="script" value="map/quests/chest.lua"/>
+	<action itemid="1770" event="script" value="map/quests/chest.lua"/>
 </actions>

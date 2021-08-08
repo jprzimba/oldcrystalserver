@@ -1604,7 +1604,7 @@ void LuaInterface::registerFunctions()
 	//getTopCreature(pos)
 	lua_register(m_luaState, "getTopCreature", LuaInterface::luaGetTopCreature);
 
-	//doRemoveItem(uid[, count])
+	//doRemoveItem(uid[, count = -1])
 	lua_register(m_luaState, "doRemoveItem", LuaInterface::luaDoRemoveItem);
 
 	//doPlayerFeed(cid, food)

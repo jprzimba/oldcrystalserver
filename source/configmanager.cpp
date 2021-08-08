@@ -105,6 +105,9 @@ bool ConfigManager::load()
 		integer[MYSQL_WRITE_TIMEOUT] = getGlobalNumber("mysqlWriteTimeout", 10);
 		integer[WORLD_ID] = getGlobalNumber("worldId", 0);
 
+		#ifndef __LOGIN_SERVER__
+		boolean[LOGIN_ONLY_LOGINSERVER] = getGlobalBool("loginOnlyWithLoginServer", false);
+		#endif
 		boolean[GLOBALSAVE_ENABLED] = getGlobalBool("globalSaveEnabled", true);
 		boolean[TRUNCATE_LOGS] = getGlobalBool("truncateLogsOnStartup", true);
 		boolean[OPTIMIZE_DATABASE] = getGlobalBool("optimizeDatabaseAtStartup", true);
@@ -112,9 +115,6 @@ bool ConfigManager::load()
 		boolean[STORE_TRASH] = getGlobalBool("storeTrash", true);
 		boolean[EXPERIENCE_STAGES] = getGlobalBool("experienceStages", false);
 		boolean[GUILD_HALLS] = getGlobalBool("guildHalls", false);
-		#ifndef __LOGIN_SERVER__
-		boolean[LOGIN_ONLY_LOGINSERVER] = getGlobalBool("loginOnlyWithLoginServer", false);
-		#endif
 		boolean[BIND_ONLY_GLOBAL_ADDRESS] = getGlobalBool("bindOnlyGlobalAddress", false);
 	}
 
