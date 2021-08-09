@@ -377,6 +377,8 @@
 	<action uniqueid="7001" event="script" value="map/levers/arena_pvp.lua"/>
 	<action uniqueid="7002" event="script" value="map/levers/walllever.lua"/>
 	<action uniqueid="7003" event="script" value="map/levers/walllever2.lua"/>
+	<action uniqueid="7009" event="script" value="map/levers/morgaroth_lever.lua"/>
+	<action uniqueid="7041" event="script" value="map/levers/demon_helmet.lua"/>
 	<action uniqueid="14030" event="script" value="map/levers/hydras_camp.lua"/>
 	<action uniqueid="12151" event="script" value="map/levers/ferumbras_wall.lua"/>
 	<action uniqueid="12152" event="script" value="map/levers/ferumbras_wall2.lua"/>
@@ -391,6 +393,9 @@
 	<action uniqueid="5003" event="script" value="map/quests/full_annilator.lua"/> 
 	<action uniqueid="5004" event="script" value="map/quests/full_annilator.lua"/>
 	<action uniqueid="9010" event="script" value="map/quests/vocation_quest.lua"/>
+	<action uniqueid="6666" event="script" value="map/quests/ancient.lua"/>
+	<action uniqueid="6667" event="script" value="map/quests/ancient_full.lua"/>
+	<action uniqueid="6668" event="script" value="map/quests/ancient_full2.lua"/>
 
 	<action itemid="2709" event="script" value="map/quests/chest.lua"/>
 	<action itemid="2720" event="script" value="map/quests/chest.lua"/>
