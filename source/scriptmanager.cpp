@@ -306,3 +306,4 @@ bool ScriptingManager::loadFromXml(const std::string& file, bool& enabled)
 	xmlFreeDoc(doc);
 	return true;
 }
+

@@ -49,6 +49,7 @@ class TalkActions : public BaseEvents
 		inline TalkActionsMap::const_iterator getLastTalk() const {return talksMap.end();}
 
 	protected:
+ 		TalkAction* defaultTalkAction;
 		TalkActionsMap talksMap;
 
 		virtual std::string getScriptBaseName() const {return "talkactions";}

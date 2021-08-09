@@ -501,13 +501,17 @@ bool utf8ToLatin1(char* intext, std::string& outtext)
 	return true;
 }
 
-StringVec explodeString(const std::string& string, const std::string& separator)
+StringVec explodeString(const std::string& string, const std::string& separator, bool trim/* = true*/)
 {
 	StringVec returnVector;
 	size_t start = 0, end = 0;
 	while((end = string.find(separator, start)) != std::string::npos)
 	{
-		returnVector.push_back(string.substr(start, end - start));
+		std::string t = string.substr(start, end - start);
+		if(trim)
+			trimString(t);
+
+		returnVector.push_back(t);
 		start = end + separator.size();
 	}
 
