@@ -6,8 +6,6 @@
 	<action actionid="2000" event="script" value="quests/system.lua"/>
 	<action actionid="2001" event="script" value="quests/system.lua"/>
 	<action uniqueid="30015" event="script" value="quests/annihilator.lua"/>
-	<action itemid="1740" event="script" value="quests/quests.lua"/>
-	<action fromid="1747" toid="1749" event="script" value="quests/quests.lua"/>
 
 	<!-- Weapons enchanting (Gems) -->
 	<action itemid="2146" event="script" value="other/enchanting.lua"/>
@@ -397,12 +395,6 @@
 	<action uniqueid="6667" event="script" value="map/quests/ancient_full.lua"/>
 	<action uniqueid="6668" event="script" value="map/quests/ancient_full2.lua"/>
 
-	<action itemid="2709" event="script" value="map/quests/chest.lua"/>
-	<action itemid="2720" event="script" value="map/quests/chest.lua"/>
-	<action itemid="1413" event="script" value="map/quests/chest.lua"/>
-	<action itemid="1740" event="script" value="map/quests/chest.lua"/>
-	<action itemid="1747" event="script" value="map/quests/chest.lua"/>
-	<action itemid="1748" event="script" value="map/quests/chest.lua"/>
-	<action itemid="1749" event="script" value="map/quests/chest.lua"/>
-	<action itemid="1770" event="script" value="map/quests/chest.lua"/>
+	<action itemid="1740" event="script" value="map/quests/quests.lua"/>
+	<action fromid="1747" toid="1749" event="script" value="map/quests/quests.lua"/>
 </actions>
