@@ -1,6 +1,6 @@
 function onUse(cid, item, fromPosition, itemEx, toPosition)
-	wall1 = {x = 1496, y = 1488, z = 5, stackpos= STACKPOS_GROUND}
-	wall2 = {x = 1497, y = 1488, z = 5, stackpos= STACKPOS_GROUND}
+	wall1 = {x = 1496, y = 1488, z = 5, stackpos = 1}
+	wall2 = {x = 1497, y = 1488, z = 5, stackpos = 1}
 	getwall1 = getThingfromPos(wall1)
 	getwall2 = getThingfromPos(wall2)
 
