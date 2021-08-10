@@ -121,10 +121,7 @@ bool Actions::registerEvent(Event* event, xmlNodePtr p, bool override)
 		{
 			if(!override)
 			{
-				if(intVector[0] != ITEM_CHEST_1 && intVector[0] != ITEM_CHEST_2 && intVector[0] != ITEM_CHEST_3 && intVector[0] != ITEM_CHEST_4)
-				{
-    				std::clog << "[Warning - Actions::registerEvent] Duplicate registered item id: " << intVector[0] << std::endl;
-                }
+				std::clog << "[Warning - Actions::registerEvent] Duplicate registered item id: " << intVector[0] << std::endl;
 				success = false;
 			}
 			else
@@ -140,10 +137,7 @@ bool Actions::registerEvent(Event* event, xmlNodePtr p, bool override)
 			{
 				if(!override)
 				{
-    				if(intVector[0] != ITEM_CHEST_1 && intVector[0] != ITEM_CHEST_2 && intVector[0] != ITEM_CHEST_3 && intVector[0] != ITEM_CHEST_4)
-    				{
-        				std::clog << "[Warning - Actions::registerEvent] Duplicate registered item id: " << intVector[0] << std::endl;
-                    }
+        			std::clog << "[Warning - Actions::registerEvent] Duplicate registered item id: " << intVector[0] << std::endl;
 					continue;
 				}
 				else
