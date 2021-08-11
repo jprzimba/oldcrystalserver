@@ -397,4 +397,10 @@
 
 	<action itemid="1740" event="script" value="map/quests/quests.lua"/>
 	<action fromid="1747" toid="1749" event="script" value="map/quests/quests.lua"/>
+
+	<!-- Training room-doors -->
+	<action actionid="4211" event="script" value="map/training/room.lua"/> <!-- North -->
+	<action actionid="4212" event="script" value="map/training/room.lua"/> <!-- South -->
+	<action actionid="4213" event="script" value="map/training/room.lua"/> <!-- West -->
+	<action actionid="4214" event="script" value="map/training/room.lua"/> <!-- East -->
 </actions>
