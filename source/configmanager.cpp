@@ -31,7 +31,7 @@ ConfigManager::ConfigManager()
 	string[CONFIG_FILE] = getFilePath(FILE_TYPE_CONFIG, "config.lua");
 
 	integer[LOGIN_PORT] = integer[GAME_PORT] = integer[STATUS_PORT] = 0;
-	string[DATA_DIRECTORY] = string[LOGS_DIRECTORY] = string[IP] = string[RUNFILE] = string[OUT_LOG] = string[ENCRYPTION_KEY] = "";
+	string[DATA_DIRECTORY] = string[LOGS_DIRECTORY] = string[IP] = string[RUNFILE] = string[OUTPUT_LOG] = string[ENCRYPTION_KEY] = "";
 	boolean[LOGIN_ONLY_LOGINSERVER] = boolean[START_CLOSED] = false;
 	boolean[SCRIPT_SYSTEM] = true;
 }
@@ -53,7 +53,6 @@ bool ConfigManager::load()
 		return false;
 	}
 
-	//parse config
 	if(!m_loaded) //info that must be loaded one time (unless we reset the modules involved)
 	{
 		if(string[DATA_DIRECTORY] == "")
@@ -68,8 +67,8 @@ bool ConfigManager::load()
 		if(string[RUNFILE] == "")
 			string[RUNFILE] = getGlobalString("runFile", "");
 
-		if(string[OUT_LOG] == "")
-			string[OUT_LOG] = getGlobalString("outputLog", "");
+		if(string[OUTPUT_LOG] == "")
+			string[OUTPUT_LOG] = getGlobalString("outputLog", "");
 
 		if(integer[LOGIN_PORT] == 0)
 			integer[LOGIN_PORT] = getGlobalNumber("loginPort", 7171);
@@ -161,8 +160,8 @@ bool ConfigManager::load()
 	integer[PROTECTION_LEVEL] = getGlobalNumber("protectionLevel", 1);
 	integer[STATUSQUERY_TIMEOUT] = getGlobalNumber("statusTimeout", 5 * 60 * 1000);
 	integer[LEVEL_TO_FORM_GUILD] = getGlobalNumber("levelToFormGuild", 8);
-	integer[MIN_GUILDNAME] = getGlobalNumber("guildNameMinLength", 4);
-	integer[MAX_GUILDNAME] = getGlobalNumber("guildNameMaxLength", 20);
+	integer[MIN_GUILDNAME] = getGlobalNumber("minGuildNameLength", 4);
+	integer[MAX_GUILDNAME] = getGlobalNumber("maxGuildNameLength", 20);
 	integer[LEVEL_TO_BUY_HOUSE] = getGlobalNumber("levelToBuyHouse", 1);
 	integer[HOUSES_PER_ACCOUNT] = getGlobalNumber("housesPerAccount", 0);
 	integer[FIELD_OWNERSHIP] = getGlobalNumber("fieldOwnershipDuration", 5 * 1000);
@@ -219,12 +218,12 @@ bool ConfigManager::load()
 	integer[MANAGER_PASS_LENGTH] = getGlobalNumber("minPasswordLength", 6);
 	integer[MANAGER_ACCNAME_MIN_LENGTH] = getGlobalNumber("minAccountNameLength", 3);
 	integer[MANAGER_ACCNAME_MAX_LENGTH] = getGlobalNumber("maxAccountNameLength", 25);
-	integer[MANAGER_MIN_PLAYER_NAME_LENGTH] = getGlobalNumber("newCharacterMinNameLength", 3);
-	integer[MANAGER_MAX_PLAYER_NAME_LENGTH] = getGlobalNumber("newCharacterMaxNameLength", 25);
+	integer[MANAGER_MIN_PLAYER_NAME_LENGTH] = getGlobalNumber("minNewCharacterNameLength", 3);
+	integer[MANAGER_MAX_PLAYER_NAME_LENGTH] = getGlobalNumber("maxNewCharacterNameLength", 25);
 	integer[CRITICAL_HIT_CHANCE] = getGlobalNumber("criticalHitChance", 5);
 	integer[CRITICAL_COLOR] = getGlobalNumber("criticalHitColor", COLOR_TEAL);
-	integer[MIN_GUILD_NICK] = getGlobalNumber("guildNickMinLength", 2);
-	integer[MAX_GUILD_NICK] = getGlobalNumber("guildNickMaxLength", 25);
+	integer[MIN_GUILD_NICK] = getGlobalNumber("minGuildNickLength", 2);
+	integer[MAX_GUILD_NICK] = getGlobalNumber("maxGuildNickLength", 25);
 	integer[STAMINA_DESTROY_LOOT] = getGlobalNumber("staminaLootLimit", 14 * 60);
 	integer[VIPLIST_DEFAULT_LIMIT] = getGlobalNumber("vipListDefaultLimit", 20);
 	integer[VIPLIST_DEFAULT_PREMIUM_LIMIT] = getGlobalNumber("vipListDefaultPremiumLimit", 100);

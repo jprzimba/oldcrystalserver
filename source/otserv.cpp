@@ -138,7 +138,7 @@ bool argumentsHandler(StringVec args)
 			g_config.setString(ConfigManager::RUNFILE, tmp[1]);
 #endif
 		else if(tmp[0] == "--log")
-			g_config.setString(ConfigManager::OUT_LOG, tmp[1]);
+			g_config.setString(ConfigManager::OUTPUT_LOG, tmp[1]);
 		else if(tmp[0] == "--closed")
 			g_config.setBool(ConfigManager::START_CLOSED, true);
 		else if(tmp[0] == "--no-script")

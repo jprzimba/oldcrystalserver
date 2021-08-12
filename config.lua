@@ -9,8 +9,8 @@
 	minPasswordLength = 6
 	minAccountNameLength = 3
 	maxAccountNameLength = 25
-	newCharacterMinNameLength = 3
-	newCharacterMaxNameLength = 25
+	minNewCharacterNameLength = 3
+	maxNewCharacterNameLength = 25
 	newPlayerSpawnPosX = 438
 	newPlayerSpawnPosY = 503
 	newPlayerSpawnPosZ = 8
@@ -172,10 +172,10 @@
 	ingameGuildManagement = true
 	levelToFormGuild = 8
 	premiumDaysToFormGuild = 0
-	guildNameMinLength = 4
-	guildNameMaxLength = 20
-	guildNickMinLength = 3
-	guildNickMaxLength = 25
+	minGuildNameLength = 4
+	maxGuildNameLength = 20
+	minGuildNickLength = 3
+	maxGuildNickLength = 25
 
 	-- VIP list
 	separateVipListPerCharacter = false
