@@ -119,21 +119,6 @@ bool Tile::hasHeight(uint32_t n) const
 	return false;
 }
 
-bool Tile::isFull() const
-{
-	uint32_t limit = 0;
-	if(hasFlag(TILESTATE_PROTECTIONZONE))
-		limit = g_config.getNumber(ConfigManager::PROTECTION_TILE_LIMIT);
-	else
-		limit = g_config.getNumber(ConfigManager::TILE_LIMIT);
-
-	if(!limit)
-		limit = 0xFFFF;
-
-	const TileItemVector* items = getItemList();
-	return items && items->size() >= limit;
-}
-
 uint32_t Tile::getCreatureCount() const
 {
 	if(const CreatureVector* creatures = getCreatures())
@@ -553,7 +538,7 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 							continue;
 
 						if(!tmp->getMonster() || !tmp->isPushable() || tmp->isPlayerSummon())
-							return RET_NOTENOUGHROOM; //NOTPOSSIBLE
+							return RET_NOTPOSSIBLE;
 					}
 				}
 			}
@@ -576,26 +561,29 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 				&& (!(monster->canPushItems() || hasBitSet(FLAG_IGNOREBLOCKITEM, flags))))
 				return RET_NOTPOSSIBLE;
 
+			if(!items) // Do not seek for fields if there are no items
+				return RET_NOERROR;
+
 			MagicField* field = getFieldItem();
-			if(field && !field->isBlocking(monster))
-			{
-				CombatType_t combatType = field->getCombatType();
-				//There is 3 options for a monster to enter a magic field
-				//1) Monster is immune
-				if(!monster->isImmune(combatType))
-				{
-					//1) Monster is "strong" enough to handle the damage
-					//2) Monster is already afflicated by this type of condition
-					if(!hasBitSet(FLAG_IGNOREFIELDDAMAGE, flags))
-						return RET_NOTPOSSIBLE;
+			if(!field)
+				return RET_NOERROR;
 
-					if(!monster->canPushItems() && !monster->hasCondition(
-						Combat::DamageToConditionType(combatType), false))
-						return RET_NOTPOSSIBLE;
-				}
-			}
+			if(field->isBlocking(creature))
+				return RET_NOTPOSSIBLE;
 
-			return RET_NOERROR;
+			CombatType_t combatType = field->getCombatType();
+			//There is 3 options for a monster to enter a magic field
+			//1) Monster is immune
+			if(monster->isImmune(combatType))
+				return RET_NOERROR;
+
+			//1) Monster is "strong" enough to handle the damage
+			//2) Monster is already afflicated by this type of condition
+			if(!hasBitSet(FLAG_IGNOREFIELDDAMAGE, flags))
+				return RET_NOTPOSSIBLE;
+
+			return !monster->hasCondition(Combat::DamageToConditionType(combatType), -1, false)
+				&& !monster->canPushItems() ? RET_NOTPOSSIBLE : RET_NOERROR;
 		}
 		else if(const Player* player = creature->getPlayer())
 		{
@@ -671,14 +659,14 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 			std::clog << "[Notice - Tile::__queryAdd] thing->getParent() == NULL" << std::endl;
 
 #endif
+		if(items && items->size() >= 0xFFFF)
+			return RET_NOTPOSSIBLE;
+
 		if(hasBitSet(FLAG_NOLIMIT, flags))
 			return RET_NOERROR;
 
-		if(isFull())
-			return RET_TILEISFULL;
-
-		bool isHangable = item->isHangable();
-		if(!ground && !isHangable)
+		bool itemIsHangable = item->isHangable();
+		if(!ground && !itemIsHangable)
 			return RET_NOTPOSSIBLE;
 
 		if(creatures && !creatures->empty() && !hasBitSet(FLAG_IGNOREBLOCKCREATURE, flags))
@@ -690,33 +678,44 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 			}
 		}
 
-	bool hasHangable = false, supportHangable = false;
+		const uint32_t itemLimit = g_config.getNumber(hasFlag(TILESTATE_PROTECTIONZONE) ? ConfigManager::PROTECTION_TILE_LIMIT : ConfigManager::TILE_LIMIT);
+		if(itemLimit && getThingCount() > itemLimit)
+			return RET_TILEISFULL;
+
+		bool hasHangable = false, supportHangable = false;
 		if(items)
 		{
-			for(ItemVector::const_iterator it = items->begin(); it != items->end(); ++it)
+			Thing* iThing = NULL;
+			for(uint32_t i = 0; i < getThingCount(); ++i)
 			{
-				const ItemType& iType = Item::items[(*it)->getID()];
-				if(iType.isHangable)
-					hasHangable = true;
+				iThing = __getThing(i);
+				if(const Item* iItem = iThing->getItem())
+				{
+					const ItemType& iType = Item::items[iItem->getID()];
+					if(iType.isHangable)
+						hasHangable = true;
 
-				if(iType.isHorizontal || iType.isVertical)
-					supportHangable = true;
+					if(iType.isHorizontal || iType.isVertical)
+						supportHangable = true;
 
-				if((isHangable && (iType.isHorizontal || iType.isVertical)) || !(*it)->isBlocking(NULL))
-					continue;
+					if(itemIsHangable && (iType.isHorizontal || iType.isVertical))
+						continue;
+					else if(iItem->isBlocking(NULL))
+					{
+						if(!item->isPickupable())
+							return RET_NOTPOSSIBLE;
 
-				if(!item->isPickupable())
-					return RET_NOTPOSSIBLE;
+						if(iType.allowPickupable)
+							continue;
 
-				if(iType.allowPickupable)
-					continue;
-
-				if(!iType.hasHeight || iType.pickupable || iType.isBed())
-					return RET_NOTPOSSIBLE;
+						if(!iType.hasHeight || iType.pickupable || iType.isBed())
+							return RET_NOTPOSSIBLE;
+					}
+				}
 			}
 		}
 
-		if(isHangable && hasHangable && supportHangable)
+		if(itemIsHangable && hasHangable && supportHangable)
 			return RET_NEEDEXCHANGE;
 	}
 
@@ -738,7 +737,7 @@ ReturnValue Tile::__queryRemove(const Thing* thing, uint32_t count, uint32_t fla
 
 	const Item* item = thing->getItem();
 	if(!item || !count || (item->isStackable() && count > item->getItemCount())
-		|| (item->isNotMoveable() && !hasBitSet(FLAG_IGNORENOTMOVEABLE, flags)))
+		|| (!item->isMoveable() && !hasBitSet(FLAG_IGNORENOTMOVEABLE, flags)))
 		return RET_NOTPOSSIBLE;
 
 	return RET_NOERROR;

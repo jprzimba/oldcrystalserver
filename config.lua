@@ -33,6 +33,7 @@
 	mysqlReadTimeout = 10
 	mysqlWriteTimeout = 10
 	encryptionType = "sha1"
+	optimizeDatabaseAtStartup = true
 
 	-- Connection config
 	worldId = 0
@@ -134,7 +135,6 @@
 	useCapSystem = true
 	optionalWarAttackableAlly = false
 	fistBaseAttack = 7
-	classicEquipmentSlots = false
 
 	-- Spells
 	formulaLevel = 5.0
@@ -199,12 +199,14 @@
 	houseCleanOld = 0
 	guildHalls = false
 
-	-- Item usage
+	-- Item related
+	classicEquipmentSlots = false
 	timeBetweenActions = 200
 	timeBetweenExActions = 1000
 	checkCorpseOwner = true
 	hotkeyAimbotEnabled = true
 	maximumDoorLevel = 500
+	skipItemsVersionCheck = false
 
 	-- Map
 	-- NOTE: storeTrash costs more memory, but will perform alot faster cleaning.
@@ -212,7 +214,7 @@
 	mapAuthor = ""
 	randomizeTiles = true
 	storeTrash = true
-	cleanProtectedZones = true
+	cleanProtectedZones = false
 	mailboxDisabledTowns = "-1"
 	
 	-- Saving-related
@@ -221,16 +223,14 @@
 	houseDataStorage = "binary"
 	storePlayerDirection = false
 
-	-- Startup
+	-- Process
 	-- NOTE: defaultPriority works only on Windows and niceLevel on *nix
+	-- niceLevel works only on *nix systems
 	-- coresUsed are seperated by comma cores ids used by server process,
 	-- default is -1, so it stays untouched (automaticaly assigned by OS).
 	defaultPriority = "normal"
 	niceLevel = 5
 	coresUsed = "-1"
-	optimizeDatabaseAtStartup = true
-	removePremiumOnInit = true
-	skipItemsVersionCheck = false
 
 	-- Miscellaneous
 	-- NOTE: promptExceptionTracerErrorBox works only with precompiled support feature,
@@ -240,8 +240,6 @@
 	bankSystem = true
 	displaySkillLevelOnAdvance = false
 	promptExceptionTracerErrorBox = true
-	monsterLootMessage = 3
-	monsterLootMessageType = 25
 	maxMessageBuffer = 4
 
 	-- Ghost mode
@@ -260,6 +258,7 @@
 	-- Premium account
 	freePremium = false
 	premiumForPromotion = true
+	removePremiumOnInit = true
 
 	-- Outfits
 	allowChangeOutfit = true
@@ -291,6 +290,8 @@
 	rateMonsterMana = 1.0
 	rateMonsterAttack = 1.0
 	rateMonsterDefense = 1.0
+	monsterLootMessage = 3
+	monsterLootMessageType = 25
 
 	-- Experience from players
 	-- NOTE: min~Threshold* set to 0 will disable the minimum threshold:

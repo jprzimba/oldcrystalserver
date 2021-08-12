@@ -2863,10 +2863,10 @@ ReturnValue Player::__queryRemove(const Thing* thing, uint32_t count, uint32_t f
 	if(!item)
 		return RET_NOTPOSSIBLE;
 
-	if(count == 0 || (item->isStackable() && count > item->getItemCount()))
+	if(!count || (item->isStackable() && count > item->getItemCount()))
 		return RET_NOTPOSSIBLE;
 
-	 if(item->isNotMoveable() && !hasBitSet(FLAG_IGNORENOTMOVEABLE, flags))
+	 if(!item->isMoveable() && !hasBitSet(FLAG_IGNORENOTMOVEABLE, flags))
 		return RET_NOTMOVEABLE;
 
 	return RET_NOERROR;
@@ -2925,6 +2925,7 @@ Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** 
 				freeSlots.push_back(std::make_pair(this, i));
 		}
 
+		int32_t deepness = g_config.getNumber(ConfigManager::PLAYER_DEEPNESS);
 		while(!containers.empty())
 		{
 			Container* tmpContainer = containers.front().first;
@@ -2958,7 +2959,8 @@ Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** 
 							return container;
 						}
 
-						containers.push_back(std::make_pair(container, level + 1));
+						if(deepness < 0 || level < deepness)
+							containers.push_back(std::make_pair(container, level + 1));
 					}
 				}
 				else

@@ -719,7 +719,7 @@ bool Spell::playerInstantSpellCheck(Player* player, Creature* creature)
 	}
 
 	ReturnValue ret;
-	if((ret = Combat::canDoCombat(player, tile, isAggressive, false)) != RET_NOERROR)
+	if((ret = Combat::canDoCombat(player, tile, isAggressive)) != RET_NOERROR)
 	{
 		player->sendCancelMessage(ret);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -810,7 +810,7 @@ bool Spell::playerInstantSpellCheck(Player* player, const Position& toPos)
 	}
 
 	ReturnValue ret;
-	if((ret = Combat::canDoCombat(player, tile, isAggressive, false)) != RET_NOERROR)
+	if((ret = Combat::canDoCombat(player, tile, isAggressive)) != RET_NOERROR)
 	{
 		player->sendCancelMessage(ret);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -880,7 +880,7 @@ bool Spell::playerRuneSpellCheck(Player* player, const Position& toPos)
 	}
 
 	ReturnValue ret;
-	if((ret = Combat::canDoCombat(player, tile, isAggressive, false)) != RET_NOERROR)
+	if((ret = Combat::canDoCombat(player, tile, isAggressive)) != RET_NOERROR)
 	{
 		player->sendCancelMessage(ret);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -1740,7 +1740,7 @@ bool RuneSpell::Illusion(const RuneSpell* spell, Creature* creature, Item* item,
 	}
 
 	Item* illusionItem = thing->getItem();
-	if(!illusionItem || illusionItem->isNotMoveable())
+	if(!illusionItem || !illusionItem->isMoveable())
 	{
 		player->sendCancelMessage(RET_NOTPOSSIBLE);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -1748,16 +1748,15 @@ bool RuneSpell::Illusion(const RuneSpell* spell, Creature* creature, Item* item,
 	}
 
 	ReturnValue ret = CreateIllusion(creature, illusionItem->getID(), 60000);
-
 	if(ret == RET_NOERROR)
-		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_WRAPS_RED);
-	else
 	{
-		player->sendCancelMessage(ret);
-		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
+		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_WRAPS_RED);
+		return true;
 	}
 
-	return (ret == RET_NOERROR);
+	player->sendCancelMessage(ret);
+	g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
+	return false;
 }
 
 bool RuneSpell::Convince(const RuneSpell* spell, Creature* creature, Item* item, const Position& posFrom, const Position& posTo)
