@@ -1,5 +1,23 @@
 	-- Crystal Server
 
+	-- Account manager
+	accountManager = true
+	namelockManager = true
+	newPlayerChooseVoc = true
+	generateAccountNumber = false
+	generateAccountSalt = false
+	minPasswordLength = 6
+	minAccountNameLength = 3
+	maxAccountNameLength = 25
+	newCharacterMinNameLength = 3
+	newCharacterMaxNameLength = 25
+	newPlayerSpawnPosX = 438
+	newPlayerSpawnPosY = 503
+	newPlayerSpawnPosZ = 8
+	newPlayerTownId = 1
+	newPlayerLevel = 10
+	newPlayerMagicLevel = 0
+
 	-- Database
 	-- NOTE: sqlFile is used only by sqlite database, and sqlKeepAlive by mysql database.
 	-- To disable sqlKeepAlive such as mysqlReadTimeout use 0 value.
@@ -48,24 +66,6 @@
 	rsaPublic = "65537"
 	rsaModulus = "109120132967399429278860960508995541528237502902798129123468757937266291492576446330739696001110603907230888610072655818825358503429057592827629436413108566029093628212635953836686562675849720620786279431090218017681061521755056710823876476444260558147179707119674283982419152118103759076030616683978566631413"
 	rsaPrivate = "46730330223584118622160180015036832148732986808519344675210555262940258739805766860224610646919605860206328024326703361630109888417839241959507572247284807035235569619173792292786907845791904955103601652822519121908367187885509270025388641700821735345222087940578381210879116823013776808975766851829020659073"
-
-	-- Account manager
-	accountManager = true
-	namelockManager = true
-	newPlayerChooseVoc = true
-	generateAccountNumber = false
-	generateAccountSalt = false
-	minPasswordLength = 6
-	minAccountNameLength = 3
-	maxAccountNameLength = 25
-	newCharacterMinNameLength = 3
-	newCharacterMaxNameLength = 25
-	newPlayerSpawnPosX = 438
-	newPlayerSpawnPosY = 503
-	newPlayerSpawnPosZ = 8
-	newPlayerTownId = 1
-	newPlayerLevel = 8
-	newPlayerMagicLevel = 0
 
 	-- Unjustified kills
 	-- NOTE: *Banishment and *BlackSkull variables are >summed up<
