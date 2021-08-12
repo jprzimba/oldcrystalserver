@@ -10,4 +10,9 @@
 
 	<event type="think" name="Idle" event="script" value="idle.lua"/>
 	<event type="think" name="SkullCheck" event="script" value="skullcheck.lua"/>
+
+	<!-- Quests -->
+	<!-- Demon OAK -->
+	<event type="logout" name="demonOakLogout" event="script" value="quests/demon_oak/logout.lua"/>
+	<event type="death" name="demonOakDeath" event="script" value="quests/demon_oak/death.lua"/>
 </creaturescripts>

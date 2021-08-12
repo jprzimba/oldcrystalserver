@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="Adolfo" script="default.lua" walkinterval="2000" floorchange="0">
+	<health now="100" max="100"/>
+	<look type="128" head="109" body="109" legs="128" feet="127" addons="3"/>
+
+	<parameters>
+	<parameter key="message_greet" value="Hello |PLAYERNAME|, I sell {bags}, {backpacks}, {mace}, {chanin armor}, {wooden shield}, {brass shield}, {leather boots}, {brass helmet}, {leather helmet} and {torch}."/>
+		<parameter key="module_shop" value="1"/>
+		<parameter key="shop_buyable" value="bag,1987,10;backpack,1988,20;rope,2120,50;shovel,2554,50;mace,2398,30;chain armor,2464,60;wooden shield,2512,15;brass shield,2511,40;leather boots,2643,10;brass helmet,2460,25;leather helmet,2461,25;torch,2050,2"/>
+	</parameters>
+</npc>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="Roger" script="default.lua" walkinterval="2000" floorchange="0">
+	<health now="800" max="800"/>
+	<look type="143" head="78" body="99" legs="120" feet="120" addons="3"/>
+	<parameters>
+		<parameter key="module_shop" value="1"/>
+		<parameter key="shop_sellable" value="crossbow,2455,150;bow,2456,130"/>
+		<parameter key="shop_buyable" value="crossbow,2455,360;bow,2456,200;spear,2389,20;poison arrow,2545,18;bolt,2543,3;arrow,2544,2"/>
+	</parameters>
+</npc>

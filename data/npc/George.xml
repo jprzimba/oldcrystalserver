@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="George" script="default.lua" walkinterval="2000" floorchange="0">
+	<health now="100" max="100"/>
+	<look type="128" head="114" body="76" legs="38" feet="114" addons="0"/>
+
+	<parameters>
+	<parameter key="message_greet" value="Hello |PLAYERNAME|, I buy {dead rats} and {dead rabbits}."/>
+		<parameter key="module_shop" value="1"/>
+		<parameter key="shop_sellable" value="dead rabbits,2992,5;dead rats,2813,5"/>
+	</parameters>
+</npc>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="Junior" script="default.lua" walkinterval="2000" floorchange="0">
+	<health now="800" max="800"/>
+	<look type="134" head="96" body="114" legs="94" feet="114" addons="3"/>
+
+	<parameters>
+		<parameter key="module_shop" value="1" />
+		<parameter key="shop_buyable" value="parcel,2595,10;label,2599,5;letter,2597,10" />
+	</parameters>
+</npc>

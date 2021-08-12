@@ -1,9 +1,9 @@
 -- Dont change ids if you dont change it in map edito
 local ACTION_IDS = {
-	NORTH = 4211,
-	SOUTH = 4212,
-	WEST = 4213,
-	EAST = 4214
+	NORTH = 2017,
+	SOUTH = 2018,
+	WEST = 2019,
+	EAST = 2020
 }
 
 local emptyRoom = true -- dont change it
