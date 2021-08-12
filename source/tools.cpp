@@ -1786,48 +1786,47 @@ uint32_t adlerChecksum(uint8_t* data, size_t length)
 #endif
 }
 
-std::string getFilePath(FileType_t filetype, std::string filename)
+std::string getFilePath(FileType_t type, std::string name/* = ""*/)
 {
 	#ifdef __FILESYSTEM_HIERARCHY_STANDARD__
 	std::string path = "/usr/share/tcs/";
 	#endif
 	std::string path = g_config.getString(ConfigManager::DATA_DIRECTORY);
-	switch(filetype)
+	switch(type)
 	{
 		case FILE_TYPE_OTHER:
-			path += filename;
+			path += name;
 			break;
 		case FILE_TYPE_XML:
-			path += "XML/" + filename;
+			path += "XML/" + name;
 			break;
 		case FILE_TYPE_LOG:
 			#ifndef __FILESYSTEM_HIERARCHY_STANDARD__
-			path += "logs/" + filename;
+			path = g_config.getString(ConfigManager::LOGS_DIRECTORY) + name;
 			#else
-			path = "/var/log/tcs/" + filename;
+			path = "/var/log/tcs/" + name;
 			#endif
 			break;
 		case FILE_TYPE_MOD:
 		{
 			#ifndef __FILESYSTEM_HIERARCHY_STANDARD__
-			path = "data/mods/" + filename;
+			path = "data/mods/" + name;
 			#else
-			path = "/etc/tcs/mods/" + filename;
+			path = "/usr/share/tcs/mods/" + name;
 			#endif
 			break;
 		}
 		case FILE_TYPE_CONFIG:
 		{
-			#if defined(__FILESYSTEM_HIERARCHY_STANDARD__) && defined(__HOMEDIR_CONF__)
-			if(fileExists("~/.tcs/" + filename))
-				path = "~/.tcs/" + filename;
+			#if defined(__HOMEDIR_CONF__)
+			if(fileExists("~/.tcs/" + name))
+				path = "~/.tcs/" + name;
 			else
-				path = "/etc/tcs/" + filename;
-
-			#elif defined(__FILESYSTEM_HIERARCHY_STANDARD__)
-			path = "/etc/tcs/" + filename;
+			#endif
+			#if defined(__FILESYSTEM_HIERARCHY_STANDARD__)
+    			path = "/etc/tcs/" + name;
 			#else
-			path = filename;
+    			path = name;
 			#endif
 			break;
 		}

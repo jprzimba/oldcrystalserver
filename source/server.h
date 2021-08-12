@@ -129,7 +129,7 @@ bool ServiceManager::add(uint16_t port, IPAddressList ips)
 {
 	if(!port)
 	{
-		std::clog << "> ERROR: No port provided for service " << ProtocolType::protocolName() << ", service disabled." << std::endl;
+		std::clog << "ERROR: No port provided for service " << ProtocolType::protocolName() << ", service disabled." << std::endl;
 		return false;
 	}
 
@@ -146,7 +146,7 @@ bool ServiceManager::add(uint16_t port, IPAddressList ips)
 		servicePort = it->second;
 		if(servicePort->isSingleSocket() || ProtocolType::isSingleSocket)
 		{
-			std::clog << "> ERROR: " << ProtocolType::protocolName() << " and " << servicePort->getProtocolNames()
+			std::clog << "ERROR: " << ProtocolType::protocolName() << " and " << servicePort->getProtocolNames()
 				<< " cannot use the same port (" << port << ")." << std::endl;
 			return false;
 		}

@@ -6025,8 +6025,7 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 
 		case RELOAD_MODS:
 		{
-			std::clog << "Reloading mods..." << std::endl;
-			if(ScriptingManager::getInstance()->reloadMods())
+			if(ScriptManager::getInstance()->reloadMods())
 				done = true;
 			else
 				std::clog << "[Error - Game::reloadInfo] Failed to reload mods." << std::endl;
@@ -6125,10 +6124,10 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 
 		case RELOAD_VOCATIONS:
 		{
-			//if(Vocations::getInstance()->reload())
+			if(Vocations::getInstance()->reload())
 				done = true;
-			//else
-			//	std::clog << "[Notice - Game::reloadInfo] Reload type does not work." << std::endl;
+			else
+				std::clog << "[Notice - Game::reloadInfo] Reload type does not work." << std::endl;
 
 			break;
 		}
@@ -6160,6 +6159,9 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 		}
 	}
 
+	if(reload != RELOAD_MODS && !ScriptManager::getInstance()->reloadMods())
+		std::clog << "[Error - Game::reloadInfo] Failed to reload mods." << std::endl;
+
 	if(!playerId)
 		return done;
 
@@ -6173,7 +6175,11 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 		return true;
 	}
 
-	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Failed to reload.");
+	if(reload == RELOAD_ALL)
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Failed to reload some parts.");
+	else
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Failed to reload.");
+
 	return false;
 }
 

@@ -394,7 +394,7 @@ bool Vocations::parseVocationNode(xmlNodePtr p)
 
 bool Vocations::loadFromXml()
 {
-	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML,"vocations.xml").c_str());
+	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "vocations.xml").c_str());
 	if(!doc)
 	{
 		std::clog << "[Warning - Vocations::loadFromXml] Cannot load vocations file." << std::endl;

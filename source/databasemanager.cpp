@@ -183,7 +183,7 @@ uint32_t DatabaseManager::updateDatabase()
 			if(db->getDatabaseEngine() == DATABASE_ENGINE_SQLITE)
 			{
 				//TODO: 0.2 migration SQLite support
-				std::cerr << "> SQLite migration from 0.2 support not available, please use latest database!" << std::endl;
+				std::cerr << "SQLite migration from 0.2 support not available, please use latest database!" << std::endl;
 				return 1;
 			}
 
@@ -1151,7 +1151,7 @@ uint32_t DatabaseManager::updateDatabase()
 
 		case 26:
 		{
-			std::clog << "> Updating database to version 27..." << std::endl;
+			std::clog << "Updating database to version 27..." << std::endl;
 			switch(db->getDatabaseEngine())
 			{
 				case DATABASE_ENGINE_SQLITE:

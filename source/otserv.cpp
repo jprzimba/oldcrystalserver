@@ -139,6 +139,10 @@ bool argumentsHandler(StringVec args)
 #endif
 		else if(tmp[0] == "--log")
 			g_config.setString(ConfigManager::OUT_LOG, tmp[1]);
+		else if(tmp[0] == "--closed")
+			g_config.setBool(ConfigManager::START_CLOSED, true);
+		else if(tmp[0] == "--no-script")
+			g_config.setBool(ConfigManager::SCRIPT_SYSTEM, false);
 	}
 
 	return true;
@@ -228,7 +232,7 @@ void allocationHandler()
 void startupErrorMessage(std::string error = "")
 {
 	if(error.length() > 0)
-		std::clog << std::endl << "> ERROR: " << error << std::endl;
+		std::clog << std::endl << "ERROR: " << error << std::endl;
 
 	getch();
 	exit(-1);
@@ -304,7 +308,7 @@ void otserv(StringVec, ServiceManager* services)
 #if !defined(WINDOWS) && !defined(__ROOT_PERMISSION__)
 	if(!getuid() || !geteuid())
 	{
-		std::clog << "> WARNING: " << SOFTWARE_NAME << " has been executed as super user! It is "
+		std::clog << "WARNING: " << SOFTWARE_NAME << " has been executed as super user! It is "
 			<< "recommended to run as a normal user." << std::endl << "Continue? (y/N)" << std::endl;
 		char buffer = getch();
 		if(buffer != 121 && buffer != 89)
@@ -440,17 +444,17 @@ void otserv(StringVec, ServiceManager* services)
 	else if(encryptionType == "sha256")
 	{
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_SHA256);
-		std::clog << "> Using SHA256 encryption" << std::endl;
+		std::clog << "Using SHA256 encryption" << std::endl;
 	}
 	else if(encryptionType == "sha512")
 	{
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_SHA512);
-		std::clog << "> Using SHA512 encryption" << std::endl;
+		std::clog << "Using SHA512 encryption" << std::endl;
 	}
 	else if(encryptionType == "vahash")
 	{
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_VAHASH);
-		std::clog << "> Using VAHash encryption" << std::endl;
+		std::clog << "Using VAHash encryption" << std::endl;
 	}
 	else
 	{
@@ -496,7 +500,7 @@ void otserv(StringVec, ServiceManager* services)
 				if(!version)
 					break;
 
-				std::clog << "> Database has been updated to version: " << version << "." << std::endl;
+				std::clog << "Database has been updated to version: " << version << "." << std::endl;
 			}
 			while(version < VERSION_DATABASE);
 		}
@@ -506,7 +510,7 @@ void otserv(StringVec, ServiceManager* services)
 		DatabaseManager::getInstance()->checkTriggers();
 		DatabaseManager::getInstance()->checkEncryption();
 		if(g_config.getBool(ConfigManager::OPTIMIZE_DATABASE) && !DatabaseManager::getInstance()->optimizeTables())
-			std::clog << "> No tables were optimized." << std::endl;
+			std::clog << "No tables were optimized." << std::endl;
 	}
 	else
 		startupErrorMessage("Couldn't estabilish connection to SQL database!");
@@ -531,13 +535,28 @@ void otserv(StringVec, ServiceManager* services)
 	if(!Vocations::getInstance()->loadFromXml())
 		startupErrorMessage("Unable to load vocations!");
 
-	std::clog << "Loading script systems" << std::endl;
-	if(!ScriptingManager::getInstance()->load())
-		startupErrorMessage();
-
 	std::clog << "Loading chat channels" << std::endl;
 	if(!g_chat.loadFromXml())
 		startupErrorMessage("Unable to load chat channels!");
+
+	if(g_config.getBool(ConfigManager::SCRIPT_SYSTEM))
+	{
+		std::clog << "Loading script systems" << std::endl;
+		if(!ScriptManager::getInstance()->loadSystem())
+			startupErrorMessage();
+	}
+	else
+		ScriptManager::getInstance();
+
+	std::clog << "Loading mods..." << std::endl;
+	if(!ScriptManager::getInstance()->loadMods())
+		startupErrorMessage();
+
+	#ifdef __LOGIN_SERVER__
+	std::clog << "Loading game servers" << std::endl;
+	if(!GameServers::getInstance()->loadFromXml(true))
+		startupErrorMessage("Unable to load game servers!");
+	#endif
 
 	std::clog << "Loading outfits" << std::endl;
 	if(!Outfits::getInstance()->loadFromXml())
@@ -556,19 +575,9 @@ void otserv(StringVec, ServiceManager* services)
 			startupErrorMessage("Unable to load monsters!");
 	}
 
-	std::clog << "Loading mods..." << std::endl;
-	if(!ScriptingManager::getInstance()->loadMods())
-		startupErrorMessage();
-
 	std::clog << "Loading map and spawns..." << std::endl;
 	if(!g_game.loadMap(g_config.getString(ConfigManager::MAP_NAME)))
 		startupErrorMessage();
-
-	#ifdef __LOGIN_SERVER__
-	std::clog << "Loading game servers" << std::endl;
-	if(!GameServers::getInstance()->loadFromXml(true))
-		startupErrorMessage("Unable to load game servers!");
-	#endif
 
 	std::clog << "Checking world type... ";
 	std::string worldType = asLowerCaseString(g_config.getString(ConfigManager::WORLD_TYPE));
@@ -688,6 +697,6 @@ void otserv(StringVec, ServiceManager* services)
 
 	std::clog << std::endl << "Everything smells good, server is starting up..." << std::endl;
 	g_game.start(services);
-	g_game.setGameState(GAMESTATE_NORMAL);
+	g_game.setGameState(g_config.getBool(ConfigManager::START_CLOSED) ? GAMESTATE_CLOSED : GAMESTATE_NORMAL);
 	g_loaderSignal.notify_all();
 }

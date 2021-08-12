@@ -32,7 +32,8 @@ ConfigManager::ConfigManager()
 
 	integer[LOGIN_PORT] = integer[GAME_PORT] = integer[STATUS_PORT] = 0;
 	string[DATA_DIRECTORY] = string[LOGS_DIRECTORY] = string[IP] = string[RUNFILE] = string[OUT_LOG] = string[ENCRYPTION_KEY] = "";
-	boolean[LOGIN_ONLY_LOGINSERVER] = false;
+	boolean[LOGIN_ONLY_LOGINSERVER] = boolean[START_CLOSED] = false;
+	boolean[SCRIPT_SYSTEM] = true;
 }
 
 bool ConfigManager::load()
