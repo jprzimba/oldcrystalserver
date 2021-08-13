@@ -320,6 +320,8 @@ bool ConfigManager::load()
 	boolean[OPTIONAL_WAR_ATTACK_ALLY] = getGlobalBool("optionalWarAttackableAlly", false);
 	boolean[EXTERNAL_GUILD_WARS_MANAGEMENT] = getGlobalBool("externalGuildWarsManagement", false);
 	boolean[CLASSIC_EQUIPMENT_SLOTS] = getGlobalBool("classicEquipmentSlots", false);
+	boolean[EXP_COLOR_RANDOM] = getGlobalBool("randomExperienceColor", false);
+	boolean[HEAL_PLAYER_ON_LEVEL] = getGlobalBool("healPlayersOnLevelAdvance", true);
 
 	m_loaded = true;
 	return true;

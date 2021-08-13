@@ -4,8 +4,6 @@
 	accountManager = true
 	namelockManager = true
 	newPlayerChooseVoc = true
-	generateAccountNumber = false
-	generateAccountSalt = false
 	minPasswordLength = 6
 	minAccountNameLength = 3
 	maxAccountNameLength = 25
@@ -17,6 +15,39 @@
 	newPlayerTownId = 1
 	newPlayerLevel = 10
 	newPlayerMagicLevel = 0
+	generateAccountNumber = false
+	generateAccountSalt = false
+
+	-- Connection config
+	worldId = 0
+	ip = "127.0.0.1"
+	bindOnlyGlobalAddress = false
+	loginPort = 7171
+	gamePort = 7172
+	loginTries = 10
+	retryTimeout = 5 * 1000
+	loginTimeout = 60 * 1000
+	maxPlayers = 1000
+	motd = "Welcome to the Crystal Server!"
+	displayOnOrOffAtCharlist = false
+	onePlayerOnlinePerAccount = true
+	allowClones = false
+	serverName = "Crystal"
+	loginMessage = "Welcome to the Crystal Server!"
+	replaceKickOnLogin = true
+	forceSlowConnectionsToDisconnect = false
+	loginOnlyWithLoginServer = false
+	premiumPlayerSkipWaitList = false
+
+	-- RSA
+	-- NOTE: These should not be changed unless you know what your doing!
+	-- Prime1 - known as p; Prime2 - known as q; Public - known as e;
+	-- Modulus - known as n; Private - known as d.
+	rsaPrime1 = "14299623962416399520070177382898895550795403345466153217470516082934737582776038882967213386204600674145392845853859217990626450972452084065728686565928113"
+	rsaPrime2 = "7630979195970404721891201847792002125535401292779123937207447574596692788513647179235335529307251350570728407373705564708871762033017096809910315212884101"
+	rsaPublic = "65537"
+	rsaModulus = "109120132967399429278860960508995541528237502902798129123468757937266291492576446330739696001110603907230888610072655818825358503429057592827629436413108566029093628212635953836686562675849720620786279431090218017681061521755056710823876476444260558147179707119674283982419152118103759076030616683978566631413"
+	rsaPrivate = "46730330223584118622160180015036832148732986808519344675210555262940258739805766860224610646919605860206328024326703361630109888417839241959507572247284807035235569619173792292786907845791904955103601652822519121908367187885509270025388641700821735345222087940578381210879116823013776808975766851829020659073"
 
 	-- Database
 	-- NOTE: sqlFile is used only by sqlite database, and sqlKeepAlive by mysql database.
@@ -34,39 +65,6 @@
 	mysqlWriteTimeout = 10
 	encryptionType = "sha1"
 	optimizeDatabaseAtStartup = true
-
-	-- Connection config
-	worldId = 0
-	ip = "127.0.0.1"
-	bindOnlyGlobalAddress = false
-	loginPort = 7171
-	gamePort = 7172
-	statusPort = 7171
-	loginTries = 10
-	retryTimeout = 5 * 1000
-	loginTimeout = 60 * 1000
-	maxPlayers = 1000
-	motd = "Welcome to the Crystal Server!"
-	displayOnOrOffAtCharlist = false
-	onePlayerOnlinePerAccount = true
-	allowClones = false
-	serverName = "Crystal"
-	loginMessage = "Welcome to the Crystal Server!"
-	statusTimeout = 5 * 60 * 1000
-	replaceKickOnLogin = true
-	forceSlowConnectionsToDisconnect = false
-	loginOnlyWithLoginServer = false
-	premiumPlayerSkipWaitList = false
-
-	-- RSA
-	-- NOTE: These should not be changed unless you know what your doing!
-	-- Prime1 - known as p; Prime2 - known as q; Public - known as e;
-	-- Modulus - known as n; Private - known as d.
-	rsaPrime1 = "14299623962416399520070177382898895550795403345466153217470516082934737582776038882967213386204600674145392845853859217990626450972452084065728686565928113"
-	rsaPrime2 = "7630979195970404721891201847792002125535401292779123937207447574596692788513647179235335529307251350570728407373705564708871762033017096809910315212884101"
-	rsaPublic = "65537"
-	rsaModulus = "109120132967399429278860960508995541528237502902798129123468757937266291492576446330739696001110603907230888610072655818825358503429057592827629436413108566029093628212635953836686562675849720620786279431090218017681061521755056710823876476444260558147179707119674283982419152118103759076030616683978566631413"
-	rsaPrivate = "46730330223584118622160180015036832148732986808519344675210555262940258739805766860224610646919605860206328024326703361630109888417839241959507572247284807035235569619173792292786907845791904955103601652822519121908367187885509270025388641700821735345222087940578381210879116823013776808975766851829020659073"
 
 	-- Unjustified kills
 	-- NOTE: *Banishment and *BlackSkull variables are >summed up<
@@ -128,13 +126,14 @@
 	stairhopDelay = 2 * 1000
 	pushCreatureDelay = 2 * 1000
 	deathContainerId = 1987
+	randomExperienceColor = false
 	gainExperienceColor = 215
 	addManaSpentInPvPZone = true
 	squareColor = 0
 	allowFightback = true
-	useCapSystem = true
 	optionalWarAttackableAlly = false
 	fistBaseAttack = 7
+	healPlayersOnLevelAdvance = true
 
 	-- Spells
 	formulaLevel = 5.0
@@ -241,6 +240,7 @@
 	displaySkillLevelOnAdvance = false
 	promptExceptionTracerErrorBox = true
 	maxMessageBuffer = 4
+	useCapSystem = true
 
 	-- Ghost mode
 	ghostModeInvisibleEffect = false
@@ -353,6 +353,8 @@
 	ownerEmail = ""
 	url = ""
 	location = "Brazil"
+	statusPort = 7171
+	statusTimeout = 5 * 60 * 1000
 
 	-- Logs
 	-- NOTE: This kind of logging does not work in GUI version.

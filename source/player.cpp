@@ -1954,9 +1954,15 @@ void Player::addExperience(uint64_t exp)
 	{
 		updateBaseSpeed();
 		setBaseSpeed(getBaseSpeed());
-
 		g_game.changeSpeed(this, 0);
+
+		if(g_config.getBool(ConfigManager::HEAL_PLAYER_ON_LEVEL))
+		{
+			health = healthMax;
+			mana = manaMax;
+		}
 		g_game.addCreatureHealth(this);
+
 		if(getParty())
 			getParty()->updateSharedExperience();
 
