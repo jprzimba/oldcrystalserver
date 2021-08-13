@@ -83,17 +83,19 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 	enableXTEAEncryption();
 	setXTEAKey(key);
 
-	std::string name = msg.getString(), password = msg.getString();
-	if(name.empty())
+	std::string accountName = msg.getString(), password = msg.getString();
+	if(accountName.empty())
 	{
-		if(!g_config.getBool(ConfigManager::ACCOUNT_MANAGER))
+		if(g_config.getBool(ConfigManager::ACCOUNT_MANAGER))
 		{
-			disconnectClient(0x0A, "Invalid account name.");
+			accountName = "1";
+			password = "1";
+		}
+		else
+		{
+			disconnectClient(0x0A, "Invalid Account Name.");
 			return false;
 		}
-
-		name = "1";
-		password = "1";
 	}
 
 	if(version < CLIENT_VERSION_MIN || version > CLIENT_VERSION_MAX)
@@ -102,7 +104,7 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 		return false;
 	}
 
-	if(g_game.getGameState() < GAMESTATE_NORMAL)
+	if(g_game.getGameState() == GAMESTATE_STARTUP)
 	{
 		disconnectClient(0x0A, "Server is just starting up, please wait.");
 		return false;
@@ -127,7 +129,7 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 	}
 
 	uint32_t id = 1;
-	if(!IOLoginData::getInstance()->getAccountId(name, id))
+	if(!IOLoginData::getInstance()->getAccountId(accountName, id))
 	{
 		ConnectionManager::getInstance()->addAttempt(clientIp, protocolId, false);
 		disconnectClient(0x0A, "Invalid account name.");
@@ -167,6 +169,7 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 
 	//Remove premium days
 	IOLoginData::getInstance()->removePremium(account);
+
 	if(!g_config.getBool(ConfigManager::ACCOUNT_MANAGER) && !account.charList.size())
 	{
 		disconnectClient(0x0A, std::string("This account does not contain any character yet.\nCreate a new character on the "
@@ -175,14 +178,16 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 	}
 
 	ConnectionManager::getInstance()->addAttempt(clientIp, protocolId, true);
-	if(OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false))
+
+	OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false);
+	if(output)
 	{
 		TRACK_MESSAGE(output);
 		output->put<char>(0x14);
 
-		char motd[1300];
-		sprintf(motd, "%d\n%s", g_game.getMotdId(), g_config.getString(ConfigManager::MOTD).c_str());
-		output->putString(motd);
+		std::ostringstream ss;
+		ss << g_game.getMotdId() << "\n" << g_config.getString(ConfigManager::MOTD);
+		output->putString(ss.str());
 
 		uint32_t serverIp = serverIps.front().first;
 		for(std::list<std::pair<uint32_t, uint32_t> >::iterator it = serverIps.begin(); it != serverIps.end(); ++it)

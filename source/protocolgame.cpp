@@ -414,7 +414,7 @@ bool ProtocolGame::parseFirstPacket(NetworkMessage& msg)
 	setXTEAKey(key);
 
 	bool gamemaster = (msg.get<char>() != (char)0);
-	std::string name = msg.getString(), character = msg.getString(), password = msg.getString();
+	std::string accountName = msg.getString(), character = msg.getString(), password = msg.getString();
 
 	msg.skip(6); //841- wtf?
 	if(version < CLIENT_VERSION_MIN || version > CLIENT_VERSION_MAX)
@@ -423,19 +423,21 @@ bool ProtocolGame::parseFirstPacket(NetworkMessage& msg)
 		return false;
 	}
 
-	if(name.empty())
+	if(accountName.empty())
 	{
-		if(!g_config.getBool(ConfigManager::ACCOUNT_MANAGER))
+		if(g_config.getBool(ConfigManager::ACCOUNT_MANAGER))
 		{
-			disconnectClient(0x14, "Invalid account name.");
+			accountName = "1";
+			password = "1";
+		}
+		else
+		{
+			disconnectClient(0x14, "You must enter your account name.");
 			return false;
 		}
-
-		name = "1";
-		password = "1";
 	}
 
-	if(g_game.getGameState() < GAMESTATE_NORMAL)
+	if(g_game.getGameState() == GAMESTATE_STARTUP)
 	{
 		disconnectClient(0x14, "Gameworld is just starting up, please wait.");
 		return false;
@@ -460,7 +462,7 @@ bool ProtocolGame::parseFirstPacket(NetworkMessage& msg)
 	}
 
 	uint32_t id = 1;
-	if(!IOLoginData::getInstance()->getAccountId(name, id))
+	if(!IOLoginData::getInstance()->getAccountId(accountName, id))
 	{
 		ConnectionManager::getInstance()->addAttempt(getIP(), protocolId, false);
 		disconnectClient(0x14, "Invalid account name.");
@@ -502,6 +504,7 @@ bool ProtocolGame::parseFirstPacket(NetworkMessage& msg)
 	ConnectionManager::getInstance()->addAttempt(getIP(), protocolId, true);
 	Dispatcher::getInstance().addTask(createTask(boost::bind(
 		&ProtocolGame::login, this, character, id, password, operatingSystem, version, gamemaster)));
+
 	return true;
 }
 

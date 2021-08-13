@@ -322,6 +322,7 @@ bool ConfigManager::load()
 	boolean[CLASSIC_EQUIPMENT_SLOTS] = getGlobalBool("classicEquipmentSlots", false);
 	boolean[EXP_COLOR_RANDOM] = getGlobalBool("randomExperienceColor", false);
 	boolean[HEAL_PLAYER_ON_LEVEL] = getGlobalBool("healPlayersOnLevelAdvance", true);
+	boolean[ALWAYS_SHOW_MOTD] = getGlobalBool("alwaysShowMessageOfTheDay", false);
 
 	m_loaded = true;
 	return true;

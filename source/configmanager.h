@@ -292,6 +292,7 @@ class ConfigManager
 			CLASSIC_EQUIPMENT_SLOTS,
 			EXP_COLOR_RANDOM,
 			HEAL_PLAYER_ON_LEVEL,
+			ALWAYS_SHOW_MOTD,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

@@ -238,7 +238,6 @@ void Game::setGameState(GameState_t newState)
 
 			case GAMESTATE_NORMAL:
 			case GAMESTATE_MAINTAIN:
-			case GAMESTATE_STARTUP:
 			case GAMESTATE_CLOSING:
 			default:
 				break;
@@ -5865,8 +5864,11 @@ Highscore Game::getHighscore(uint16_t skill)
 
 int32_t Game::getMotdId()
 {
-	if(lastMotd == g_config.getString(ConfigManager::MOTD))
-		return lastMotdId;
+    if (!g_config.getBool(ConfigManager::ALWAYS_SHOW_MOTD))
+    {        
+    	if(lastMotd == g_config.getString(ConfigManager::MOTD))
+    		return lastMotdId;
+    }
 
 	lastMotd = g_config.getString(ConfigManager::MOTD);
 	Database* db = Database::getInstance();

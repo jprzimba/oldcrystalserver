@@ -28,6 +28,7 @@
 	retryTimeout = 5 * 1000
 	loginTimeout = 60 * 1000
 	maxPlayers = 1000
+	alwaysShowMessageOfTheDay = false
 	motd = "Welcome to the Crystal Server!"
 	displayOnOrOffAtCharlist = false
 	onePlayerOnlinePerAccount = true
