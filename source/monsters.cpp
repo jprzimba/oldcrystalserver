@@ -214,8 +214,8 @@ bool Monsters::loadFromXml(bool reloading /*= false*/)
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_OTHER, "monster/monsters.xml").c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Monsters::loadFromXml] Cannot load monsters file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Monsters::loadFromXml] Cannot load monsters file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 
@@ -911,7 +911,7 @@ bool Monsters::loadMonster(const std::string& file, const std::string& monsterNa
 	if(!doc)
 	{
 		std::clog << "[Warning - Monsters::loadMonster] Cannot load monster (" << monsterName << ") file (" << file << ")." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << getLastXMLError() << std::endl;
 		return false;
 	}
 

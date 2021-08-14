@@ -692,8 +692,8 @@ bool Houses::loadFromXml(std::string filename)
 	xmlDocPtr doc = xmlParseFile(filename.c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Houses::loadFromXml] Cannot load houses file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Houses::loadFromXml] Cannot load houses file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 
@@ -747,7 +747,7 @@ bool Houses::loadFromXml(std::string filename)
 		if(!entry.x || !entry.y)
 		{
 			std::clog << "[Warning - Houses::loadFromXml] House entry not set for: ";
-			std::cout << house->getName() << " (" << houseId << ")" << std::endl;
+			std::clog << house->getName() << " (" << houseId << ")" << std::endl;
 		}
 
 		if(readXMLString(houseNode, "name", strValue))

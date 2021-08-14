@@ -358,15 +358,15 @@ bool Items::loadFromXml()
 		paletteDoc = xmlParseFile(getFilePath(FILE_TYPE_OTHER, "items/randomization.xml").c_str());
 	if(!itemDoc)
 	{
-		std::clog << "[Warning - Items::loadFromXml] Cannot load items file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Items::loadFromXml] Cannot load items file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 
 	if(!paletteDoc)
 	{
-		std::clog << "[Warning - Items::loadFromXml] Cannot load randomization file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Items::loadFromXml] Cannot load randomization file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 
@@ -1805,7 +1805,7 @@ int32_t Items::getItemIdByName(const std::string& name)
 		ItemType* iType = NULL;
 		do
 		{
-			if((iType = items.getElement(i)) && !strcasecmp(name.c_str(), iType->name.c_str()))
+			if((iType = items.getElement(i)) && boost::algorithm::iequals(name, iType->name))
 				return i;
 
 			i++;

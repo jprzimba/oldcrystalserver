@@ -397,8 +397,8 @@ bool Vocations::loadFromXml()
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "vocations.xml").c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Vocations::loadFromXml] Cannot load vocations file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Vocations::loadFromXml] Cannot load vocations file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 
@@ -431,7 +431,7 @@ int32_t Vocations::getVocationId(const std::string& name)
 {
 	for(VocationsMap::iterator it = vocationsMap.begin(); it != vocationsMap.end(); ++it)
 	{
-		if(!strcasecmp(it->second->getName().c_str(), name.c_str()))
+		if(boost::algorithm::iequals(it->second->getName(), name))
 			return it->first;
 	}
 

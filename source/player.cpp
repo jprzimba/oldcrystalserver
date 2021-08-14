@@ -745,7 +745,7 @@ int32_t Player::getContainerID(const Container* container) const
 void Player::addContainer(uint32_t cid, Container* container)
 {
 #ifdef __DEBUG__
-	std::cout << getName() << ", addContainer: " << (int32_t)cid << std::endl;
+	std::clog << getName() << ", addContainer: " << (int32_t)cid << std::endl;
 #endif
 	if(cid > 0xF)
 		return;
@@ -774,7 +774,7 @@ void Player::closeContainer(uint32_t cid)
 	}
 #ifdef __DEBUG__
 
-	std::cout << getName() << ", closeContainer: " << (int32_t)cid << std::endl;
+	std::clog << getName() << ", closeContainer: " << (int32_t)cid << std::endl;
 #endif
 }
 
@@ -1419,7 +1419,7 @@ void Player::onCreatureAppear(const Creature* creature)
 		IOLoginData::getInstance()->updateOnlineStatus(guid, true);
 
 	if(g_config.getBool(ConfigManager::DISPLAY_LOGGING))
-		std::cout << name << " has logged in." << std::endl;
+		std::clog << name << " has logged in." << std::endl;
 }
 
 void Player::onAttackedCreatureDisappear(bool isLogout)
@@ -1515,7 +1515,7 @@ void Player::onCreatureDisappear(const Creature* creature, bool isLogout)
 		IOLoginData::getInstance()->updateOnlineStatus(guid, false);
 
 	if(g_config.getBool(ConfigManager::DISPLAY_LOGGING))
-		std::cout << getName() << " has logged out." << std::endl;
+		std::clog << getName() << " has logged out." << std::endl;
 
 	bool saved = false;
 	for(uint32_t tries = 0; !saved && tries < 3; ++tries)
@@ -4418,7 +4418,7 @@ bool Player::hasLearnedInstantSpell(const std::string& name) const
 
 	for(LearnedInstantSpellList::const_iterator it = learnedInstantSpellList.begin(); it != learnedInstantSpellList.end(); ++it)
 	{
-		if(!strcasecmp((*it).c_str(), name.c_str()))
+		if(boost::algorithm::iequals(*it, name))
 			return true;
 	}
 

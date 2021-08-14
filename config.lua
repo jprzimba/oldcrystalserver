@@ -177,6 +177,10 @@
 	minGuildNickLength = 3
 	maxGuildNickLength = 25
 
+	-- Depot
+	defaultDepotSizePremium = 2000
+	defaultDepotSize = 1000
+
 	-- VIP list
 	separateVipListPerCharacter = false
 	vipListDefaultLimit = 20

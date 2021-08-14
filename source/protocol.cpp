@@ -148,7 +148,7 @@ bool Protocol::XTEA_decrypt(NetworkMessage& msg)
 		if(ip)
 			std::clog << " (IP: " << convertIPAddress(ip) << ")";
 
-		std::cout << std::endl;
+		std::clog << std::endl;
 		return false;
 	}
 
@@ -182,7 +182,7 @@ bool Protocol::XTEA_decrypt(NetworkMessage& msg)
 		if(ip)
 			std::clog << " (IP: " << convertIPAddress(ip) << ")";
 
-		std::cout << std::endl;
+		std::clog << std::endl;
 		return false;
 	}
 

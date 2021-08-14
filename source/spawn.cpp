@@ -56,7 +56,7 @@ bool Spawns::loadFromXml(const std::string& _filename)
 	if(!doc)
 	{
 		std::clog << "[Warning - Spawns::loadFromXml] Cannot open spawns file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << getLastXMLError() << std::endl;
 		return false;
 	}
 

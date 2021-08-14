@@ -25,6 +25,8 @@
 extern Game g_game;
 extern ConfigManager g_config;
 
+LuaInterface ScriptEvent::m_interface("Raid Interface");
+
 Raids::Raids()
 {
 	running = NULL;
@@ -118,12 +120,12 @@ bool Raids::loadFromXml()
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_OTHER, "raids/raids.xml").c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Raids::loadFromXml] Could not load raids file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Raids::loadFromXml] Could not load raids file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 
-	xmlNodePtr raidNode, root = xmlDocGetRootElement(doc);
+	xmlNodePtr root = xmlDocGetRootElement(doc);
 	if(xmlStrcmp(root->name,(const xmlChar*)"raids"))
 	{
 		std::clog << "[Error - Raids::loadFromXml] Malformed raids file." << std::endl;
@@ -131,12 +133,8 @@ bool Raids::loadFromXml()
 		return false;
 	}
 
-	raidNode = root->children;
-	while(raidNode)
-	{
-		parseRaidNode(raidNode, false, FILE_TYPE_OTHER);
-		raidNode = raidNode->next;
-	}
+	for(xmlNodePtr p = root->children; p; p = p->next)
+		parseRaidNode(p, false, FILE_TYPE_OTHER);
 
 	xmlFreeDoc(doc);
 	loaded = true;
@@ -160,7 +158,7 @@ void Raids::checkRaids()
 {
 	checkRaidsEvent = Scheduler::getInstance().addEvent(createSchedulerTask(
 		CHECK_RAIDS_INTERVAL * 1000, boost::bind(&Raids::checkRaids, this)));
-	if(getRunning())
+	if(running)
 		return;
 
 	uint64_t now = OTSYS_TIME();
@@ -196,10 +194,10 @@ bool Raids::reload()
 Raid* Raids::getRaidByName(const std::string& name)
 {
 	RaidList::iterator it;
-	for(it = raidList.begin(); it != raidList.end(); it++)
+	for(it = raidList.begin(); it != raidList.end(); ++it)
 	{
-		if(!strcasecmp((*it)->getName().c_str(), name.c_str()))
-			return (*it);
+		if(boost::algorithm::iequals((*it)->getName(), name))
+			return *it;
 	}
 
 	return NULL;
@@ -222,8 +220,8 @@ Raid::Raid(const std::string& _name, uint32_t _interval, uint64_t _margin,
 Raid::~Raid()
 {
 	stopEvents();
-	for(RaidEventVector::iterator it = raidEvents.begin(); it != raidEvents.end(); it++)
-		delete (*it);
+	for(RaidEventVector::iterator it = raidEvents.begin(); it != raidEvents.end(); ++it)
+		delete *it;
 
 	raidEvents.clear();
 }
@@ -236,25 +234,23 @@ bool Raid::loadFromXml(const std::string& _filename)
 	xmlDocPtr doc = xmlParseFile(_filename.c_str());
 	if(!doc)
 	{
-		std::clog << "[Error - Raid::loadFromXml] Could not load raid file (" << _filename << ")." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Error - Raid::loadFromXml] Could not load raid file " << _filename
+			<< std::endl << std::clog << getLastXMLError() << std::endl;
 		return false;
 	}
 
-	xmlNodePtr root, eventNode;
-	root = xmlDocGetRootElement(doc);
+	xmlNodePtr root = xmlDocGetRootElement(doc);
 	if(xmlStrcmp(root->name,(const xmlChar*)"raid"))
 	{
-		std::clog << "[Error - Raid::loadFromXml] Malformed raid file (" << _filename << ")." << std::endl;
+		std::clog << "[Error - Raid::loadFromXml] Malformed raid file " << _filename << std::endl;
 		xmlFreeDoc(doc);
 		return false;
 	}
 
 	std::string strValue;
-	eventNode = root->children;
-	while(eventNode)
+	for(xmlNodePtr eventNode = root->children; eventNode; eventNode = eventNode->next)
 	{
-		RaidEvent* event;
+		RaidEvent* event = NULL;
 		if(!xmlStrcmp(eventNode->name, (const xmlChar*)"announce"))
 			event = new AnnounceEvent(this, ref);
 		else if(!xmlStrcmp(eventNode->name, (const xmlChar*)"effect"))
@@ -268,10 +264,7 @@ bool Raid::loadFromXml(const std::string& _filename)
 		else if(!xmlStrcmp(eventNode->name, (const xmlChar*)"script"))
 			event = new ScriptEvent(this, ref);
 		else
-		{
-			eventNode = eventNode->next;
 			continue;
-		}
 
 		if(!event->configureRaidEvent(eventNode))
 		{
@@ -280,8 +273,6 @@ bool Raid::loadFromXml(const std::string& _filename)
 		}
 		else
 			raidEvents.push_back(event);
-
-		eventNode = eventNode->next;
 	}
 
 	//sort by delay time
@@ -309,7 +300,7 @@ bool Raid::startRaid()
 
 bool Raid::executeRaidEvent(RaidEvent* raidEvent)
 {
-	if(!raidEvent->executeEvent())
+	if(!raidEvent->executeEvent(name))
 		return !resetRaid(false);
 
 	RaidEvent* newRaidEvent = getNextRaidEvent();
@@ -414,7 +405,7 @@ bool AnnounceEvent::configureRaidEvent(xmlNodePtr eventNode)
 	return true;
 }
 
-bool AnnounceEvent::executeEvent() const
+bool AnnounceEvent::executeEvent(const std::string&) const
 {
 	g_game.broadcastMessage(m_message, m_messageType);
 	return true;
@@ -479,7 +470,7 @@ bool EffectEvent::configureRaidEvent(xmlNodePtr eventNode)
 	return true;
 }
 
-bool EffectEvent::executeEvent() const
+bool EffectEvent::executeEvent(const std::string&) const
 {
 	g_game.addMagicEffect(m_position, m_effect);
 	return true;
@@ -550,7 +541,7 @@ bool ItemSpawnEvent::configureRaidEvent(xmlNodePtr eventNode)
 	return true;
 }
 
-bool ItemSpawnEvent::executeEvent() const
+bool ItemSpawnEvent::executeEvent(const std::string&) const
 {
 	if(m_chance < (uint32_t)random_range(0, (int32_t)MAX_ITEM_CHANCE))
 		return true;
@@ -671,7 +662,7 @@ bool SingleSpawnEvent::configureRaidEvent(xmlNodePtr eventNode)
 	return true;
 }
 
-bool SingleSpawnEvent::executeEvent() const
+bool SingleSpawnEvent::executeEvent(const std::string&) const
 {
 	Monster* monster = Monster::createMonster(m_monsterName);
 	if(!monster)
@@ -680,7 +671,7 @@ bool SingleSpawnEvent::executeEvent() const
 		return false;
 	}
 
-	if(!g_game.placeCreature(monster, m_position))
+	if(!g_game.placeCreature(monster, m_position, false, true))
 	{
 		delete monster;
 		std::clog << "[Error - SingleSpawnEvent::executeEvent] Cannot spawn monster " << m_monsterName << std::endl;
@@ -826,40 +817,37 @@ bool AreaSpawnEvent::configureRaidEvent(xmlNodePtr eventNode)
 		}
 	}
 
-	xmlNodePtr monsterNode = eventNode->children;
-	while(monsterNode)
+	for(xmlNodePtr monsterNode = eventNode->children; monsterNode; monsterNode = monsterNode->next)
 	{
-		if(!xmlStrcmp(monsterNode->name, (const xmlChar*)"monster"))
+		if(xmlStrcmp(monsterNode->name, (const xmlChar*)"monster"))
+			continue;
+
+		if(!readXMLString(monsterNode, "name", strValue))
 		{
-			if(!readXMLString(monsterNode, "name", strValue))
+			std::clog << "[Error - AreaSpawnEvent::configureRaidEvent] name tag missing for monster node." << std::endl;
+			return false;
+		}
+
+		std::string name = strValue;
+		int32_t min = 0, max = 0;
+		if(readXMLInteger(monsterNode, "min", intValue) || readXMLInteger(monsterNode, "minamount", intValue))
+			min = intValue;
+
+		if(readXMLInteger(monsterNode, "max", intValue) || readXMLInteger(monsterNode, "maxamount", intValue))
+			max = intValue;
+
+		if(!min && !max)
+		{
+			if(!readXMLInteger(monsterNode, "amount", intValue))
 			{
-				std::clog << "[Error - AreaSpawnEvent::configureRaidEvent] name tag missing for monster node." << std::endl;
+				std::clog << "[Error - AreaSpawnEvent::configureRaidEvent] amount tag missing for monster node." << std::endl;
 				return false;
 			}
 
-			std::string name = strValue;
-			int32_t min = 0, max = 0;
-			if(readXMLInteger(monsterNode, "min", intValue) || readXMLInteger(monsterNode, "maxamount", intValue))
-				min = intValue;
-
-			if(readXMLInteger(monsterNode, "max", intValue) || readXMLInteger(monsterNode, "maxamount", intValue))
-				max = intValue;
-
-			if(!min && !max)
-			{
-				if(!readXMLInteger(monsterNode, "amount", intValue))
-				{
-					std::clog << "[Error - AreaSpawnEvent::configureRaidEvent] amount tag missing for monster node." << std::endl;
-					return false;
-				}
-
-				min = max = intValue;
-			}
-
-			addMonster(name, min, max);
+			min = max = intValue;
 		}
 
-		monsterNode = monsterNode->next;
+		addMonster(name, min, max);
 	}
 
 	return true;
@@ -867,8 +855,8 @@ bool AreaSpawnEvent::configureRaidEvent(xmlNodePtr eventNode)
 
 AreaSpawnEvent::~AreaSpawnEvent()
 {
-	for(MonsterSpawnList::iterator it = m_spawnList.begin(); it != m_spawnList.end(); it++)
-		delete (*it);
+	for(MonsterSpawnList::iterator it = m_spawnList.begin(); it != m_spawnList.end(); ++it)
+		delete *it;
 
 	m_spawnList.clear();
 }
@@ -888,11 +876,14 @@ void AreaSpawnEvent::addMonster(const std::string& name, uint32_t min, uint32_t 
 	addMonster(monsterSpawn);
 }
 
-bool AreaSpawnEvent::executeEvent() const
+bool AreaSpawnEvent::executeEvent(const std::string&) const
 {
-	for(MonsterSpawnList::const_iterator it = m_spawnList.begin(); it != m_spawnList.end(); it++)
+	MonsterSpawn* spawn = NULL;
+	for(MonsterSpawnList::const_iterator it = m_spawnList.begin(); it != m_spawnList.end(); ++it)
 	{
-		MonsterSpawn* spawn = *it;
+		if(!(spawn = *it))
+			continue;
+
 		uint32_t amount = (uint32_t)random_range(spawn->min, spawn->max);
 		for(uint32_t i = 0; i < amount; ++i)
 		{
@@ -907,7 +898,7 @@ bool AreaSpawnEvent::executeEvent() const
 			for(int32_t t = 0; t < MAXIMUM_TRIES_PER_MONSTER; ++t)
 			{
 				if(!g_game.placeCreature(monster, Position(random_range(m_fromPos.x, m_toPos.x),
-					random_range(m_fromPos.y, m_toPos.y), random_range(m_fromPos.z, m_toPos.z))))
+					random_range(m_fromPos.y, m_toPos.y), random_range(m_fromPos.z, m_toPos.z)), true))
 					continue;
 
 				if(m_raid->usesRef() && m_ref)
@@ -927,8 +918,6 @@ bool AreaSpawnEvent::executeEvent() const
 
 	return true;
 }
-
-LuaInterface ScriptEvent::m_interface("Raid Interface");
 
 bool ScriptEvent::configureRaidEvent(xmlNodePtr eventNode)
 {
@@ -968,14 +957,17 @@ bool ScriptEvent::configureRaidEvent(xmlNodePtr eventNode)
 	return false;
 }
 
-bool ScriptEvent::executeEvent() const
+bool ScriptEvent::executeEvent(const std::string& name) const
 {
-	//onRaid()
+	//onRaid(name)
 	if(m_interface.reserveEnv())
 	{
 		ScriptEnviroment* env = m_interface.getEnv();
 		if(m_scripted == EVENT_SCRIPT_BUFFER)
 		{
+			std::stringstream scriptstream;
+			scriptstream << "local name = \"" << name << "\"" << std::endl;
+
 			bool result = true;
 			if(m_scriptData && m_interface.loadBuffer(*m_scriptData))
 			{
@@ -989,12 +981,15 @@ bool ScriptEvent::executeEvent() const
 		else
 		{
 			#ifdef __DEBUG_LUASCRIPTS__
-			env->setEventDesc("Raid event");
+			env->setEvent("Raid event");
 			#endif
 			env->setScriptId(m_scriptId, &m_interface);
-			m_interface.pushFunction(m_scriptId);
+			lua_State* L = m_interface.getState();
 
-			bool result = m_interface.callFunction(0);
+			m_interface.pushFunction(m_scriptId);
+			lua_pushstring(L, name.c_str());
+
+			bool result = m_interface.callFunction(1);
 			m_interface.releaseEnv();
 			return result;
 		}

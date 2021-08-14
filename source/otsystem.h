@@ -29,11 +29,13 @@
 #include <map>
 #include <limits>
 
+#include <boost/version.hpp>
 #include <boost/utility.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -43,8 +45,17 @@
 	#include <stdint.h>
 #endif
 
+#ifndef __x86_64__
+	#ifdef _M_X64 // msvc
+		#define __x86_64__ 1
+	#else
+		#define __x86_64__ 0
+	#endif
+#endif
+
 #include <ctime>
 #include <cassert>
+
 #ifdef WINDOWS
 	#include <windows.h>
 	#include <sys/timeb.h>
@@ -118,14 +129,14 @@ inline int64_t OTSYS_TIME()
 
 inline uint32_t swap_uint32(uint32_t val)
 {
-    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF ); 
-    return (val << 16) | (val >> 16);
+	val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
+	return (val << 16) | (val >> 16);
 }
 
 #if BOOST_VERSION < 104400
-	#define BOOST_DIR_ITER_FILENAME(iterator) (iterator)->path().filename()
+#define BOOST_DIR_ITER_FILENAME(iterator) (iterator)->path().filename()
 #else
-	#define BOOST_DIR_ITER_FILENAME(iterator) (iterator)->path().filename().string()
+#define BOOST_DIR_ITER_FILENAME(iterator) (iterator)->path().filename().string()
 #endif
 
 #define foreach BOOST_FOREACH

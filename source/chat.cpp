@@ -213,8 +213,8 @@ bool Chat::loadFromXml()
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "channels.xml").c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Chat::loadFromXml] Cannot load channels file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Chat::loadFromXml] Cannot load channels file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 

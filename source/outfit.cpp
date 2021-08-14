@@ -569,7 +569,7 @@ bool Outfits::loadFromXml()
 	if(!doc)
 	{
 		std::clog << "[Warning - Outfits::loadFromXml] Cannot load outfits file, using defaults." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << getLastXMLError() << std::endl;
 		return false;
 	}
 

@@ -109,12 +109,10 @@ class IOLoginData
 
 	protected:
 		IOLoginData() {}
+
 		struct StringCompareCase
 		{
-			bool operator()(const std::string& l, const std::string& r) const
-			{
-				return strcasecmp(l.c_str(), r.c_str()) < 0;
-			}
+			bool operator()(const std::string& l, const std::string& r) const {return asLowerCaseString(l).compare(asLowerCaseString(r)) < 0;}
 		};
 
 		typedef std::map<std::string, uint32_t, StringCompareCase> GuidCacheMap;

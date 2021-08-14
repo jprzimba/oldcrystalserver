@@ -47,8 +47,8 @@ bool Groups::loadFromXml()
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "groups.xml").c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Groups::loadFromXml] Cannot load groups file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Groups::loadFromXml] Cannot load groups file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 
@@ -143,7 +143,7 @@ int32_t Groups::getGroupId(const std::string& name)
 {
 	for(GroupsMap::iterator it = groupsMap.begin(); it != groupsMap.end(); ++it)
 	{
-		if(!strcasecmp(it->second->getName().c_str(), name.c_str()))
+		if(boost::algorithm::iequals(it->second->getName(), name))
 			return it->first;
 	}
 
@@ -155,7 +155,8 @@ uint32_t Group::getDepotLimit(bool premium) const
 	if(m_depotLimit > 0)
 		return m_depotLimit;
 
-	return (premium ? 2000 : 1000);
+	return (premium ? g_config.getNumber(ConfigManager::DEFAULT_DEPOT_SIZE_PREMIUM)
+		: g_config.getNumber(ConfigManager::DEFAULT_DEPOT_SIZE));
 }
 
 uint32_t Group::getMaxVips(bool premium) const

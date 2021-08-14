@@ -969,7 +969,7 @@ void LuaInterface::dumpStack(lua_State* L/* = NULL*/)
 
 	std::clog << "Stack size: " << stack << std::endl;
 	for(int32_t i = 1; i <= stack ; ++i)
-		std::cout << lua_typename(m_luaState, lua_type(m_luaState, -i)) << " " << lua_topointer(m_luaState, -i) << std::endl;
+		std::clog << lua_typename(m_luaState, lua_type(m_luaState, -i)) << " " << lua_topointer(m_luaState, -i) << std::endl;
 }
 
 void LuaInterface::pushVariant(lua_State* L, const LuaVariant& var)

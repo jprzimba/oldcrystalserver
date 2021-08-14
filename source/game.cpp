@@ -5668,13 +5668,18 @@ double Game::getExperienceStage(uint32_t level, double divider/* = 1.*/)
 bool Game::loadExperienceStages()
 {
 	if(!g_config.getBool(ConfigManager::EXPERIENCE_STAGES))
+	{
+		if(!stages.empty())
+			stages.clear();
+
 		return true;
+	}
 
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "stages.xml").c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Game::loadExperienceStages] Cannot load stages file." << std::endl;
-		std::cout << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Game::loadExperienceStages] Cannot load stages file."
+			<< std::endl << getLastXMLError() << std::endl;
 		return false;
 	}
 

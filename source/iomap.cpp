@@ -360,7 +360,7 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 								{
 									std::clog << "[Warning - IOMap::loadMap] Movable item in house: " << house->getId();
 									std::clog << ", item type: " << item->getID() << ", at position " << px << "/" << py << "/";
-									std::cout << pz << std::endl;
+									std::clog << pz << std::endl;
 
 									delete item;
 									item = NULL;
@@ -424,7 +424,7 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 								if(house && item->isMoveable())
 								{
 									std::clog << "[Warning - IOMap::loadMap] Movable item in house: ";
-									std::cout << house->getId() << ", item type: " << item->getID();
+									std::clog << house->getId() << ", item type: " << item->getID();
 									std::clog << ", pos " << px << "/" << py << "/" << pz << std::endl;
 
 									delete item;

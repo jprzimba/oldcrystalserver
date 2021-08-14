@@ -38,7 +38,7 @@ class ConfigManager
 			OWNER_EMAIL,
 			URL,
 			LOCATION,
-			IP,
+			IP_STRING,
 			MOTD,
 			WORLD_TYPE,
 			SQL_HOST,
@@ -179,6 +179,8 @@ class ConfigManager
 			VIPLIST_DEFAULT_LIMIT,
 			VIPLIST_DEFAULT_PREMIUM_LIMIT,
 			FIST_BASE_ATTACK,
+			DEFAULT_DEPOT_SIZE_PREMIUM,
+			DEFAULT_DEPOT_SIZE,
 			LAST_INTEGER_CONFIG /* this must be the last one */
 		};
 
@@ -337,9 +339,9 @@ class ConfigManager
 		bool m_loaded, m_startup;
 		lua_State* L;
 
-		std::string string[LAST_STRING_CONFIG];
-		bool boolean[LAST_BOOL_CONFIG];
-		int32_t integer[LAST_INTEGER_CONFIG];
-		double m_confDouble[LAST_DOUBLE_CONFIG];
+		std::string m_string[LAST_STRING_CONFIG];
+		bool m_boolean[LAST_BOOL_CONFIG];
+		int32_t m_integer[LAST_INTEGER_CONFIG];
+		double m_double[LAST_DOUBLE_CONFIG];
 };
 #endif
