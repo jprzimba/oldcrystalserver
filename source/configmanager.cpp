@@ -141,7 +141,8 @@ bool ConfigManager::load()
 	m_integer[PZ_LOCKED] = getGlobalNumber("pzLocked", 60 * 1000);
 	m_integer[HUNTING_DURATION] = getGlobalNumber("huntingDuration", 60 * 1000);
 	m_integer[ALLOW_CLONES] = getGlobalNumber("allowClones", 0);
-	m_integer[RATE_SPAWN] = getGlobalNumber("rateSpawn", 1);
+	m_integer[RATE_SPAWN_MIN] = getGlobalNumber("rateSpawnMin", 1);
+	m_integer[RATE_SPAWN_MAX] = getGlobalNumber("rateSpawnMax", 1);
 	m_integer[PARTY_RADIUS_X] = getGlobalNumber("experienceShareRadiusX", 30);
 	m_integer[PARTY_RADIUS_Y] = getGlobalNumber("experienceShareRadiusY", 30);
 	m_integer[PARTY_RADIUS_Z] = getGlobalNumber("experienceShareRadiusZ", 1);
@@ -326,6 +327,7 @@ bool ConfigManager::load()
 	m_boolean[HEAL_PLAYER_ON_LEVEL] = getGlobalBool("healPlayersOnLevelAdvance", true);
 	m_boolean[ALWAYS_SHOW_MOTD] = getGlobalBool("alwaysShowMessageOfTheDay", false);
 	m_boolean[PVPZONE_RECOVERMANA] = getGlobalBool("recoverManaAfterDeathInPvPZone", false);
+	m_boolean[ALLOW_BLOCK_SPAWN] = getGlobalBool("allowBlockSpawn", true);
 
 	m_loaded = true;
 	return true;

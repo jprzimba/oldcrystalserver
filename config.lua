@@ -345,7 +345,9 @@
 	cleanMapAtGlobalSave = false
 
 	-- Spawns
-	rateSpawn = 1
+	allowBlockSpawn = false
+	rateSpawnMin = 1
+	rateSpawnMax = 1
 	deSpawnRange = 2
 	deSpawnRadius = 50
 
