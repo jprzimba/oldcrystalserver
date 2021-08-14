@@ -1203,3 +1203,4 @@ PrivateChatChannel* Chat::getPrivateChannel(Player* player)
 
 	return NULL;
 }
+

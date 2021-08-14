@@ -712,15 +712,21 @@ bool LuaInterface::loadFile(const std::string& file, Npc* npc/* = NULL*/)
 	return true;
 }
 
-bool LuaInterface::loadDirectory(const std::string& dir, Npc* npc/* = NULL*/, bool recursively/* = false*/)
+bool LuaInterface::loadDirectory(std::string dir, bool recursively, bool loadSystems, Npc* npc/* = NULL*/)
 {
+	if(dir[dir.size() - 1] != '/')
+		dir += '/';
+
 	StringVec files;
 	for(boost::filesystem::directory_iterator it(dir), end; it != end; ++it)
 	{
-		std::string s = it->leaf();
+		std::string s = BOOST_DIR_ITER_FILENAME(it);
+		if(!loadSystems && s[0] == '_')
+			continue;
+
 		if(boost::filesystem::is_directory(it->status()))
 		{
-			if(recursively && !loadDirectory(it->path().filename() + "/" + s, npc, recursively))
+			if(recursively && !loadDirectory(dir + s, recursively, loadSystems, npc))
 				return false;
 		}
 		else if((s.size() > 4 ? s.substr(s.size() - 4) : "") == ".lua")
@@ -846,12 +852,11 @@ bool LuaInterface::initState()
 #endif
 
 	registerFunctions();
-	if(!loadDirectory(getFilePath(FILE_TYPE_OTHER, "lib/"), NULL))
+	if(!loadDirectory(getFilePath(FILE_TYPE_OTHER, "lib/"), false, true))
 		std::clog << "[Warning - LuaInterface::initState] Cannot load " << getFilePath(FILE_TYPE_OTHER, "lib/") << std::endl;
 
 	lua_newtable(m_luaState);
 	lua_setfield(m_luaState, LUA_REGISTRYINDEX, "EVENTS");
-
 	m_runningEvent = EVENT_ID_USER;
 	return true;
 }
@@ -2484,8 +2489,8 @@ const luaL_Reg LuaInterface::luaStdTable[] =
 	{"sha1", LuaInterface::luaStdSHA1},
 	{"sha256", LuaInterface::luaStdSHA256},
 	{"sha512", LuaInterface::luaStdSHA512},
-	{"vahash", LuaInterface::luaStdVAHash},
 
+	{"checkName", LuaInterface::luaStdCheckName},
 	{NULL, NULL}
 };
 
@@ -9988,15 +9993,19 @@ int32_t LuaInterface::luaL_domodlib(lua_State* L)
 
 int32_t LuaInterface::luaL_dodirectory(lua_State* L)
 {
-	//dodirectory(dir[, recursively = false])
-	bool recursively = false;
-	if(lua_gettop(L) > 1)
-		recursively = popNumber(L);
+	//dodirectory(dir[, recursively = false[, loadSystems = true]])
+	bool recursively = false, loadSystems = true;
+	int32_t params = lua_gettop(L);
+	if(params > 2)
+		loadSystems = popBoolean(L);
+
+	if(params > 1)
+		recursively = popBoolean(L);
 
 	std::string dir = popString(L);
-	if(!getEnv()->getInterface()->loadDirectory(dir, NULL, recursively))
+	if(!getEnv()->getInterface()->loadDirectory(dir, recursively, loadSystems, NULL))
 	{
-		errorEx("Failed to load directory " + dir + ".");
+		errorEx("Failed to load directory " + dir);
 		lua_pushboolean(L, false);
 	}
 	else
@@ -10076,14 +10085,14 @@ int32_t LuaInterface::luaStdSHA512(lua_State* L)
 	return 1;
 }
 
-int32_t LuaInterface::luaStdVAHash(lua_State* L)
+int32_t LuaInterface::luaStdCheckName(lua_State* L)
 {
-	//std.vahash(string[, upperCase = false])
-	bool upperCase = false;
+	//std.checkName(string[, forceUppercaseOnFirstLetter = true])
+	bool forceUppercaseOnFirstLetter = true;
 	if(lua_gettop(L) > 1)
-		upperCase = popNumber(L);
+		forceUppercaseOnFirstLetter = popBoolean(L);
 
-	lua_pushstring(L, transformToVAHash(popString(L), upperCase).c_str());
+	lua_pushboolean(L, isValidName(popString(L), forceUppercaseOnFirstLetter));
 	return 1;
 }
 

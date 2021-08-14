@@ -451,11 +451,6 @@ void otserv(StringVec, ServiceManager* services)
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_SHA512);
 		std::clog << "Using SHA512 encryption" << std::endl;
 	}
-	else if(encryptionType == "vahash")
-	{
-		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_VAHASH);
-		std::clog << "Using VAHash encryption" << std::endl;
-	}
 	else
 	{
 		g_config.setNumber(ConfigManager::ENCRYPTION, ENCRYPTION_PLAIN);

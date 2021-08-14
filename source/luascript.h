@@ -259,7 +259,7 @@ class LuaInterface
 
 		bool loadBuffer(const std::string& text, Npc* npc = NULL);
 		bool loadFile(const std::string& file, Npc* npc = NULL);
-		bool loadDirectory(const std::string& dir, Npc* npc = NULL, bool recursively = false);
+		bool loadDirectory(std::string dir, bool recursively, bool loadSystems, Npc* npc = NULL);
 
 		std::string getName() {return m_interfaceName;}
 		std::string getScript(int32_t scriptId);
@@ -710,7 +710,7 @@ class LuaInterface
 		static int32_t luaStdSHA1(lua_State* L);
 		static int32_t luaStdSHA256(lua_State* L);
 		static int32_t luaStdSHA512(lua_State* L);
-		static int32_t luaStdVAHash(lua_State* L);
+		static int32_t luaStdCheckName(lua_State* L);
 
 		lua_State* m_luaState;
 		bool m_errors;
