@@ -387,6 +387,9 @@ class Player : public Creature, public Cylinder
 			return shopOwner;
 		}
 
+		//Quest functions
+		void onUpdateQuest();
+
 		//V.I.P. functions
 		void notifyLogIn(Player* loginPlayer);
 		void notifyLogOut(Player* logoutPlayer);

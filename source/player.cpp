@@ -24,6 +24,7 @@
 #include "town.h"
 #include "house.h"
 #include "beds.h"
+#include "quests.h"
 
 #include "combat.h"
 #include "movement.h"
@@ -824,7 +825,15 @@ bool Player::setStorage(const std::string& key, const std::string& value)
 {
 	uint32_t numericKey = atol(key.c_str());
 	if(!IS_IN_KEYRANGE(numericKey, RESERVED_RANGE))
-		return Creature::setStorage(key, value);
+	{
+		if(!Creature::setStorage(key, value))
+			return false;
+
+		if(Quests::getInstance()->isQuestStorage(key, value, true))
+			onUpdateQuest();
+
+		return true;
+	}
 
 	if(IS_IN_KEYRANGE(numericKey, OUTFITS_RANGE))
 	{
@@ -5247,4 +5256,9 @@ void Player::sendCritical() const
 {
 	if(g_config.getBool(ConfigManager::DISPLAY_CRITICAL_HIT))
 		g_game.addAnimatedText(getPosition(), g_config.getNumber(ConfigManager::CRITICAL_COLOR), "CRITICAL!");
+}
+
+void Player::onUpdateQuest()
+{
+	sendTextMessage(MSG_EVENT_ADVANCE, "Your quest log has been updated.");
 }
