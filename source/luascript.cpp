@@ -2316,9 +2316,6 @@ void LuaInterface::registerFunctions()
 	//getConfigValue(key)
 	lua_register(m_luaState, "getConfigValue", LuaInterface::luaGetConfigValue);
 
-	//getModList()
-	lua_register(m_luaState, "getModList", LuaInterface::luaGetModList);
-
 	//getHighscoreString(skillId)
 	lua_register(m_luaState, "getHighscoreString", LuaInterface::luaGetHighscoreString);
 
@@ -2366,12 +2363,6 @@ void LuaInterface::registerFunctions()
 
 	//doUpdateHouseAuctions()
 	lua_register(m_luaState, "doUpdateHouseAuctions", LuaInterface::luaDoUpdateHouseAuctions);
-
-	//loadmodlib(lib)
-	lua_register(m_luaState, "loadmodlib", LuaInterface::luaL_loadmodlib);
-
-	//domodlib(lib)
-	lua_register(m_luaState, "domodlib", LuaInterface::luaL_domodlib);
 
 	//dodirectory(dir[, recursively = false])
 	lua_register(m_luaState, "dodirectory", LuaInterface::luaL_dodirectory);
@@ -9107,7 +9098,7 @@ int32_t LuaInterface::luaDoCleanMap(lua_State* L)
 {
 	//doCleanMap()
 	uint32_t count = 0;
-	g_game.cleanMap(count);
+	g_game.cleanMapEx(count);
 	lua_pushnumber(L, count);
 	return 1;
 }
@@ -9926,68 +9917,6 @@ int32_t LuaInterface::luaGetConfigValue(lua_State* L)
 {
 	//getConfigValue(key)
 	g_config.getValue(popString(L), L);
-	return 1;
-}
-
-int32_t LuaInterface::luaGetModList(lua_State* L)
-{
-	//getModList()
-	ModMap::iterator it = ScriptManager::getInstance()->getFirstMod();
-	lua_newtable(L);
-	for(uint32_t i = 1; it != ScriptManager::getInstance()->getLastMod(); ++it, ++i)
-	{
-		createTable(L, i);
-		setField(L, "name", it->first);
-		setField(L, "description", it->second.description);
-		setField(L, "file", it->second.file);
-
-		setField(L, "version", it->second.version);
-		setField(L, "author", it->second.author);
-		setField(L, "contact", it->second.contact);
-
-		setFieldBool(L, "enabled", it->second.enabled);
-		pushTable(L);
-	}
-
-	return 1;
-}
-
-int32_t LuaInterface::luaL_loadmodlib(lua_State* L)
-{
-	//loadmodlib(lib)
-	std::string name = asLowerCaseString(popString(L));
-	for(LibMap::iterator it = ScriptManager::getInstance()->getFirstLib();
-		it != ScriptManager::getInstance()->getLastLib(); ++it)
-	{
-		if(asLowerCaseString(it->first) != name)
-			continue;
-
-		luaL_loadstring(L, it->second.second.c_str());
-		lua_pushvalue(L, -1);
-		break;
-	}
-
-	return 1;
-}
-
-int32_t LuaInterface::luaL_domodlib(lua_State* L)
-{
-	//domodlib(lib)
-	std::string name = asLowerCaseString(popString(L));
-	for(LibMap::iterator it = ScriptManager::getInstance()->getFirstLib();
-		it != ScriptManager::getInstance()->getLastLib(); ++it)
-	{
-		if(asLowerCaseString(it->first) != name)
-			continue;
-
-		bool ret = luaL_dostring(L, it->second.second.c_str());
-		if(ret)
-			error(NULL, popString(L));
-
-		lua_pushboolean(L, !ret);
-		break;
-	}
-
 	return 1;
 }
 

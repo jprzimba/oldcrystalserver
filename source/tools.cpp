@@ -1620,15 +1620,6 @@ std::string getFilePath(FileType_t type, std::string name/* = ""*/)
 			path = "/var/log/tcs/" + name;
 			#endif
 			break;
-		case FILE_TYPE_MOD:
-		{
-			#ifndef __FILESYSTEM_HIERARCHY_STANDARD__
-			path = "data/mods/" + name;
-			#else
-			path = "/usr/share/tcs/mods/" + name;
-			#endif
-			break;
-		}
 		case FILE_TYPE_CONFIG:
 		{
 			#if defined(__HOMEDIR_CONF__)

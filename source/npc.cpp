@@ -75,12 +75,6 @@ Npc::Npc(const std::string& _name):
 	npcCount++;
 #endif
 	m_filename = getFilePath(FILE_TYPE_OTHER, "npc/" + _name + ".xml");
-	if(!fileExists(m_filename.c_str()))
-	{
-		std::string tmp = getFilePath(FILE_TYPE_MOD, "npc/" + _name + ".xml");
-		if(fileExists(tmp.c_str()))
-			m_filename = tmp;
-	}
 
 	m_npcEventHandler = NULL;
 	loaded = false;
@@ -343,7 +337,6 @@ bool Npc::loadFromXml(const std::string& filename)
 		return true;
 
 	replaceString(scriptfile, "|DATA|", getFilePath(FILE_TYPE_OTHER, "npc/scripts"));
-	replaceString(scriptfile, "|MODS|", getFilePath(FILE_TYPE_MOD, "npc"));
 	if(scriptfile.find("/") == std::string::npos)
 		scriptfile = getFilePath(FILE_TYPE_OTHER, "npc/scripts/" + scriptfile);
 
@@ -375,6 +368,8 @@ uint32_t Npc::loadParams(xmlNodePtr node)
 				params |= RESPOND_LOWAMOUNT;
 			else if(tmpParam == "premium")
 				params |= RESPOND_PREMIUM;
+			else if(tmpParam == "promoted")
+				params |= RESPOND_PROMOTED;
 			else if(tmpParam == "druid")
 				params |= RESPOND_DRUID;
 			else if(tmpParam == "knight")
@@ -1963,13 +1958,27 @@ const NpcResponse* Npc::getResponse(const ResponseList& list, const Player* play
 				++matchCount;
 			}
 
+			if(hasBitSet(RESPOND_PROMOTED, params))
+			{
+				Vocation* tmpVoc = player->vocation;
+
+				if(tmpVoc->getId() == VOCATION_NONE ||
+				tmpVoc->getId() == VOCATION_SORCERER ||
+				tmpVoc->getId() == VOCATION_DRUID ||
+				tmpVoc->getId() == VOCATION_KNIGHT ||
+				tmpVoc->getId() == VOCATION_PALADIN)
+					continue;
+
+				++matchCount;
+			}
+
 			if(hasBitSet(RESPOND_DRUID, params))
 			{
 				Vocation* tmpVoc = player->vocation;
 				for(uint32_t i = 0; i <= player->promotionLevel; i++)
 					tmpVoc = Vocations::getInstance()->getVocation(tmpVoc->getFromVocation());
 
-				if(tmpVoc->getId() != 2)
+				if(tmpVoc->getId() != VOCATION_DRUID)
 					continue;
 
 				++matchCount;
@@ -1981,7 +1990,7 @@ const NpcResponse* Npc::getResponse(const ResponseList& list, const Player* play
 				for(uint32_t i = 0; i <= player->promotionLevel; i++)
 					tmpVoc = Vocations::getInstance()->getVocation(tmpVoc->getFromVocation());
 
-				if(tmpVoc->getId() != 4)
+				if(tmpVoc->getId() != VOCATION_KNIGHT)
 					continue;
 
 				++matchCount;
@@ -1993,7 +2002,7 @@ const NpcResponse* Npc::getResponse(const ResponseList& list, const Player* play
 				for(uint32_t i = 0; i <= player->promotionLevel; i++)
 					tmpVoc = Vocations::getInstance()->getVocation(tmpVoc->getFromVocation());
 
-				if(tmpVoc->getId() != 3)
+				if(tmpVoc->getId() != VOCATION_PALADIN)
 					continue;
 
 				++matchCount;
@@ -2005,7 +2014,7 @@ const NpcResponse* Npc::getResponse(const ResponseList& list, const Player* play
 				for(uint32_t i = 0; i <= player->promotionLevel; i++)
 					tmpVoc = Vocations::getInstance()->getVocation(tmpVoc->getFromVocation());
 
-				if(tmpVoc->getId() != 1)
+				if(tmpVoc->getId() != VOCATION_SORCERER)
 					continue;
 
 				++matchCount;

@@ -274,10 +274,14 @@ int32_t Game::loadMap(std::string filename)
 	if(!map)
 		map = new Map;
 
-	return map->loadMap(getFilePath(FILE_TYPE_OTHER, std::string("world/" + filename + ".otbm")));
+	std::string file = getFilePath(FILE_TYPE_CONFIG, "world/" + filename);
+	if(!fileExists(file.c_str()))
+		file = getFilePath(FILE_TYPE_OTHER, "world/" + filename);
+
+	return map->loadMap(file);
 }
 
-void Game::cleanMap(uint32_t& count)
+void Game::cleanMapEx(uint32_t& count)
 {
 	uint64_t start = OTSYS_TIME();
 	uint32_t tiles = 0; count = 0;
@@ -428,6 +432,13 @@ void Game::cleanMap(uint32_t& count)
 
 	std::clog << " in " << (OTSYS_TIME() - start) / (1000.) << " seconds." << std::endl;
 }
+
+void Game::cleanMap()
+{
+	uint32_t dummy;
+	cleanMapEx(dummy);
+}
+
 
 void Game::proceduralRefresh(RefreshTiles::iterator* it/* = NULL*/)
 {
@@ -6030,16 +6041,6 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 			break;
 		}
 
-		case RELOAD_MODS:
-		{
-			if(ScriptManager::getInstance()->reloadMods())
-				done = true;
-			else
-				std::clog << "[Error - Game::reloadInfo] Failed to reload mods." << std::endl;
-
-			break;
-		}
-
 		case RELOAD_MONSTERS:
 		{
 			if(g_monsters.reload())
@@ -6166,9 +6167,6 @@ bool Game::reloadInfo(ReloadInfo_t reload, uint32_t playerId/* = 0*/)
 		}
 	}
 
-	if(reload != RELOAD_MODS && !ScriptManager::getInstance()->reloadMods())
-		std::clog << "[Error - Game::reloadInfo] Failed to reload mods." << std::endl;
-
 	if(!playerId)
 		return done;
 
@@ -6236,10 +6234,7 @@ void Game::globalSave()
 	Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAMESTATE_CLOSED)));
 	//clean map if configured to
 	if(g_config.getBool(ConfigManager::CLEAN_MAP_AT_GLOBALSAVE))
-	{
-		uint32_t dummy;
-		cleanMap(dummy);
-	}
+		cleanMap();
 
 	//pay houses
 	Houses::getInstance()->payHouses();

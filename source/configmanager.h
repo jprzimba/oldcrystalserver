@@ -295,6 +295,7 @@ class ConfigManager
 			EXP_COLOR_RANDOM,
 			HEAL_PLAYER_ON_LEVEL,
 			ALWAYS_SHOW_MOTD,
+			PVPZONE_RECOVERMANA,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

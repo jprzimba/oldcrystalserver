@@ -68,6 +68,7 @@
 	<talkaction words="!serverinfo;/serverinfo" event="script" value="serverinfo.lua"/>
 	<talkaction words="!commands;/commands" event="script" value="commands.lua"/>
 	<talkaction words="!software;/software" event="function" value="software"/>
+	<talkaction words="!buypremium" event="script" value="buypremium.lua"/>
 
 	<!-- Houses -->
 	<talkaction words="!buyhouse;/buyhouse;alana res" filter="word-spaced" event="function" value="houseBuy"/>

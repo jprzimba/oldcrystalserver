@@ -73,6 +73,12 @@ class Vocation
 		bool isPremiumNeeded() const {return needPremium;}
 		void setNeedPremium(bool v) {needPremium = v;}
 
+		bool getDropLoot() const {return dropLoot;}
+		void setDropLoot(bool v) {dropLoot = v;}
+
+		bool getLossSkill() const {return skillLoss;}
+		void setLossSkill(bool v) {skillLoss = v;}
+
 		uint32_t getAttackSpeed() const {return attackSpeed;}
 		void setAttackSpeed(uint32_t v) {attackSpeed = v;}
 
@@ -115,7 +121,7 @@ class Vocation
 		cacheMap cacheSkill[SKILL_LAST + 1];
 		cacheMap cacheMana;
 
-		bool attackable, needPremium;
+		bool attackable, needPremium, dropLoot, skillLoss;
 		int32_t lessLoss, capGain;
 		uint32_t id, fromVocation, baseSpeed, attackSpeed;
 		std::string name, description;

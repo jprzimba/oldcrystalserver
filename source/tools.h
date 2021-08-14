@@ -44,8 +44,7 @@ enum FileType_t
 	FILE_TYPE_XML,
 	FILE_TYPE_LOG,
 	FILE_TYPE_OTHER,
-	FILE_TYPE_CONFIG,
-	FILE_TYPE_MOD
+	FILE_TYPE_CONFIG
 };
 
 std::string transformToMD5(std::string plainText, bool upperCase);

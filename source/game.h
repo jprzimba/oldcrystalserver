@@ -101,8 +101,7 @@ enum ReloadInfo_t
 	RELOAD_TALKACTIONS = 19,
 	RELOAD_VOCATIONS = 20,
 	RELOAD_WEAPONS = 21,
-	RELOAD_MODS = 22,
-	RELOAD_ALL = 23,
+	RELOAD_ALL = 22,
 	RELOAD_LAST = RELOAD_WEAPONS
 };
 
@@ -569,7 +568,9 @@ class Game
 		void saveGameState(bool shallow);
 		void loadGameState();
 
-		void cleanMap(uint32_t& count);
+		void cleanMapEx(uint32_t& count);
+		void cleanMap();
+
 		void refreshMap(RefreshTiles::iterator* it = NULL, uint32_t limit = 0);
 		void proceduralRefresh(RefreshTiles::iterator* it = NULL);
 

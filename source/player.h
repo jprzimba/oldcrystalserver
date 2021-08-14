@@ -291,10 +291,13 @@ class Player : public Creature, public Cylinder
 		uint32_t getMagicLevel() const {return getPlayerInfo(PLAYERINFO_MAGICLEVEL);}
 		uint64_t getSpentMana() const {return manaSpent;}
 
-		uint32_t getVocationId() const {return vocation_id;}
-		void setVocation(uint32_t vocId);
+		uint32_t getVocationId() const {return vocationId;}
+		void setVocation(uint32_t id);
 		uint16_t getSex(bool full) const {return full ? sex : sex % 2;}
 		void setSex(uint16_t);
+
+		virtual void setDropLoot(lootDrop_t _lootDrop);
+		virtual void setLossSkill(bool _skillLoss);
 
 		uint64_t getStamina() const {return hasFlag(PlayerFlag_HasInfiniteStamina) ? STAMINA_MAX : stamina;}
 		void setStamina(uint64_t value) {stamina = std::min((uint64_t)STAMINA_MAX, (uint64_t)std::max((uint64_t)0, value));}
@@ -829,7 +832,7 @@ class Player : public Creature, public Cylinder
 
 		int32_t soul;
 		int32_t soulMax;
-		int32_t vocation_id;
+		int32_t vocationId;
 		int32_t groupId;
 		int32_t managerNumber, managerNumber2;
 		int32_t purchaseCallback;

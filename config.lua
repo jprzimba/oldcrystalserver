@@ -135,6 +135,7 @@
 	optionalWarAttackableAlly = false
 	fistBaseAttack = 7
 	healPlayersOnLevelAdvance = true
+	recoverManaAfterDeathInPvPZone = false
 
 	-- Spells
 	formulaLevel = 5.0
@@ -214,7 +215,7 @@
 
 	-- Map
 	-- NOTE: storeTrash costs more memory, but will perform alot faster cleaning.
-	mapName = "world"
+	mapName = "world.otbm"
 	mapAuthor = ""
 	randomizeTiles = true
 	storeTrash = true

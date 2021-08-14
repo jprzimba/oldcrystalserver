@@ -65,11 +65,12 @@ Player::Player(const std::string& _name, ProtocolGame* p):
 	tradeState = TRADE_NONE;
 	accountManager = MANAGER_NONE;
 	guildLevel = GUILDLEVEL_NONE;
+	vocationId = VOCATION_NONE;
 
 	promotionLevel = walkTaskEvent = actionTaskEvent = nextStepEvent = bloodHitCount = shieldBlockCount = 0;
 	lastAttack = idleTime = marriage = blessings = balance = premiumDays = mana = manaMax = manaSpent = 0;
 	soul = guildId = levelPercent = magLevelPercent = magLevel = experience = damageImmunities = 0;
-	conditionImmunities = conditionSuppressions = groupId = vocation_id = managerNumber2 = town = skullEnd = 0;
+	conditionImmunities = conditionSuppressions = groupId = managerNumber2 = town = skullEnd = 0;
 	lastLogin = lastLogout = lastIP = messageTicks = messageBuffer = nextAction = 0;
 	editListId = maxWriteLen = windowTextId = rankId = 0;
 
@@ -148,10 +149,14 @@ Player::~Player()
 		it->second.first->unRef();
 }
 
-void Player::setVocation(uint32_t vocId)
+void Player::setVocation(uint32_t id)
 {
-	vocation_id = vocId;
-	vocation = Vocations::getInstance()->getVocation(vocId);
+	vocationId = id;
+	if(!(vocation = Vocations::getInstance()->getVocation(id)))
+		return;
+
+	Creature::setDropLoot((vocation->getDropLoot() ? LOOT_DROP_FULL : LOOT_DROP_PREVENT));
+	Creature::setLossSkill(vocation->getLossSkill());
 
 	soulMax = vocation->getGain(GAIN_SOUL);
 	if(Condition* condition = getCondition(CONDITION_REGENERATION, CONDITIONID_DEFAULT))
@@ -161,6 +166,22 @@ void Player::setVocation(uint32_t vocId)
 		condition->setParam(CONDITIONPARAM_MANAGAIN, vocation->getGainAmount(GAIN_MANA));
 		condition->setParam(CONDITIONPARAM_MANATICKS, (vocation->getGainTicks(GAIN_MANA) * 1000));
 	}
+}
+
+void Player::setDropLoot(lootDrop_t _lootDrop)
+{
+	if(vocation && !vocation->getDropLoot())
+		_lootDrop = LOOT_DROP_PREVENT;
+
+	Creature::setDropLoot(_lootDrop);
+}
+
+void Player::setLossSkill(bool _skillLoss)
+{
+	if(vocation && !vocation->getLossSkill())
+		_skillLoss = false;
+
+	Creature::setLossSkill(_skillLoss);
 }
 
 bool Player::isPushable() const
@@ -176,7 +197,7 @@ std::string Player::getDescription(int32_t lookDistance) const
 		s << "yourself.";
 		if(hasFlag(PlayerFlag_ShowGroupNameInsteadOfVocation))
 			s << " You are " << group->getName();
-		else if(vocation_id != 0)
+		else if(vocationId != VOCATION_NONE)
 			s << " You are " << vocation->getDescription();
 		else
 			s << " You have no vocation";
@@ -190,19 +211,17 @@ std::string Player::getDescription(int32_t lookDistance) const
 		s << ". " << (sex % 2 ? "He" : "She");
 		if(hasFlag(PlayerFlag_ShowGroupNameInsteadOfVocation))
 			s << " is " << group->getName();
-		else if(vocation_id != 0)
+		else if(vocationId != VOCATION_NONE)
 			s << " is " << vocation->getDescription();
 		else
 			s << " has no vocation";
-
-		s << getSpecialDescription();
 	}
 
 	std::string tmp;
 	if(marriage && IOLoginData::getInstance()->getNameByGuid(marriage, tmp))
 	{
 		s << ", ";
-		if(vocation_id == 0)
+		if(vocationId == VOCATION_NONE)
 		{
 			if(lookDistance == -1)
 				s << "and you are";
@@ -230,6 +249,7 @@ std::string Player::getDescription(int32_t lookDistance) const
 		s << ".";
 	}
 
+	s << getSpecialDescription();
 	return s.str();
 }
 
@@ -797,7 +817,8 @@ void Player::dropLoot(Container* corpse)
 	if(!corpse || lootDrop != LOOT_DROP_FULL)
 		return;
 
-	uint32_t start = g_config.getNumber(ConfigManager::BLESS_REDUCTION_BASE), loss = lossPercent[LOSS_CONTAINERS], bless = getBlessings();
+	uint32_t loss = lossPercent[LOSS_CONTAINERS], start = g_config.getNumber(
+		ConfigManager::BLESS_REDUCTION_BASE), bless = getBlessings();
 	while(bless > 0 && loss > 0)
 	{
 		loss -= start;
@@ -2195,8 +2216,7 @@ uint32_t Player::getIP() const
 
 bool Player::onDeath()
 {
-	Item* preventLoss = NULL;
-	Item* preventDrop = NULL;
+	Item *preventLoss = NULL, *preventDrop = NULL;
 	if(getZone() == ZONE_HARDCORE)
 	{
 		setDropLoot(LOOT_DROP_NONE);
@@ -2205,7 +2225,7 @@ bool Player::onDeath()
 	else if(skull < SKULL_RED)
 	{
 		Item* item = NULL;
-		for(int32_t i = SLOT_FIRST; ((skillLoss || lootDrop == LOOT_DROP_FULL) && i < SLOT_LAST); ++i)
+		for(int32_t i = SLOT_FIRST; ((!preventDrop || !preventLoss) && i < SLOT_LAST); ++i)
 		{
 			if(!(item = getInventoryItem((slots_t)i)) || item->isRemoved() ||
 				(g_moveEvents->hasEquipEvent(item) && !isItemAbilityEnabled((slots_t)i)))
@@ -2231,22 +2251,8 @@ bool Player::onDeath()
 		return false;
 	}
 
-	if(preventLoss)
-	{
-		setLossSkill(false);
-		if(preventLoss->getCharges() > 1) //weird, but transform failed to remove for some hosters
-			g_game.transformItem(preventLoss, preventLoss->getID(), std::max(0, ((int32_t)preventLoss->getCharges() - 1)));
-		else
-			g_game.internalRemoveItem(NULL, preventDrop);
-	}
-
 	if(preventDrop && preventDrop != preventLoss)
-	{
-		if(preventDrop->getCharges() > 1) //weird, but transform failed to remove for some hosters
-			g_game.transformItem(preventDrop, preventDrop->getID(), std::max(0, ((int32_t)preventDrop->getCharges() - 1)));
-		else
-			g_game.internalRemoveItem(NULL, preventDrop);
-	}
+		g_game.transformItem(preventDrop, preventDrop->getID(), std::max(0, (int32_t)preventDrop->getCharges() - 1));
 
 	removeConditions(CONDITIONEND_DEATH);
 	if(skillLoss)
@@ -2256,13 +2262,12 @@ bool Player::onDeath()
 		double percent = 1. - ((double)(experience - lossExperience) / experience);
 
 		//Magic level loss
-		uint32_t sumMana = 0;
-		uint64_t lostMana = 0;
+		uint64_t sumMana = 0, lostMana = 0;
 		for(uint32_t i = 1; i <= magLevel; ++i)
 			sumMana += vocation->getReqMana(i);
 
 		sumMana += manaSpent;
-		lostMana = (uint64_t)std::ceil(sumMana * ((double)(percent * lossPercent[LOSS_MANA]) / 100.));
+		lostMana = (uint64_t)std::ceil((percent * lossPercent[LOSS_MANA] / 100.) * sumMana);
 		while(lostMana > manaSpent && magLevel > 0)
 		{
 			lostMana -= manaSpent;
@@ -2270,7 +2275,7 @@ bool Player::onDeath()
 			magLevel--;
 		}
 
-		manaSpent -= std::max((int32_t)0, (int32_t)lostMana);
+		manaSpent -= lostMana;
 		uint64_t nextReqMana = vocation->getReqMana(magLevel + 1);
 		if(nextReqMana > vocation->getReqMana(magLevel))
 			magLevelPercent = Player::getPercentLevel(manaSpent, nextReqMana);
@@ -2286,22 +2291,15 @@ bool Player::onDeath()
 				sumSkillTries += vocation->getReqSkillTries(i, c);
 
 			sumSkillTries += skills[i][SKILL_TRIES];
-			lostSkillTries = (uint32_t)std::ceil(sumSkillTries * ((double)(percent * lossPercent[LOSS_SKILLS]) / 100.));
-			while(lostSkillTries > skills[i][SKILL_TRIES])
+			lostSkillTries = (uint64_t)std::ceil((percent * lossPercent[LOSS_SKILLS] / 100.) * sumSkillTries);
+			while(lostSkillTries > skills[i][SKILL_TRIES] && skills[i][SKILL_LEVEL] > 10)
 			{
 				lostSkillTries -= skills[i][SKILL_TRIES];
 				skills[i][SKILL_TRIES] = vocation->getReqSkillTries(i, skills[i][SKILL_LEVEL]);
-				if(skills[i][SKILL_LEVEL] < 11)
-				{
-					skills[i][SKILL_LEVEL] = 10;
-					skills[i][SKILL_TRIES] = lostSkillTries = 0;
-					break;
-				}
-				else
-					skills[i][SKILL_LEVEL]--;
+				skills[i][SKILL_LEVEL]--;
 			}
 
-			skills[i][SKILL_TRIES] = std::max((int32_t)0, (int32_t)(skills[i][SKILL_TRIES] - lostSkillTries));
+			skills[i][SKILL_TRIES] -= lostSkillTries;
 		}
 
 		blessings = 0;
@@ -2324,6 +2322,7 @@ bool Player::onDeath()
 		{
 			loginPosition = masterPosition;
 			g_creatureEvents->playerLogout(this, true);
+
 			g_game.removeCreature(this, false);
 			sendReLoginWindow();
 		}
@@ -2340,7 +2339,8 @@ void Player::dropCorpse(DeathList deathList)
 		if(health <= 0)
 		{
 			health = healthMax;
-			mana = manaMax;
+			if(getZone() != ZONE_HARDCORE || g_config.getBool(ConfigManager::PVPZONE_RECOVERMANA))
+				mana = manaMax;
 		}
 
 		setDropLoot(LOOT_DROP_FULL);
@@ -4314,7 +4314,7 @@ void Player::setPromotionLevel(uint32_t pLevel)
 {
 	if(pLevel > promotionLevel)
 	{
-		uint32_t tmpLevel = 0, currentVoc = vocation_id;
+		uint32_t tmpLevel = 0, currentVoc = vocationId;
 		for(uint32_t i = promotionLevel; i < pLevel; ++i)
 		{
 			currentVoc = Vocations::getInstance()->getPromotedVocation(currentVoc);
@@ -4326,14 +4326,14 @@ void Player::setPromotionLevel(uint32_t pLevel)
 			if(voc->isPremiumNeeded() && !isPremium() && g_config.getBool(ConfigManager::PREMIUM_FOR_PROMOTION))
 				continue;
 
-			vocation_id = currentVoc;
+			vocationId = currentVoc;
 		}
 
 		promotionLevel += tmpLevel;
 	}
 	else if(pLevel < promotionLevel)
 	{
-		uint32_t tmpLevel = 0, currentVoc = vocation_id;
+		uint32_t tmpLevel = 0, currentVoc = vocationId;
 		for(uint32_t i = pLevel; i < promotionLevel; ++i)
 		{
 			Vocation* voc = Vocations::getInstance()->getVocation(currentVoc);
@@ -4345,13 +4345,13 @@ void Player::setPromotionLevel(uint32_t pLevel)
 			if(voc->isPremiumNeeded() && !isPremium() && g_config.getBool(ConfigManager::PREMIUM_FOR_PROMOTION))
 				continue;
 
-			vocation_id = currentVoc;
+			vocationId = currentVoc;
 		}
 
 		promotionLevel -= tmpLevel;
 	}
 
-	setVocation(vocation_id);
+	setVocation(vocationId);
 }
 
 uint16_t Player::getBlessings() const

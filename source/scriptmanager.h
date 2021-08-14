@@ -19,19 +19,6 @@
 #define __SCRIPTMANAGER__
 #include "otsystem.h"
 
-struct ModBlock
-{
-	std::string name, description, author, version, contact, file;
-	bool enabled;
-};
-typedef std::map<std::string, ModBlock> ModMap;
-
-struct LibBlock
-{
-	std::string first, second;
-};
-typedef std::map<std::string, LibBlock> LibMap;
-
 class ScriptManager
 {
 	public:
@@ -42,27 +29,8 @@ class ScriptManager
 		}
 
 		ScriptManager();
-		virtual ~ScriptManager() {clearMods();}
+		virtual ~ScriptManager() {}
 
 		bool loadSystem();
-		bool loadMods();
-
-		void clearMods();
-		bool reloadMods();
-
-		inline LibMap::iterator getFirstLib() {return libMap.begin();}
-		inline LibMap::iterator getLastLib() {return libMap.end();}
-
-		inline ModMap::iterator getFirstMod() {return modMap.begin();}
-		inline ModMap::iterator getLastMod() {return modMap.end();}
-
-	protected:
-		bool loadFromXml(const std::string& file, bool& enabled);
-
-	private:
-		bool modsLoaded;
-
-		LibMap libMap;
-		ModMap modMap;
 };
 #endif

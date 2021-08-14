@@ -660,11 +660,8 @@ class LuaInterface
 		static int32_t luaGetLogsDir(lua_State* L);
 		static int32_t luaGetConfigFile(lua_State* L);
 		static int32_t luaGetConfigValue(lua_State* L);
-		static int32_t luaGetModList(lua_State* L);
 
 		static int32_t luaL_errors(lua_State* L);
-		static int32_t luaL_loadmodlib(lua_State* L);
-		static int32_t luaL_domodlib(lua_State* L);
 		static int32_t luaL_dodirectory(lua_State* L);
 
 		static const luaL_Reg luaSystemTable[2];
