@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
 #include "otpch.h"
-#include "tasks.h"
+#include "dispatcher.h"
 
 #include "outputmessage.h"
 #if defined __EXCEPTION_TRACER__
@@ -23,41 +23,39 @@
 #endif
 
 #include "game.h"
+
 extern Game g_game;
 
 Dispatcher::DispatcherState Dispatcher::m_threadState = Dispatcher::STATE_TERMINATED;
 
 Dispatcher::Dispatcher()
 {
-	m_taskList.clear();
 	Dispatcher::m_threadState = Dispatcher::STATE_RUNNING;
-	boost::thread(boost::bind(&Dispatcher::dispatcherThread, (void*)this));
+	m_thread = boost::thread(boost::bind(&Dispatcher::dispatcherThread, this));
 }
 
-void Dispatcher::dispatcherThread(void* p)
+void Dispatcher::dispatcherThread()
 {
-	Dispatcher* dispatcher = (Dispatcher*)p;
 	#if defined __EXCEPTION_TRACER__
 	ExceptionHandler dispatcherExceptionHandler;
 	dispatcherExceptionHandler.InstallHandler();
 	#endif
-	srand((uint32_t)OTSYS_TIME());
 
 	OutputMessagePool* outputPool = NULL;
-	boost::unique_lock<boost::mutex> taskLockUnique(dispatcher->m_taskLock, boost::defer_lock);
+	boost::unique_lock<boost::mutex> taskLockUnique(m_taskLock, boost::defer_lock);
 	while(Dispatcher::m_threadState != Dispatcher::STATE_TERMINATED)
 	{
 		Task* task = NULL;
 		// check if there are tasks waiting
 		taskLockUnique.lock();
-		if(dispatcher->m_taskList.empty()) //if the list is empty wait for signal
-			dispatcher->m_taskSignal.wait(taskLockUnique);
+		if(m_taskList.empty()) //if the list is empty wait for signal
+			m_taskSignal.wait(taskLockUnique);
 
-		if(!dispatcher->m_taskList.empty() && Dispatcher::m_threadState != Dispatcher::STATE_TERMINATED)
+		if(!m_taskList.empty() && Dispatcher::m_threadState != Dispatcher::STATE_TERMINATED)
 		{
 			// take the first task
-			task = dispatcher->m_taskList.front();
-			dispatcher->m_taskList.pop_front();
+			task = m_taskList.front();
+			m_taskList.pop_front();
 		}
 
 		taskLockUnique.unlock();

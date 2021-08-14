@@ -125,7 +125,7 @@ std::string Status::getStatusString(bool sendPlayers) const
 	p = xmlNewNode(NULL,(const xmlChar*)"serverinfo");
 	sprintf(buffer, "%u", (uint32_t)getUptime());
 	xmlSetProp(p, (const xmlChar*)"uptime", (const xmlChar*)buffer);
-	xmlSetProp(p, (const xmlChar*)"ip", (const xmlChar*)g_config.getString(ConfigManager::IP).c_str());
+	xmlSetProp(p, (const xmlChar*)"ip", (const xmlChar*)g_config.getString(ConfigManager::IP_STRING).c_str());
 	xmlSetProp(p, (const xmlChar*)"servername", (const xmlChar*)g_config.getString(ConfigManager::SERVER_NAME).c_str());
 	sprintf(buffer, "%d", g_config.getNumber(ConfigManager::LOGIN_PORT));
 	xmlSetProp(p, (const xmlChar*)"port", (const xmlChar*)buffer);
@@ -211,7 +211,7 @@ void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMe
 	{
 		output->put<char>(0x10);
 		output->putString(g_config.getString(ConfigManager::SERVER_NAME).c_str());
-		output->putString(g_config.getString(ConfigManager::IP).c_str());
+		output->putString(g_config.getString(ConfigManager::IP_STRING).c_str());
 
 		char buffer[10];
 		sprintf(buffer, "%d", g_config.getNumber(ConfigManager::LOGIN_PORT));

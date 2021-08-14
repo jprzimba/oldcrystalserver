@@ -1170,7 +1170,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit126]
-FileName=..\tasks.cpp
+FileName=..\dispatcher.cpp
 CompileCpp=1
 Folder=Crystal Server
 Compile=1
@@ -1180,7 +1180,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit127]
-FileName=..\tasks.h
+FileName=..\dispatcher.h
 CompileCpp=1
 Folder=Crystal Server
 Compile=1

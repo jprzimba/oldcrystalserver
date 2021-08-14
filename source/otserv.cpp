@@ -126,7 +126,7 @@ bool argumentsHandler(StringVec args)
 		else if(tmp[0] == "--data-directory")
 			g_config.setString(ConfigManager::DATA_DIRECTORY, tmp[1]);
 		else if(tmp[0] == "--ip")
-			g_config.setString(ConfigManager::IP, tmp[1]);
+			g_config.setString(ConfigManager::IP_STRING, tmp[1]);
 		else if(tmp[0] == "--login-port")
 			g_config.setNumber(ConfigManager::LOGIN_PORT, atoi(tmp[1].c_str()));
 		else if(tmp[0] == "--game-port")
@@ -149,18 +149,18 @@ bool argumentsHandler(StringVec args)
 }
 
 #ifndef WINDOWS
-int32_t getch()
+int32_t OTSYS_getch()
 {
 	struct termios oldt;
 	tcgetattr(STDIN_FILENO, &oldt);
 
-	struct termios newt = oldt; 
-	newt.c_lflag &= ~(ICANON | ECHO);  
-	tcsetattr(STDIN_FILENO, TCSANOW, &newt); 
+	struct termios newt = oldt;
+	newt.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
-	int32_t ch = getchar();  
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldt); 
-	return ch; 
+	int32_t ch = getchar();
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	return ch;
 }
 
 void signalHandler(int32_t sig)
@@ -215,7 +215,7 @@ void runfileHandler(void)
 	runfile.close();
 }
 #else
-int32_t getch()
+int32_t OTSYS_getch()
 {
 	return (int32_t)getchar();
 }
@@ -224,23 +224,24 @@ int32_t getch()
 void allocationHandler()
 {
 	puts("Allocation failed, server out of memory!\nDecrease size of your map or compile in a 64-bit mode.");
-	char buffer[1024];
-	delete fgets(buffer, 1024, stdin);
-	exit(-1);
+	OTSYS_getch();
+	std::exit(-1);
 }
 
 void startupErrorMessage(std::string error = "")
 {
+	// we will get a crash here as the threads aren't going down smoothly
 	if(error.length() > 0)
-		std::clog << std::endl << "ERROR: " << error << std::endl;
+		std::clog << std::endl << "> ERROR: " << error << std::endl;
 
-	getch();
-	exit(-1);
+	OTSYS_getch();
+	std::exit(-1);
 }
 
 void otserv(StringVec args, ServiceManager* services);
 int main(int argc, char* argv[])
 {
+	std::srand((uint32_t)OTSYS_TIME());
 	StringVec args = StringVec(argv, argv + argc);
 	if(argc > 1 && !argumentsHandler(args))
 		return 0;
@@ -250,8 +251,8 @@ int main(int argc, char* argv[])
 	g_config.startup();
 
 #ifdef __OTSERV_ALLOCATOR_STATS__
-	boost::thread(boost::bind(&allocatorStatsThread, (void*)NULL));
-	// TODO: shutdown this thread?
+	//boost::thread(boost::bind(&allocatorStatsThread, (void*)NULL));
+	// TODO: this thread needs a shutdown (timed_lock + interrupt? .interrupt + .unlock)
 #endif
 #ifdef __EXCEPTION_TRACER__
 	ExceptionHandler mainExceptionHandler;
@@ -280,16 +281,20 @@ int main(int argc, char* argv[])
 
 	OutputHandler::getInstance();
 	Dispatcher::getInstance().addTask(createTask(boost::bind(otserv, args, &servicer)));
-
 	g_loaderSignal.wait(g_loaderUniqueLock);
+
+	boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
 	if(servicer.isRunning())
 	{
+ 		Status::getInstance();
 		std::clog << "" << g_config.getString(ConfigManager::SERVER_NAME) << " server Online!" << std::endl << std::endl;
 		servicer.run();
 	}
 	else
 		std::clog << "" << g_config.getString(ConfigManager::SERVER_NAME) << " server Offline! No services available..." << std::endl << std::endl;
 
+	Dispatcher::getInstance().exit();
+	Scheduler::getInstance().exit();
 
 #ifdef __EXCEPTION_TRACER__
 	mainExceptionHandler.RemoveHandler();
@@ -310,7 +315,7 @@ void otserv(StringVec, ServiceManager* services)
 	{
 		std::clog << "WARNING: " << SOFTWARE_NAME << " has been executed as super user! It is "
 			<< "recommended to run as a normal user." << std::endl << "Continue? (y/N)" << std::endl;
-		char buffer = getch();
+		char buffer = OTSYS_getch();
 		if(buffer != 121 && buffer != 89)
 			startupErrorMessage("Aborted.");
 	}
@@ -517,7 +522,7 @@ void otserv(StringVec, ServiceManager* services)
 	if(!Item::items.loadFromXml())
 	{
 		std::clog << "Unable to load items (XML)! Continue? (y/N)" << std::endl;
-		char buffer = getch();
+		char buffer = OTSYS_getch();
 		if(buffer != 121 && buffer != 89)
 			startupErrorMessage("Unable to load items (XML)!");
 	}
@@ -565,7 +570,7 @@ void otserv(StringVec, ServiceManager* services)
 	if(!g_monsters.loadFromXml())
 	{
 		std::clog << "Unable to load monsters! Continue? (y/N)" << std::endl;
-		char buffer = getch();
+		char buffer = OTSYS_getch();
 		if(buffer != 121 && buffer != 89)
 			startupErrorMessage("Unable to load monsters!");
 	}
@@ -604,7 +609,7 @@ void otserv(StringVec, ServiceManager* services)
 
 	IPAddressList ipList;
 
-	std::string ip = g_config.getString(ConfigManager::IP);
+	std::string ip = g_config.getString(ConfigManager::IP_STRING);
 	if(asLowerCaseString(ip) == "auto")
 	{
 		// TODO: automatic shit
