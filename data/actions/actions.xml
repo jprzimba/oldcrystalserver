@@ -379,6 +379,12 @@
 	<action actionid="2019" event="script" value="map/training/room.lua"/>
 	<action actionid="2020" event="script" value="map/training/room.lua"/>
 
+	<!-- Ferumbras Tower -->
+	<action uniqueid="12151" event="script" value="map/ferumbras_tower/ferumbras_wall.lua"/>
+	<action uniqueid="12152" event="script" value="map/ferumbras_tower/ferumbras_wall2.lua"/>
+	<action uniqueid="12153" event="script" value="map/ferumbras_tower/ferumbras_wall3.lua"/>
+	<action uniqueid="5169" event="script" value="map/ferumbras_tower/ferumbras_stair.lua"/>
+
 	<!-- Behemoth Quest -->
 	<action uniqueid="5010" event="script" value="map/quests/Behemoth_Quest.lua"/>
 	<action uniqueid="5011" event="script" value="map/quests/Behemoth_Quest.lua"/>
