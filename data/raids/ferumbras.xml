@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raid>
+	<announce delay="1000" type="22" message="Ferumbras has returned to his citadel once more. Stop him before its too late." />
+	<singlespawn delay="5000" name="Ferumbras" x="653" y="546" z="4"/>
+</raid>

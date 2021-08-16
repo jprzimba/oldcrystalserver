@@ -35,7 +35,6 @@
 		<monster name="Demon" x="3" y="-3" z="4" spawntime="60" />
 		<monster name="Demon" x="-3" y="-2" z="4" spawntime="60" />
 		<monster name="Demon" x="-4" y="1" z="4" spawntime="60" />
-		<monster name="Ferumbras" x="-2" y="3" z="4" spawntime="60" />
 		<monster name="Demon" x="3" y="4" z="4" spawntime="60" />
 	</spawn>
 	<spawn centerx="623" centery="717" centerz="4" radius="8">

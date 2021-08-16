@@ -9,4 +9,6 @@
 		<raid name="Example2" file="example.xml" interval2="2" margin="0" reftype="block" ref="no"/>
 			will stay as 'running' until Cave Rat gets killed
 	-->
+
+	<raid name="ferumbras" file="ferumbras.xml" interval2="120" margin="0" reftype="single" ref="no"/>
 </raids>
