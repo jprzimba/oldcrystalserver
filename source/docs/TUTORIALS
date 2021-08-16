@@ -3,7 +3,7 @@
 		Crystal Server
 
 	Version
-		0.1.8
+		1.0
 
 	Website
 		https://github.com/tryller/crystalserver
@@ -13,38 +13,7 @@
 ]
 
 [ COMPILING IN WINDOWS
-	For Version Crystal Server (Compatible TFS 0.3.7 Gold "0.4" and OpenTibia SVN)
-		Visual C++ 2010 Express
-			http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-express
 
-		Visual C++ 2010 Express Libs
-			http://www.mediafire.com/?hfa5vvehsuiraxz
-
-		Instalation (It is necessary to replace the pack files for Visual C++ files)
-			Windows XP - Vista - Seven (x64)
-			ENG::ESP -- C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC
-
-			Windows XP - Vista - Seven (x86-x32)
-			ENG -- C:\Program Files\Microsoft Visual Studio 10.0\VC
-			ESP -- C:\Archivos de programa\Microsoft Visual Studio 10.0\VC
-
-		Run compilation
-			Run the file (Crystal Server.vcxproj) - choose "release" or debug - and press build
-			Goto folder //release and copy "Crystal Server.exe" to main folder
-			Note: GUI System not supported with (Visual C++ 2010 Express)
-
-	For Version Crystal Server (Compatible TFS 0.3.7 Gold "0.4" and 0.3.6 
-			- require hack in definitions.h :: #define BOOST_FILESYSTEM_VERSION 2)
-
-		Code::Blocks 10.05 + Libs
-			http://www.mediafire.com/?bh1bu2m7bowbphx
-
-		Instalation
-			c:/codeblocks/
-
-		Run compilation
-			Open project (Crystal Server.cbp) - choose GUI or Console and press build
-			Goto folder //\bin\GUI or \bin\CONSOLE and copy "Crystal Server-(GUI or CONSOLE).exe" to main folder
 ]
 
 [ COMPILING IN UBUNTU LINUX

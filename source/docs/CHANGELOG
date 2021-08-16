@@ -3,7 +3,7 @@
 		Crystal Server
 
 	Version
-		0.1.8
+		1.0
 
 	Website
 		https://github.com/tryller/crystalserver
@@ -17,7 +17,7 @@
 	M = Modified,
 	A = Added.
 
-	[ 0.1.8
+	[ 1.0
 		[ A...
 
 		]
@@ -34,11 +34,17 @@
 
 [ Charges made
 	[ 0.1.8
-		Game protocol 8.60. (Tryller)
-		War system (Elf, Tryller)
-		Auto stacking items (Elf)
-		Map SadSoul (SadTeam Mapper, Erimyth and Tryller)
-		POI Quest (Erimyth and Tryller)
-		Demon OAK Quest (Erimyth and Tryller)
+		[ DISTRO
+			Game protocol 8.60. (Tryller)
+			War system (Elf, Tryller)
+			Auto stacking items (Elf)
+		]
+
+		[ MAP
+			Map SadSoul (SadTeam Mapper, Erimyth and Tryller)
+			POI Quest (Erimyth and Tryller)
+			Demon OAK Quest (Erimyth and Tryller)
+			Ferumbras tower with Ferumbras raid. (Tryller)
+		]
 	]
 ]

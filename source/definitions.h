@@ -23,7 +23,7 @@
 #define CLIENT_VERSION_STRING "Only clients with protocol 8.6 allowed!"
 
 #define SOFTWARE_NAME "Crystal Server"
-#define SOFTWARE_VERSION "0.1.8"
+#define SOFTWARE_VERSION "1.0"
 #define SOFTWARE_DEVELOPERS "Tryller"
 #define SOFTWARE_PROTOCOL "8.6"
 
