@@ -889,9 +889,9 @@ bool Chat::talkToChannel(Player* player, SpeakClasses type, const std::string& t
 			{
 				if(paramPlayer->getGuildId())
 				{
-					if(param2.length() > g_config.getNumber(ConfigManager::MIN_GUILD_NICK))
+					if(param2.length() > (uint32_t)g_config.getNumber(ConfigManager::MIN_GUILD_NICK))
 					{
-						if(param2.length() < g_config.getNumber(ConfigManager::MAX_GUILD_NICK))
+						if(param2.length() < (uint32_t)g_config.getNumber(ConfigManager::MAX_GUILD_NICK))
 						{
 							if(isValidName(param2, false))
 							{
@@ -935,9 +935,9 @@ bool Chat::talkToChannel(Player* player, SpeakClasses type, const std::string& t
 				IOLoginData::getInstance()->getGuidByName(guid, (std::string&)param1);
 				if(IOGuild::getInstance()->hasGuild(guid))
 				{
-					if(param2.length() > g_config.getNumber(ConfigManager::MIN_GUILD_NICK))
+					if(param2.length() > (uint32_t)g_config.getNumber(ConfigManager::MIN_GUILD_NICK))
 					{
-						if(param2.length() < g_config.getNumber(ConfigManager::MAX_GUILD_NICK))
+						if(param2.length() < (uint32_t)g_config.getNumber(ConfigManager::MAX_GUILD_NICK))
 						 {
 							if(isValidName(param2, false))
 							{

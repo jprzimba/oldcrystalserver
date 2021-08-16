@@ -2240,7 +2240,7 @@ void LuaInterface::registerFunctions()
 
 	//hasItemProperty(uid)
 	lua_register(m_luaState, "hasItemProperty", LuaInterface::luaHasItemProperty);
-	
+
 	//hasPlayerClient(cid)
 	lua_register(m_luaState, "hasPlayerClient", LuaInterface::luaHasPlayerClient);
 
@@ -2384,7 +2384,7 @@ void LuaInterface::registerFunctions()
 
 	//std table
 	luaL_register(m_luaState, "std", LuaInterface::luaStdTable);
-	
+
 	//doAnonymousBroadcast(message)
 	lua_register(m_luaState, "doAnonymousBroadcast", LuaInterface::luaAnonymousBroadcastMessage);
 
@@ -7066,8 +7066,12 @@ int32_t LuaInterface::luaGetGuildMotd(lua_State* L)
 
 int32_t LuaInterface::luaDoMoveCreature(lua_State* L)
 {
-	//doMoveCreature(cid, direction)
-	uint32_t direction = popNumber(L);
+	//doMoveCreature(cid, direction[, flag = FLAG_NOLIMIT])
+	uint32_t flags = FLAG_NOLIMIT;
+	if(lua_gettop(L) > 2)
+		flags = popNumber(L);
+
+	int32_t direction = popNumber(L);
 	if(direction < NORTH || direction > NORTHEAST)
 	{
 		lua_pushboolean(L, false);
@@ -7076,7 +7080,7 @@ int32_t LuaInterface::luaDoMoveCreature(lua_State* L)
 
 	ScriptEnviroment* env = getEnv();
 	if(Creature* creature = env->getCreatureByUID(popNumber(L)))
-		lua_pushnumber(L, g_game.internalMoveCreature(creature, (Direction)direction, FLAG_NOLIMIT));
+		lua_pushnumber(L, g_game.internalMoveCreature(creature, (Direction)direction, flags));
 	else
 	{
 		errorEx(getError(LUA_ERROR_CREATURE_NOT_FOUND));
@@ -9418,7 +9422,7 @@ int32_t LuaInterface::luaDoItemSetAttribute(lua_State* L)
 			}
 
 			item->setUniqueId(tmp);
-		}		
+		}
 		else if(key == "aid")
 			item->setActionId(boost::any_cast<int32_t>(value));
 		else

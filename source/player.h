@@ -426,7 +426,6 @@ class Player : public Creature, public Cylinder
 
 		bool isImmune(CombatType_t type) const;
 		bool isImmune(ConditionType_t type) const;
-		bool isProtected() const;
 		virtual bool isAttackable() const;
 
 		virtual void changeHealth(int32_t healthChange);
@@ -801,7 +800,7 @@ class Player : public Creature, public Cylinder
 
 		bool isPromoted(uint32_t pLevel = 1) const {return promotionLevel >= pLevel;}
 		bool hasCapacity(const Item* item, uint32_t count) const;
-		
+
 	public:
 		int32_t premiumDays;
 

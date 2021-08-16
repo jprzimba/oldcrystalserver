@@ -297,33 +297,31 @@ void FileLoader::endNode()
 	writeData(&nodeEnd, sizeof(nodeEnd), false);
 }
 
-const NODE FileLoader::getChildNode(const NODE parent, uint32_t &type)
+NODE FileLoader::getChildNode(const NODE& parent, uint32_t &type) const
 {
-	if(parent)
+	if(!parent)
 	{
-		NODE child = parent->child;
-		if(child)
-			type = child->type;
-
-		return child;
+		type = m_root->type;
+		return m_root;
 	}
 
-	type = m_root->type;
-	return m_root;
+	NODE child = parent->child;
+	if(child)
+		type = child->type;
+
+	return child;
 }
 
-const NODE FileLoader::getNextNode(const NODE prev, uint32_t &type)
+NODE FileLoader::getNextNode(const NODE& prev, uint32_t &type) const
 {
-	if(prev)
-	{
-		NODE next = prev->next;
-		if(next)
-			type = next->type;
+	if(!prev)
+		return NO_NODE;
 
-		return next;
-	}
+	NODE next = prev->next;
+	if(next)
+		type = next->type;
 
-	return NO_NODE;
+	return next;
 }
 
 inline bool FileLoader::readByte(int32_t &value)

@@ -749,44 +749,6 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 		result->free();
 	}
 
-	query.str("");
-	query << "SELECT `pk`.`player_id`, `pd`.`date` FROM `player_killers` pk LEFT JOIN `killers` k"
-		<< " ON `pk`.`kill_id` = `k`.`id` LEFT JOIN `player_deaths` pd ON `k`.`death_id` = `pd`.`id`"
-		<< " WHERE `pd`.`player_id` = " << player->getGUID() << " AND `k`.`unjustified` = 1 AND "
-		<< "`pd`.`date` >= " << (time(NULL) - (7 * 86400)) << " AND `k`.`war` = 0"; // TODO: configurable
-
-	std::map<uint32_t, time_t> deaths;
-	if((result = db->storeQuery(query.str())))
-	{
-		do
-		{
-			if(!deaths[result->getDataInt("player_id")] || deaths[result->getDataInt("player_id")]
-				< (time_t)result->getDataInt("date")) // pick up the latest date
-				deaths[result->getDataInt("player_id")] = (time_t)result->getDataInt("date");
-		}
-		while(result->next());
-		result->free();
-	}
-
-	if(!deaths.empty())
-	{
-		query.str("");
-		query << "SELECT `pd`.`player_id`, `pd`.`date` FROM `player_killers` pk LEFT JOIN `killers` k"
-			<< " ON `pk`.`kill_id` = `k`.`id` LEFT JOIN `player_deaths` pd ON `k`.`death_id` = `pd`.`id`"
-			<< " WHERE `pk`.`player_id` = " << player->getGUID() << " AND `k`.`unjustified` = 0 AND "
-			<< "`pd`.`date` >= " << (time(NULL) - (7 * 86400)) << " AND `k`.`war` = 0"; // TODO: configurable, same as up
-		if((result = db->storeQuery(query.str())))
-		{
-			do
-			{
-				if(!deaths[result->getDataInt("player_id")] || deaths[result->getDataInt("player_id")]
-					>= (time_t)result->getDataInt("date"));
-			}
-			while(result->next());
-			result->free();
-		}
-	}
-
 	player->updateInventoryWeight();
 	player->updateItemsLight(true);
 	player->updateBaseSpeed();
@@ -1173,8 +1135,25 @@ bool IOLoginData::playerDeath(Player* _player, const DeathList& dl)
 	for(DeathList::const_iterator it = dl.begin(); i < size && it != dl.end(); ++it, ++i)
 	{
 		query.str("");
-		query << "INSERT INTO `killers` (`death_id`, `final_hit`, `unjustified`, `war`) VALUES ("
-			<< deathId << ", " << it->isLast() << ", " << it->isUnjustified() << ", " << it->getWar().war << ")";
+		query.str("");
+		query << "INSERT INTO `killers` (`death_id`, `final_hit`, `unjustified`"
+			<< ", `war`"
+			<< ") VALUES (" << deathId << ", " << it->isLast() << ", " << it->isUnjustified();
+
+		if(it->isLast()) //last hit is always first and we got stored war data only there
+		{
+			War_t tmp = it->getWar();
+			if(tmp.war && tmp.frags[tmp.type == WAR_GUILD]
+				<= tmp.limit && tmp.frags[tmp.type] <= tmp.limit)
+				war = true;
+		}
+
+		if(war)
+			query << ", " << it->getWar().war;
+		else
+			query << ", 0";
+
+		query << ")";
 		if(!db->query(query.str()))
 			return false;
 

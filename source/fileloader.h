@@ -91,8 +91,8 @@ class FileLoader
 		bool openFile(const char* name, const char* identifier, bool write, bool caching = false);
 		const uint8_t* getProps(const NODE, uint32_t &size);
 		bool getProps(const NODE, PropStream& props);
-		const NODE getChildNode(const NODE parent, uint32_t &type);
-		const NODE getNextNode(const NODE prev, uint32_t &type);
+		NODE getChildNode(const NODE& parent, uint32_t &type) const;
+		NODE getNextNode(const NODE& prev, uint32_t &type) const;
 
 		void startNode(uint8_t type);
 		void endNode();

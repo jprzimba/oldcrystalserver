@@ -4,7 +4,7 @@
 #include <windows.h> // include for version info constants
 
 
-A ICON MOVEABLE PURE LOADONCALL DISCARDABLE "Crystal Server.ico"
+A ICON MOVEABLE PURE LOADONCALL DISCARDABLE "CrystalServer.ico"
 
 //
 // TO CHANGE VERSION INFORMATION, EDIT PROJECT OPTIONS...
@@ -20,12 +20,12 @@ FILETYPE VFT_APP
 		 {
 			 VALUE "CompanyName", ""
 			 VALUE "FileVersion", "1.0"
-			 VALUE "FileDescription", "Crystal Server"
+			 VALUE "FileDescription", "CrystalServer"
 			 VALUE "InternalName", "crystalserver.exe"
 			 VALUE "LegalCopyright", ""
 			 VALUE "LegalTrademarks", ""
-			 VALUE "OriginalFilename", "Crystal Server"
-			 VALUE "ProductName", "Crystal Server"
+			 VALUE "OriginalFilename", "CrystalServer"
+			 VALUE "ProductName", "CrystalServer"
 			 VALUE "ProductVersion", "1.0"
 		 }
 	 }

@@ -113,7 +113,7 @@ void Game::start(ServiceManager* servicer)
 	int32_t autoSaveEachMinutes = g_config.getNumber(ConfigManager::AUTO_SAVE_EACH_MINUTES);
 	if(autoSaveEachMinutes > 0)
 		Scheduler::getInstance().addEvent(createSchedulerTask(autoSaveEachMinutes * 1000 * 60, boost::bind(&Game::autoSave, &g_game)));
-	
+
 	if(g_config.getBool(ConfigManager::GLOBALSAVE_ENABLED) && g_config.getNumber(ConfigManager::GLOBALSAVE_H) >= 1
 		&& g_config.getNumber(ConfigManager::GLOBALSAVE_H) <= 24)
 	{
@@ -481,7 +481,7 @@ void Game::refreshMap(RefreshTiles::iterator* it/* = NULL*/, uint32_t limit/* = 
 		if((items = tile->getItemList()))
 		{
 			downItemsSize = tile->getDownItemCount();
-			for(uint32_t i = downItemsSize - 1; i >= 0; --i)
+			for(uint32_t i = downItemsSize - 1; i; --i)
 			{
 				if((item = items->at(i)))
 				{
@@ -1149,10 +1149,12 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 				}
 			}
 
-			if(player->isProtected())
+			uint32_t protectionLevel = g_config.getNumber(ConfigManager::PROTECTION_LEVEL);
+			if(player->getLevel() < protectionLevel && player->getVocation()->isAttackable())
 			{
 				Player* movingPlayer = movingCreature->getPlayer();
-				if(movingPlayer && !movingPlayer->isProtected())
+				if(movingPlayer && movingPlayer->getLevel() >= protectionLevel
+					&& movingPlayer->getVocation()->isAttackable())
 				{
 					player->sendCancelMessage(RET_NOTMOVEABLE);
 					return false;
@@ -3727,7 +3729,7 @@ bool Game::playerSay(uint32_t playerId, uint16_t channelId, SpeakClasses type, c
 		return internalCreatureSay(player, SPEAK_SAY, text, false);
 	}
 
-	if(g_talkActions->onPlayerSay(player, type == SPEAK_SAY ? CHANNEL_DEFAULT : channelId, text, false))
+	if(g_talkActions->onPlayerSay(player, type == SPEAK_SAY ? (unsigned)CHANNEL_DEFAULT : channelId, text, false))
 		return true;
 
 	ReturnValue ret = RET_NOERROR;
@@ -5881,7 +5883,7 @@ Highscore Game::getHighscore(uint16_t skill)
 int32_t Game::getMotdId()
 {
     if (!g_config.getBool(ConfigManager::ALWAYS_SHOW_MOTD))
-    {        
+    {
     	if(lastMotd == g_config.getString(ConfigManager::MOTD))
     		return lastMotdId;
     }

@@ -921,9 +921,11 @@ bool Player::canWalkthrough(const Creature* creature) const
 	if(!player)
 		return false;
 
-	if(((g_game.getWorldType() == WORLDTYPE_OPTIONAL && !player->isEnemy(this, true) &&
-		!player->isProtected()) || player->getTile()->hasFlag(TILESTATE_PROTECTIONZONE) || player->isProtected()) && player->getTile()->ground
-		&& Item::items[player->getTile()->ground->getID()].walkStack && (!player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges)
+	if((((g_game.getWorldType() == WORLDTYPE_OPTIONAL &&
+		!player->isEnemy(this, true) &&
+		player->getVocation()->isAttackable()) || (player->getVocation()->isAttackable() &&
+		player->getLevel() < (uint32_t)g_config.getNumber(ConfigManager::PROTECTION_LEVEL))) && player->getTile()->ground &&
+		Item::items[player->getTile()->ground->getID()].walkStack) && (!player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges)
 		|| player->getAccess() <= getAccess()))
 		return true;
 
@@ -1954,7 +1956,6 @@ void Player::addManaSpent(uint64_t amount, bool useMultiplier/* = true*/)
 
 void Player::addExperience(uint64_t exp)
 {
-	bool attackable = isProtected(); 	 
 	uint32_t prevLevel = level;
 	uint64_t nextLevelExp = Player::getExpForLevel(level + 1);
 	if(Player::getExpForLevel(level) > nextLevelExp)
@@ -2004,8 +2005,7 @@ void Player::addExperience(uint64_t exp)
 		s << "You advanced from Level " << prevLevel << " to Level " << level << ".";
 		sendTextMessage(MSG_EVENT_ADVANCE, s.str());
 
-		if(isProtected() != attackable)
-			g_game.updateCreatureWalkthrough(this);
+		g_game.updateCreatureWalkthrough(this);
 	}
 
 	uint64_t currLevelExp = Player::getExpForLevel(level);
@@ -2020,8 +2020,6 @@ void Player::addExperience(uint64_t exp)
 void Player::removeExperience(uint64_t exp, bool updateStats/* = true*/)
 {
 	uint32_t prevLevel = level;
-	bool attackable = isProtected();
-
 	experience -= std::min(exp, experience);
 	while(level > 1 && experience < Player::getExpForLevel(level))
 	{
@@ -2046,8 +2044,7 @@ void Player::removeExperience(uint64_t exp, bool updateStats/* = true*/)
 		s << "You were downgraded from Level " << prevLevel << " to Level " << level << ".";
 		sendTextMessage(MSG_EVENT_ADVANCE, s.str());
 
-		if(!isProtected() != attackable)
-			g_game.updateCreatureWalkthrough(this);
+		g_game.updateCreatureWalkthrough(this);
 	}
 
 	uint64_t currLevelExp = Player::getExpForLevel(level);
@@ -2711,7 +2708,7 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 						ret = RET_NOERROR;
 					else if(leftType == WEAPON_SHIELD && type == WEAPON_SHIELD)
 						ret = RET_CANONLYUSEONESHIELD;
-					else if(leftType == WEAPON_NONE || type == WEAPON_NONE || leftType == WEAPON_SHIELD 
+					else if(leftType == WEAPON_NONE || type == WEAPON_NONE || leftType == WEAPON_SHIELD
                     || leftType == WEAPON_AMMO || type == WEAPON_SHIELD || type == WEAPON_AMMO)
 						ret = RET_NOERROR;
 					else
@@ -2755,7 +2752,7 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 						ret = RET_NOERROR;
 					else if(rightType == WEAPON_SHIELD && type == WEAPON_SHIELD)
 						ret = RET_CANONLYUSEONESHIELD;
-					else if(rightType == WEAPON_NONE || type == WEAPON_NONE || rightType == WEAPON_SHIELD 
+					else if(rightType == WEAPON_NONE || type == WEAPON_NONE || rightType == WEAPON_SHIELD
                     || rightType == WEAPON_AMMO || type == WEAPON_SHIELD || type == WEAPON_AMMO)
 						ret = RET_NOERROR;
 					else
@@ -3109,7 +3106,7 @@ void Player::__updateThing(Thing* thing, uint16_t itemId, uint32_t count)
 
 void Player::__replaceThing(uint32_t index, Thing* thing)
 {
-	if(index < 0 || index > 11)
+	if(index > 11)
 	{
 #ifdef __DEBUG_MOVESYS__
 		std::clog << "Failure: [Player::__replaceThing], " << "player: " << getName() << ", index: " << index << ", index < 0 || index > 11" << std::endl;
@@ -3725,7 +3722,7 @@ void Player::onCombatRemoveCondition(const Creature* attacker, Condition* condit
 	{
 		if(!canDoAction())
 		{
-			uint32_t delay = getNextActionTime();
+			int32_t delay = getNextActionTime();
 			delay -= (delay % EVENT_CREATURE_THINK_INTERVAL);
 			if(delay < 0)
 				removeCondition(condition);
@@ -4026,11 +4023,6 @@ bool Player::isImmune(CombatType_t type) const
 bool Player::isImmune(ConditionType_t type) const
 {
 	return hasCustomFlag(PlayerCustomFlag_IsImmune) || Creature::isImmune(type);
-}
-
-bool Player::isProtected() const
-{
-	return (vocation && !vocation->isAttackable()) || hasCustomFlag(PlayerCustomFlag_IsProtected) || level < g_config.getNumber(ConfigManager::PROTECTION_LEVEL);
 }
 
 bool Player::isAttackable() const
@@ -4448,9 +4440,9 @@ void Player::manageAccount(const std::string &text)
 			{
 				managerString = text;
 				trimString(managerString);
-				if(managerString.length() < g_config.getNumber(ConfigManager::MANAGER_MIN_PLAYER_NAME_LENGTH))
+				if(managerString.length() < (uint32_t)g_config.getNumber(ConfigManager::MANAGER_MIN_PLAYER_NAME_LENGTH))
 					msg << "Your name you want is too short, please use more of " << g_config.getNumber(ConfigManager::MANAGER_MIN_PLAYER_NAME_LENGTH) << " length in yours name.";
-				else if(managerString.length() > g_config.getNumber(ConfigManager::MANAGER_MAX_PLAYER_NAME_LENGTH))
+				else if(managerString.length() > (uint32_t)g_config.getNumber(ConfigManager::MANAGER_MAX_PLAYER_NAME_LENGTH))
 					msg << "The name you want is too long, please select a shorter name.";
                 else if(!isValidName(managerString))
 					msg << "That name seems to contain invalid symbols, please choose another name.";
@@ -4583,8 +4575,8 @@ void Player::manageAccount(const std::string &text)
 			{
 				std::string tmp = text;
 				trimString(tmp);
-				if(tmp.length() < g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH))
-					msg << "That password is too short, at least " << g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH) << " digits are required. Please select a longer password.";
+				if(tmp.length() < (uint32_t)g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH))
+					msg << "That password is too short, at least " << (uint32_t)g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH) << " digits are required. Please select a longer password.";
 				else if(!isValidPassword(tmp))
 					msg << "Your password contains invalid characters... please tell me another one.";
 				else
@@ -4633,9 +4625,9 @@ void Player::manageAccount(const std::string &text)
 			{
 				managerString = text;
 				trimString(managerString);
-				if(managerString.length() < g_config.getNumber(ConfigManager::MANAGER_MIN_PLAYER_NAME_LENGTH))
-					msg << "Your name you want is too short, please use more of " << g_config.getNumber(ConfigManager::MANAGER_MIN_PLAYER_NAME_LENGTH) << " length in yours name.";
-				else if(managerString.length() > g_config.getNumber(ConfigManager::MANAGER_MAX_PLAYER_NAME_LENGTH))
+				if(managerString.length() < (uint32_t)g_config.getNumber(ConfigManager::MANAGER_MIN_PLAYER_NAME_LENGTH))
+					msg << "Your name you want is too short, please use more of " << (uint32_t)g_config.getNumber(ConfigManager::MANAGER_MIN_PLAYER_NAME_LENGTH) << " length in yours name.";
+				else if(managerString.length() > (uint32_t)g_config.getNumber(ConfigManager::MANAGER_MAX_PLAYER_NAME_LENGTH))
 					msg << "The name you want is too long, please select a shorter name.";
 				else if(!isValidName(managerString))
 					msg << "That name seems to contain invalid symbols, please choose another name.";
@@ -4817,8 +4809,8 @@ void Player::manageAccount(const std::string &text)
 			{
 				std::string tmp = text;
 				trimString(tmp);
-				if(tmp.length() < g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH))
-					msg << "That password is too short, at least " << g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH) << " digits are required. Please select a longer password.";
+				if(tmp.length() < (uint32_t)g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH))
+					msg << "That password is too short, at least " << (uint32_t)g_config.getNumber(ConfigManager::MANAGER_PASS_LENGTH) << " digits are required. Please select a longer password.";
 				else if(!isValidPassword(tmp))
 					msg << "Your password contains invalid characters... please tell me another one.";
 				else
@@ -4871,10 +4863,10 @@ void Player::manageAccount(const std::string &text)
 			{
 				std::string tmp = text;
 				trimString(tmp);
-				if(tmp.length() < g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MIN_LENGTH))
-					msg << "That account name is too short, at least " << g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MIN_LENGTH) << " digits are required. Please select a longer account name.";
-				else if(tmp.length() > g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MAX_LENGTH))
-					msg << "That account name is too long, not more than " << g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MAX_LENGTH) << " digits are required. Please select a shorter account name.";
+				if(tmp.length() < (uint32_t)g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MIN_LENGTH))
+					msg << "That account name is too short, at least " << (uint32_t)g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MIN_LENGTH) << " digits are required. Please select a longer account name.";
+				else if(tmp.length() > (uint32_t)g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MAX_LENGTH))
+					msg << "That account name is too long, not more than " << (uint32_t)g_config.getNumber(ConfigManager::MANAGER_ACCNAME_MAX_LENGTH) << " digits are required. Please select a shorter account name.";
 				else if(!isValidAccountName(tmp))
 					msg << "Your account name contains invalid characters, please choose another one.";
 				else if(asLowerCaseString(tmp) == asLowerCaseString(managerString))

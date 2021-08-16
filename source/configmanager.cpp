@@ -327,7 +327,7 @@ bool ConfigManager::load()
 	m_boolean[HEAL_PLAYER_ON_LEVEL] = getGlobalBool("healPlayersOnLevelAdvance", true);
 	m_boolean[ALWAYS_SHOW_MOTD] = getGlobalBool("alwaysShowMessageOfTheDay", false);
 	m_boolean[PVPZONE_RECOVERMANA] = getGlobalBool("recoverManaAfterDeathInPvPZone", false);
-	m_boolean[ALLOW_BLOCK_SPAWN] = getGlobalBool("allowBlockSpawn", true);
+	m_boolean[ALLOW_BLOCK_SPAWN] = getGlobalBool("allowBlockSpawn", false);
 
 	m_loaded = true;
 	return true;
