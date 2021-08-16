@@ -479,8 +479,7 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 	player->manaMax = result->getDataInt("manamax");
 
 	player->magLevel = result->getDataInt("maglevel");
-	uint64_t nextManaCount = player->vocation->getReqMana(player->magLevel + 1);
-	uint64_t manaSpent = result->getDataLong("manaspent");
+	uint64_t nextManaCount = player->vocation->getReqMana(player->magLevel + 1), manaSpent = result->getDataLong("manaspent");
 	if(manaSpent > nextManaCount)
 		manaSpent = 0;
 
@@ -1708,9 +1707,11 @@ bool IOLoginData::getUnjustifiedDates(uint32_t guid, std::vector<time_t>& dateLi
 {
 	Database* db = Database::getInstance();
 	DBQuery query;
-	query << "SELECT `pd`.`date` FROM `player_killers` pk LEFT JOIN `killers` k ON `pk`.`kill_id` = `k`.`id`";
-	query << "LEFT JOIN `player_deaths` pd ON `k`.`death_id` = `pd`.`id` WHERE `pk`.`player_id` = " << guid;
-	query << " AND `k`.`unjustified` = 1 AND `pd`.`date` >= " << (_time - (30 * 86400));
+	query << "SELECT `pd`.`date` FROM `player_killers` pk LEFT JOIN `killers` k ON `pk`.`kill_id` = `k`.`id`"
+		<< "LEFT JOIN `player_deaths` pd ON `k`.`death_id` = `pd`.`id` WHERE `pk`.`player_id` = " << guid
+		<< " AND `k`.`unjustified` = 1 AND `pd`.`date` >= " << (_time - (30 * 86400));
+
+	query << " AND `k`.`war` = 0";
 
 	DBResult* result;
 	if(!(result = db->storeQuery(query.str())))
