@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<npc name="Nimral" script="boat.lua" walkinterval="2000" floorchange="0">
+<npc name="Nimral" script="default.lua" walkinterval="2000" floorchange="0">
 	<health now="150" max="150"/>
 	<look type="129" head="114" body="119" legs="114" feet="114" corpse="2212"/>
 	<parameters>
-		
+		<parameter key="module_travel" value="1"/>
+		<parameter key="message_greet" value="Hello |PLAYERNAME|. I can travel to {Karmia}, {Folda}, {Desert}, {Inferno} and {Venore}. Where would you like to go?."/>
+		<parameter key="travel_destinations" value="karmia,454,480,6,220;folda,266,316,6,100;desert,399,481,6,120;inferno,517,437,6,100;venore,431,420,6,100"/>
 	</parameters>
 </npc>

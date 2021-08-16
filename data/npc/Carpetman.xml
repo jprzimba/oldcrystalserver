@@ -5,7 +5,7 @@
 
 	<parameters>
 		<parameter key="module_travel" value="1"/>
-		<parameter key="message_greet" value="Hello |PLAYERNAME|. I can travel to {Premium Island}, {Karmia}, {Tiquanda}, {Liberty Bay} and {Tortoise Island}. Where would you like to go?."/>
+		<parameter key="message_greet" value="Hello |PLAYERNAME|. I can travel to {Premium Island}, {Karmia}, {Tiquanda}, {Liberty Bay} and {Tortoise}. Where would you like to go?."/>
 		<parameter key="travel_destinations" value="premium island,435,623,6,220;tortoise,620,627,7,100;karmia,520,533,6,120;tiquanda,567,464,6,100;liberty bay,567,696,6,100"/>
 	</parameters>
 </npc>
