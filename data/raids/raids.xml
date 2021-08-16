@@ -10,5 +10,5 @@
 			will stay as 'running' until Cave Rat gets killed
 	-->
 
-	<raid name="ferumbras" file="ferumbras.xml" interval2="120" margin="0" reftype="single" ref="no"/>
+	<raid name="ferumbras" file="ferumbras.xml" interval2="1440" chance="1" margin="60" enabled="yes"/> 
 </raids>
