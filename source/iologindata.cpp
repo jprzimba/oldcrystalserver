@@ -869,7 +869,7 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 			if(!(*it)->serialize(propWriteStream))
 				return false;
 
-			propWriteStream.ADD_UCHAR(CONDITIONATTR_END);
+			propWriteStream.addByte(CONDITIONATTR_END);
 		}
 	}
 

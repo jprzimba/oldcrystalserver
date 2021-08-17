@@ -1608,12 +1608,12 @@ LanguageID=1033
 CharsetID=1252
 CompanyName=
 FileVersion=1.0
-FileDescription=CrystalServer
+FileDescription=Crystal Server
 InternalName=crystalserver.exe
 LegalCopyright=
 LegalTrademarks=
-OriginalFilename=CrystalServer
-ProductName=CrystalServer
+OriginalFilename=Crystal Server
+ProductName=Crystal Server
 ProductVersion=1.0
 AutoIncBuildNr=0
 

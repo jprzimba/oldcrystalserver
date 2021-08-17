@@ -20,12 +20,12 @@ FILETYPE VFT_APP
 		 {
 			 VALUE "CompanyName", ""
 			 VALUE "FileVersion", "1.0"
-			 VALUE "FileDescription", "CrystalServer"
+			 VALUE "FileDescription", "Crystal Server"
 			 VALUE "InternalName", "crystalserver.exe"
 			 VALUE "LegalCopyright", ""
 			 VALUE "LegalTrademarks", ""
-			 VALUE "OriginalFilename", "CrystalServer"
-			 VALUE "ProductName", "CrystalServer"
+			 VALUE "OriginalFilename", "Crystal Server"
+			 VALUE "ProductName", "Crystal Server"
 			 VALUE "ProductVersion", "1.0"
 		 }
 	 }

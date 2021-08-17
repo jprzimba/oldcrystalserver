@@ -613,7 +613,7 @@ Attr_ReadValue Door::readAttr(AttrTypes_t attr, PropStream& propStream)
 		return Item::readAttr(attr, propStream);
 
 	uint8_t doorId = 0;
-	if(!propStream.GET_UCHAR(doorId))
+	if(!propStream.getByte(doorId))
 		return ATTR_READ_ERROR;
 
 	setDoorId(doorId);
@@ -796,18 +796,6 @@ bool Houses::loadFromXml(std::string filename)
 	}
 
 	xmlFreeDoc(doc);
-	return true;
-}
-
-bool Houses::reloadPrices()
-{
-	if(g_config.getBool(ConfigManager::HOUSE_RENTASPRICE))
-		return true;
-
-	const uint32_t tilePrice = g_config.getNumber(ConfigManager::HOUSE_PRICE);
-	for(HouseMap::iterator it = houseMap.begin(); it != houseMap.end(); ++it)
-		it->second->setPrice(tilePrice * it->second->getTilesCount(), true);
-
 	return true;
 }
 
