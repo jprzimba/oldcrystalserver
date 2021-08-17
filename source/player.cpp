@@ -4475,12 +4475,12 @@ void Player::manageAccount(const std::string &text)
 						IOLoginData::getInstance()->changeName(tmp, managerString, managerString2) &&
 						IOBan::getInstance()->removePlayerBanishment(tmp, PLAYERBAN_LOCK))
 					{
+						msg << "Your character {" << managerString << "} has been successfully renamed to {" << managerString2 << "}, you should be able to login now.";
 						if(House* house = Houses::getInstance()->getHouseByPlayerId(tmp))
 							house->updateDoorDescription(managerString);
 
 						talkState[1] = true;
 						talkState[2] = false;
-						msg << "Your character has been successfully renamed, you should now be able to login at it without any problems.";
 					}
 					else
 					{
@@ -4508,7 +4508,7 @@ void Player::manageAccount(const std::string &text)
 				for(int8_t i = 2; i <= 12; i++)
 					talkState[i] = false;
 
-				msg << "Do you want to change your 'password', request a 'recovery key', add a 'character', or 'delete' a character?";
+				msg << "Do you want to change your 'password', generate a 'recovery key', create a 'character', or 'delete' an existing character?";
 			}
 			else if(checkText(text, "delete") && talkState[1])
 			{

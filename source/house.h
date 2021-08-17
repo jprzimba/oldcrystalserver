@@ -20,7 +20,11 @@
 #include "otsystem.h"
 
 #include <boost/regex.hpp>
+#if defined __GNUC__ && __GNUC__ >= 4
+#include <tr1/unordered_set>
+#else
 #include <boost/tr1/unordered_set.hpp>
+#endif
 
 #include "position.h"
 #include "housetile.h"
@@ -88,7 +92,7 @@ class AccessList
 class Door : public Item
 {
 	public:
-		Door(uint16_t type): Item(type), doorId(0), house(NULL), accessList(NULL) {}
+		Door(uint16_t type): Item(type), house(NULL), accessList(NULL) {}
 		virtual ~Door();
 
 		virtual Door* getDoor() {return this;}
@@ -97,8 +101,8 @@ class Door : public Item
 		//serialization
 		virtual Attr_ReadValue readAttr(AttrTypes_t attr, PropStream& propStream);
 
-		void setDoorId(uint8_t _doorId) {doorId = _doorId;}
-		uint8_t getDoorId() const {return doorId;}
+		void setDoorId(uint32_t doorId) {setAttribute("doorid", (int32_t)doorId);}
+		uint32_t getDoorId() const;
 
 		House* getHouse() {return house;}
 		void setHouse(House* _house);
@@ -113,11 +117,19 @@ class Door : public Item
 		virtual void copyAttributes(Item* item);
 
 	private:
- 		uint8_t doorId;
-
 		House* house;
 		AccessList* accessList;
 };
+
+inline uint32_t Door::getDoorId() const
+{
+	bool ok;
+	int32_t v = getIntegerAttribute("doorid", ok);
+	if(ok)
+		return (uint32_t)v;
+
+	return 0;
+}
 
 class TransferItem : public Item
 {
@@ -127,7 +139,7 @@ class TransferItem : public Item
 		TransferItem(House* _house): Item(0) {house = _house;}
 		virtual ~TransferItem() {}
 
-		virtual bool onTradeEvent(TradeEvents_t event, Player* owner, Player* seller);
+		virtual bool onTradeEvent(TradeEvents_t event, Player* owner);
 		virtual bool canTransform() const {return false;}
 
 		House* getHouse() {return house;}
@@ -171,11 +183,11 @@ class House
 		void setRent(uint32_t _rent) {rent = _rent;}
 		uint32_t getRent() const {return rent;}
 
-		void setPrice(uint32_t _price, bool update = false);
+		void setPrice(uint32_t _price) {price = _price;}
 		uint32_t getPrice() const {return price;}
 
 		void setLastWarning(time_t _lastWarning) {lastWarning = _lastWarning;}
-		time_t getLastWarning() {return lastWarning;}
+		time_t getLastWarning() const {return lastWarning;}
 
 		void setRentWarnings(uint32_t warnings) {rentWarnings = warnings;}
 		uint32_t getRentWarnings() const {return rentWarnings;}
@@ -193,7 +205,7 @@ class House
 		bool isGuild() const;
 
 		uint32_t getDoorsCount() const {return doorList.size();}
-		uint32_t getBedsCount() const {return bedsList.size();}
+		uint32_t getBedsCount() const {return (uint32_t)std::ceil((double)bedsList.size() / 2);}
 		uint32_t getTilesCount() const {return houseTiles.size();}
 
 		bool hasSyncFlag(syncflags_t flag) const {return ((syncFlags & (uint32_t)flag) == (uint32_t)flag);}

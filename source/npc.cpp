@@ -1447,9 +1447,11 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 						if(it->strValue == "|PRICE|")
 							moneyCount = npcState->price * npcState->amount;
 
-						int32_t subType = -1;
+						int32_t subType;
 						if(iit.hasSubType())
 							subType = npcState->subType;
+						else
+							subType = -1;
 
 						int32_t itemCount = player->__getItemTypeCount(iit.id, subType);
 						if(itemCount >= npcState->amount)
@@ -1470,11 +1472,13 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 						if(it->strValue == "|PRICE|")
 							moneyCount = npcState->price * npcState->amount;
 
-						int32_t subType = -1;
+						int32_t subType;
 						if(iit.hasSubType())
 							subType = npcState->subType;
+						else
+							subType = -1;
 
-						if(g_game.getMoney(player) >= moneyCount)
+						if(g_game.removeMoney(player, moneyCount))
 						{
 							int32_t amount = npcState->amount;
 							if(iit.stackable)
@@ -1509,8 +1513,6 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 
 							if(it->strValue == "|PRICE|")
 								moneyCount = npcState->price * amount;
-
-							g_game.removeMoney(player, moneyCount);
 						}
 					}
 					break;
@@ -1525,9 +1527,11 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 					const ItemType& iit = Item::items[npcState->itemId];
 					if(iit.id != 0)
 					{
-						int32_t subType = -1;
+						int32_t subType;
 						if(iit.hasSubType())
 							subType = npcState->subType;
+						else
+							subType = -1;
 
 						int32_t itemCount = player->__getItemTypeCount(itemId, subType);
 						if(itemCount >= npcState->amount)
@@ -1545,9 +1549,11 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 					const ItemType& iit = Item::items[itemId];
 					if(iit.id != 0)
 					{
-						int32_t subType = -1;
+						int32_t subType;
 						if(iit.hasSubType())
 							subType = npcState->subType;
+						else
+							subType = -1;
 
 						for(int32_t i = 0; i < npcState->amount; ++i)
 						{

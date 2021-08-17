@@ -95,13 +95,6 @@ Door* House::getDoorByPosition(const Position& pos)
 	return NULL;
 }
 
-void House::setPrice(uint32_t _price, bool update/* = false*/)
-{
-	price = _price;
-	if(update && !owner)
-		updateDoorDescription();
-}
-
 void House::setOwner(uint32_t guid)
 {
 	owner = guid;
@@ -135,10 +128,7 @@ bool House::setOwnerEx(uint32_t guid, bool transfer)
 	}
 
 	setOwner(guid);
-	if(guid)
-		lastWarning = time(NULL);
-	else
-		lastWarning = 0;
+	lastWarning = guid ? time(NULL) : 0;
 
 	Database* db = Database::getInstance();
 	DBTransaction trans(db);
@@ -183,7 +173,7 @@ void House::removePlayer(Player* player, bool ignoreRights)
 		return;
 
 	Position curPos = player->getPosition(), newPos = g_game.getClosestFreeTile(player, entry, false, false);
-	if(g_game.internalTeleport(player, newPos, true) == RET_NOERROR && !player->isGhost())
+	if(g_game.internalTeleport(player, newPos, false) == RET_NOERROR && !player->isGhost())
 	{
 		g_game.addMagicEffect(curPos, MAGIC_EFFECT_POFF);
 		g_game.addMagicEffect(newPos, MAGIC_EFFECT_TELEPORT);
@@ -224,19 +214,12 @@ bool House::kickPlayer(Player* player, Player* target)
 	if(!houseTile || houseTile->getHouse() != this)
 		return false;
 
-	if(player == target)
-	{
-		removePlayer(target, true);
-		return true;
-	}
+	bool self = player == target;
+	if(getHouseAccessLevel(player) < getHouseAccessLevel(target) && !self)
+		return false;
 
-	if(getHouseAccessLevel(player) >= getHouseAccessLevel(target))
-	{
-		removePlayer(target, false);
-		return true;
-	}
-
-	return false;
+	removePlayer(target, self);
+	return true;
 }
 
 void House::clean()
@@ -426,7 +409,7 @@ TransferItem* TransferItem::createTransferItem(House* house)
 	return transferItem;
 }
 
-bool TransferItem::onTradeEvent(TradeEvents_t event, Player* owner, Player* seller)
+bool TransferItem::onTradeEvent(TradeEvents_t event, Player* owner)
 {
 	switch(event)
 	{
@@ -436,15 +419,12 @@ bool TransferItem::onTradeEvent(TradeEvents_t event, Player* owner, Player* sell
 				house->setOwnerEx(owner->getGUID(), true);
 
 			g_game.internalRemoveItem(NULL, this, 1);
-			seller->transferContainer.setParent(NULL);
 			break;
 		}
 
 		case ON_TRADE_CANCEL:
 		{
-			owner->transferContainer.setParent(NULL);
 			owner->transferContainer.__removeThing(this, getItemCount());
-
 			g_game.freeThing(this);
 			break;
 		}
@@ -465,7 +445,6 @@ bool AccessList::parseList(const std::string& _list)
 {
 	playerList.clear();
 	guildList.clear();
-
 	expressionList.clear();
 	regexList.clear();
 
@@ -604,8 +583,7 @@ bool AccessList::addExpression(const std::string& expression)
 
 Door::~Door()
 {
-	if(accessList)
-		delete accessList;
+	delete accessList;
 }
 
 Attr_ReadValue Door::readAttr(AttrTypes_t attr, PropStream& propStream)
@@ -613,11 +591,11 @@ Attr_ReadValue Door::readAttr(AttrTypes_t attr, PropStream& propStream)
 	if(attr != ATTR_HOUSEDOORID)
 		return Item::readAttr(attr, propStream);
 
-	uint8_t _doorId = 0;
-	if(!propStream.getByte(_doorId))
+	uint8_t doorId = 0;
+	if(!propStream.getByte(doorId))
 		return ATTR_READ_ERROR;
 
-	doorId = _doorId;
+	setDoorId(doorId);
 	return ATTR_READ_CONTINUE;
 }
 
@@ -693,8 +671,8 @@ bool Houses::loadFromXml(std::string filename)
 	xmlDocPtr doc = xmlParseFile(filename.c_str());
 	if(!doc)
 	{
-		std::clog << "[Warning - Houses::loadFromXml] Cannot load houses file."
-			<< std::endl << getLastXMLError() << std::endl;
+		std::clog << "[Warning - Houses::loadFromXml] Cannot load houses file." << std::endl;
+		std::clog << getLastXMLError() << std::endl;
 		return false;
 	}
 
@@ -776,17 +754,10 @@ bool Houses::loadFromXml(std::string filename)
 			rent = intValue;
 
 		uint32_t price = house->getTilesCount() * g_config.getNumber(ConfigManager::HOUSE_PRICE);
-		if(g_config.getBool(ConfigManager::HOUSE_RENTASPRICE))
-		{
-			uint32_t tmp = rent;
-			if(!tmp)
-				tmp = price;
+		if(g_config.getBool(ConfigManager::HOUSE_RENTASPRICE) && rent)
+			price = rent;
 
-			house->setPrice(tmp);
-		}
-		else
-			house->setPrice(price);
-
+		house->setPrice(price);
 		if(g_config.getBool(ConfigManager::HOUSE_PRICEASRENT))
 			house->setRent(price);
 		else
@@ -806,7 +777,7 @@ void Houses::payHouses()
 		return;
 
 	uint64_t start = OTSYS_TIME();
-	std::clog << "Paying houses..." << std::endl;
+	std::clog << "> Paying houses..." << std::endl;
 
 	time_t currentTime = time(NULL);
 	for(HouseMap::iterator it = houseMap.begin(); it != houseMap.end(); ++it)

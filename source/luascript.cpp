@@ -2070,6 +2070,9 @@ void LuaInterface::registerFunctions()
 	//getPlayersByAccountId(accId)
 	lua_register(m_luaState, "getPlayersByAccountId", LuaInterface::luaGetPlayersByAccountId);
 
+	//doPlayerChangeName(guid, oldName, newName)
+	lua_register(m_luaState, "doPlayerChangeName", LuaInterface::luaDoPlayerChangeName);
+
 	//getAccountIdByName(name)
 	lua_register(m_luaState, "getAccountIdByName", LuaInterface::luaGetAccountIdByName);
 
@@ -5085,10 +5088,10 @@ int32_t LuaInterface::luaSetHouseAccessList(lua_State* L)
 
 int32_t LuaInterface::luaSetHouseOwner(lua_State* L)
 {
-	//setHouseOwner(houseId, owner[, clean])
+	//setHouseOwner(houseId, owner[, clean = true])
 	bool clean = true;
 	if(lua_gettop(L) > 2)
-		clean = popNumber(L);
+		clean = popBoolean(L);
 
 	uint32_t owner = popNumber(L);
 	if(House* house = Houses::getInstance()->getHouse(popNumber(L)))
@@ -7206,6 +7209,24 @@ int32_t LuaInterface::luaGetPlayerNameByGUID(lua_State* L)
 	}
 
 	lua_pushstring(L, name.c_str());
+	return 1;
+}
+
+int32_t LuaInterface::luaDoPlayerChangeName(lua_State* L)
+{
+	//doPlayerChangeName(guid, oldName, newName)
+	std::string newName = popString(L), oldName = popString(L);
+	uint32_t guid = popNumber(L);
+	if(IOLoginData::getInstance()->changeName(guid, newName, oldName))
+	{
+		if(House* house = Houses::getInstance()->getHouseByPlayerId(guid))
+			house->updateDoorDescription(newName);
+
+		lua_pushboolean(L, true);
+	}
+	else
+		lua_pushboolean(L, false);
+
 	return 1;
 }
 
