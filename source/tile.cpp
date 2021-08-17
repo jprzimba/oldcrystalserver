@@ -39,6 +39,9 @@ extern MoveEvents* g_moveEvents;
 
 StaticTile reallyNullTile(0xFFFF, 0xFFFF, 0xFFFF);
 Tile& Tile::nullTile = reallyNullTile;
+#ifdef __GROUND_CACHE__
+std::map<Item*, int32_t> g_grounds;
+#endif
 
 bool Tile::hasProperty(enum ITEMPROPERTY prop) const
 {
@@ -288,8 +291,8 @@ Item* Tile::getItemByTopOrder(uint32_t topOrder)
 {
 	if(TileItemVector* items = getItemList())
 	{
-		ItemVector::reverse_iterator eit = ItemVector::reverse_iterator(items->getBeginTopItem());
-		for(ItemVector::reverse_iterator it = ItemVector::reverse_iterator(items->getEndTopItem()); it != eit; ++it)
+		for(ItemVector::reverse_iterator it = ItemVector::reverse_iterator(items->getEndTopItem()),
+			end = ItemVector::reverse_iterator(items->getBeginTopItem()); it != end; ++it)
 		{
 			if(Item::items[(*it)->getID()].alwaysOnTopOrder == (int32_t)topOrder)
 				return (*it);
@@ -499,7 +502,7 @@ void Tile::moveCreature(Creature* actor, Creature* creature, Cylinder* toCylinde
 	newTile->postAddNotification(actor, creature, this, newStackpos);
 }
 
-ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
+ReturnValue Tile::__queryAdd(int32_t, const Thing* thing, uint32_t,
 	uint32_t flags) const
 {
 	const CreatureVector* creatures = getCreatures();
@@ -585,14 +588,15 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 			return !monster->hasCondition(Combat::DamageToConditionType(combatType), -1, false)
 				&& !monster->canPushItems() ? RET_NOTPOSSIBLE : RET_NOERROR;
 		}
-		else if(const Player* player = creature->getPlayer())
+
+		if(const Player* player = creature->getPlayer())
 		{
 			if(creatures && !creatures->empty() && !hasBitSet(FLAG_IGNOREBLOCKCREATURE, flags))
 			{
 				for(CreatureVector::const_iterator cit = creatures->begin(); cit != creatures->end(); ++cit)
 				{
 					if(!creature->canWalkthrough(*cit))
-						return RET_NOTENOUGHROOM; //RET_NOTPOSSIBLE
+						return RET_NOTENOUGHROOM; //NOTPOSSIBLE
 				}
 			}
 
@@ -608,8 +612,10 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 			if(hasFlag(TILESTATE_OPTIONALZONE) && player->isPzLocked())
 				return RET_PLAYERISPZLOCKED;
 
-			if(hasFlag(TILESTATE_PROTECTIONZONE) && player->isPzLocked())
-				return RET_PLAYERISPZLOCKED;
+			if(hasFlag(TILESTATE_PROTECTIONZONE)) {
+				if(player->isPzLocked())
+					return RET_PLAYERISPZLOCKED;
+			}
 		}
 		else if(creatures && !creatures->empty() && !hasBitSet(FLAG_IGNOREBLOCKCREATURE, flags))
 		{
@@ -678,7 +684,8 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 			}
 		}
 
-		const uint32_t itemLimit = g_config.getNumber(hasFlag(TILESTATE_PROTECTIONZONE) ? ConfigManager::PROTECTION_TILE_LIMIT : ConfigManager::TILE_LIMIT);
+		const uint32_t itemLimit = g_config.getNumber(
+				hasFlag(TILESTATE_PROTECTIONZONE) ? ConfigManager::PROTECTION_TILE_LIMIT : ConfigManager::TILE_LIMIT);
 		if(itemLimit && getThingCount() > itemLimit)
 			return RET_TILEISFULL;
 
@@ -722,8 +729,8 @@ ReturnValue Tile::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
 	return RET_NOERROR;
 }
 
-ReturnValue Tile::__queryMaxCount(int32_t index, const Thing* thing, uint32_t count, uint32_t& maxQueryCount,
-	uint32_t flags) const
+ReturnValue Tile::__queryMaxCount(int32_t, const Thing*, uint32_t count, uint32_t& maxQueryCount,
+	uint32_t ) const
 {
 	maxQueryCount = std::max((uint32_t)1, count);
 	return RET_NOERROR;
@@ -743,7 +750,7 @@ ReturnValue Tile::__queryRemove(const Thing* thing, uint32_t count, uint32_t fla
 	return RET_NOERROR;
 }
 
-Cylinder* Tile::__queryDestination(int32_t& index, const Thing* thing, Item** destItem,
+Cylinder* Tile::__queryDestination(int32_t&, const Thing*, Item** destItem,
 	uint32_t& flags)
 {
 	Tile* destTile = NULL;
@@ -851,15 +858,14 @@ Cylinder* Tile::__queryDestination(int32_t& index, const Thing* thing, Item** de
 
 	if(destTile)
 	{
-		Thing* destThing = destTile->getTopDownItem();
-		if(destThing && !destThing->isRemoved())
-			*destItem = destThing->getItem();
+		if(Item* item = destTile->getTopDownItem())
+			*destItem = item;
 	}
 
 	return destTile;
 }
 
-void Tile::__addThing(Creature* actor, int32_t index, Thing* thing)
+void Tile::__addThing(Creature* actor, int32_t, Thing* thing)
 {
 	if(Creature* creature = thing->getCreature())
 	{
@@ -897,18 +903,34 @@ void Tile::__addThing(Creature* actor, int32_t index, Thing* thing)
 	{
 		if(ground)
 		{
-			const ItemType& oldType = Item::items[ground->getID()];
 			int32_t oldGroundIndex = __getIndexOfThing(ground);
 			Item* oldGround = ground;
-
-			ground->setParent(NULL);
-			g_game.freeThing(ground);
 			ground = item;
+
+#ifdef __GROUND_CACHE__
+			std::map<Item*, int32_t>::iterator it = g_grounds.find(ground);
+			bool erase = it == g_grounds.end();
+			if(!erase)
+			{
+				it->second--;
+				erase = it->second < 1;
+				if(erase)
+					g_grounds.erase(it);
+			}
+
+			if(erase)
+			{
+#endif
+				oldGround->setParent(NULL);
+				g_game.freeThing(oldGround);
+#ifdef __GROUND_CACHE__
+			}
+#endif
 
 			updateTileFlags(oldGround, true);
 			updateTileFlags(item, false);
 
-			onUpdateTileItem(oldGround, oldType, item, Item::items[item->getID()]);
+			onUpdateTile();
 			postRemoveNotification(actor, oldGround, NULL, oldGroundIndex, true);
 		}
 		else
@@ -1070,8 +1092,11 @@ void Tile::__replaceThing(uint32_t index, Thing* thing)
 		--pos;
 	}
 
-	TileItemVector* items = getItemList();
-	if(!oldItem && items)
+	TileItemVector* items = NULL;
+	if(!oldItem)
+		items = getItemList();
+
+	if(items)
 	{
 		int32_t topItemSize = getTopItemCount();
 		if(pos < topItemSize)
@@ -1118,18 +1143,23 @@ void Tile::__replaceThing(uint32_t index, Thing* thing)
 		}
 	}
 
+	item->setParent(this);
+	if(oldItem)
+		updateTileFlags(oldItem, true);
+
+	updateTileFlags(item, false);
 	if(oldItem)
 	{
-		item->setParent(this);
-		updateTileFlags(oldItem, true);
-		updateTileFlags(item, false);
-
 		onUpdateTileItem(oldItem, Item::items[oldItem->getID()], item, Item::items[item->getID()]);
-		oldItem->setParent(NULL);
+#ifdef __GROUND_CACHE__
+		if(g_grounds.find(oldItem) == g_grounds.end())
+#endif
+			oldItem->setParent(NULL);
+
 		return/* RET_NOERROR*/;
 	}
-
 #ifdef __DEBUG_MOVESYS__
+
 	std::clog << "[Failure - Tile::__replaceThing] Update object not found" << std::endl;
 #endif
 }
@@ -1192,10 +1222,14 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 				oldStackposVector.push_back(getClientIndexOfThing(tmpPlayer, ground));
 		}
 
-		ground->setParent(NULL);
-		ground = NULL;
+#ifdef __GROUND_CACHE__
+		if(g_grounds.find(ground) == g_grounds.end())
+#endif
+			ground->setParent(NULL);
 
+		ground = NULL;
 		--thingCount;
+
 		onRemoveTileItem(list, oldStackposVector, item);
 		return/* RET_NOERROR*/;
 	}
@@ -1270,8 +1304,8 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 			return/* RET_NOERROR*/;
 		}
 	}
-
 #ifdef __DEBUG_MOVESYS__
+
 	std::clog << "[Failure - Tile::__removeThing] thing not found" << std::endl;
 #endif
 }
@@ -1280,12 +1314,6 @@ int32_t Tile::getClientIndexOfThing(const Player* player, const Thing* thing) co
 {
 	if(ground && ground == thing)
 		return 0;
-
-	if(const Item* item = thing->getItem())
-	{
-		if(item->isGroundTile())
-			return 0;
-	}
 
 	int32_t n = 0;
 	if(!ground)
@@ -1343,6 +1371,9 @@ int32_t Tile::__getIndexOfThing(const Thing* thing) const
 		return 0;
 
 	int32_t n = 0;
+	if(!ground)
+		n--;
+
 	const TileItemVector* items = getItemList();
 	if(items)
 	{
@@ -1421,11 +1452,7 @@ Thing* Tile::__getThing(uint32_t index) const
 	{
 		uint32_t topItemSize = items->getTopItemCount();
 		if(index < topItemSize)
-		{
-			Item* item = items->at(items->downItemCount + index);
-			if(item && !item->isRemoved())
-				return item;
-		}
+			return items->at(items->downItemCount + index);
 
 		index -= topItemSize;
 	}
@@ -1439,11 +1466,7 @@ Thing* Tile::__getThing(uint32_t index) const
 	}
 
 	if(items && index < items->getDownItemCount())
-	{
-		Item* item = items->at(index);
-		if(item && !item->isRemoved())
-			return item;
-	}
+		return items->at(index);
 
 	return NULL;
 }
@@ -1452,8 +1475,8 @@ void Tile::postAddNotification(Creature* actor, Thing* thing, const Cylinder* ol
 	int32_t index, cylinderlink_t link/* = LINK_OWNER*/)
 {
 	const Position& cylinderMapPos = pos;
-
 	const SpectatorVec& list = g_game.getSpectators(cylinderMapPos);
+
 	SpectatorVec::const_iterator it;
 
 	Player* tmpPlayer = NULL;
@@ -1504,11 +1527,11 @@ void Tile::postAddNotification(Creature* actor, Thing* thing, const Cylinder* ol
 }
 
 void Tile::postRemoveNotification(Creature* actor, Thing* thing, const Cylinder* newParent,
-	int32_t index, bool isCompleteRemoval, cylinderlink_t link/* = LINK_OWNER*/)
+	int32_t index, bool isCompleteRemoval, cylinderlink_t /*link = LINK_OWNER*/)
 {
 	const Position& cylinderMapPos = pos;
-
 	const SpectatorVec& list = g_game.getSpectators(cylinderMapPos);
+
 	SpectatorVec::const_iterator it;
 	if(/*isCompleteRemoval && */getThingCount() > 8)
 		onUpdateTile();
@@ -1536,7 +1559,7 @@ void Tile::postRemoveNotification(Creature* actor, Thing* thing, const Cylinder*
 	}
 }
 
-void Tile::__internalAddThing(uint32_t index, Thing* thing)
+void Tile::__internalAddThing(uint32_t, Thing* thing)
 {
 	thing->setParent(this);
 	if(Creature* creature = thing->getCreature())
@@ -1596,9 +1619,9 @@ void Tile::__internalAddThing(uint32_t index, Thing* thing)
 	updateTileFlags(item, false);
 }
 
-void Tile::updateTileFlags(Item* item, bool removed)
+void Tile::updateTileFlags(Item* item, bool remove)
 {
-	if(!removed)
+	if(!remove)
 	{
 		if(!hasFlag(TILESTATE_FLOORCHANGE))
 		{

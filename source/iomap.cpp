@@ -34,6 +34,9 @@
 
 extern ConfigManager g_config;
 extern Game g_game;
+#ifdef __GROUND_CACHE__
+extern std::map<Item*, int32_t> g_grounds;
+#endif
 
 typedef uint8_t attribute_t;
 typedef uint32_t flags_t;
@@ -224,6 +227,12 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 	for(StringVec::iterator it = map->descriptions.begin(); it != map->descriptions.end(); ++it)
 		std::clog << "" << (*it) << "" << std::endl;
 
+#ifdef __GROUND_CACHE__
+	typedef std::map<uint16_t, std::pair<Item*, int32_t> > CacheMap;
+	CacheMap groundCache;
+
+#endif
+
 	NODE nodeMapData = f.getChildNode(nodeMap, type);
 	while(nodeMapData != NO_NODE)
 	{
@@ -380,17 +389,55 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 								else if(item->isGroundTile())
 								{
 									if(ground)
-										delete ground;
+									{
+#ifdef __GROUND_CACHE__
+										CacheMap::iterator it = groundCache.find(ground->getID());
+										bool erase = it == groundCache.end();
+										if(!erase)
+										{
+											it->second.second--;
+											erase = it->second.second < 1;
+											if(erase)
+												groundCache.erase(it);
+										}
 
+										if(erase)
+#endif
+											delete ground;
+									}
+
+#ifdef __GROUND_CACHE__
+									const ItemType& tit = Item::items[item->getID()];
+									if(!(item->floorChange() || tit.magicEffect != MAGIC_EFFECT_NONE || !tit.walkStack
+										|| item->canDecay() || item->getActionId() > 0 || item->getUniqueId() > 0
+										|| item->getID() == 293 || item->getID() == 294 || item->getID() == 461
+										|| item->getID() == 468 || item->getID() == 481 || item->getID() == 483
+										|| item->getID() == 670 || item->getID() == 7932 || item->getID() == 8579
+										|| item->getID() == 8714)) //TODO: export to items.xml
+									{
+										CacheMap::iterator it = groundCache.find(item->getID());
+										if(it != groundCache.end())
+										{
+											delete item;
+											item = it->second.first;
+											it->second.second++;
+										}
+										else
+											groundCache[item->getID()] = std::make_pair(item, 1);
+									}
+
+#endif
 									ground = item;
 								}
 								else
 								{
 									tile = createTile(ground, item, px, py, pz);
 									tile->__internalAddThing(item);
-
-									item->__startDecaying();
-									item->setLoadedFromMap(true);
+									if(item->getDecaying() != DECAYING_TRUE)
+									{
+										item->__startDecaying();
+										item->setLoadedFromMap(true);
+									}
 								}
 
 								break;
@@ -427,11 +474,14 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 
 							if(item->unserializeItemNode(f, nodeItem, propStream))
 							{
+								if(item->getItemCount() <= 0)
+									item->setItemCount(1);
+
 								if(house && item->isMoveable())
 								{
-									std::clog << "[Warning - IOMap::loadMap] Movable item in house: ";
-									std::clog << house->getId() << ", item type: " << item->getID();
-									std::clog << ", pos " << px << "/" << py << "/" << pz << std::endl;
+									std::clog << "[Warning - IOMap::loadMap] Moveable item in house: "
+										<< house->getId() << ", item type: " << item->getID()
+										<< ", pos " << px << "/" << py << "/" << pz << std::endl;
 
 									delete item;
 									item = NULL;
@@ -439,23 +489,64 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 								else if(tile)
 								{
 									tile->__internalAddThing(item);
-									item->__startDecaying();
-									item->setLoadedFromMap(true);
+									if(item->getDecaying() != DECAYING_TRUE)
+									{
+										item->__startDecaying();
+										item->setLoadedFromMap(true);
+									}
 								}
 								else if(item->isGroundTile())
 								{
 									if(ground)
-										delete ground;
+									{
+#ifdef __GROUND_CACHE__
+										CacheMap::iterator it = groundCache.find(ground->getID());
+										bool erase = it == groundCache.end();
+										if(!erase)
+										{
+											it->second.second--;
+											erase = it->second.second < 1;
+											if(erase)
+												groundCache.erase(it);
+										}
 
+										if(erase)
+#endif
+											delete ground;
+									}
+
+#ifdef __GROUND_CACHE__
+									const ItemType& tit = Item::items[item->getID()];
+									if(!(item->floorChange() || tit.magicEffect != MAGIC_EFFECT_NONE || !tit.walkStack
+										|| item->canDecay() || item->getActionId() > 0 || item->getUniqueId() > 0
+										|| item->getID() == 293 || item->getID() == 294 || item->getID() == 461
+										|| item->getID() == 468 || item->getID() == 481 || item->getID() == 483
+										|| item->getID() == 670 || item->getID() == 7932 || item->getID() == 8579
+										|| item->getID() == 8714)) //TODO: export to items.xml
+									{
+										CacheMap::iterator it = groundCache.find(item->getID());
+										if(it != groundCache.end())
+										{
+											delete item;
+											item = it->second.first;
+											it->second.second++;
+										}
+										else
+											groundCache[item->getID()] = std::make_pair(item, 1);
+									}
+
+#endif
 									ground = item;
 								}
 								else
 								{
 									tile = createTile(ground, item, px, py, pz);
 									tile->__internalAddThing(item);
-
-									item->__startDecaying();
-									item->setLoadedFromMap(true);
+									if(item->getDecaying() != DECAYING_TRUE)
+									{
+										item->__startDecaying();
+										item->setLoadedFromMap(true);
+									}
 								}
 							}
 							else
@@ -594,6 +685,16 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 
 		nodeMapData = f.getNextNode(nodeMapData, type);
 	}
+
+#ifdef __GROUND_CACHE__
+	for(CacheMap::iterator it = groundCache.begin(); it != groundCache.end(); ++it)
+	{
+		//it->second.first->setParent(NULL);
+		g_grounds[it->second.first] = it->second.second;
+	}
+
+	groundCache.clear();
+#endif
 
 	return true;
 }

@@ -33,12 +33,9 @@ class Creature;
 class HouseTile;
 class QTreeLeafNode;
 
-typedef std::list<Player*> PlayerList;
 typedef std::list<Creature*> SpectatorVec;
-typedef std::map<Position, boost::shared_ptr<SpectatorVec> > SpectatorCache;
-
-typedef std::vector<Item*> ItemVector;
 typedef std::vector<Creature*> CreatureVector;
+typedef std::map<Position, boost::shared_ptr<SpectatorVec> > SpectatorCache;
 
 enum tileflags_t
 {
@@ -107,7 +104,8 @@ class TileItemVector
 		bool empty() {return items.empty();}
 		bool empty() const {return items.empty();}
 
-		void push_back(Item* item) {return items.push_back(item);}
+		void push_back(Item* item) {items.push_back(item);}
+		void push_front(Item* item) {items.insert(items.begin(), item);}
 		ItemVector::iterator insert(ItemVector::iterator _where, Item* item) {return items.insert(_where, item);}
 		ItemVector::iterator erase(ItemVector::iterator _pos) {return items.erase(_pos);}
 
@@ -165,7 +163,6 @@ class Tile : public Cylinder
 		Creature* getTopCreature();
 		Item* getTopTopItem();
 		Item* getTopDownItem();
-		bool isMoveableBlocking() const;
 		Thing* getTopVisibleThing(const Creature* creature);
 		Creature* getTopVisibleCreature(const Creature* creature);
 		const Creature* getTopVisibleCreature(const Creature* creature) const;
@@ -275,14 +272,14 @@ class Tile : public Cylinder
 
 		virtual void __internalAddThing(Thing* thing) {__internalAddThing(0, thing);}
 		virtual void __internalAddThing(uint32_t index, Thing* thing);
+		void onUpdateTile();
 
 	private:
 		void onAddTileItem(Item* item);
 		void onUpdateTileItem(Item* oldItem, const ItemType& oldType, Item* newItem, const ItemType& newType);
 		void onRemoveTileItem(const SpectatorVec& list, std::vector<uint32_t>& oldStackPosVector, Item* item);
-		void onUpdateTile();
 
-		void updateTileFlags(Item* item, bool removed);
+		void updateTileFlags(Item* item, bool remove);
 
 	protected:
 		bool isDynamic() const {return (m_flags & TILESTATE_DYNAMIC_TILE);}
