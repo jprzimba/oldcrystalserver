@@ -88,7 +88,7 @@ class AccessList
 class Door : public Item
 {
 	public:
-		Door(uint16_t type): Item(type), house(NULL), accessList(NULL) {}
+		Door(uint16_t type): Item(type), doorId(0), house(NULL), accessList(NULL) {}
 		virtual ~Door();
 
 		virtual Door* getDoor() {return this;}
@@ -97,8 +97,8 @@ class Door : public Item
 		//serialization
 		virtual Attr_ReadValue readAttr(AttrTypes_t attr, PropStream& propStream);
 
-		void setDoorId(uint32_t doorId) {setAttribute("doorid", (int32_t)doorId);}
-		uint32_t getDoorId() const;
+		void setDoorId(uint8_t _doorId) {doorId = _doorId;}
+		uint8_t getDoorId() const {return doorId;}
 
 		House* getHouse() {return house;}
 		void setHouse(House* _house);
@@ -113,18 +113,11 @@ class Door : public Item
 		virtual void copyAttributes(Item* item);
 
 	private:
+ 		uint8_t doorId;
+
 		House* house;
 		AccessList* accessList;
 };
-
-inline uint32_t Door::getDoorId() const
-{
-	const int32_t* v = getIntegerAttribute("doorid");
-	if(v)
-		return (uint32_t)*v;
-
-	return 0;
-}
 
 class TransferItem : public Item
 {

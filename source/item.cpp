@@ -116,17 +116,17 @@ bool Item::loadItem(xmlNodePtr node, Container* parent)
 
 	if(readXMLString(node, "attributes", strValue))
 	{
-		StringVec v, attr = explodeString(";", strValue);
+		StringVec v, attr = explodeString(strValue, ";");
 		for(StringVec::iterator it = attr.begin(); it != attr.end(); ++it)
 		{
-			v = explodeString(",", (*it));
+			v = explodeString((*it), ",");
 			if(v.size() < 2)
 				continue;
 
 			if(atoi(v[1].c_str()) || v[1] == "0")
-				item->setAttribute(v[0], atoi(v[1].c_str()));
+				item->setAttribute(v[0].c_str(), atoi(v[1].c_str()));
 			else
-				item->setAttribute(v[0], v[1]);
+				item->setAttribute(v[0].c_str(), v[1]);
 		}
 	}
 
@@ -1156,7 +1156,7 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance, const
 	}
 	else if(it.allowDistRead)
 	{
-		s << std::endl;
+		s << "." << std::endl;
 		if(item && !item->getText().empty())
 		{
 			if(lookDistance <= 4)
@@ -1175,12 +1175,10 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance, const
 
 				std::string text = item->getText();
 				s << text;
-				if(!text.empty())
-				{
-					char end = *text.rbegin();
-					if(end == '?' || end == '!' || end == '.')
-						dot = false;
-				}
+
+				char end = *text.rbegin();
+				if(end == '?' || end == '!' || end == '.')
+					dot = false;
 			}
 			else
 				s << "You are too far away to read it";
@@ -1247,7 +1245,7 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance, const
 	{
 		std::string tmp;
 		if(!item)
-			tmp = getWeightDescription(it.weight, it.stackable, subType);
+			tmp = getWeightDescription(it.weight, it.stackable && it.showCount, subType);
 		else
 			tmp = item->getWeightDescription();
 

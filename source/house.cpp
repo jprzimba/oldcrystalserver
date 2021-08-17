@@ -612,11 +612,11 @@ Attr_ReadValue Door::readAttr(AttrTypes_t attr, PropStream& propStream)
 	if(attr != ATTR_HOUSEDOORID)
 		return Item::readAttr(attr, propStream);
 
-	uint8_t doorId = 0;
-	if(!propStream.getByte(doorId))
+	uint8_t _doorId = 0;
+	if(!propStream.getByte(_doorId))
 		return ATTR_READ_ERROR;
 
-	setDoorId(doorId);
+	doorId = _doorId;
 	return ATTR_READ_CONTINUE;
 }
 

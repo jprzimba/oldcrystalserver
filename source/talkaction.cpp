@@ -853,16 +853,21 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 		toLowerCaseString(action);
 		if(Item* item = thing->getItem())
 		{
-			if(action == "set")
+			if(action == "set" || action == "add" || action == "new")
 			{
-				std::string key = parseParams(it, tokens.end()), value = parseParams(it, tokens.end());
-				if(atoi(value.c_str()) || value == "0")
-					item->setAttribute(key, atoi(value.c_str()));
+				std::string type = parseParams(it, tokens.end()), key = parseParams(it,
+					tokens.end()), value = parseParams(it, tokens.end());
+				if(type == "integer" || type == "number" || type == "int" || type == "num")
+					item->setAttribute(key.c_str(), atoi(value.c_str()));
+				else if(type == "float" || type == "double")
+					item->setAttribute(key.c_str(), (float)atof(value.c_str()));
+				else if(type == "bool" || type == "boolean")
+					item->setAttribute(key.c_str(), booleanString(value));
 				else
-					item->setAttribute(key, value);
+					item->setAttribute(key.c_str(), value);
 			}
-			else if(action == "erase" || action == "remove")
-				item->eraseAttribute(parseParams(it, tokens.end()));
+			else if(action == "erase" || action == "remove" || action == "delete")
+				item->eraseAttribute(parseParams(it, tokens.end()).c_str());
 			else if(action == "action" || action == "actionid" || action == "aid")
 			{
 				int32_t tmp = atoi(parseParams(it, tokens.end()).c_str());
@@ -877,13 +882,12 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 				if(tmp >= 1000 || tmp <= 0xFFFF)
 					item->setUniqueId(tmp);
 			}
-			else if(action == "destination" || action == "position"
-				|| action == "pos" || action == "dest") //TODO: doesn't work
+			else if(action == "destination" || action == "position" || action == "pos"
+				|| action == "dest" || action == "location" || action == "loc") //TODO: doesn't work
 			{
 				if(Teleport* teleport = item->getTeleport())
-					teleport->setDestination(Position(atoi(parseParams(it,
-						tokens.end()).c_str()), atoi(parseParams(it, tokens.end()).c_str()),
-						atoi(parseParams(it, tokens.end()).c_str())));
+					teleport->setDestination(Position(atoi(parseParams(it, tokens.end()).c_str()), atoi(
+						parseParams(it, tokens.end()).c_str()), atoi(parseParams(it, tokens.end()).c_str())));
 			}
 			else
 			{
@@ -909,12 +913,27 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 				_creature->setDropLoot((lootDrop_t)atoi(parseParams(it, tokens.end()).c_str()));
 			else if(action == "lossskill")
 				_creature->setLossSkill(booleanString(parseParams(it, tokens.end())));
+			else if(action == "storage")
+				_creature->setStorage(parseParams(it, tokens.end()), parseParams(it, tokens.end()));
 			else if(action == "cannotmove")
+			{
 				_creature->setNoMove(booleanString(parseParams(it, tokens.end())));
+				_creature->onWalkAborted();
+			}
 			else if(action == "skull")
 			{
 				_creature->setSkull(getSkulls(parseParams(it, tokens.end())));
 				g_game.updateCreatureSkull(_creature);
+			}
+			else if(action == "shield")
+			{
+				_creature->setShield(getShields(parseParams(it, tokens.end())));
+				g_game.updateCreatureShield(_creature);
+			}
+			else if(action == "emblem")
+			{
+				_creature->setEmblem(getEmblems(parseParams(it, tokens.end())));
+				g_game.updateCreatureEmblem(_creature);
 			}
 			else if(action == "speaktype")
 				_creature->setSpeakType((SpeakClasses)atoi(parseParams(it, tokens.end()).c_str()));
@@ -931,7 +950,16 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 				else if(action == "guildnick")
 					_player->setGuildNick(parseParams(it, tokens.end()).c_str());
 				else if(action == "group")
-					_player->setGroupId(atoi(parseParams(it, tokens.end()).c_str()));
+				{
+					uint16_t tmp = atoi(parseParams(it, tokens.end()).c_str());
+					if(tmp >= player->getGroupId())
+					{
+						invalid = "security failure - you can set only lower group than your own!";
+						break;
+					}
+					else
+						_player->setGroupId(tmp);
+				}
 				else if(action == "vocation")
 					_player->setVocation(atoi(parseParams(it, tokens.end()).c_str()));
 				else if(action == "sex" || action == "gender")
@@ -980,25 +1008,28 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 		}
 	}
 
-	const SpectatorVec& list = g_game.getSpectators(pos);
-	SpectatorVec::const_iterator it;
-
-	Player* tmpPlayer = NULL;
-	for(it = list.begin(); it != list.end(); ++it)
+	if(invalid.empty())
 	{
-		if((tmpPlayer = (*it)->getPlayer()))
-			tmpPlayer->sendUpdateTile(tile, pos);
+		const SpectatorVec& list = g_game.getSpectators(pos);
+		SpectatorVec::const_iterator it;
+
+		Player* tmpPlayer = NULL;
+		for(it = list.begin(); it != list.end(); ++it)
+		{
+			if((tmpPlayer = (*it)->getPlayer()))
+				tmpPlayer->sendUpdateTile(tile, pos);
+		}
+
+		for(it = list.begin(); it != list.end(); ++it)
+			(*it)->onUpdateTile(tile, pos);
+	}
+	else
+	{
+		std::string tmp = "Following action was invalid: " + invalid;
+		player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, tmp.c_str());
 	}
 
-	for(it = list.begin(); it != list.end(); ++it)
-		(*it)->onUpdateTile(tile, pos);
-
 	g_game.addMagicEffect(pos, MAGIC_EFFECT_WRAPS_GREEN);
-	if(invalid.empty())
-		return true;
-
-	std::string tmp = "Following action was invalid: " + invalid;
-	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, tmp.c_str());
 	return true;
 }
 
