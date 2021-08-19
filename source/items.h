@@ -130,7 +130,7 @@ class ItemType
 
 		bool hasSubType() const {return (isFluidContainer() || isSplash() || stackable || charges);}
 
-		bool stopTime, showCount, stackable, showDuration, showCharges, showAttributes,
+		bool stopTime, showCount, stackable, showDuration, showCharges, showAttributes, dualWield,
 			allowDistRead, canReadText, canWriteText, forceSerialize, isVertical, isHorizontal, isHangable,
 			useable, moveable, pickupable, rotable, replaceable, lookThrough, walkStack,
 			hasHeight, blockSolid, blockPickupable, blockProjectile, blockPathFind, allowPickupable, alwaysOnTop,

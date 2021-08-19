@@ -2621,207 +2621,154 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 		return RET_CANNOTPICKUP;
 
 	ReturnValue ret = RET_NOERROR;
-
-	const int32_t& slotPosition = item->getSlotPosition();
-	if((slotPosition & SLOTP_HEAD) || (slotPosition & SLOTP_NECKLACE) ||
-	        (slotPosition & SLOTP_BACKPACK) || (slotPosition & SLOTP_ARMOR) ||
-	        (slotPosition & SLOTP_LEGS) || (slotPosition & SLOTP_FEET) ||
-	        (slotPosition & SLOTP_RING))
+	if((item->getSlotPosition() & SLOTP_HEAD) || (item->getSlotPosition() & SLOTP_NECKLACE) ||
+		(item->getSlotPosition() & SLOTP_BACKPACK) || (item->getSlotPosition() & SLOTP_ARMOR) ||
+		(item->getSlotPosition() & SLOTP_LEGS) || (item->getSlotPosition() & SLOTP_FEET) ||
+		(item->getSlotPosition() & SLOTP_RING))
 		ret = RET_CANNOTBEDRESSED;
-	else if(slotPosition & SLOTP_TWO_HAND)
+	else if(item->getSlotPosition() & SLOTP_TWO_HAND)
 		ret = RET_PUTTHISOBJECTINBOTHHANDS;
-	else if((slotPosition & SLOTP_RIGHT) || (slotPosition & SLOTP_LEFT))
-    {
-		if(!g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
-			ret = RET_CANNOTBEDRESSED;
-		else
-			ret = RET_PUTTHISOBJECTINYOURHAND;
-	}
+	else if((item->getSlotPosition() & SLOTP_RIGHT) || (item->getSlotPosition() & SLOTP_LEFT))
+		ret = RET_PUTTHISOBJECTINYOURHAND;
 
 	switch(index)
 	{
 		case SLOT_HEAD:
-		{
-			if(slotPosition & SLOTP_HEAD)
+			if(item->getSlotPosition() & SLOTP_HEAD)
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_NECKLACE:
-		{
-			if(slotPosition & SLOTP_NECKLACE)
+			if(item->getSlotPosition() & SLOTP_NECKLACE)
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_BACKPACK:
-		{
-			if(slotPosition & SLOTP_BACKPACK)
+			if(item->getSlotPosition() & SLOTP_BACKPACK)
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_ARMOR:
-		{
-			if(slotPosition & SLOTP_ARMOR)
+			if(item->getSlotPosition() & SLOTP_ARMOR)
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_RIGHT:
-		{
-			if(slotPosition & SLOTP_RIGHT)
+			if(item->getSlotPosition() & SLOTP_RIGHT)
 			{
 				if(!g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
 				{
-					if(item->getWeaponType() != WEAPON_SHIELD)
-						ret = RET_CANNOTBEDRESSED;
+					if(!item->isWeapon() || (item->getWeaponType() != WEAPON_SHIELD && !item->isDualWield()))
+						ret = RET_NOTPOSSIBLE;
+					else if(inventory[SLOT_LEFT] && inventory[SLOT_LEFT]->getSlotPosition() & SLOTP_TWO_HAND)
+						ret = RET_DROPTWOHANDEDITEM;
 					else
-                    {
-						const Item* leftItem = inventory[SLOT_LEFT];
-						if(leftItem)
-                        {
-							if((leftItem->getSlotPosition() | slotPosition) & SLOTP_TWO_HAND)
-								ret = RET_BOTHHANDSNEEDTOBEFREE;
-							else
-								ret = RET_NOERROR;
-						}
-                        else
-							ret = RET_NOERROR;
-					}
+						ret = RET_NOERROR;
 				}
-                else if(slotPosition & SLOTP_TWO_HAND)
+				else if(item->getSlotPosition() & SLOTP_TWO_HAND)
 				{
 					if(inventory[SLOT_LEFT] && inventory[SLOT_LEFT] != item)
 						ret = RET_BOTHHANDSNEEDTOBEFREE;
 					else
 						ret = RET_NOERROR;
 				}
-                else if(inventory[SLOT_LEFT])
-                {
+				else if(inventory[SLOT_LEFT])
+				{
 					const Item* leftItem = inventory[SLOT_LEFT];
 					WeaponType_t type = item->getWeaponType(), leftType = leftItem->getWeaponType();
-
 					if(leftItem->getSlotPosition() & SLOTP_TWO_HAND)
 						ret = RET_DROPTWOHANDEDITEM;
-					else if(item == leftItem && count == item->getItemCount())
+					else if(item == leftItem && item->getItemCount() == count)
 						ret = RET_NOERROR;
 					else if(leftType == WEAPON_SHIELD && type == WEAPON_SHIELD)
 						ret = RET_CANONLYUSEONESHIELD;
-					else if(leftType == WEAPON_NONE || type == WEAPON_NONE || leftType == WEAPON_SHIELD
-                    || leftType == WEAPON_AMMO || type == WEAPON_SHIELD || type == WEAPON_AMMO)
+					else if(!leftItem->isWeapon() || !item->isWeapon() ||
+						leftType == WEAPON_AMMO || type == WEAPON_AMMO ||
+						leftType == WEAPON_SHIELD || type == WEAPON_SHIELD ||
+						(leftItem->isDualWield() && item->isDualWield()))
 						ret = RET_NOERROR;
 					else
 						ret = RET_CANONLYUSEONEWEAPON;
 				}
-                else
+				else
 					ret = RET_NOERROR;
 			}
 			break;
-		}
-
 		case SLOT_LEFT:
-		{
-			if(slotPosition & SLOTP_LEFT)
-            {
+			if(item->getSlotPosition() & SLOTP_LEFT)
+			{
 				if(!g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
-                {
-					WeaponType_t type = item->getWeaponType();
-					if(type == WEAPON_NONE || type == WEAPON_SHIELD)
-						ret = RET_CANNOTBEDRESSED;
-					else if(inventory[SLOT_RIGHT] && (slotPosition & SLOTP_TWO_HAND))
+				{
+					if(!item->isWeapon() || item->getWeaponType() == WEAPON_SHIELD)
+						ret = RET_NOTPOSSIBLE;
+					else if(inventory[SLOT_RIGHT] && item->getSlotPosition() & SLOTP_TWO_HAND)
 						ret = RET_BOTHHANDSNEEDTOBEFREE;
 					else
 						ret = RET_NOERROR;
 				}
-                else if(slotPosition & SLOTP_TWO_HAND)
-                {
+				else if(item->getSlotPosition() & SLOTP_TWO_HAND)
+				{
 					if(inventory[SLOT_RIGHT] && inventory[SLOT_RIGHT] != item)
 						ret = RET_BOTHHANDSNEEDTOBEFREE;
 					else
 						ret = RET_NOERROR;
 				}
-                else if(inventory[SLOT_RIGHT])
-                {
+				else if(inventory[SLOT_RIGHT])
+				{
 					const Item* rightItem = inventory[SLOT_RIGHT];
 					WeaponType_t type = item->getWeaponType(), rightType = rightItem->getWeaponType();
-
 					if(rightItem->getSlotPosition() & SLOTP_TWO_HAND)
 						ret = RET_DROPTWOHANDEDITEM;
-					else if(item == rightItem && count == item->getItemCount())
+					else if(item == rightItem && item->getItemCount() == count)
 						ret = RET_NOERROR;
 					else if(rightType == WEAPON_SHIELD && type == WEAPON_SHIELD)
 						ret = RET_CANONLYUSEONESHIELD;
-					else if(rightType == WEAPON_NONE || type == WEAPON_NONE || rightType == WEAPON_SHIELD
-                    || rightType == WEAPON_AMMO || type == WEAPON_SHIELD || type == WEAPON_AMMO)
+					else if(!rightItem->isWeapon() || !item->isWeapon() ||
+						rightType == WEAPON_AMMO || type == WEAPON_AMMO ||
+						rightType == WEAPON_SHIELD || type == WEAPON_SHIELD ||
+						(rightItem->isDualWield() && item->isDualWield()))
 						ret = RET_NOERROR;
 					else
 						ret = RET_CANONLYUSEONEWEAPON;
 				}
-                else
+				else
 					ret = RET_NOERROR;
 			}
 			break;
-		}
-
 		case SLOT_LEGS:
-		{
-			if(slotPosition & SLOTP_LEGS)
+			if(item->getSlotPosition() & SLOTP_LEGS)
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_FEET:
-		{
-			if(slotPosition & SLOTP_FEET)
+			if(item->getSlotPosition() & SLOTP_FEET)
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_RING:
-		{
-			if(slotPosition & SLOTP_RING)
+			if(item->getSlotPosition() & SLOTP_RING)
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_AMMO:
-		{
-			if((slotPosition & SLOTP_AMMO) || g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
+			if(item->getSlotPosition() & SLOTP_AMMO || g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
 				ret = RET_NOERROR;
 			break;
-		}
-
 		case SLOT_WHEREEVER:
 		case -1:
 			ret = RET_NOTENOUGHROOM;
 			break;
-
 		default:
 			ret = RET_NOTPOSSIBLE;
 			break;
 	}
 
-	if(ret != RET_NOERROR && ret != RET_NOTENOUGHROOM)
-		return ret;
-
-	//check if enough capacity
-	if(!hasCapacity(item, count))
-		return RET_NOTENOUGHCAPACITY;
-
-	ret = g_moveEvents->onPlayerEquip(const_cast<Player*>(this), const_cast<Item*>(item), static_cast<slots_t>(index), true);
-	if(ret != RET_NOERROR)
-		return ret;
-
-	//need an exchange with source? (destination item is swapped with currently moved item)
-	const Item* inventoryItem = getInventoryItem(static_cast<slots_t>(index));
-	if (inventoryItem && (!inventoryItem->isStackable() || inventoryItem->getID() != item->getID())) {
-		const Cylinder* cylinder = item->getTopParent();
-		if (cylinder && (dynamic_cast<const Depot*>(cylinder) || dynamic_cast<const Player*>(cylinder))) {
+	if(ret == RET_NOERROR || ret == RET_NOTENOUGHROOM)
+	{
+		//need an exchange with source?
+		if(getInventoryItem((slots_t)index) != NULL && (!getInventoryItem((slots_t)index)->isStackable()
+			|| getInventoryItem((slots_t)index)->getID() != item->getID()))
 			return RET_NEEDEXCHANGE;
-		}
 
-		return RET_NOTENOUGHROOM;
+		if(!g_moveEvents->onPlayerEquip(const_cast<Player*>(this), const_cast<Item*>(item), (slots_t)index, true))
+			return RET_CANNOTBEDRESSED;
+
+		//check if enough capacity
+		if(!hasCapacity(item, count))
+			return RET_NOTENOUGHCAPACITY;
 	}
 
 	return ret;

@@ -244,7 +244,9 @@ class Item : virtual public Thing, public ItemAttributes
 		std::string getName() const;
 		std::string getPluralName() const;
 		std::string getArticle() const;
+
 		bool isScriptProtected() const;
+		bool isDualWield() const;
 
 		int32_t getAttack() const;
 		int32_t getExtraAttack() const;
@@ -458,6 +460,16 @@ inline int32_t Item::getShootRange() const
 		return v;
 
 	return items[id].shootRange;
+}
+
+inline bool Item::isDualWield() const
+{
+	bool ok;
+	int32_t v = getBooleanAttribute("dualwield", ok);
+	if(ok)
+		return v;
+
+	return items[id].dualWield;
 }
 
 inline void Item::decreaseDuration(int32_t time)

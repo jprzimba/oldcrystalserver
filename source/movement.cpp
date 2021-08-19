@@ -518,20 +518,20 @@ uint32_t MoveEvents::onCreatureMove(Creature* actor, Creature* creature, const T
 	return ret;
 }
 
-ReturnValue MoveEvents::onPlayerEquip(Player* player, Item* item, slots_t slot, bool isCheck)
+uint32_t MoveEvents::onPlayerEquip(Player* player, Item* item, slots_t slot, bool isCheck)
 {
 	if(MoveEvent* moveEvent = getEvent(item, MOVE_EVENT_EQUIP, slot))
 		return moveEvent->fireEquip(player, item, slot, isCheck);
 
-	return RET_NOERROR;
+	return 1;
 }
 
-ReturnValue MoveEvents::onPlayerDeEquip(Player* player, Item* item, slots_t slot, bool isRemoval)
+uint32_t MoveEvents::onPlayerDeEquip(Player* player, Item* item, slots_t slot, bool isRemoval)
 {
 	if(MoveEvent* moveEvent = getEvent(item, MOVE_EVENT_DEEQUIP, slot))
 		return moveEvent->fireEquip(player, item, slot, isRemoval);
 
-	return RET_NOERROR;
+	return 1;
 }
 
 uint32_t MoveEvents::onItemMove(Creature* actor, Item* item, Tile* tile, bool isAdd)
@@ -884,25 +884,25 @@ uint32_t MoveEvent::AddItemField(Item* item)
 	return LUA_ERROR_ITEM_NOT_FOUND;
 }
 
-ReturnValue MoveEvent::EquipItem(MoveEvent* moveEvent, Player* player, Item* item, slots_t slot, bool isCheck)
+uint32_t MoveEvent::EquipItem(MoveEvent* moveEvent, Player* player, Item* item, slots_t slot, bool isCheck)
 {
 	if(player->isItemAbilityEnabled(slot))
-		return RET_NOERROR;
+		return 1;
 
 	if(!player->hasFlag(PlayerFlag_IgnoreEquipCheck) && moveEvent->getWieldInfo() != 0)
 	{
 		if(player->getLevel() < (uint32_t)moveEvent->getReqLevel() || player->getMagicLevel() < (uint32_t)moveEvent->getReqMagLv())
-			return RET_NOTENOUGHLEVEL;
+			return 0;
 
 		if(moveEvent->isPremium() && !player->isPremium())
-			return RET_YOUNEEDPREMIUMACCOUNT;
+			return 0;
 
 		if(!moveEvent->getVocEquipMap().empty() && moveEvent->getVocEquipMap().find(player->getVocationId()) == moveEvent->getVocEquipMap().end())
-			return RET_YOUDONTHAVEREQUIREDPROFESSION;
+			return 0;
 	}
 
 	if(isCheck)
-		return RET_NOERROR;
+		return 1;
 
 	const ItemType& it = Item::items[item->getID()];
 	if(it.transformEquipTo)
@@ -994,13 +994,13 @@ ReturnValue MoveEvent::EquipItem(MoveEvent* moveEvent, Player* player, Item* ite
 	if(needUpdateStats)
 		player->sendStats();
 
-	return RET_NOERROR;
+	return 1;
 }
 
-ReturnValue MoveEvent::DeEquipItem(MoveEvent* moveEvent, Player* player, Item* item, slots_t slot, bool isRemoval)
+uint32_t MoveEvent::DeEquipItem(MoveEvent* moveEvent, Player* player, Item* item, slots_t slot, bool isRemoval)
 {
 	if(!player->isItemAbilityEnabled(slot))
-		return RET_NOERROR;
+		return 1;
 
 	player->setItemAbility(slot, false);
 	const ItemType& it = Item::items[item->getID()];
@@ -1066,7 +1066,7 @@ ReturnValue MoveEvent::DeEquipItem(MoveEvent* moveEvent, Player* player, Item* i
 	if(needUpdateStats)
 		player->sendStats();
 
-	return RET_NOERROR;
+	return 1;
 }
 
 uint32_t MoveEvent::fireStepEvent(Creature* actor, Creature* creature, Item* item, const Position& pos, const Position& fromPos, const Position& toPos)
@@ -1145,21 +1145,12 @@ uint32_t MoveEvent::executeStep(Creature* actor, Creature* creature, Item* item,
 	}
 }
 
-ReturnValue MoveEvent::fireEquip(Player* player, Item* item, slots_t slot, bool boolean)
+uint32_t MoveEvent::fireEquip(Player* player, Item* item, slots_t slot, bool boolean)
 {
 	if(isScripted())
-	{
-		if(!equipFunction || equipFunction(this, player, item, slot, boolean) == RET_NOERROR)
-		{
-			if (executeEquip(player, item, slot))
-				return RET_NOERROR;
+		return executeEquip(player, item, slot);
 
-			return RET_CANNOTBEDRESSED;
-		}
-		return equipFunction(this, player, item, slot, boolean);
-	}
-	else
-		return equipFunction(this, player, item, slot, boolean);
+	return equipFunction(this, player, item, slot, boolean);
 }
 
 uint32_t MoveEvent::executeEquip(Player* player, Item* item, slots_t slot)

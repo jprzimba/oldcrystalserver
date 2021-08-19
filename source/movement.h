@@ -51,8 +51,8 @@ class MoveEvents : public BaseEvents
 		virtual ~MoveEvents();
 
 		uint32_t onCreatureMove(Creature* actor, Creature* creature, const Tile* fromTile, const Tile* toTile, bool isStepping);
-		ReturnValue onPlayerEquip(Player* player, Item* item, slots_t slot, bool isCheck);
-		ReturnValue onPlayerDeEquip(Player* player, Item* item, slots_t slot, bool isRemoval);
+		uint32_t onPlayerEquip(Player* player, Item* item, slots_t slot, bool isCheck);
+		uint32_t onPlayerDeEquip(Player* player, Item* item, slots_t slot, bool isRemoval);
 		uint32_t onItemMove(Creature* actor, Item* item, Tile* tile, bool isAdd);
 
 		MoveEvent* getEvent(Item* item, MoveEvent_t eventType);
@@ -97,7 +97,7 @@ class MoveEvents : public BaseEvents
 
 typedef uint32_t (MoveFunction)(Item* item);
 typedef uint32_t (StepFunction)(Creature* creature, Item* item);
-typedef ReturnValue (EquipFunction)(MoveEvent* moveEvent, Player* player, Item* item, slots_t slot, bool boolean);
+typedef uint32_t (EquipFunction)(MoveEvent* moveEvent, Player* player, Item* item, slots_t slot, bool boolean);
 
 class MoveEvent : public Event
 {
@@ -114,7 +114,7 @@ class MoveEvent : public Event
 
 		uint32_t fireStepEvent(Creature* actor, Creature* creature, Item* item, const Position& pos, const Position& fromPos, const Position& toPos);
 		uint32_t fireAddRemItem(Creature* actor, Item* item, Item* tileItem, const Position& pos);
-		ReturnValue fireEquip(Player* player, Item* item, slots_t slot, bool boolean);
+		uint32_t fireEquip(Player* player, Item* item, slots_t slot, bool boolean);
 
 		//scripting
 		uint32_t executeStep(Creature* actor, Creature* creature, Item* item, const Position& pos, const Position& fromPos, const Position& toPos);
