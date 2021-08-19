@@ -182,6 +182,7 @@ class ConfigManager
 			FIST_BASE_ATTACK,
 			DEFAULT_DEPOT_SIZE_PREMIUM,
 			DEFAULT_DEPOT_SIZE,
+			SURPRISEBAG_PERCENT,
 			LAST_INTEGER_CONFIG /* this must be the last one */
 		};
 
@@ -286,7 +287,6 @@ class ConfigManager
 			USE_FRAG_HANDLER,
 			ADDONS_PREMIUM,
 			USE_CAPACITY,
-			SHOW_DESCR,
 			REMOVE_BREAK,
 			SHOW_GAMEMASTERS_ONLINE,
 			SKIP_ITEMS_VERSION,
@@ -298,6 +298,7 @@ class ConfigManager
 			ALWAYS_SHOW_MOTD,
 			PVPZONE_RECOVERMANA,
 			ALLOW_BLOCK_SPAWN,
+			SURPRISE_BAGS,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

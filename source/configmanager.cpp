@@ -231,6 +231,7 @@ bool ConfigManager::load()
 	m_integer[FIST_BASE_ATTACK] = getGlobalNumber("fistBaseAttack", 7);
 	m_integer[DEFAULT_DEPOT_SIZE_PREMIUM] = getGlobalNumber("defaultDepotSizePremium", 2000);
 	m_integer[DEFAULT_DEPOT_SIZE] = getGlobalNumber("defaultDepotSize", 2000);
+	m_integer[SURPRISEBAG_PERCENT] = getGlobalNumber("surpriseBagPercent", 1);
 
 	m_double[RATE_EXPERIENCE] = getGlobalDouble("rateExperience", 1);
 	m_double[RATE_SKILL] = getGlobalDouble("rateSkill", 1);
@@ -316,7 +317,6 @@ bool ConfigManager::load()
 	m_boolean[ADDONS_PREMIUM] = getGlobalBool("addonsOnlyPremium", true);
 	m_boolean[DISPLAY_CRITICAL_HIT] = getGlobalBool("displayCriticalHitNotify", false);
 	m_boolean[USE_CAPACITY] = getGlobalBool("useCapSystem", true);
-	m_boolean[SHOW_DESCR] = getGlobalBool("showDescriptionItems", false);
 	m_boolean[REMOVE_BREAK] = getGlobalBool("removeBreakWeaponsCharges", true);
 	m_boolean[SHOW_GAMEMASTERS_ONLINE] = getGlobalBool("displayGamemastersWithOnlineCommand", false);
 	m_boolean[SKIP_ITEMS_VERSION] = getGlobalBool("skipItemsVersionCheck", true);
@@ -328,6 +328,7 @@ bool ConfigManager::load()
 	m_boolean[ALWAYS_SHOW_MOTD] = getGlobalBool("alwaysShowMessageOfTheDay", false);
 	m_boolean[PVPZONE_RECOVERMANA] = getGlobalBool("recoverManaAfterDeathInPvPZone", false);
 	m_boolean[ALLOW_BLOCK_SPAWN] = getGlobalBool("allowBlockSpawn", false);
+	m_boolean[SURPRISE_BAGS] = getGlobalBool("dropSurpriseBagsFromMonsters", false);
 
 	m_loaded = true;
 	return true;

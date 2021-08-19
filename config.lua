@@ -159,7 +159,6 @@
 
 	-- Gamemasters
 	displayGamemastersWithOnlineCommand = false
-	showDescriptionItems = true
 
 	-- Deathlist
 	deathListEnabled = true
@@ -298,6 +297,11 @@
 	rateMonsterDefense = 1.0
 	monsterLootMessage = 3
 	monsterLootMessageType = 25
+
+	-- Surprise Bags
+	-- NOTE: set dropSurpriseBagsFromMonsters to false to disable drop surprise bags from monsters.
+	dropSurpriseBagsFromMonsters = false
+	surpriseBagPercent = 20
 
 	-- Experience from players
 	-- NOTE: min~Threshold* set to 0 will disable the minimum threshold:

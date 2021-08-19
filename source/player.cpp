@@ -560,8 +560,7 @@ void Player::sendIcons() const
 void Player::updateInventoryWeight()
 {
 	inventoryWeight = 0.00;
-	if(hasFlag(PlayerFlag_HasInfiniteCapacity)
-		|| g_config.getBool(ConfigManager::USE_CAPACITY))
+	if(hasFlag(PlayerFlag_HasInfiniteCapacity))
 		return;
 
 	for(int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
@@ -575,8 +574,7 @@ double Player::getFreeCapacity() const
 {
 	if(hasFlag(PlayerFlag_CannotPickupItem))
 		return 0.00;
-	else if(hasFlag(PlayerFlag_HasInfiniteCapacity)
-		|| g_config.getBool(ConfigManager::USE_CAPACITY))
+	else if(hasFlag(PlayerFlag_HasInfiniteCapacity))
 		return 10000.00;
 
 	return std::max(0.00, capacity - inventoryWeight);

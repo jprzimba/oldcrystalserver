@@ -177,6 +177,21 @@ ItemList MonsterType::createLoot(const LootBlock& lootBlock)
 	return items;
 }
 
+void MonsterType::createSurpriseBag(Container* corpse)
+{
+	if(!g_config.getBool(ConfigManager::SURPRISE_BAGS))
+		return;
+
+	//TODO: Add a configuration file that contain names of monsters to drop surprise bags.
+	//and move ITEM_BLUE_SURPRISE_BAG and ITEM_RED_SURPRISE_BAG bag to items.xml.
+	if(corpse->capacity() - corpse->size() > 0)
+	{
+	 	uint32_t surpriseBagId = random_range(ITEM_BLUE_SURPRISE_BAG, ITEM_RED_SURPRISE_BAG);
+		if(random_range(1, 100) <= g_config.getNumber(ConfigManager::SURPRISEBAG_PERCENT))
+			corpse->__internalAddThing(Item::CreateItem(surpriseBagId, 1));
+	}
+}
+
 bool MonsterType::createChildLoot(Container* parent, const LootBlock& lootBlock)
 {
 	LootItems::const_iterator it = lootBlock.childLoot.begin();

@@ -1290,7 +1290,10 @@ void Monster::updateLookDirection()
 void Monster::dropLoot(Container* corpse)
 {
 	if(corpse && lootDrop == LOOT_DROP_FULL)
+	{
 		mType->dropLoot(corpse);
+		mType->createSurpriseBag(corpse);
+	}
 }
 
 bool Monster::isImmune(CombatType_t type) const
