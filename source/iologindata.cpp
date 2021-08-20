@@ -920,19 +920,21 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 	if(!db->query(query.str()))
 		return false;
 
-	char buffer[280];
-	DBInsert query_insert(db);
-
-	query_insert.setQuery("INSERT INTO `player_spells` (`player_id`, `name`) VALUES ");
-	for(LearnedInstantSpellList::const_iterator it = player->learnedInstantSpellList.begin(); it != player->learnedInstantSpellList.end(); ++it)
+	DBInsert stmt(db);
+	if(player->learnedInstantSpellList.size())
 	{
-		sprintf(buffer, "%d, %s", player->getGUID(), db->escapeString(*it).c_str());
-		if(!query_insert.addRow(buffer))
+		query.str("");
+		stmt.setQuery("INSERT INTO `player_spells` (`player_id`, `name`) VALUES ");
+		for(LearnedInstantSpellList::const_iterator it = player->learnedInstantSpellList.begin(); it != player->learnedInstantSpellList.end(); ++it)
+		{
+			query << player->getGUID() << "," << db->escapeString(*it);
+			if(!stmt.addRow(query))
+				return false;
+		}
+
+		if(!stmt.execute())
 			return false;
 	}
-
-	if(!query_insert.execute())
-		return false;
 
 	//item saving
 	query.str("");
@@ -947,8 +949,8 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 			itemList.push_back(itemBlock(slotId, item));
 	}
 
-	query_insert.setQuery("INSERT INTO `player_items` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
-	if(!saveItems(player, itemList, query_insert))
+	stmt.setQuery("INSERT INTO `player_items` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
+	if(!saveItems(player, itemList, stmt))
 		return false;
 
 	itemList.clear();
@@ -973,8 +975,8 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 		if(!db->query(query.str()))
 			return false;
 
-		query_insert.setQuery("INSERT INTO `player_depotitems` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
-		if(!saveItems(player, itemList, query_insert))
+		stmt.setQuery("INSERT INTO `player_depotitems` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
+		if(!saveItems(player, itemList, stmt))
 			return false;
 
 		itemList.clear();
@@ -986,15 +988,17 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 		return false;
 
 	player->generateReservedStorage();
-	query_insert.setQuery("INSERT INTO `player_storage` (`player_id`, `key`, `value`) VALUES ");
+	query.str("");
+
+	stmt.setQuery("INSERT INTO `player_storage` (`player_id`, `key`, `value`) VALUES ");
 	for(StorageMap::const_iterator cit = player->getStorageBegin(); cit != player->getStorageEnd(); ++cit)
 	{
-		sprintf(buffer, "%u, %s, %s", player->getGUID(), db->escapeString(cit->first).c_str(), db->escapeString(cit->second).c_str());
-		if(!query_insert.addRow(buffer))
+		query << player->getGUID() << "," << db->escapeString(cit->first) << "," << db->escapeString(cit->second);
+		if(!stmt.addRow(query))
 			return false;
 	}
 
-	if(!query_insert.execute())
+	if(!stmt.execute())
 		return false;
 
 	if(g_config.getBool(ConfigManager::INGAME_GUILD_MANAGEMENT))
@@ -1005,15 +1009,15 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 		if(!db->query(query.str()))
 			return false;
 
-		query_insert.setQuery("INSERT INTO `guild_invites` (`player_id`, `guild_id`) VALUES ");
+		stmt.setQuery("INSERT INTO `guild_invites` (`player_id`, `guild_id`) VALUES ");
 		for(InvitedToGuildsList::const_iterator it = player->invitedToGuildsList.begin(); it != player->invitedToGuildsList.end(); ++it)
 		{
-			sprintf(buffer, "%d, %d", player->getGUID(), *it);
-			if(!query_insert.addRow(buffer))
+			query << player->getGUID() << "," << (*it);
+			if(!stmt.addRow(query))
 				return false;
 		}
 
-		if(!query_insert.execute())
+		if(!stmt.execute())
 			return false;
 	}
 
@@ -1028,25 +1032,26 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 		return false;
 
 	if(!g_config.getBool(ConfigManager::VIPLIST_PER_PLAYER))
-		query_insert.setQuery("INSERT INTO `account_viplist` (`account_id`, `world_id`, `player_id`) VALUES ");
+		stmt.setQuery("INSERT INTO `account_viplist` (`account_id`, `world_id`, `player_id`) VALUES ");
 	else
-		query_insert.setQuery("INSERT INTO `player_viplist` (`player_id`, `vip_id`) VALUES ");
+		stmt.setQuery("INSERT INTO `player_viplist` (`player_id`, `vip_id`) VALUES ");
 
 	for(VIPListSet::iterator it = player->VIPList.begin(); it != player->VIPList.end(); it++)
 	{
-		if(!playerExists(*it, false, false))
+		if(!playerExists((*it), false, false))
 			continue;
 
 		if(!g_config.getBool(ConfigManager::VIPLIST_PER_PLAYER))
-			sprintf(buffer, "%d, %d, %d", player->getAccount(), g_config.getNumber(ConfigManager::WORLD_ID), *it);
+			query << player->getAccount() << "," << g_config.getNumber(ConfigManager::WORLD_ID) << "," << (*it);
 		else
-			sprintf(buffer, "%d, %d", player->getGUID(), *it);
+			query << player->getGUID() << "," << (*it);
 
-		if(!query_insert.addRow(buffer))
+
+		if(!stmt.addRow(query))
 			return false;
 	}
 
-	if(!query_insert.execute())
+	if(!stmt.execute())
 		return false;
 
 	//End the transaction
@@ -1568,7 +1573,7 @@ bool IOLoginData::createCharacter(uint32_t accountId, std::string characterName,
 	return db->query(query.str());
 }
 
-DeleteCharacter_t IOLoginData::deleteCharacter(uint32_t accountId, const std::string characterName)
+DeleteCharacter_t IOLoginData::deleteCharacter(uint32_t accountId, const std::string& characterName)
 {
 	if(g_game.getPlayerByName(characterName))
 		return DELETE_ONLINE;

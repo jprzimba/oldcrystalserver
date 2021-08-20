@@ -72,8 +72,8 @@ ScriptEnviroment::ConditionMap ScriptEnviroment::m_conditionMap;
 uint32_t ScriptEnviroment::m_lastConditionId = 0;
 
 ScriptEnviroment::ThingMap ScriptEnviroment::m_globalMap;
-ScriptEnviroment::StorageMap ScriptEnviroment::m_storageMap;
 ScriptEnviroment::TempItemListMap ScriptEnviroment::m_tempItems;
+StorageMap ScriptEnviroment::m_storageMap;
 
 ScriptEnviroment::ScriptEnviroment()
 {
@@ -135,17 +135,17 @@ bool ScriptEnviroment::saveGameState()
 	if(!db->query(query.str()))
 		return false;
 
-	DBInsert query_insert(db);
-	query_insert.setQuery("INSERT INTO `global_storage` (`key`, `world_id`, `value`) VALUES ");
+	DBInsert stmt(db);
+	stmt.setQuery("INSERT INTO `global_storage` (`key`, `world_id`, `value`) VALUES ");
 	for(StorageMap::const_iterator it = m_storageMap.begin(); it != m_storageMap.end(); ++it)
 	{
-		char buffer[25 + it->second.length()];
-		sprintf(buffer, "%u, %u, %s", it->first, g_config.getNumber(ConfigManager::WORLD_ID), db->escapeString(it->second).c_str());
-		if(!query_insert.addRow(buffer))
+		query.str("");
+		query << db->escapeString(it->first) << "," << g_config.getNumber(ConfigManager::WORLD_ID) << "," << db->escapeString(it->second);
+		if(!stmt.addRow(query))
 			return false;
 	}
 
-	return query_insert.execute();
+	return stmt.execute();
 }
 
 bool ScriptEnviroment::loadGameState()
@@ -158,7 +158,7 @@ bool ScriptEnviroment::loadGameState()
 	if((result = db->storeQuery(query.str())))
 	{
 		do
-			m_storageMap[result->getDataInt("key")] = result->getDataString("value");
+			m_storageMap[result->getDataString("key")] = result->getDataString("value");
 		while(result->next());
 		result->free();
 	}
@@ -186,7 +186,7 @@ bool ScriptEnviroment::setCallbackId(int32_t callbackId, LuaInterface* interface
 void ScriptEnviroment::getInfo(int32_t& scriptId, std::string& desc, LuaInterface*& interface, int32_t& callbackId, bool& timerEvent)
 {
 	scriptId = m_scriptId;
-	desc = m_eventdesc;
+	desc = m_event;
 	interface = m_interface;
 	callbackId = m_callbackId;
 	timerEvent = m_timerEvent;
@@ -452,7 +452,7 @@ DBResult* ScriptEnviroment::getResultByID(uint32_t id)
 	return NULL;
 }
 
-bool ScriptEnviroment::getStorage(const uint32_t key, std::string& value) const
+bool ScriptEnviroment::getStorage(const std::string& key, std::string& value) const
 {
 	StorageMap::const_iterator it = m_storageMap.find(key);
 	if(it != m_storageMap.end())
@@ -1566,6 +1566,9 @@ void LuaInterface::registerFunctions()
 
 	//doCreatureSetStorage(uid, key, value)
 	lua_register(m_luaState, "doCreatureSetStorage", LuaInterface::luaDoCreatureSetStorage);
+
+	//getStorageList()
+	lua_register(m_luaState, "getStorageList", LuaInterface::luaGetStorageList);
 
 	//getStorage(key)
 	lua_register(m_luaState, "getStorage", LuaInterface::luaGetStorage);
@@ -4594,13 +4597,13 @@ int32_t LuaInterface::luaDoCreatureSetStorage(lua_State* L)
 {
 	//doCreatureSetStorage(cid, key[, value])
 	std::string value;
-	bool nil = true;
+	bool tmp = true;
 	if(lua_gettop(L) > 2)
 	{
 		if(!lua_isnil(L, -1))
 		{
 			value = popString(L);
-			nil = false;
+			tmp = false;
 		}
 		else
 			lua_pop(L, 1);
@@ -4610,12 +4613,12 @@ int32_t LuaInterface::luaDoCreatureSetStorage(lua_State* L)
 	ScriptEnviroment* env = getEnv();
 	if(Creature* creature = env->getCreatureByUID(popNumber(L)))
 	{
-		if(!nil)
-			nil = creature->setStorage(key, value);
+		if(!tmp)
+			tmp = creature->setStorage(key, value);
 		else
 			creature->eraseStorage(key);
 
-		lua_pushboolean(L, nil);
+		lua_pushboolean(L, tmp);
 	}
 	else
 	{
@@ -6909,21 +6912,40 @@ int32_t LuaInterface::luaSetItemOutfit(lua_State* L)
 	return 1;
 }
 
+int32_t LuaInterface::luaGetStorageList(lua_State* L)
+{
+	//getStorageList()
+	ScriptEnviroment* env = getEnv();
+
+	StorageMap::const_iterator it = env->getStorageBegin();
+	lua_newtable(L);
+	for(uint32_t i = 1; it != env->getStorageEnd(); ++i, ++it)
+	{
+		lua_pushnumber(L, i);
+		lua_pushstring(L, it->first.c_str());
+		pushTable(L);
+	}
+
+	return 1;
+}
+
 int32_t LuaInterface::luaGetStorage(lua_State* L)
 {
 	//getStorage(key)
 	ScriptEnviroment* env = getEnv();
 	std::string strValue;
-	if(env->getStorage(popNumber(L), strValue))
+	if(!env->getStorage(popString(L), strValue))
 	{
-		int32_t intValue = atoi(strValue.c_str());
-		if(intValue || strValue == "0")
-			lua_pushnumber(L, intValue);
-		else
-			lua_pushstring(L, strValue.c_str());
-	}
-	else
 		lua_pushnumber(L, -1);
+		lua_pushnil(L);
+		return 2;
+	}
+
+	int32_t intValue = atoi(strValue.c_str());
+	if(intValue || strValue == "0")
+		lua_pushnumber(L, intValue);
+	else
+		lua_pushstring(L, strValue.c_str());
 
 	return 1;
 }
@@ -6932,20 +6954,20 @@ int32_t LuaInterface::luaDoSetStorage(lua_State* L)
 {
 	//doSetStorage(value, key)
 	std::string value;
-	bool nil = false;
+	bool tmp = false;
 	if(lua_isnil(L, -1))
 	{
-		nil = true;
+		tmp = true;
 		lua_pop(L, 1);
 	}
 	else
 		value = popString(L);
 
 	ScriptEnviroment* env = getEnv();
-	if(!nil)
-		env->setStorage(popNumber(L), value);
+	if(!tmp)
+		env->setStorage(popString(L), value);
 	else
-		env->eraseStorage(popNumber(L));
+		env->eraseStorage(popString(L));
 
 	lua_pushboolean(L, true);
 	return 1;

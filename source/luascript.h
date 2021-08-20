@@ -75,6 +75,8 @@ struct LuaVariant
 	uint32_t number;
 };
 
+typedef std::map<std::string, std::string> StorageMap;
+
 class Game;
 class Thing;
 class LuaInterface;
@@ -100,21 +102,24 @@ class ScriptEnviroment
 		static bool saveGameState();
 		static bool loadGameState();
 
-		bool getStorage(const uint32_t key, std::string& value) const;
-		void setStorage(const uint32_t key, const std::string& value) {m_storageMap[key] = value;}
-		void eraseStorage(const uint32_t key) {m_storageMap.erase(key);}
+		bool getStorage(const std::string& key, std::string& value) const;
+		void setStorage(const std::string& key, const std::string& value) {m_storageMap[key] = value;}
+		void eraseStorage(const std::string& key) {m_storageMap.erase(key);}
 
-		int32_t getScriptId() {return m_scriptId;}
+		inline StorageMap::const_iterator getStorageBegin() const {return m_storageMap.begin();}
+		inline StorageMap::const_iterator getStorageEnd() const {return m_storageMap.end();}
+
+		int32_t getScriptId() const {return m_scriptId;};
 		void setScriptId(int32_t scriptId, LuaInterface* interface)
 			{m_scriptId = scriptId; m_interface = interface;}
 
-		int32_t getCallbackId() {return m_callbackId;}
+		int32_t getCallbackId() const {return m_callbackId;};
 		bool setCallbackId(int32_t callbackId, LuaInterface* interface);
 
-		std::string getEventDesc() {return m_eventdesc;}
-		void setEventDesc(const std::string& desc) {m_eventdesc = desc;}
+		std::string getEvent() const {return m_event;};
+		void setEvent(const std::string& desc) {m_event = desc;}
 
-		Position getRealPos() {return m_realPos;}
+		Position getRealPos() const {return m_realPos;};
 		void setRealPos(const Position& realPos) {m_realPos = realPos;}
 
 		Npc* getNpc() const {return m_curNpc;}
@@ -172,7 +177,6 @@ class ScriptEnviroment
 	private:
 		typedef std::map<uint64_t, Thing*> ThingMap;
 		typedef std::vector<const LuaVariant*> VariantVector;
-		typedef std::map<uint32_t, std::string> StorageMap;
 		typedef std::map<uint32_t, CombatArea*> AreaMap;
 		typedef std::map<uint32_t, Combat*> CombatMap;
 		typedef std::map<uint32_t, Condition*> ConditionMap;
@@ -182,7 +186,7 @@ class ScriptEnviroment
 
 		LuaInterface* m_interface;
 		int32_t m_scriptId, m_callbackId;
-		std::string m_eventdesc;
+		std::string m_event;
 		bool m_timerEvent;
 
 		ThingMap m_localMap;
@@ -261,7 +265,7 @@ class LuaInterface
 		bool loadFile(const std::string& file, Npc* npc = NULL);
 		bool loadDirectory(std::string dir, bool recursively, bool loadSystems, Npc* npc = NULL);
 
-		std::string getName() {return m_interfaceName;}
+		std::string getName() const {return m_interfaceName;};
 		std::string getScript(int32_t scriptId);
 		std::string getLastError() const {return m_lastError;}
 
@@ -548,6 +552,7 @@ class LuaInterface
 		static int32_t luaDoGuildAddEnemy(lua_State* L);
 		static int32_t luaDoGuildRemoveEnemy(lua_State* L);
 
+		static int32_t luaGetStorageList(lua_State* L);
 		static int32_t luaGetStorage(lua_State* L);
 		static int32_t luaDoSetStorage(lua_State* L);
 		static int32_t luaDoPlayerAddOutfit(lua_State* L);

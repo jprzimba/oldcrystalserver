@@ -146,7 +146,7 @@ DBResult* DatabaseSQLite::storeQuery(const std::string& query)
 	return verifyResult(result);
 }
 
-std::string DatabaseSQLite::escapeString(const std::string& s)
+std::string DatabaseSQLite::escapeString(std::string s)
 {
 	// remember about quoiting even an empty string!
 	if(!s.size())
@@ -155,7 +155,7 @@ std::string DatabaseSQLite::escapeString(const std::string& s)
 	// the worst case is 2n + 3
 	char* output = new char[s.length() * 2 + 3];
 	// quotes escaped string and frees temporary buffer
-	sqlite3_snprintf(s.length() * 2 + 1, output, "%Q", s.c_str());
+	sqlite3_snprintf((s.length() << 1) + 1, output, "%Q", s.c_str());
 
 	std::string r(output);
 	delete[] output;
