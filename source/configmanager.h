@@ -183,6 +183,7 @@ class ConfigManager
 			DEFAULT_DEPOT_SIZE_PREMIUM,
 			DEFAULT_DEPOT_SIZE,
 			SURPRISEBAG_PERCENT,
+			CHRISTMAS_PERCENT,
 			LAST_INTEGER_CONFIG /* this must be the last one */
 		};
 
@@ -299,6 +300,7 @@ class ConfigManager
 			PVPZONE_RECOVERMANA,
 			ALLOW_BLOCK_SPAWN,
 			SURPRISE_BAGS,
+			CHRISTMAS_DECO,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

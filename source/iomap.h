@@ -19,11 +19,13 @@
 #define __IOMAP__
 #include "status.h"
 
+#include "enums.h"
 #include "map.h"
 #include "house.h"
 
 #include "spawn.h"
 #include "item.h"
+
 
 enum OTBM_AttrTypes_t
 {
@@ -107,6 +109,7 @@ class IOMap
 		virtual ~IOMap() {}
 
 		bool loadMap(Map* map, const std::string& identifier);
+		void addChristmasDecoration(WallType_t wallType, Tile* tile);
 
 		/* Load the spawns
 		 * \param map pointer to the Map class

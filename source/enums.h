@@ -294,6 +294,15 @@ enum PlayerSex_t
 	// own use- each female should be even and male odd.
 };
 
+enum WallType_t
+{
+    WALLTYPE_NONE = 0,
+	WALLTYPE_FIRST = 1,
+	WALLTYPE_HORIZONTAL = WALLTYPE_FIRST,
+	WALLTYPE_VERTICAL = 2,
+	WALLTYPE_LAST = WALLTYPE_VERTICAL
+};
+
 enum WarType_t
 {
 	WAR_FIRST = 0,

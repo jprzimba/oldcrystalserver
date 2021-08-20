@@ -6290,3 +6290,19 @@ void Game::showHotkeyUseMessage(Player* player, Item* item)
 
 	player->sendTextMessage(MSG_INFO_DESCR, ss.str());
 }
+
+WallType_t Game::isWall(uint16_t id)
+{
+    //TODO: Move item id to items.xml
+	if(id == 1025 || id == 1030 || id == 1032 || id == 1036 || id == 1041 || id == 1043 || id == 1049 || id == 1054 ||
+		id == 1056 || id == 1060 || id == 1065 || id == 1067 || id == 1100 || id == 1105 || id == 1107 || id == 1111 ||
+		id == 1116 || id == 5010 || id == 3463 || id == 6802 || id == 8475 || id == 9118)
+		return WALLTYPE_VERTICAL;
+
+	if(id == 1026 || id == 1028 || id == 1034 || id == 1037 || id == 1039 || id == 1045 || id == 1050 || id == 1052 ||
+		id == 1058 || id == 1061 || id == 1063 || id == 1069 || id == 1101 || id == 1103 || id == 1109 || id == 1112 ||
+		id == 1114 || id == 1118 || id == 3454 || id == 6803 || id == 8476 || id == 9119)
+		return WALLTYPE_HORIZONTAL;
+ 
+	return WALLTYPE_NONE;
+}

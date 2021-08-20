@@ -169,6 +169,12 @@ class Game
 		int32_t loadMap(std::string filename);
 
 		/**
+		  * Get item ids of vertical and horizontal walls
+		  * to be used with cristimas decoration.
+		  */
+		WallType_t isWall(uint16_t id);
+
+		/**
 		  * Get the map size - info purpose only
 		  * \param width width of the map
 		  * \param height height of the map

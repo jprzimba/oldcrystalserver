@@ -36,14 +36,16 @@
 	[ 0.1.8
 		[ DISTRO
 			Game protocol 8.60. (Tryller)
-			War system (Elf, Tryller)
-			Auto stacking items (Elf)
+			War system. (Elf, Tryller)
+			Auto stacking items. (Elf)
+			Drop surprise bags from monsters configurable in config.lua. (Zorzin, Tryller)
+			Cristimas decoration. (Zorzin, Tryller)
 		]
 
 		[ MAP
-			Map SadSoul (SadTeam Mapper, Erimyth and Tryller)
-			POI Quest (Erimyth and Tryller)
-			Demon OAK Quest (Erimyth and Tryller)
+			Map SadSoul. (SadTeam Mapper, Erimyth and Tryller)
+			POI Quest. (Erimyth and Tryller)
+			Demon OAK Quest. (Erimyth and Tryller)
 			Ferumbras tower with Ferumbras raid. (Tryller)
 		]
 	]

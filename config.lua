@@ -220,6 +220,10 @@
 	storeTrash = true
 	cleanProtectedZones = false
 	mailboxDisabledTowns = "-1"
+
+	-- Cristimas decoration
+	useChristmasDecoration = false
+	christmasDecorationPercent = 55
 	
 	-- Saving-related
 	-- houseDataStorage can be binary, relational and binary-tilebased

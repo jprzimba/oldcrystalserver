@@ -232,6 +232,7 @@ bool ConfigManager::load()
 	m_integer[DEFAULT_DEPOT_SIZE_PREMIUM] = getGlobalNumber("defaultDepotSizePremium", 2000);
 	m_integer[DEFAULT_DEPOT_SIZE] = getGlobalNumber("defaultDepotSize", 2000);
 	m_integer[SURPRISEBAG_PERCENT] = getGlobalNumber("surpriseBagPercent", 1);
+	m_integer[CHRISTMAS_PERCENT] = getGlobalNumber("christmasDecorationPercent", 50);
 
 	m_double[RATE_EXPERIENCE] = getGlobalDouble("rateExperience", 1);
 	m_double[RATE_SKILL] = getGlobalDouble("rateSkill", 1);
@@ -329,6 +330,7 @@ bool ConfigManager::load()
 	m_boolean[PVPZONE_RECOVERMANA] = getGlobalBool("recoverManaAfterDeathInPvPZone", false);
 	m_boolean[ALLOW_BLOCK_SPAWN] = getGlobalBool("allowBlockSpawn", false);
 	m_boolean[SURPRISE_BAGS] = getGlobalBool("dropSurpriseBagsFromMonsters", false);
+	m_boolean[CHRISTMAS_DECO] = getGlobalBool("useChristmasDecoration", false);
 
 	m_loaded = true;
 	return true;
