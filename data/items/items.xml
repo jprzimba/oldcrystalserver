@@ -23,7 +23,9 @@
 	<item id="194" name="dirt" />
 	<item id="231" name="sand" />
 	<item id="280" name="earth ground" />
-	<item id="293" name="grass" />
+	<item id="293" name="grass">
+		<attribute key="cache" value="1" />
+	</item>
 	<item id="294" article="a" name="pitfall">
 		<attribute key="floorchange" value="down" />
 		<attribute key="decayTo" value="293" />
@@ -131,7 +133,9 @@
 	<item id="467" article="a" name="stone tile">
 		<attribute key="description" value="It seems to be a switch." />
 	</item>
-	<item id="468" article="a" name="loose stone pile" />
+	<item id="468" article="a" name="loose stone pile">
+		<attribute key="cache" value="1" />
+	</item>
 	<item id="469" article="a" name="hole">
 		<attribute key="floorchange" value="down" />
 		<attribute key="decayTo" value="468" />
@@ -148,13 +152,17 @@
 	<item fromid="479" toid="480" article="a" name="hole">
 		<attribute key="floorchange" value="down" />
 	</item>
-	<item id="481" article="a" name="loose stone pile" />
+	<item id="481" article="a" name="loose stone pile">
+		<attribute key="cache" value="1" />
+	</item>
 	<item id="482" article="a" name="hole">
 		<attribute key="floorchange" value="down" />
 		<attribute key="decayTo" value="481" />
 		<attribute key="duration" value="300" />
 	</item>
-	<item id="483" article="a" name="loose ice pile" />
+	<item id="483" article="a" name="loose ice pile">
+		<attribute key="cache" value="1" />
+	</item>
 	<item id="484" article="a" name="hole">
 		<attribute key="floorchange" value="down" />
 		<attribute key="decayTo" value="483" />
@@ -180,7 +188,9 @@
 		<attribute key="effect" value="fire" />
 		<attribute key="allowpickupable" value="1" />
 	</item>
-	<item id="670" name="snow" />
+	<item id="670" name="snow">
+		<attribute key="cache" value="1" />
+	</item>
 	<item id="671" name="ice" />
 	<item fromid="708" toid="711" name="tar">
 		<attribute key="type" value="trashholder" />
@@ -14072,7 +14082,9 @@
 		<attribute key="corpseType" value="blood" />
 		<attribute key="fluidSource" value="blood" />
 	</item>
-	<item id="7932" article="a" name="burried hole" />
+	<item id="7932" article="a" name="burried hole">
+		<attribute key="cache" value="1" />
+	</item>
 	<item id="7933" article="a" name="hole">
 		<attribute key="floorchange" value="down" />
 		<attribute key="decayTo" value="7932" />
@@ -14533,10 +14545,15 @@
 	</item>
 	<item id="8577" />
 	<item id="8578" name="grass" />
-	<item id="8579" article="a" name="hole" />
+	<item id="8579" article="a" name="hole">
+		<attribute key="cache" value="1" />
+	</item>
 	<item id="8580" article="a" name="grate" />
 	<item id="8581" article="a" name="wooden cart" />
-	<item id="8582" article="a" name="branch" />
+	<item id="8582" article="a" name="branch">
+		<attribute key="description" value="Push it back to Zirella by holding the left mousebutton down on it and pushing it over the grass." />
+		<attribute key="weight" value="100000" />
+	</item>
 	<item id="8583" article="a" name="dead tree" />
 	<item id="8584" name="jerom's family necklace">
 		<attribute key="weight" value="630" />

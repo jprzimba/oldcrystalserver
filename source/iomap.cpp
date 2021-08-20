@@ -34,9 +34,6 @@
 
 extern ConfigManager g_config;
 extern Game g_game;
-#ifdef __GROUND_CACHE__
-extern std::map<Item*, int32_t> g_grounds;
-#endif
 
 typedef uint8_t attribute_t;
 typedef uint32_t flags_t;
@@ -232,7 +229,6 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 	CacheMap groundCache;
 
 #endif
-
 	NODE nodeMapData = f.getChildNode(nodeMap, type);
 	while(nodeMapData != NO_NODE)
 	{
@@ -408,11 +404,8 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 
 #ifdef __GROUND_CACHE__
 									const ItemType& tit = Item::items[item->getID()];
-									if(!(item->floorChange() || tit.magicEffect != MAGIC_EFFECT_NONE || !tit.walkStack
-										|| item->canDecay() || item->getActionId() > 0 || item->getUniqueId() > 0
-										|| item->getID() == 293 || item->getID() == 294 || item->getID() == 461
-										|| item->getID() == 468 || item->getID() == 481 || item->getID() == 483
-										|| item->getID() == 670 || item->getID() == 7932)) //TODO: export to items.xml
+									if(!(tit.magicEffect != MAGIC_EFFECT_NONE || !tit.walkStack || tit.transformUseTo != 0 || tit.cache ||
+										item->floorChange() || item->canDecay() || item->getActionId() > 0 || item->getUniqueId() > 0))
 									{
 										CacheMap::iterator it = groundCache.find(item->getID());
 										if(it != groundCache.end())
@@ -520,12 +513,8 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 
 #ifdef __GROUND_CACHE__
 									const ItemType& tit = Item::items[item->getID()];
-									if(!(item->floorChange() || tit.magicEffect != MAGIC_EFFECT_NONE || !tit.walkStack
-										|| item->canDecay() || item->getActionId() > 0 || item->getUniqueId() > 0
-										|| item->getID() == 293 || item->getID() == 294 || item->getID() == 461
-										|| item->getID() == 468 || item->getID() == 481 || item->getID() == 483
-										|| item->getID() == 670 || item->getID() == 7932 || item->getID() == 8579
-										|| item->getID() == 8714)) //TODO: export to items.xml
+									if(!(tit.magicEffect != MAGIC_EFFECT_NONE || !tit.walkStack || tit.transformUseTo != 0 || tit.cache ||
+										item->floorChange() || item->canDecay() || item->getActionId() > 0 || item->getUniqueId() > 0))
 									{
 										CacheMap::iterator it = groundCache.find(item->getID());
 										if(it != groundCache.end())
@@ -537,7 +526,6 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 										else
 											groundCache[item->getID()] = std::make_pair(item, 1);
 									}
-
 #endif
 									ground = item;
 								}
@@ -693,7 +681,7 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 	for(CacheMap::iterator it = groundCache.begin(); it != groundCache.end(); ++it)
 	{
 		//it->second.first->setParent(NULL);
-		g_grounds[it->second.first] = it->second.second;
+		g_game.grounds[it->second.first] = it->second.second;
 	}
 
 	groundCache.clear();

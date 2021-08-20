@@ -39,9 +39,6 @@ extern MoveEvents* g_moveEvents;
 
 StaticTile reallyNullTile(0xFFFF, 0xFFFF, 0xFFFF);
 Tile& Tile::nullTile = reallyNullTile;
-#ifdef __GROUND_CACHE__
-std::map<Item*, int32_t> g_grounds;
-#endif
 
 bool Tile::hasProperty(enum ITEMPROPERTY prop) const
 {
@@ -397,11 +394,9 @@ void Tile::onUpdateTileItem(Item* oldItem, const ItemType& oldType, Item* newIte
 		(*it)->onUpdateTileItem(this, cylinderMapPos, oldItem, oldType, newItem, newType);
 }
 
-void Tile::onRemoveTileItem(const SpectatorVec& list, std::vector<uint32_t>& oldStackposVector, Item* item)
+void Tile::onRemoveTileItem(const SpectatorVec& list, std::vector<int32_t>& oldStackposVector, Item* item)
 {
 	updateTileFlags(item, true);
-	const Position& cylinderMapPos = pos;
-
 	const ItemType& iType = Item::items[item->getID()];
 	SpectatorVec::const_iterator it;
 
@@ -411,12 +406,12 @@ void Tile::onRemoveTileItem(const SpectatorVec& list, std::vector<uint32_t>& old
 	for(it = list.begin(); it != list.end(); ++it)
 	{
 		if((tmpPlayer = (*it)->getPlayer()))
-			tmpPlayer->sendRemoveTileItem(this, cylinderMapPos, oldStackposVector[i++], item);
+			tmpPlayer->sendRemoveTileItem(this, pos, oldStackposVector[i++], item);
 	}
 
 	//event methods
 	for(it = list.begin(); it != list.end(); ++it)
-		(*it)->onRemoveTileItem(this, cylinderMapPos, iType, item);
+		(*it)->onRemoveTileItem(this, pos, iType, item);
 }
 
 void Tile::onUpdateTile()
@@ -905,17 +900,20 @@ void Tile::__addThing(Creature* actor, int32_t, Thing* thing)
 		{
 			int32_t oldGroundIndex = __getIndexOfThing(ground);
 			Item* oldGround = ground;
+
+			updateTileFlags(oldGround, true);
+			updateTileFlags(item, false);
 			ground = item;
 
 #ifdef __GROUND_CACHE__
-			std::map<Item*, int32_t>::iterator it = g_grounds.find(ground);
-			bool erase = it == g_grounds.end();
+			std::map<Item*, int32_t>::iterator it = g_game.grounds.find(oldGround);
+			bool erase = it == g_game.grounds.end();
 			if(!erase)
 			{
 				it->second--;
 				erase = it->second < 1;
 				if(erase)
-					g_grounds.erase(it);
+					g_game.grounds.erase(it);
 			}
 
 			if(erase)
@@ -1143,18 +1141,33 @@ void Tile::__replaceThing(uint32_t index, Thing* thing)
 		}
 	}
 
-	item->setParent(this);
-	if(oldItem)
-		updateTileFlags(oldItem, true);
-
-	updateTileFlags(item, false);
 	if(oldItem)
 	{
+		item->setParent(this);
+		updateTileFlags(oldItem, true);
+		updateTileFlags(item, false);
+
 		onUpdateTileItem(oldItem, Item::items[oldItem->getID()], item, Item::items[item->getID()]);
 #ifdef __GROUND_CACHE__
-		if(g_grounds.find(oldItem) == g_grounds.end())
+
+		std::map<Item*, int32_t>::iterator it = g_game.grounds.find(oldItem);
+		bool erase = it == g_game.grounds.end();
+		if(!erase)
+		{
+			it->second--;
+			erase = it->second < 1;
+			if(erase)
+				g_game.grounds.erase(it);
+		}
+
+		if(erase)
+		{
 #endif
 			oldItem->setParent(NULL);
+			g_game.freeThing(oldItem);
+#ifdef __GROUND_CACHE__
+		}
+#endif
 
 		return/* RET_NOERROR*/;
 	}
@@ -1213,7 +1226,7 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 	if(item == ground)
 	{
 		const SpectatorVec& list = g_game.getSpectators(pos);
-		std::vector<uint32_t> oldStackposVector;
+		std::vector<int32_t> oldStackposVector;
 
 		Player* tmpPlayer = NULL;
 		for(SpectatorVec::const_iterator it = list.begin(); it != list.end(); ++it)
@@ -1223,9 +1236,24 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 		}
 
 #ifdef __GROUND_CACHE__
-		if(g_grounds.find(ground) == g_grounds.end())
+		std::map<Item*, int32_t>::iterator it = g_game.grounds.find(ground);
+		bool erase = it == g_game.grounds.end();
+		if(!erase)
+		{
+			it->second--;
+			erase = it->second < 1;
+			if(erase)
+				g_game.grounds.erase(it);
+		}
+
+		if(erase)
+		{
 #endif
 			ground->setParent(NULL);
+			g_game.freeThing(ground);
+#ifdef __GROUND_CACHE__
+		}
+#endif
 
 		ground = NULL;
 		--thingCount;
@@ -1240,13 +1268,11 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 
 	if(item->isAlwaysOnTop())
 	{
-		for(ItemVector::iterator it = items->getBeginTopItem(); it != items->getEndTopItem(); ++it)
+		ItemVector::iterator it = std::find(items->getBeginTopItem(), items->getEndTopItem(), item);
+		if(it != items->end())
 		{
-			if(*it != item)
-				continue;
-
 			const SpectatorVec& list = g_game.getSpectators(pos);
-			std::vector<uint32_t> oldStackposVector;
+			std::vector<int32_t> oldStackposVector;
 
 			Player* tmpPlayer = NULL;
 			for(SpectatorVec::const_iterator iit = list.begin(); iit != list.end(); ++iit)
@@ -1265,11 +1291,9 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 	}
 	else
 	{
-		for(ItemVector::iterator it = items->getBeginDownItem(); it != items->getEndDownItem(); ++it)
+		ItemVector::iterator it = std::find(items->getBeginDownItem(), items->getEndDownItem(), item);
+		if(it != items->end())
 		{
-			if((*it) != item)
-				continue;
-
 			if(item->isStackable() && count != item->getItemCount())
 			{
 				uint8_t newCount = (uint8_t)std::max((int32_t)0, (int32_t)(item->getItemCount() - count));
@@ -1284,7 +1308,7 @@ void Tile::__removeThing(Thing* thing, uint32_t count)
 			else
 			{
 				const SpectatorVec& list = g_game.getSpectators(pos);
-				std::vector<uint32_t> oldStackposVector;
+				std::vector<int32_t> oldStackposVector;
 
 				Player* tmpPlayer = NULL;
 				for(SpectatorVec::const_iterator iit = list.begin(); iit != list.end(); ++iit)

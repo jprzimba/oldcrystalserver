@@ -93,9 +93,7 @@ Game::Game()
 
 Game::~Game()
 {
-
-	if(map)
-		delete map;
+	delete map;
 }
 
 void Game::start(ServiceManager* servicer)
@@ -1485,8 +1483,8 @@ ReturnValue Game::internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cyli
 	int32_t floor = 0;
 	while((subCylinder = toCylinder->__queryDestination(index, item, &toItem, flags)) != toCylinder)
 	{
-		toCylinder = subCylinder;
 		flags = 0;
+		toCylinder = subCylinder;
 		//to prevent infinite loop
 		if(++floor >= MAP_MAX_LAYERS)
 			break;
@@ -1502,15 +1500,12 @@ ReturnValue Game::internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cyli
 	{
 		//check if we can add it to source cylinder
 		int32_t fromIndex = fromCylinder->__getIndexOfThing(item);
-
-		ret = fromCylinder->__queryAdd(fromIndex, toItem, toItem->getItemCount(), 0);
-		if(ret == RET_NOERROR)
+		if((ret = fromCylinder->__queryAdd(fromIndex, toItem, toItem->getItemCount(), 0)) == RET_NOERROR)
 		{
 			//check how much we can move
 			uint32_t maxExchangeQueryCount = 0;
-			ReturnValue retExchangeMaxCount = fromCylinder->__queryMaxCount(-1, toItem, toItem->getItemCount(), maxExchangeQueryCount, 0);
-
-			if(retExchangeMaxCount != RET_NOERROR && maxExchangeQueryCount == 0)
+			ReturnValue retExchangeMaxCount = fromCylinder->__queryMaxCount(INDEX_WHEREEVER, toItem, toItem->getItemCount(), maxExchangeQueryCount, 0);
+			if(retExchangeMaxCount != RET_NOERROR && !maxExchangeQueryCount)
 				return retExchangeMaxCount;
 
 			if((toCylinder->__queryRemove(toItem, toItem->getItemCount(), flags) == RET_NOERROR) && ret == RET_NOERROR)
@@ -1539,27 +1534,26 @@ ReturnValue Game::internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cyli
 	uint32_t maxQueryCount = 0;
 	ReturnValue retMaxCount = toCylinder->__queryMaxCount(index, item, count, maxQueryCount, flags);
 	if(retMaxCount != RET_NOERROR && !maxQueryCount)
-		return retMaxCount;
+		return ret;
 
-	uint32_t m = maxQueryCount, n = 0;
+	uint32_t m = maxQueryCount;
 	if(item->isStackable())
 		m = std::min((uint32_t)count, m);
 
 	Item* moveItem = item;
 	//check if we can remove this item
-	ret = fromCylinder->__queryRemove(item, m, flags);
-	if(ret != RET_NOERROR)
+	if((ret = fromCylinder->__queryRemove(item, m, flags)) != RET_NOERROR)
 		return ret;
 
 	//remove the item
 	int32_t itemIndex = fromCylinder->__getIndexOfThing(item);
 	fromCylinder->__removeThing(item, m);
-
 	bool isCompleteRemoval = item->isRemoved();
+
 	Item* updateItem = NULL;
-	//update item(s)
 	if(item->isStackable())
 	{
+		uint8_t n = 0;
 		if(toItem && toItem->getID() == item->getID())
 		{
 			n = std::min((uint32_t)100 - toItem->getItemCount(), m);
@@ -1576,8 +1570,7 @@ ReturnValue Game::internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cyli
 			freeThing(item);
 	}
 
-	//add item
-	if(moveItem /*m - n > 0*/)
+	if(moveItem)
 		toCylinder->__addThing(actor, index, moveItem);
 
 	if(itemIndex != -1)
@@ -1743,7 +1736,7 @@ Item* Game::findItemOfType(Cylinder* cylinder, uint16_t itemId,
 	bool depthSearch /*= true*/, int32_t subType /*= -1*/)
 {
 	if(!cylinder)
-		return false;
+		return NULL;
 
 	std::list<Container*> listContainer;
 	Container* tmpContainer = NULL;
@@ -3898,7 +3891,7 @@ bool Game::playerSpeakToNpc(Player* player, const std::string& text)
 	getSpectators(list, player->getPosition());
 
 	//send to npcs only
-	Npc* tmpNpc = NULL;
+	Npc* tmpNpc;
 	for(it = list.begin(); it != list.end(); ++it)
 	{
 		if((tmpNpc = (*it)->getNpc()))

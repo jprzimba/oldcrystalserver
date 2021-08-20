@@ -37,7 +37,7 @@ ItemType::ItemType()
 	group = ITEM_GROUP_NONE;
 	type = ITEM_TYPE_NONE;
 	stackable = useable = alwaysOnTop = lookThrough = pickupable = rotable = hasHeight = forceSerialize = false;
-	blockSolid = blockProjectile = blockPathFind = allowPickupable = false;
+	blockSolid = blockProjectile = blockPathFind = allowPickupable = cache = false;
 	moveable = walkStack = true;
 	alwaysOnTopOrder = 0;
 	rotateTo = 0;
@@ -582,6 +582,11 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 			{
 				if(readXMLString(itemAttributesNode, "value", strValue))
 					it.pluralName = strValue;
+			}
+			else if(tmpStrValue == "cache")
+			{
+				if(readXMLInteger(itemAttributesNode, "value", intValue))
+					it.cache = (intValue != 0);
 			}
 			else if(tmpStrValue == "description")
 			{

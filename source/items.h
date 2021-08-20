@@ -134,7 +134,7 @@ class ItemType
 			allowDistRead, canReadText, canWriteText, forceSerialize, isVertical, isHorizontal, isHangable,
 			useable, moveable, pickupable, rotable, replaceable, lookThrough, walkStack,
 			hasHeight, blockSolid, blockPickupable, blockProjectile, blockPathFind, allowPickupable, alwaysOnTop,
-			floorChange[CHANGE_LAST];
+			floorChange[CHANGE_LAST], cache;
 
 		MagicEffect_t magicEffect;
 		FluidTypes_t fluidSource;
