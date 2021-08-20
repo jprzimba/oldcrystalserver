@@ -26,7 +26,6 @@
 #include "spawn.h"
 #include "item.h"
 
-
 enum OTBM_AttrTypes_t
 {
 	OTBM_ATTR_DESCRIPTION = 1,

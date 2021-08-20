@@ -549,7 +549,13 @@ void Player::sendIcons() const
 	}
 
 	if(getZone() == ZONE_PROTECTION)
+	{
 		icons |= ICON_PROTECTIONZONE;
+
+		// Don't show ICON_SWORDS if player is in protection zone.
+		if(hasBitSet(ICON_SWORDS, icons))
+			icons &= ~ICON_SWORDS;
+	}
 
 	if(pzLocked)
 		icons |= ICON_PZ;
@@ -572,9 +578,7 @@ void Player::updateInventoryWeight()
 
 double Player::getFreeCapacity() const
 {
-	if(hasFlag(PlayerFlag_CannotPickupItem))
-		return 0.00;
-	else if(hasFlag(PlayerFlag_HasInfiniteCapacity))
+	if(hasFlag(PlayerFlag_HasInfiniteCapacity))
 		return 10000.00;
 
 	return std::max(0.00, capacity - inventoryWeight);
@@ -1241,8 +1245,8 @@ void Player::sendCancelMessage(ReturnValue message) const
 			sendCancel("You cannot add more items on this tile.");
 			break;
 
-		case RET_YOUDONTHAVEREQUIREDPROFESSION:
-			sendCancel("You don't have the required profession.");
+		case RET_YOUMAYNOTATTACKIMMEDIATELYAFTERLOGGINGIN:
+			sendCancel("You may not attack immediately after logging in.");
 			break;
 
 		case RET_DONTSHOWMESSAGE:
@@ -1806,7 +1810,7 @@ void Player::onThink(uint32_t interval)
 	if(timeNow - lastPing >= 5000)
 	{
 		lastPing = timeNow;
-		if(client)
+		if(hasClient())
 			client->sendPing();
 		else if(g_config.getBool(ConfigManager::STOP_ATTACK_AT_EXIT))
 			setAttackedCreature(NULL);
@@ -1815,7 +1819,7 @@ void Player::onThink(uint32_t interval)
 	if((timeNow - lastPong) >= 60000 && !getTile()->hasFlag(TILESTATE_NOLOGOUT)
 		&& !isConnecting && !pzLocked && !hasCondition(CONDITION_INFIGHT))
 	{
-		if(client)
+		if(hasClient())
 			client->logout(true, true);
 		else if(g_creatureEvents->playerLogout(this, false))
 			g_game.removeCreature(this, true);
@@ -2481,7 +2485,7 @@ void Player::addList()
 
 void Player::kick(bool displayEffect, bool forceLogout)
 {
-	if(!client)
+	if(!hasClient())
 	{
 		if(g_creatureEvents->playerLogout(this, forceLogout))
 			g_game.removeCreature(this);
@@ -2584,9 +2588,6 @@ void Player::autoCloseContainers(const Container* container)
 
 bool Player::hasCapacity(const Item* item, uint32_t count) const
 {
-	if(hasFlag(PlayerFlag_CannotPickupItem))
-		return false;
-
 	if(hasFlag(PlayerFlag_HasInfiniteCapacity) || item->getTopParent() == this)
 		return true;
 
@@ -2605,8 +2606,12 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 	if(!item)
 		return RET_NOTPOSSIBLE;
 
-	bool childIsOwner = ((flags & FLAG_CHILDISOWNER) == FLAG_CHILDISOWNER), skipLimit = ((flags & FLAG_NOLIMIT) == FLAG_NOLIMIT);
-	if(childIsOwner)
+	if(!item->isPickupable() || (hasFlag(PlayerFlag_CannotPickupItem) &&
+		item->getParent() && item->getParent() != VirtualCylinder::virtualCylinder))
+		return RET_CANNOTPICKUP;
+
+	bool childOwner = ((flags & FLAG_CHILDISOWNER) == FLAG_CHILDISOWNER), skipLimit = ((flags & FLAG_NOLIMIT) == FLAG_NOLIMIT);
+	if(childOwner)
 	{
 		//a child container is querying the player, just check if enough capacity
 		if(skipLimit || hasCapacity(item, count))
@@ -2614,9 +2619,6 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 
 		return RET_NOTENOUGHCAPACITY;
 	}
-
-	if(!item->isPickupable())
-		return RET_CANNOTPICKUP;
 
 	ReturnValue ret = RET_NOERROR;
 	if((item->getSlotPosition() & SLOTP_HEAD) || (item->getSlotPosition() & SLOTP_NECKLACE) ||
@@ -2754,19 +2756,38 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 			break;
 	}
 
-	if(ret == RET_NOERROR || ret == RET_NOTENOUGHROOM)
+		Player* self = const_cast<Player*>(this);
+	if(ret == RET_NOERROR)
 	{
 		//need an exchange with source?
-		if(getInventoryItem((slots_t)index) != NULL && (!getInventoryItem((slots_t)index)->isStackable()
-			|| getInventoryItem((slots_t)index)->getID() != item->getID()))
+		Item* tmpItem = NULL;
+		if((tmpItem = getInventoryItem((slots_t)index)) && (!tmpItem->isStackable() || tmpItem->getID() != item->getID()))
 			return RET_NEEDEXCHANGE;
 
-		if(!g_moveEvents->onPlayerEquip(const_cast<Player*>(this), const_cast<Item*>(item), (slots_t)index, true))
+		if(!g_moveEvents->onPlayerEquip(self, const_cast<Item*>(item), (slots_t)index, true))
 			return RET_CANNOTBEDRESSED;
+	}
 
-		//check if enough capacity
-		if(!hasCapacity(item, count))
-			return RET_NOTENOUGHCAPACITY;
+	if((ret == RET_NOERROR || ret == RET_NOTENOUGHROOM) && !hasCapacity(item, count)) //check if enough capacity
+		return RET_NOTENOUGHCAPACITY;
+
+	if(index == SLOT_LEFT || index == SLOT_RIGHT)
+	{
+		if(ret == RET_NOERROR && item->getWeaponType() != WEAPON_NONE)
+			self->setLastAttack(OTSYS_TIME());
+
+		Item* tmpItem = inventory[(slots_t)index];
+		if(ret == RET_BOTHHANDSNEEDTOBEFREE && g_game.internalAddItem(
+			NULL, self, tmpItem, INDEX_WHEREEVER) == RET_NOERROR)
+		{
+			self->sendRemoveInventoryItem((slots_t)index, tmpItem);
+			self->onRemoveInventoryItem((slots_t)index, tmpItem);
+
+			self->inventory[(slots_t)index] = NULL;
+			self->updateWeapon();
+			self->inventoryWeight -= tmpItem->getWeight();
+			self->sendStats();
+		}
 	}
 
 	return ret;
@@ -3428,19 +3449,19 @@ void Player::getPathSearchParams(const Creature* creature, FindPathParams& fpp) 
 
 void Player::doAttacking(uint32_t)
 {
-	if(!lastAttack)
-		lastAttack = OTSYS_TIME() - getAttackSpeed() - 1;
-	else if((OTSYS_TIME() - lastAttack) < getAttackSpeed())
-		return;
-
-	if(hasCondition(CONDITION_PACIFIED) && !hasCustomFlag(PlayerCustomFlag_IgnorePacification))
+	uint32_t attackSpeed = getAttackSpeed();
+	if(attackSpeed == 0 || (hasCondition(CONDITION_PACIFIED) && !hasCustomFlag(PlayerCustomFlag_IgnorePacification)))
 	{
 		lastAttack = OTSYS_TIME();
 		return;
 	}
 
-	Item* item = getWeapon(false);
-	if(const Weapon* _weapon = g_weapons->getWeapon(item))
+	if(!lastAttack)
+		lastAttack = OTSYS_TIME() - attackSpeed - 1;
+	else if((OTSYS_TIME() - lastAttack) < attackSpeed)
+		return;
+
+	if(const Weapon* _weapon = g_weapons->getWeapon(weapon))
 	{
 		if(_weapon->interruptSwing() && !canDoAction())
 		{
@@ -3450,7 +3471,7 @@ void Player::doAttacking(uint32_t)
 		}
 		else
 		{
-			if((!_weapon->hasExhaustion() || !hasCondition(CONDITION_EXHAUST, EXHAUST_COMBAT)) && _weapon->useWeapon(this, item, attackedCreature))
+			if((!_weapon->hasExhaustion() || !hasCondition(CONDITION_EXHAUST, EXHAUST_COMBAT)) && _weapon->useWeapon(this, weapon, attackedCreature))
 				lastAttack = OTSYS_TIME();
 
 			updateWeapon();
@@ -3502,15 +3523,13 @@ void Player::onFollowCreature(const Creature* creature)
 
 void Player::setChaseMode(chaseMode_t mode)
 {
-	chaseMode_t prevChaseMode = chaseMode;
-	chaseMode = mode;
-
-	if(prevChaseMode == chaseMode)
+	if(chaseMode == mode)
 		return;
 
+	chaseMode = mode;
 	if(chaseMode == CHASEMODE_FOLLOW)
 	{
-		if(!followCreature && attackedCreature) //chase opponent
+		if(!followCreature && attackedCreature && !getNoMove()) //chase opponent
 			setFollowCreature(attackedCreature);
 	}
 	else if(attackedCreature)
@@ -3572,7 +3591,10 @@ void Player::updateItemsLight(bool internal /*=false*/)
 void Player::onAddCondition(ConditionType_t type, bool hadCondition)
 {
 	Creature::onAddCondition(type, hadCondition);
-	if(getLastPosition().x && type != CONDITION_GAMEMASTER) // don't send if player have just logged in (its already done in protocolgame), or condition have no icons
+	if(type == CONDITION_GAMEMASTER)
+		return;
+
+	if(getLastPosition().x) // don't send if player have just logged in (its already done in protocolgame), or condition have no icons
 		sendIcons();
 }
 
@@ -3692,43 +3714,49 @@ void Player::onAttackedCreature(Creature* target)
 	if(hasFlag(PlayerFlag_NotGainInFight))
 		return;
 
-	addInFightTicks(false);
+	if(target == this)
+	{
+		addInFightTicks(false);
+		return;
+	}
+
 	Player* targetPlayer = target->getPlayer();
-	if(!targetPlayer)
-		return;
-
-	addAttacked(targetPlayer);
-	if(targetPlayer == this && targetPlayer->getZone() != ZONE_HARDCORE)
+	if(targetPlayer && !isPartner(targetPlayer) && !isAlly(targetPlayer))
 	{
-		targetPlayer->sendCreatureSkull(this);
-		return;
+		if(!pzLocked && g_game.getWorldType() == WORLDTYPE_HARDCORE)
+		{
+			pzLocked = true;
+			sendIcons();
+		}
+
+		if(getSkull() == SKULL_NONE && getSkullType(targetPlayer) == SKULL_YELLOW)
+		{
+			addAttacked(targetPlayer);
+			targetPlayer->sendCreatureSkull(this);
+		}
+		else if(!targetPlayer->hasAttacked(this) && !targetPlayer->isEnemy(this, false))
+		{
+			if(!pzLocked && g_game.getWorldType() != WORLDTYPE_HARDCORE)
+			{
+				pzLocked = true;
+				sendIcons();
+			}
+
+			if(!Combat::isInPvpZone(this, targetPlayer) && !isAlly(targetPlayer))
+			{
+				addAttacked(targetPlayer);
+				if(targetPlayer->getSkull() == SKULL_NONE && getSkull() == SKULL_NONE)
+				{
+					setSkull(SKULL_WHITE);
+					g_game.updateCreatureSkull(this);
+				}
+
+				if(getSkull() == SKULL_NONE)
+					targetPlayer->sendCreatureSkull(this);
+			}
+		}
 	}
-
-	if(Combat::isInPvpZone(this, targetPlayer) || isPartner(targetPlayer) ||
-		isAlly(targetPlayer) ||
-		(g_config.getBool(ConfigManager::ALLOW_FIGHTBACK) && targetPlayer->hasAttacked(this)
-		&& !targetPlayer->isEnemy(this, false)
-		))
-		return;
-
-	if(!pzLocked)
-	{
-		pzLocked = true;
-		sendIcons();
-	}
-
-	if(getZone() != target->getZone() || skull != SKULL_NONE
-		|| targetPlayer->isEnemy(this, true)
-		)
-		return;
-
-	if(targetPlayer->getSkull() != SKULL_NONE)
-		targetPlayer->sendCreatureSkull(this);
-	else if(!hasCustomFlag(PlayerCustomFlag_NotGainSkull))
-	{
-		setSkull(SKULL_WHITE);
-		g_game.updateCreatureSkull(this);
-	}
+	addInFightTicks(false);
 }
 
 void Player::onSummonAttackedCreature(Creature* summon, Creature* target)
@@ -3743,10 +3771,10 @@ void Player::onAttacked()
 	addInFightTicks(false);
 }
 
-bool Player::checkLoginDelay(uint32_t playerId) const
+bool Player::checkLoginDelay() const
 {
 	return (!hasCustomFlag(PlayerCustomFlag_IgnoreLoginDelay) && OTSYS_TIME() <= (lastLoad + g_config.getNumber(
-		ConfigManager::LOGIN_PROTECTION)) && !hasBeenAttacked(playerId));
+		ConfigManager::LOGIN_PROTECTION)));
 }
 
 void Player::onIdleStatus()

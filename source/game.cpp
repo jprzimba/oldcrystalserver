@@ -3583,8 +3583,9 @@ bool Game::playerSetFightModes(uint32_t playerId, fightMode_t fightMode, chaseMo
 
 	player->setFightMode(fightMode);
 	player->setChaseMode(chaseMode);
-
 	player->setSecureMode(secureMode);
+
+	player->setLastAttack(OTSYS_TIME());
 	return true;
 }
 

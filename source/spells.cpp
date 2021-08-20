@@ -604,6 +604,13 @@ bool Spell::playerSpellCheck(Player* player) const
 			return false;
 		}
 
+		if(player->checkLoginDelay())
+		{
+			player->sendCancelMessage(RET_YOUMAYNOTATTACKIMMEDIATELYAFTERLOGGINGIN);
+			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
+			return false;
+		}
+
 		if(player->hasCondition(CONDITION_EXHAUST, EXHAUST_COMBAT))
 			exhausted = true;
 	}

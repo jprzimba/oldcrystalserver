@@ -232,7 +232,7 @@ class Player : public Creature, public Cylinder
 		uint32_t getClientVersion() const {return clientVersion;}
 		void setClientVersion(uint32_t version) {clientVersion = version;}
 
-		bool hasClient() const {return client;}
+		bool hasClient() const {return (client != NULL);}
 		bool isVirtual() const {return (getID() == 0);}
 		void disconnect() {if(client) client->disconnect();}
 		uint32_t getIP() const;
@@ -264,8 +264,8 @@ class Player : public Creature, public Cylinder
 		uint32_t getIdleTime() const {return idleTime;}
 		void setIdleTime(uint32_t amount) {idleTime = amount;}
 
-		bool checkLoginDelay(uint32_t playerId) const;
-		bool isTrading() const {return tradePartner;}
+		bool checkLoginDelay() const;
+		bool isTrading() const {return (tradePartner != NULL);}
 
 		uint32_t getAccount() const {return accountId;}
 		std::string getAccountName() const {return account;}
@@ -436,10 +436,12 @@ class Player : public Creature, public Cylinder
 		void setPzLocked(bool v) {pzLocked = v;}
 		virtual BlockType_t blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
 			bool checkDefense = false, bool checkArmor = false);
+
 		virtual void doAttacking(uint32_t interval);
 		virtual bool hasExtraSwing() {return lastAttack > 0 && ((OTSYS_TIME() - lastAttack) >= getAttackSpeed());}
-		int32_t getShootRange() const {return shootRange;}
+		void setLastAttack(uint64_t time) {lastAttack = time;}
 
+		int32_t getShootRange() const {return shootRange;}
 		int32_t getSkill(skills_t skilltype, skillsid_t skillinfo) const;
 		bool getAddAttackSkill() const {return addAttackSkillPoint;}
 		BlockType_t getLastAttackBlockType() const {return lastAttackBlockType;}
