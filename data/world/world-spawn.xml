@@ -2774,6 +2774,22 @@
 		<monster name="Scarab" x="-2" y="-1" z="8" spawntime="40" />
 		<monster name="Larva" x="1" y="-1" z="8" spawntime="40" />
 	</spawn>
+	<spawn centerx="715" centery="582" centerz="8" radius="20">
+		<monster name="Warlock" x="-4" y="-12" z="8" spawntime="60" />
+		<monster name="Warlock" x="8" y="-12" z="8" spawntime="60" />
+		<monster name="Warlock" x="-14" y="-11" z="8" spawntime="60" />
+		<monster name="Warlock" x="-14" y="-4" z="8" spawntime="60" />
+		<monster name="Warlock" x="-1" y="-4" z="8" spawntime="60" />
+		<monster name="Warlock" x="14" y="-4" z="8" spawntime="60" />
+		<monster name="Warlock" x="7" y="-1" z="8" spawntime="60" />
+		<monster name="Warlock" x="-7" y="7" z="8" spawntime="60" />
+		<monster name="Warlock" x="14" y="7" z="8" spawntime="60" />
+		<monster name="Warlock" x="0" y="11" z="8" spawntime="60" />
+		<monster name="Warlock" x="7" y="11" z="8" spawntime="60" />
+		<monster name="Warlock" x="18" y="15" z="8" spawntime="60" />
+		<monster name="Warlock" x="-13" y="18" z="8" spawntime="60" />
+		<monster name="Warlock" x="5" y="18" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="463" centery="583" centerz="8" radius="1">
 		<monster name="Black Knight" x="0" y="0" z="8" spawntime="85" />
 	</spawn>
@@ -2789,6 +2805,8 @@
 	<spawn centerx="455" centery="596" centerz="8" radius="1">
 		<monster name="Black Knight" x="0" y="0" z="8" spawntime="85" />
 	</spawn>
+	<spawn centerx="734" centery="597" centerz="8" radius="5" />
+	<spawn centerx="701" centery="600" centerz="8" radius="5" />
 	<spawn centerx="436" centery="604" centerz="8" radius="10">
 		<monster name="Ghoul" x="-8" y="-5" z="8" spawntime="60" />
 		<monster name="Ghost" x="0" y="-5" z="8" spawntime="60" />
@@ -2864,11 +2882,39 @@
 		<monster name="Thornback Tortoise" x="11" y="37" z="8" spawntime="60" />
 		<monster name="Tortoise" x="-6" y="38" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="745" centery="605" centerz="8" radius="5">
+		<monster name="Warlock" x="0" y="2" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="720" centery="607" centerz="8" radius="5">
+		<monster name="Warlock" x="0" y="-1" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="734" centery="607" centerz="8" radius="5">
+		<monster name="Warlock" x="-1" y="-1" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="527" centery="608" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="712" centery="608" centerz="8" radius="5">
+		<monster name="Warlock" x="0" y="1" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="487" centery="609" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="752" centery="610" centerz="8" radius="5">
+		<monster name="Warlock" x="3" y="2" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="745" centery="614" centerz="8" radius="5">
+		<monster name="Warlock" x="-2" y="-1" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="726" centery="615" centerz="8" radius="5">
+		<monster name="Warlock" x="1" y="-1" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="755" centery="619" centerz="8" radius="5">
+		<monster name="Warlock" x="-1" y="2" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="712" centery="623" centerz="8" radius="10">
+		<monster name="Infernalist" x="1" y="-1" z="8" spawntime="60" />
+		<monster name="Warlock" x="-1" y="0" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="509" centery="624" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
@@ -2876,17 +2922,38 @@
 	<spawn centerx="540" centery="624" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="745" centery="624" centerz="8" radius="5">
+		<monster name="Warlock" x="1" y="-4" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="523" centery="627" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="493" centery="628" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="755" centery="629" centerz="8" radius="5">
+		<monster name="Warlock" x="-1" y="3" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="476" centery="630" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="697" centery="630" centerz="8" radius="5">
+		<monster name="Warlock" x="-1" y="0" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="727" centery="630" centerz="8" radius="5">
+		<monster name="Warlock" x="2" y="-1" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="738" centery="630" centerz="8" radius="5">
+		<monster name="Warlock" x="5" y="0" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="719" centery="635" centerz="8" radius="5">
+		<monster name="Warlock" x="0" y="1" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="528" centery="639" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="755" centery="641" centerz="8" radius="5">
+		<monster name="Warlock" x="-2" y="1" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="485" centery="643" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
@@ -2894,11 +2961,36 @@
 	<spawn centerx="504" centery="646" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="719" centery="648" centerz="8" radius="5">
+		<monster name="Warlock" x="0" y="-3" z="8" spawntime="60" />
+		<monster name="Warlock" x="0" y="2" z="8" spawntime="60" />
+		<monster name="Warlock" x="0" y="3" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="539" centery="649" centerz="8" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="753" centery="650" centerz="8" radius="10">
+		<monster name="Warlock" x="-6" y="-2" z="8" spawntime="60" />
+		<monster name="Warlock" x="-5" y="1" z="8" spawntime="60" />
+		<monster name="Infernalist" x="0" y="1" z="8" spawntime="60" />
+		<monster name="Warlock" x="6" y="1" z="8" spawntime="60" />
+		<monster name="Warlock" x="-4" y="4" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="715" centery="657" centerz="8" radius="5">
+		<monster name="Warlock" x="1" y="-3" z="8" spawntime="60" />
+		<monster name="Warlock" x="0" y="3" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="726" centery="657" centerz="8" radius="5">
+		<monster name="Warlock" x="-4" y="-3" z="8" spawntime="60" />
+		<monster name="Warlock" x="0" y="1" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="492" centery="659" centerz="8" radius="1">
 		<monster name="Giant Spider" x="-1" y="0" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="719" centery="665" centerz="8" radius="5">
+		<monster name="Infernalist" x="4" y="-1" z="8" spawntime="60" />
+		<monster name="Warlock" x="-2" y="0" z="8" spawntime="60" />
+		<monster name="Warlock" x="1" y="0" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="550" centery="667" centerz="8" radius="5">
 		<monster name="Mummy" x="4" y="-1" z="8" spawntime="60" />
@@ -3760,8 +3852,23 @@
 	<spawn centerx="460" centery="644" centerz="9" radius="1">
 		<monster name="Black Knight" x="0" y="0" z="9" spawntime="60" />
 	</spawn>
+	<spawn centerx="719" centery="652" centerz="9" radius="1">
+		<monster name="Warlock" x="0" y="0" z="9" spawntime="60" />
+	</spawn>
 	<spawn centerx="511" centery="654" centerz="9" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="9" spawntime="60" />
+	</spawn>
+	<spawn centerx="718" centery="657" centerz="9" radius="1">
+		<monster name="Infernalist" x="0" y="0" z="9" spawntime="60" />
+	</spawn>
+	<spawn centerx="724" centery="658" centerz="9" radius="1">
+		<monster name="Warlock" x="0" y="0" z="9" spawntime="60" />
+	</spawn>
+	<spawn centerx="713" centery="659" centerz="9" radius="1">
+		<monster name="Warlock" x="0" y="0" z="9" spawntime="60" />
+	</spawn>
+	<spawn centerx="718" centery="664" centerz="9" radius="1">
+		<monster name="Warlock" x="0" y="0" z="9" spawntime="60" />
 	</spawn>
 	<spawn centerx="493" centery="665" centerz="9" radius="1">
 		<monster name="Giant Spider" x="0" y="0" z="9" spawntime="60" />
