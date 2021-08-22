@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <monsters>
-
-	<monster name="Exp" file="Others/exp.xml"/>
-
 	<!-- Amazons -->
 	<monster name="Amazon" file="Amazons/amazon.xml"/>
 	<monster name="Valkyrie" file="Amazons/valkyrie.xml"/>
@@ -119,9 +116,11 @@
 	<monster name="Foreman Kneebiter" file="Bosses/foreman kneebiter.xml"/>
 	<monster name="General Murius" file="Bosses/general murius.xml"/>
 	<monster name="Ghazbaran" file="Bosses/ghazbaran.xml"/>
+	<monster name="Glitterscale" file="Bosses/glitterscale.xml"/>
 	<monster name="Golgordan" file="Bosses/golgordan.xml"/>
 	<monster name="Grorlam" file="Bosses/grorlam.xml"/>
 	<monster name="Hellgorak" file="Bosses/hellgorak.xml"/>
+	<monster name="Heoni" file="Bosses/heoni.xml"/>
 	<monster name="Latrivan" file="Bosses/latrivan.xml"/>
 	<monster name="Lethal Lissy" file="Bosses/lethal lissy.xml"/>
 	<monster name="Lord of the Elements" file="Bosses/lord of the elements.xml"/>
@@ -137,6 +136,8 @@
 	<monster name="Orshabaal" file="Bosses/orshabaal.xml"/>
 	<monster name="Ron the Ripper" file="Bosses/ron the ripper.xml"/>
 	<monster name="Rotworm Queen" file="Bosses/rotworm queen.xml"/>
+	<monster name="Snake God Essence" file="Bosses/snake god essence.xml"/>
+	<monster name="Snake Thing" file="Bosses/snake thing.xml"/>
 	<monster name="The Abomination" file="Bosses/the abomination.xml"/>
 	<monster name="The Count" file="Bosses/the count.xml"/>
 	<monster name="The Evil Eye" file="Bosses/the evil eye.xml"/>
@@ -307,8 +308,16 @@
 	<monster name="Scarab" file="Insects/scarab.xml"/>
 	<monster name="Wasp" file="Insects/wasp.xml"/>
 	<monster name="Yellow Butterfly" file="Insects/yellow butterfly.xml"/>
+	<monster name="Brimstone Bug" file="Insects/brimstone bug.xml"/>
 
 	<!-- Lizards -->
+	<monster name="Draken Abomination" file="Lizards/draken abomination.xml"/>
+	<monster name="Draken Spellweaver" file="Lizards/draken spellweaver.xml"/>
+	<monster name="Draken Warmaster" file="Lizards/draken warmaster.xml"/>
+	<monster name="Battlemaster Zunzu" file="Lizards/battlemaster zunzu.xml"/>
+	<monster name="Eternal Guardian" file="Lizards/eternal guardian.xml"/>
+	<monster name="Lizard Abomination" file="Lizards/lizard abomination.xml"/>
+	<monster name="Lizard Chosen" file="Lizards/lizard chosen.xml"/>
 	<monster name="Lizard Sentinel" file="Lizards/lizard sentinel.xml"/>
 	<monster name="Lizard Snakecharmer" file="Lizards/lizard snakecharmer.xml"/>
 	<monster name="Lizard Templar" file="Lizards/lizard templar.xml"/>
@@ -355,6 +364,9 @@
 	<monster name="Orc Warlord" file="Orcs/orc warlord.xml"/>
 	<monster name="Orc Warrior" file="Orcs/orc warrior.xml"/>
 	<monster name="Orc" file="Orcs/orc.xml"/>
+
+	<!-- Others -->
+	<monster name="Exp" file="Others/exp.xml"/>
 
 	<!-- Outlaws -->
 	<monster name="Assassin" file="Outlaws/assassin.xml"/>
@@ -487,6 +499,7 @@
 	<monster name="Grim Reaper" file="Undead Humanoids/grim reaper.xml"/>
 	<monster name="Lich" file="Undead Humanoids/lich.xml"/>
 	<monster name="Mummy" file="Undead Humanoids/mummy.xml"/>
+	<monster name="Souleater" file="Undead Humanoids/souleater.xml"/>
 	<monster name="Vampire" file="Undead Humanoids/vampire.xml"/>
 	<monster name="Vampire Bride" file="Undead Humanoids/vampire bride.xml"/>
 	<monster name="Zombie" file="Undead Humanoids/zombie.xml"/>
