@@ -233,6 +233,9 @@ bool ConfigManager::load()
 	m_integer[DEFAULT_DEPOT_SIZE] = getGlobalNumber("defaultDepotSize", 2000);
 	m_integer[SURPRISEBAG_PERCENT] = getGlobalNumber("surpriseBagPercent", 1);
 	m_integer[CHRISTMAS_PERCENT] = getGlobalNumber("christmasDecorationPercent", 50);
+	m_integer[ROOK_TOWN]	= getGlobalNumber("rookTownId", 1);
+	m_integer[ROOK_LEVELTO] = getGlobalNumber("rookLevelToGetRooked", 5);
+	m_integer[ROOK_TOLEVEL] = getGlobalNumber("rookLevelToLeaveRook", 8);
 
 	m_double[RATE_EXPERIENCE] = getGlobalDouble("rateExperience", 1);
 	m_double[RATE_SKILL] = getGlobalDouble("rateSkill", 1);
@@ -284,7 +287,6 @@ bool ConfigManager::load()
 	m_boolean[TELEPORT_SUMMONS] = getGlobalBool("teleportAllSummons", false);
 	m_boolean[TELEPORT_PLAYER_SUMMONS] = getGlobalBool("teleportPlayerSummons", false);
 	m_boolean[PVP_TILE_IGNORE_PROTECTION] = getGlobalBool("pvpTileIgnoreLevelAndVocationProtection", true);
-	m_boolean[ADVANCING_SKILL_LEVEL] = getGlobalBool("displaySkillLevelOnAdvance", false);
 	m_boolean[CLEAN_PROTECTED_ZONES] = getGlobalBool("cleanProtectedZones", true);
 	m_boolean[SPELL_NAME_INSTEAD_WORDS] = getGlobalBool("spellNameInsteadOfWords", false);
 	m_boolean[EMOTE_SPELLS] = getGlobalBool("emoteSpells", false);
@@ -325,13 +327,13 @@ bool ConfigManager::load()
 	m_boolean[EXTERNAL_GUILD_WARS_MANAGEMENT] = getGlobalBool("externalGuildWarsManagement", false);
 	m_boolean[CLASSIC_EQUIPMENT_SLOTS] = getGlobalBool("classicEquipmentSlots", false);
 	m_boolean[EXP_COLOR_RANDOM] = getGlobalBool("randomExperienceColor", false);
-	m_boolean[HEAL_PLAYER_ON_LEVEL] = getGlobalBool("healPlayersOnLevelAdvance", true);
 	m_boolean[ALWAYS_SHOW_MOTD] = getGlobalBool("alwaysShowMessageOfTheDay", false);
 	m_boolean[PVPZONE_RECOVERMANA] = getGlobalBool("recoverManaAfterDeathInPvPZone", false);
 	m_boolean[ALLOW_BLOCK_SPAWN] = getGlobalBool("allowBlockSpawn", false);
 	m_boolean[SURPRISE_BAGS] = getGlobalBool("dropSurpriseBagsFromMonsters", false);
 	m_boolean[CHRISTMAS_DECO] = getGlobalBool("useChristmasDecoration", false);
 	m_boolean[HOUSE_SKIP_INIT_RENT] = getGlobalBool("houseSkipInitialRent", true);
+	m_boolean[ROOK_SYSTEM]	= getGlobalBool("useRookSystem", false);
 
 	m_loaded = true;
 	return true;

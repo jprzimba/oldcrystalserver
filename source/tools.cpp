@@ -1182,7 +1182,8 @@ SkillIdNames skillIdNames[] =
 	{"fish",		SKILL_FISH},
 	{"level",		SKILL__LEVEL},
 	{"magiclevel",		SKILL__MAGLEVEL},
-	{"magic level",		SKILL__MAGLEVEL}
+	{"magic level",		SKILL__MAGLEVEL},
+	{"experience",	SKILL__EXPERIENCE}
 };
 
 MagicEffect_t getMagicEffect(const std::string& strValue)

@@ -487,8 +487,8 @@ class Player : public Creature, public Cylinder
 		virtual void onSummonAttackedCreatureDrain(Creature* summon, Creature* target, int32_t points);
 		virtual void onTargetCreatureGainHealth(Creature* target, int32_t points);
 		virtual bool onKilledCreature(Creature* target, DeathEntry& entry);
-		virtual void onGainExperience(double& gainExp, bool fromMonster, bool multiplied);
-		virtual void onGainSharedExperience(double& gainExp, bool fromMonster, bool multiplied);
+		virtual void onGainExperience(double& gainExp, Creature* target, bool multiplied);
+		virtual void onGainSharedExperience(double& gainExp, Creature* target, bool multiplied);
 		virtual void onAttackedCreatureBlockHit(Creature* target, BlockType_t blockType);
 		virtual void onBlockHit(BlockType_t blockType);
 		virtual void onChangeZone(ZoneType_t zone);
@@ -727,8 +727,9 @@ class Player : public Creature, public Cylinder
 	protected:
 		void checkTradeState(const Item* item);
 
-		bool gainExperience(double& gainExp, bool fromMonster);
-		bool rateExperience(double& gainExp, bool fromMonster);
+		bool gainExperience(double& gainExp, Creature* target);
+		bool rateExperience(double& gainExp, Creature* target);
+
 		void updateBaseSpeed()
 		{
 			if(!hasFlag(PlayerFlag_SetMaxSpeed))

@@ -225,6 +225,7 @@ enum Increment_t
 
 enum skills_t
 {
+	SKILL_NONE = -1,
 	SKILL_FIRST = 0,
 	SKILL_FIST = SKILL_FIRST,
 	SKILL_CLUB,
@@ -235,8 +236,9 @@ enum skills_t
 	SKILL_FISH,
 	SKILL__MAGLEVEL,
 	SKILL__LEVEL,
+	SKILL__EXPERIENCE,
 	SKILL_LAST = SKILL_FISH,
-	SKILL__LAST = SKILL__LEVEL
+	SKILL__LAST = SKILL__EXPERIENCE
 };
 
 enum stats_t

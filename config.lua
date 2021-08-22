@@ -18,6 +18,12 @@
 	generateAccountNumber = false
 	generateAccountSalt = false
 
+	-- Rook system
+	useRookSystem = false
+	rookTownId = 9
+	rookLevelToGetRooked = 5
+	rookLevelToLeaveRook = 8
+
 	-- Connection config
 	worldId = 0
 	ip = "127.0.0.1"
@@ -134,7 +140,6 @@
 	allowFightback = true
 	optionalWarAttackableAlly = false
 	fistBaseAttack = 7
-	healPlayersOnLevelAdvance = true
 	recoverManaAfterDeathInPvPZone = false
 
 	-- Spells
@@ -194,6 +199,7 @@
 	buyableAndSellableHouses = true
 	houseNeedPremium = true
 	bedsRequirePremium = true
+	houseSkipInitialRent = true
 	levelToBuyHouse = 1
 	housesPerAccount = 0
 	houseRentAsPrice = false
@@ -246,7 +252,6 @@
 	-- monsterLootMessage 0 to disable, 1 - only party, 2 - only player, 3 - party or player (like Tibia's)
 	dataDirectory = "data/"
 	bankSystem = true
-	displaySkillLevelOnAdvance = false
 	promptExceptionTracerErrorBox = true
 	maxMessageBuffer = 4
 	useCapSystem = true

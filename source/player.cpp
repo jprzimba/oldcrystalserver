@@ -662,11 +662,7 @@ void Player::addSkillAdvance(skills_t skill, uint32_t count, bool useMultiplier/
 		skills[skill][SKILL_LEVEL]++;
 
 		s.str("");
-		s << "You advanced in " << getSkillName(skill);
-		if(g_config.getBool(ConfigManager::ADVANCING_SKILL_LEVEL))
-			s << " [" << skills[skill][SKILL_LEVEL] << "]";
-
-		s << ".";
+		s << "You advanced to " << getSkillName(skill) << " level " << skills[skill][SKILL_LEVEL] << ".";
 		sendTextMessage(MSG_EVENT_ADVANCE, s.str().c_str());
 
 		CreatureEventList advanceEvents = getCreatureEvents(CREATURE_EVENT_ADVANCE);
@@ -1912,24 +1908,23 @@ void Player::addManaSpent(uint64_t amount, bool useMultiplier/* = true*/)
 		return;
 
 	uint64_t currReqMana = vocation->getReqMana(magLevel), nextReqMana = vocation->getReqMana(magLevel + 1);
-	if(currReqMana > nextReqMana) //player has reached max magic level
+	if(magLevel > 0 && currReqMana > nextReqMana) //player has reached max magic level
 		return;
 
 	if(useMultiplier)
 		amount = uint64_t((double)amount * rates[SKILL__MAGLEVEL] * g_config.getDouble(ConfigManager::RATE_MAGIC));
 
-	bool advance = false;
+	std::stringstream s;
 	while(manaSpent + amount >= nextReqMana)
 	{
 		amount -= nextReqMana - manaSpent;
 		manaSpent = 0;
 		magLevel++;
 
-		char advMsg[50];
-		sprintf(advMsg, "You advanced to magic level %d.", magLevel);
-		sendTextMessage(MSG_EVENT_ADVANCE, advMsg);
+		s.str("");
+		s << "You advanced to magic level " << ++magLevel << ".";
+		sendTextMessage(MSG_EVENT_ADVANCE, s.str());
 
-		advance = true;
 		CreatureEventList advanceEvents = getCreatureEvents(CREATURE_EVENT_ADVANCE);
 		for(CreatureEventList::iterator it = advanceEvents.begin(); it != advanceEvents.end(); ++it)
 			(*it)->executeAdvance(this, SKILL__MAGLEVEL, (magLevel - 1), magLevel);
@@ -1952,7 +1947,7 @@ void Player::addManaSpent(uint64_t amount, bool useMultiplier/* = true*/)
 		magLevelPercent = newPercent;
 		sendStats();
 	}
-	else if(advance)
+	else if(!s.str().empty())
 		sendStats();
 }
 
@@ -1971,13 +1966,21 @@ void Player::addExperience(uint64_t exp)
 	experience += exp;
 	while(experience >= nextLevelExp)
 	{
-		healthMax += vocation->getGain(GAIN_HEALTH);
-		health += vocation->getGain(GAIN_HEALTH);
-		manaMax += vocation->getGain(GAIN_MANA);
-		mana += vocation->getGain(GAIN_MANA);
-		capacity += vocation->getGainCap();
-
 		++level;
+		Vocation* voc = vocation;
+		if(voc->getId() > 0 && g_config.getBool(ConfigManager::ROOK_SYSTEM) &&
+			level <= (uint32_t)g_config.getNumber(ConfigManager::ROOK_TOLEVEL))
+		{
+			if(Vocation* tmp = Vocations::getInstance()->getVocation(0))
+				voc = tmp;
+		}
+
+		healthMax += voc->getGain(GAIN_HEALTH);
+		health += voc->getGain(GAIN_HEALTH);
+		manaMax += voc->getGain(GAIN_MANA);
+		mana += voc->getGain(GAIN_MANA);
+		capacity += voc->getGainCap();
+
 		nextLevelExp = Player::getExpForLevel(level + 1);
 		if(Player::getExpForLevel(level) > nextLevelExp) //player has reached max level
 			break;
@@ -1986,18 +1989,9 @@ void Player::addExperience(uint64_t exp)
 	if(prevLevel != level)
 	{
 		updateBaseSpeed();
-		setBaseSpeed(getBaseSpeed());
 		g_game.changeSpeed(this, 0);
-
-		if(g_config.getBool(ConfigManager::HEAL_PLAYER_ON_LEVEL))
-		{
-			health = healthMax;
-			mana = manaMax;
-		}
-		g_game.addCreatureHealth(this);
-
-		if(getParty())
-			getParty()->updateSharedExperience();
+		if(party)
+			party->updateSharedExperience();
 
 		CreatureEventList advanceEvents = getCreatureEvents(CREATURE_EVENT_ADVANCE);
 		for(CreatureEventList::iterator it = advanceEvents.begin(); it != advanceEvents.end(); ++it)
@@ -2005,6 +1999,7 @@ void Player::addExperience(uint64_t exp)
 
 		std::stringstream s;
 		s << "You advanced from Level " << prevLevel << " to Level " << level << ".";
+
 		sendTextMessage(MSG_EVENT_ADVANCE, s.str());
 
 		g_game.updateCreatureWalkthrough(this);
@@ -2025,10 +2020,18 @@ void Player::removeExperience(uint64_t exp, bool updateStats/* = true*/)
 	experience -= std::min(exp, experience);
 	while(level > 1 && experience < Player::getExpForLevel(level))
 	{
-		level--;
-		healthMax = std::max((int32_t)0, (healthMax - (int32_t)vocation->getGain(GAIN_HEALTH)));
-		manaMax = std::max((int32_t)0, (manaMax - (int32_t)vocation->getGain(GAIN_MANA)));
-		capacity = std::max((double)0, (capacity - (double)vocation->getGainCap()));
+		--level;
+		Vocation* voc = vocation;
+		if(voc->getId() > 0 && g_config.getBool(ConfigManager::ROOK_SYSTEM) &&
+			level < (uint32_t)g_config.getNumber(ConfigManager::ROOK_TOLEVEL))
+		{
+			if(Vocation* tmp = Vocations::getInstance()->getVocation(0))
+				voc = tmp;
+		}
+
+		healthMax = std::max((int32_t)0, (healthMax - (int32_t)voc->getGain(GAIN_HEALTH)));
+		manaMax = std::max((int32_t)0, (manaMax - (int32_t)voc->getGain(GAIN_MANA)));
+		capacity = std::max((double)0, (capacity - (double)voc->getGainCap()));
 	}
 
 	if(prevLevel != level)
@@ -2036,11 +2039,13 @@ void Player::removeExperience(uint64_t exp, bool updateStats/* = true*/)
 		if(updateStats)
 		{
 			updateBaseSpeed();
-			setBaseSpeed(getBaseSpeed());
-
 			g_game.changeSpeed(this, 0);
 			g_game.addCreatureHealth(this);
 		}
+
+		CreatureEventList advanceEvents = getCreatureEvents(CREATURE_EVENT_ADVANCE);
+		for(CreatureEventList::iterator it = advanceEvents.begin(); it != advanceEvents.end(); ++it)
+			(*it)->executeAdvance(this, SKILL__LEVEL, prevLevel, level);
 
 		std::stringstream s;
 		s << "You were downgraded from Level " << prevLevel << " to Level " << level << ".";
@@ -2049,8 +2054,8 @@ void Player::removeExperience(uint64_t exp, bool updateStats/* = true*/)
 		g_game.updateCreatureWalkthrough(this);
 	}
 
-	uint64_t currLevelExp = Player::getExpForLevel(level);
-	uint64_t nextLevelExp = Player::getExpForLevel(level + 1);
+	uint64_t currLevelExp = Player::getExpForLevel(level),
+		nextLevelExp = Player::getExpForLevel(level + 1);
 	if(nextLevelExp > currLevelExp)
 		levelPercent = Player::getPercentLevel(experience - currLevelExp, nextLevelExp - currLevelExp);
 	else
@@ -2302,8 +2307,41 @@ bool Player::onDeath()
 		}
 
 		blessings = 0;
+
 		loginPosition = masterPosition;
-		if(!inventory[SLOT_BACKPACK])
+		if(vocationId > VOCATION_NONE && g_config.getBool(ConfigManager::ROOK_SYSTEM) &&
+			level <= (uint32_t)g_config.getNumber(ConfigManager::ROOK_LEVELTO))
+		{
+			if(Town* rook = Towns::getInstance()->getTown(g_config.getNumber(ConfigManager::ROOK_TOWN)))
+			{
+				level = 1;
+				soulMax = soul = 100;
+				capacity = 400;
+				stamina = STAMINA_MAX;
+				health = healthMax = 150;
+				loginPosition = masterPosition = rook->getPosition();
+				experience = magLevel = manaSpent = mana = manaMax = balance = marriage = 0;
+				promotionLevel = defaultOutfit.lookAddons = 0;
+
+				setTown(rook->getID());
+				setVocation(0);
+				leaveGuild();
+
+				storageMap.clear();
+				for(uint32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i)
+				{
+					skills[i][SKILL_LEVEL] = 10;
+					skills[i][SKILL_TRIES] = 0;
+				}
+
+				for(uint32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
+				{
+					if(inventory[i])
+						g_game.internalRemoveItem(NULL, inventory[i]);
+				}
+			}
+		}
+		else if(!inventory[SLOT_BACKPACK]) // FIXME: you should receive the bag after you login back...
 			__internalAddThing(SLOT_BACKPACK, Item::CreateItem(g_config.getNumber(ConfigManager::DEATH_CONTAINER)));
 
 		sendIcons();
@@ -3917,9 +3955,9 @@ bool Player::onKilledCreature(Creature* target, DeathEntry& entry)
 	return true;
 }
 
-bool Player::gainExperience(double& gainExp, bool fromMonster)
+bool Player::gainExperience(double& gainExp, Creature* target)
 {
-	if(!rateExperience(gainExp, fromMonster))
+	if(!rateExperience(gainExp, target))
 		return false;
 
 	//soul regeneration
@@ -3940,12 +3978,12 @@ bool Player::gainExperience(double& gainExp, bool fromMonster)
 	return true;
 }
 
-bool Player::rateExperience(double& gainExp, bool fromMonster)
+bool Player::rateExperience(double& gainExp, Creature* target)
 {
 	if(hasFlag(PlayerFlag_NotGainExperience) || gainExp <= 0)
 		return false;
 
-	if(!fromMonster)
+	if(target->getPlayer())
 		return true;
 
 	gainExp *= rates[SKILL__LEVEL] * g_game.getExperienceStage(level,
@@ -3969,23 +4007,28 @@ bool Player::rateExperience(double& gainExp, bool fromMonster)
 	return true;
 }
 
-void Player::onGainExperience(double& gainExp, bool fromMonster, bool multiplied)
+void Player::onGainExperience(double& gainExp, Creature* target, bool multiplied)
 {
+	uint64_t tmp = experience;
 	if(party && party->isSharedExperienceEnabled() && party->isSharedExperienceActive())
 	{
-		party->shareExperience(gainExp, fromMonster, multiplied);
-		rateExperience(gainExp, fromMonster);
+		party->shareExperience(gainExp, target, multiplied);
+		rateExperience(gainExp, target);
 		return; //we will get a share of the experience through the sharing mechanism
 	}
 
-	if(gainExperience(gainExp, fromMonster))
-		Creature::onGainExperience(gainExp, fromMonster, true);
+	if(gainExperience(gainExp, target))
+		Creature::onGainExperience(gainExp, target, true);
+
+	CreatureEventList advanceEvents = getCreatureEvents(CREATURE_EVENT_ADVANCE);
+	for(CreatureEventList::iterator it = advanceEvents.begin(); it != advanceEvents.end(); ++it)
+		(*it)->executeAdvance(this, SKILL__EXPERIENCE, tmp, experience);
 }
 
-void Player::onGainSharedExperience(double& gainExp, bool fromMonster, bool multiplied)
+void Player::onGainSharedExperience(double& gainExp, Creature* target, bool)
 {
-	if(gainExperience(gainExp, fromMonster))
-		Creature::onGainSharedExperience(gainExp, fromMonster, true);
+	if(gainExperience(gainExp, target))
+		Creature::onGainSharedExperience(gainExp, target, true);
 }
 
 bool Player::isImmune(CombatType_t type) const
