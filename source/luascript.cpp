@@ -23,6 +23,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include "beds.h"
 #include "player.h"
 #include "item.h"
 #include "teleport.h"
@@ -1889,7 +1890,7 @@ void LuaInterface::registerFunctions()
 	//doAddContainerItem(uid, itemid[, count/subType])
 	lua_register(m_luaState, "doAddContainerItem", LuaInterface::luaDoAddContainerItem);
 
-	//getHouseInfo(houseId)
+	//getHouseInfo(houseId[, full = true])
 	lua_register(m_luaState, "getHouseInfo", LuaInterface::luaGetHouseInfo);
 
 	//getHouseAccessList(houseid, listId)
@@ -1898,8 +1899,8 @@ void LuaInterface::registerFunctions()
 	//getHouseByPlayerGUID(playerGUID)
 	lua_register(m_luaState, "getHouseByPlayerGUID", LuaInterface::luaGetHouseByPlayerGUID);
 
-	//getHouseFromPos(pos)
-	lua_register(m_luaState, "getHouseFromPos", LuaInterface::luaGetHouseFromPos);
+	//getHouseFromPosition(pos)
+	lua_register(m_luaState, "getHouseFromPosition", LuaInterface::luaGetHouseFromPosition);
 
 	//setHouseAccessList(houseid, listid, listtext)
 	lua_register(m_luaState, "setHouseAccessList", LuaInterface::luaSetHouseAccessList);
@@ -2348,6 +2349,9 @@ void LuaInterface::registerFunctions()
 
 	//doSaveServer()
 	lua_register(m_luaState, "doSaveServer", LuaInterface::luaDoSaveServer);
+
+	//doSaveHouse({list})
+	lua_register(m_luaState, "doSaveHouse", LuaInterface::luaDoSaveHouse);
 
 	//doCleanHouse(houseId)
 	lua_register(m_luaState, "doCleanHouse", LuaInterface::luaDoCleanHouse);
@@ -4664,9 +4668,9 @@ int32_t LuaInterface::luaGetTileInfo(lua_State* L)
 	return 1;
 }
 
-int32_t LuaInterface::luaGetHouseFromPos(lua_State* L)
+int32_t LuaInterface::luaGetHouseFromPosition(lua_State* L)
 {
-	//getHouseFromPos(pos)
+	//luaGetHouseFromPosition(pos)
 	PositionEx pos;
 	popPosition(L, pos);
 
@@ -5000,17 +5004,15 @@ int32_t LuaInterface::luaGetPlayerMoney(lua_State* L)
 
 int32_t LuaInterface::luaGetHouseInfo(lua_State* L)
 {
-	//getHouseInfo(houseId)
-	bool displayError = true;
+	//getHouseInfo(houseId[, full = true])
+	bool full = true;
 	if(lua_gettop(L) > 1)
-		displayError = popNumber(L);
+		full = popBoolean(L);
 
 	House* house = Houses::getInstance()->getHouse(popNumber(L));
 	if(!house)
 	{
-		if(displayError)
-			errorEx(getError(LUA_ERROR_HOUSE_NOT_FOUND));
-
+		errorEx(getError(LUA_ERROR_HOUSE_NOT_FOUND));
 		lua_pushboolean(L, false);
 		return 1;
 	}
@@ -5033,9 +5035,43 @@ int32_t LuaInterface::luaGetHouseInfo(lua_State* L)
 
 	setFieldBool(L, "guildHall", house->isGuild());
 	setField(L, "size", house->getSize());
-	setField(L, "doors", house->getDoorsCount());
-	setField(L, "beds", house->getBedsCount());
-	setField(L, "tiles", house->getTilesCount());
+
+	if(full)
+	{
+		createTable(L, "doors");
+
+		HouseDoorList::iterator dit = house->getHouseDoorBegin();
+		for(uint32_t i = 1; dit != house->getHouseDoorEnd(); ++dit, ++i)
+		{
+			lua_pushnumber(L, i);
+			pushPosition(L, (*dit)->getPosition(), 0);
+			pushTable(L);
+		}
+
+		pushTable(L);
+		createTable(L, "beds");
+
+		HouseBedList::iterator bit = house->getHouseBedsBegin();
+		for(uint32_t i = 1; bit != house->getHouseBedsEnd(); ++bit, ++i)
+		{
+			lua_pushnumber(L, i);
+			pushPosition(L, (*bit)->getPosition(), 0);
+			pushTable(L);
+		}
+
+		pushTable(L);
+		createTable(L, "tiles");
+
+		HouseTileList::iterator tit = house->getHouseTileBegin();
+		for(uint32_t i = 1; tit != house->getHouseTileEnd(); ++tit, ++i)
+		{
+			lua_pushnumber(L, i);
+			pushPosition(L, (*tit)->getPosition(), 0);
+			pushTable(L);
+		}
+
+		pushTable(L);
+	}
 
 	return 1;
 }
@@ -9126,6 +9162,67 @@ int32_t LuaInterface::luaDoSaveServer(lua_State* L)
 	return 1;
 }
 
+int32_t LuaInterface::luaDoSaveHouse(lua_State* L)
+{
+	//doSaveHouse({list})
+	IntegerVec list;
+	if(lua_istable(L, -1))
+	{
+		lua_pushnil(L);
+		while(lua_next(L, -2))
+			list.push_back(popNumber(L));
+
+		lua_pop(L, 2);
+	}
+	else
+		list.push_back(popNumber(L));
+
+	House* house;
+	std::vector<House*> houses;
+	for(IntegerVec::const_iterator it = list.begin(); it != list.end(); ++it)
+	{
+		if(!(house = Houses::getInstance()->getHouse(*it)))
+		{
+			std::stringstream s;
+			s << "House not found, ID: " << (*it);
+			errorEx(s.str());
+
+			lua_pushboolean(L, false);
+			return 1;
+		}
+
+		houses.push_back(house);
+	}
+
+	Database* db = Database::getInstance();
+	DBTransaction trans(db);
+	if(!trans.begin())
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	for(std::vector<House*>::iterator it = houses.begin(); it != houses.end(); ++it)
+	{
+		if(!IOMapSerialize::getInstance()->saveHouse(db, *it))
+		{
+			std::stringstream s;
+			s << "Unable to save house information, ID: " << (*it)->getId();
+			errorEx(s.str());
+		}
+
+		if(!IOMapSerialize::getInstance()->saveHouseItems(db, *it))
+		{
+			std::stringstream s;
+			s << "Unable to save house items, ID: " << (*it)->getId();
+			errorEx(s.str());
+		}
+	}
+
+	lua_pushboolean(L, trans.commit());
+	return 1;
+}
+
 int32_t LuaInterface::luaDoCleanHouse(lua_State* L)
 {
 	//doCleanHouse(houseId)
@@ -9315,12 +9412,12 @@ int32_t LuaInterface::luaGetItemInfo(lua_State* L)
 	setField(L, "shootType", (int32_t)item->shootType);
 	setField(L, "ammoType", (int32_t)item->ammoType);
 
-	createTable(L, "transformUseTo");
-	setField(L, "female", item->transformUseTo[PLAYERSEX_FEMALE]);
-	setField(L, "male", item->transformUseTo[PLAYERSEX_MALE]);
+	createTable(L, "transformBed");
+	setField(L, "female", item->transformBed[PLAYERSEX_FEMALE]);
+	setField(L, "male", item->transformBed[PLAYERSEX_MALE]);
 
 	pushTable(L);
-	setField(L, "transformToFree", item->transformToFree);
+	setField(L, "transformUseTo", item->transformUseTo);
 	setField(L, "transformEquipTo", item->transformEquipTo);
 	setField(L, "transformDeEquipTo", item->transformDeEquipTo);
 	setField(L, "clientId", item->clientId);
@@ -9357,6 +9454,8 @@ int32_t LuaInterface::luaGetItemInfo(lua_State* L)
 	setField(L, "minRequiredMagicLevel", item->minReqMagicLevel);
 	setField(L, "worth", item->worth);
 	setField(L, "levelDoor", item->levelDoor);
+	setFieldBool(L, "specialDoor", item->specialDoor);
+	setFieldBool(L, "closingDoor", item->closingDoor);
 	setField(L, "name", item->name.c_str());
 	setField(L, "plural", item->pluralName.c_str());
 	setField(L, "article", item->article.c_str());

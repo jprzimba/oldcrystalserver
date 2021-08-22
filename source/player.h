@@ -36,6 +36,7 @@
 #include "party.h"
 #include "npc.h"
 
+class BedItem;
 class House;
 class NetworkMessage;
 class Weapon;

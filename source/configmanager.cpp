@@ -331,6 +331,7 @@ bool ConfigManager::load()
 	m_boolean[ALLOW_BLOCK_SPAWN] = getGlobalBool("allowBlockSpawn", false);
 	m_boolean[SURPRISE_BAGS] = getGlobalBool("dropSurpriseBagsFromMonsters", false);
 	m_boolean[CHRISTMAS_DECO] = getGlobalBool("useChristmasDecoration", false);
+	m_boolean[HOUSE_SKIP_INIT_RENT] = getGlobalBool("houseSkipInitialRent", true);
 
 	m_loaded = true;
 	return true;

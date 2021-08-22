@@ -301,6 +301,7 @@ class ConfigManager
 			ALLOW_BLOCK_SPAWN,
 			SURPRISE_BAGS,
 			CHRISTMAS_DECO,
+			HOUSE_SKIP_INIT_RENT,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

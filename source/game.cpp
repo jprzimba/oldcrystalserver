@@ -207,7 +207,7 @@ void Game::setGameState(GameState_t newState)
 					it = Player::autoList.begin();
 				}
 
-				Houses::getInstance()->payHouses();
+				Houses::getInstance()->check();
 				saveGameState(false);
 				Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::shutdown, this)));
 
@@ -6206,26 +6206,31 @@ void Game::globalSave()
 
 	//close server
 	Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAMESTATE_CLOSED)));
+
 	//clean map if configured to
 	if(g_config.getBool(ConfigManager::CLEAN_MAP_AT_GLOBALSAVE))
 		cleanMap();
 
 	//pay houses
-	Houses::getInstance()->payHouses();
+	Houses::getInstance()->check();
+
 	//clear temporial and expired bans
 	IOBan::getInstance()->clearTemporials();
+
 	//remove premium days globally if configured to
 	if(g_config.getBool(ConfigManager::REMOVE_PREMIUM_ON_INIT))
 		IOLoginData::getInstance()->updatePremiumDays();
 
 	//reload everything
 	reloadInfo(RELOAD_ALL);
+
 	//reset variables
 	for(int16_t i = 0; i < 3; i++)
 		setGlobalSaveMessage(i, false);
 
 	//prepare for next global save after 24 hours
 	Scheduler::getInstance().addEvent(createSchedulerTask(86100000, boost::bind(&Game::prepareGlobalSave, this)));
+
 	//open server
 	Dispatcher::getInstance().addTask(createTask(boost::bind(&Game::setGameState, this, GAMESTATE_NORMAL)));
 }

@@ -342,6 +342,14 @@ ReturnValue Actions::canUse(const Player* player, const Position& pos)
 	if(!Position::areInRange<1,1,0>(playerPos, pos))
 		return RET_TOOFARAWAY;
 
+	Tile* tile = g_game.getTile(pos);
+	if(tile)
+	{
+		HouseTile* houseTile = tile->getHouseTile();
+		if(houseTile && houseTile->getHouse() && !houseTile->getHouse()->isInvited(player))
+			return RET_PLAYERISNOTINVITED;
+	}
+
 	return RET_NOERROR;
 }
 
@@ -569,6 +577,14 @@ ReturnValue Actions::internalUseItem(Player* player, const Position& pos, uint8_
 			player->sendTextWindow(item, 0, false);
 		}
 
+		return RET_NOERROR;
+	}
+
+	const ItemType& it = Item::items[item->getID()];
+	if(it.transformUseTo)
+	{
+		g_game.transformItem(item, it.transformUseTo);
+		g_game.startDecay(item);
 		return RET_NOERROR;
 	}
 

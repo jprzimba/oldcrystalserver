@@ -79,7 +79,7 @@ ItemType::ItemType()
 	date = 0;
 	writeOnceItemId = 0;
 
-	transformEquipTo = transformDeEquipTo = 0;
+	transformEquipTo = transformDeEquipTo = transformUseTo = 0;
 	showDuration = showCharges = showAttributes = dualWield = false;
 	charges	= 0;
 	hitChance = maxHitChance = breakChance = -1;
@@ -92,10 +92,10 @@ ItemType::ItemType()
 	worth = 0;
 
 	bedPartnerDir = NORTH;
-	transformUseTo[PLAYERSEX_FEMALE] = 0;
-	transformUseTo[PLAYERSEX_MALE] = 0;
-	transformToFree = 0;
+	transformBed[PLAYERSEX_FEMALE] = transformBed[PLAYERSEX_MALE] = 0;
+
 	levelDoor = 0;
+	specialDoor = closingDoor = false;
 
 	memset(floorChange, 0, sizeof(floorChange));
 }
@@ -107,9 +107,9 @@ ItemType::~ItemType()
 
 void Items::clear()
 {
-	//TODO: clear items?
 	moneyMap.clear();
 	randomizationMap.clear();
+
 	reverseItemMap.clear();
 }
 
@@ -424,7 +424,7 @@ bool Items::loadFromXml()
 			continue;
 
 		//check bed items
-		if((it->transformToFree || it->transformUseTo[PLAYERSEX_FEMALE] || it->transformUseTo[PLAYERSEX_MALE]) && it->type != ITEM_TYPE_BED)
+		if((it->transformBed[PLAYERSEX_FEMALE] || it->transformBed[PLAYERSEX_MALE]) && it->type != ITEM_TYPE_BED)
 			std::clog << "[Warning - Items::loadFromXml] Item " << it->id << " is not set as a bed-type." << std::endl;
 	}
 
@@ -651,6 +651,11 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
 					it.moveable = (intValue != 0);
 			}
+			else if(tmpStrValue == "blocksolid" || tmpStrValue == "blocking")
+			{
+				if(readXMLInteger(itemAttributesNode, "value", intValue))
+					it.blockSolid = (intValue != 0);
+			}
 			else if(tmpStrValue == "blockprojectile")
 			{
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
@@ -783,6 +788,16 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 			{
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
 					it.levelDoor = intValue;
+			}
+			else if(tmpStrValue == "specialdoor")
+			{
+				if(readXMLInteger(itemAttributesNode, "value", intValue))
+					it.specialDoor = (intValue != 0);
+			}
+			else if(tmpStrValue == "closingdoor")
+			{
+				if(readXMLInteger(itemAttributesNode, "value", intValue))
+					it.closingDoor = (intValue != 0);
 			}
 			else if(tmpStrValue == "weapontype")
 			{
@@ -1721,32 +1736,32 @@ void Items::parseItemNode(xmlNodePtr itemNode, uint32_t id)
 			{
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
 				{
-					it.transformUseTo[PLAYERSEX_MALE] = intValue;
+					it.transformBed[PLAYERSEX_MALE] = intValue;
 					ItemType& ot = getItemType(intValue);
-					if(!ot.transformToFree)
-						ot.transformToFree = it.id;
+					if(!ot.transformUseTo)
+						ot.transformUseTo = it.id;
 
-					if(!it.transformUseTo[PLAYERSEX_FEMALE])
-						it.transformUseTo[PLAYERSEX_FEMALE] = intValue;
+					if(!it.transformBed[PLAYERSEX_FEMALE])
+						it.transformBed[PLAYERSEX_FEMALE] = intValue;
 				}
 			}
 			else if(tmpStrValue == "femaletransformto")
 			{
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
 				{
-					it.transformUseTo[PLAYERSEX_FEMALE] = intValue;
+					it.transformBed[PLAYERSEX_MALE] = intValue;
 					ItemType& ot = getItemType(intValue);
-					if(!ot.transformToFree)
-						ot.transformToFree = it.id;
+					if(!ot.transformUseTo)
+						ot.transformUseTo = it.id;
 
-					if(!it.transformUseTo[PLAYERSEX_MALE])
-						it.transformUseTo[PLAYERSEX_MALE] = intValue;
+					if(!it.transformBed[PLAYERSEX_FEMALE])
+						it.transformBed[PLAYERSEX_FEMALE] = intValue;
 				}
 			}
-			else if(tmpStrValue == "transformto")
+			else if(tmpStrValue == "transformto" || tmpStrValue == "transformuseto" || tmpStrValue == "onuseto")
 			{
 				if(readXMLInteger(itemAttributesNode, "value", intValue))
-					it.transformToFree = intValue;
+					it.transformUseTo = intValue;
 			}
 			else if(tmpStrValue == "walkstack")
 			{

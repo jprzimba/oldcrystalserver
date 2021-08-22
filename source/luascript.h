@@ -468,7 +468,7 @@ class LuaInterface
 		static int32_t luaGetHouseInfo(lua_State* L);
 		static int32_t luaGetHouseAccessList(lua_State* L);
 		static int32_t luaGetHouseByPlayerGUID(lua_State* L);
-		static int32_t luaGetHouseFromPos(lua_State* L);
+		static int32_t luaGetHouseFromPosition(lua_State* L);
 		static int32_t luaSetHouseOwner(lua_State* L);
 		static int32_t luaSetHouseAccessList(lua_State* L);
 		static int32_t luaDoPlayerSetNameDescription(lua_State* L);
@@ -647,6 +647,7 @@ class LuaInterface
 		static int32_t luaDoExecuteRaid(lua_State* L);
 		static int32_t luaDoReloadInfo(lua_State* L);
 		static int32_t luaDoSaveServer(lua_State* L);
+		static int32_t luaDoSaveHouse(lua_State* L);
 		static int32_t luaDoCleanHouse(lua_State* L);
 		static int32_t luaDoCleanMap(lua_State* L);
 		static int32_t luaDoRefreshMap(lua_State* L);
