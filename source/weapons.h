@@ -125,20 +125,12 @@ class WeaponMelee : public Weapon
 		WeaponMelee(LuaInterface* _interface);
 		virtual ~WeaponMelee() {}
 
-		virtual bool configureEvent(xmlNodePtr p);
-		virtual bool configureWeapon(const ItemType& it);
-
 		virtual bool useWeapon(Player* player, Item* item, Creature* target) const;
 		virtual int32_t getWeaponDamage(const Player* player, const Creature* target, const Item* item, bool maxDamage = false) const;
-		virtual int32_t getElementDamage(const Player* player, const Item* item) const;
+		virtual int32_t getWeaponElementDamage(const Player* player, const Item* item, bool maxDamage = false) const;
 
 	protected:
-		virtual void onUsedWeapon(Player* player, Item* item, Tile* destTile) const;
-		virtual void onUsedAmmo(Player* player, Item* item, Tile* destTile) const;
-		virtual bool getSkillType(const Player* player, const Item* item, skills_t& skill, uint32_t& skillpoint) const;
-
-		CombatType_t elementType;
-		int16_t elementDamage;
+		virtual bool getSkillType(const Player* player, const Item* item, skills_t& skill, uint64_t& skillPoint) const;
 };
 
 class WeaponDistance : public Weapon

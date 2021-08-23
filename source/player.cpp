@@ -1004,7 +1004,7 @@ void Player::sendCancelMessage(ReturnValue message) const
 			sendCancel("Destination is out of reach.");
 			break;
 
-		case RET_NOTMOVEABLE:
+		case RET_NOTMOVABLE:
 			sendCancel("You cannot move this object.");
 			break;
 
@@ -2126,14 +2126,14 @@ bool Player::hasShield() const
 }
 
 BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
-	bool checkDefense/* = false*/, bool checkArmor/* = false*/)
+	bool checkDefense/* = false*/, bool checkArmor/* = false*/, bool reflect/* = true*/, bool field/* = false*/, bool element/* = false*/)
 {
-	BlockType_t blockType = Creature::blockHit(attacker, combatType, damage, checkDefense, checkArmor);
-	if(attacker)
+	BlockType_t blockType = Creature::blockHit(attacker, combatType, damage, checkDefense, checkArmor, reflect, field);
+	if(attacker && !element)
 	{
 		int16_t color = g_config.getNumber(ConfigManager::SQUARE_COLOR);
 		if(color < 0)
-			color = random_range(0, 255);
+			color = random_range(0, 254);
 
 		sendCreatureSquare(attacker, color);
 	}
@@ -2141,69 +2141,89 @@ BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_
 	if(blockType != BLOCK_NONE)
 		return blockType;
 
-	if(vocation->getMultiplier(MULTIPLIER_MAGICDEFENSE) != 1.0 && combatType != COMBAT_NONE &&
-		combatType != COMBAT_PHYSICALDAMAGE && combatType != COMBAT_UNDEFINEDDAMAGE &&
-		combatType != COMBAT_DROWNDAMAGE)
+	if(vocation->getMultiplier(MULTIPLIER_MAGICDEFENSE) != 1.0 && combatType != COMBAT_PHYSICALDAMAGE &&
+		combatType != COMBAT_NONE && combatType != COMBAT_UNDEFINEDDAMAGE && combatType != COMBAT_DROWNDAMAGE)
 		damage -= (int32_t)std::ceil((double)(damage * vocation->getMultiplier(MULTIPLIER_MAGICDEFENSE)) / 100.);
 
-	if(damage > 0)
+	if(damage <= 0)
+		return blockType;
+
+	int32_t blocked = 0, reflected = 0;
+	if(reflect)
+		reflect = attacker && !attacker->isRemoved() && attacker->getHealth() > 0;
+
+	Item* item = NULL;
+	for(int32_t slot = SLOT_FIRST; slot < SLOT_LAST; ++slot)
 	{
-		Item* item = NULL;
-		int32_t blocked = 0, reflected = 0;
-		for(int32_t slot = SLOT_FIRST; slot < SLOT_LAST; ++slot)
+		if(!(item = getInventoryItem((slots_t)slot)) || item->isRemoved() ||
+			(g_moveEvents->hasEquipEvent(item) && !isItemAbilityEnabled((slots_t)slot)))
+			continue;
+
+		const ItemType& it = Item::items[item->getID()];
+		if(!it.hasAbilities())
+			continue;
+
+		bool transform = false;
+		if(it.abilities->absorb[combatType])
 		{
-			if(!(item = getInventoryItem((slots_t)slot)) || (g_moveEvents->hasEquipEvent(item)
-				&& !isItemAbilityEnabled((slots_t)slot)))
-				continue;
+			blocked += (int32_t)std::ceil((double)(damage * it.abilities->absorb[combatType]) / 100.);
+			if(item->hasCharges())
+				transform = true;
 
-			const ItemType& it = Item::items[item->getID()];
-			if(it.abilities.absorb[combatType])
-			{
-				blocked += (int32_t)std::ceil((double)(damage * it.abilities.absorb[combatType]) / 100.);
-				if(item->hasCharges())
-					g_game.transformItem(item, item->getID(), std::max((int32_t)0, (int32_t)item->getCharges() - 1));
-			}
-
-			if(it.abilities.reflect[REFLECT_PERCENT][combatType] && it.abilities.reflect[REFLECT_CHANCE][combatType] < random_range(0, 100))
-			{
-				reflected += (int32_t)std::ceil((double)(damage * it.abilities.reflect[REFLECT_PERCENT][combatType]) / 100.);
-				if(item->hasCharges() && !it.abilities.absorb[combatType])
-					g_game.transformItem(item, item->getID(), std::max((int32_t)0, (int32_t)item->getCharges() - 1));
-			}
 		}
 
-		if(outfitAttributes)
+		if(field && it.abilities->fieldAbsorb[combatType])
 		{
-			uint32_t tmp = Outfits::getInstance()->getOutfitAbsorb(defaultOutfit.lookType, sex, combatType);
-			if(tmp)
-				blocked += (int32_t)std::ceil((double)(damage * tmp) / 100.);
+			blocked += (int32_t)std::ceil((double)(damage * it.abilities->fieldAbsorb[combatType]) / 100.);
+			if(item->hasCharges())
+				transform = true;
+		}
 
+		if(reflect && it.abilities->reflect[REFLECT_PERCENT][combatType] && it.abilities->reflect[REFLECT_CHANCE][combatType] >= random_range(1, 100))
+		{
+			reflected += (int32_t)std::ceil((double)(damage * it.abilities->reflect[REFLECT_PERCENT][combatType]) / 100.);
+			if(item->hasCharges())
+				transform = true;
+		}
+
+		if(!element && transform)
+			g_game.transformItem(item, item->getID(), std::max((int32_t)0, (int32_t)item->getCharges() - 1));
+	}
+
+	if(outfitAttributes)
+	{
+		uint32_t tmp = Outfits::getInstance()->getOutfitAbsorb(defaultOutfit.lookType, sex, combatType);
+		if(tmp)
+			blocked += (int32_t)std::ceil((double)(damage * tmp) / 100.);
+
+		if(reflect)
+		{
 			tmp = Outfits::getInstance()->getOutfitReflect(defaultOutfit.lookType, sex, combatType);
 			if(tmp)
 				reflected += (int32_t)std::ceil((double)(damage * tmp) / 100.);
 		}
+	}
 
-		if(vocation->getAbsorb(combatType))
-			blocked += (int32_t)std::ceil((double)(damage * vocation->getAbsorb(combatType)) / 100.);
+	if(vocation->getAbsorb(combatType))
+		blocked += (int32_t)std::ceil((double)(damage * vocation->getAbsorb(combatType)) / 100.);
 
-		if(vocation->getReflect(combatType))
-			reflected += (int32_t)std::ceil((double)(damage * vocation->getReflect(combatType)) / 100.);
+	if(reflect && vocation->getReflect(combatType))
+		reflected += (int32_t)std::ceil((double)(damage * vocation->getReflect(combatType)) / 100.);
 
-		damage -= blocked;
-		if(damage <= 0)
-		{
-			damage = 0;
-			blockType = BLOCK_DEFENSE;
-		}
+	damage -= blocked;
+	if(damage <= 0)
+	{
+		damage = 0;
+		blockType = BLOCK_DEFENSE;
+	}
 
-		if(reflected)
-		{
-			CombatType_t reflectType = combatType;
-			if(reflected <= 0)
-				reflectType = COMBAT_HEALING;
+	if(reflected && !element)
+	{
+		if(combatType != COMBAT_HEALING)
+			reflected = -reflected;
 
-			g_game.combatChangeHealth(reflectType, NULL, attacker, -reflected);
-		}
+		if(!g_game.combatBlockHit(combatType, this, attacker, reflected, false, false, true, false))
+			g_game.combatChangeHealth(combatType, NULL, attacker, reflected);
 	}
 
 	return blockType;
@@ -2235,13 +2255,16 @@ bool Player::onDeath()
 				continue;
 
 			const ItemType& it = Item::items[item->getID()];
-			if(lootDrop == LOOT_DROP_FULL && it.abilities.preventDrop)
+			if(!it.hasAbilities())
+				continue;
+
+			if(lootDrop == LOOT_DROP_FULL && it.abilities->preventDrop)
 			{
 				setDropLoot(LOOT_DROP_PREVENT);
 				preventDrop = item;
 			}
 
-			if(skillLoss && !preventLoss && it.abilities.preventLoss)
+			if(skillLoss && !preventLoss && it.abilities->preventLoss)
 				preventLoss = item;
 		}
 	}
@@ -2881,8 +2904,8 @@ ReturnValue Player::__queryRemove(const Thing* thing, uint32_t count, uint32_t f
 	if(!count || (item->isStackable() && count > item->getItemCount()))
 		return RET_NOTPOSSIBLE;
 
-	 if(!item->isMoveable() && !hasBitSet(FLAG_IGNORENOTMOVEABLE, flags))
-		return RET_NOTMOVEABLE;
+	 if(!item->isMovable() && !hasBitSet(FLAG_IGNORENOTMOVABLE, flags))
+		return RET_NOTMOVABLE;
 
 	return RET_NOERROR;
 }
@@ -5194,36 +5217,39 @@ void Player::increaseCombatValues(int32_t& min, int32_t& max, bool useCharges, b
 			continue;
 
 		const ItemType& it = Item::items[item->getID()];
+		if(!it.hasAbilities())
+			continue;
+
 		if(min > 0)
 		{
-			minValue += it.abilities.increment[HEALING_VALUE];
-			if(it.abilities.increment[HEALING_PERCENT])
-				min = (int32_t)std::ceil((double)(min * it.abilities.increment[HEALING_PERCENT]) / 100.);
+			minValue += it.abilities->increment[HEALING_VALUE];
+			if(it.abilities->increment[HEALING_PERCENT])
+				min = (int32_t)std::ceil((double)(min * it.abilities->increment[HEALING_PERCENT]) / 100.);
 		}
 		else
 		{
-			minValue -= it.abilities.increment[MAGIC_VALUE];
-			if(it.abilities.increment[MAGIC_PERCENT])
-				min = (int32_t)std::ceil((double)(min * it.abilities.increment[MAGIC_PERCENT]) / 100.);
+			minValue -= it.abilities->increment[MAGIC_VALUE];
+			if(it.abilities->increment[MAGIC_PERCENT])
+				min = (int32_t)std::ceil((double)(min * it.abilities->increment[MAGIC_PERCENT]) / 100.);
 		}
 
 		if(max > 0)
 		{
-			maxValue += it.abilities.increment[HEALING_VALUE];
-			if(it.abilities.increment[HEALING_PERCENT])
-				max = (int32_t)std::ceil((double)(max * it.abilities.increment[HEALING_PERCENT]) / 100.);
+			maxValue += it.abilities->increment[HEALING_VALUE];
+			if(it.abilities->increment[HEALING_PERCENT])
+				max = (int32_t)std::ceil((double)(max * it.abilities->increment[HEALING_PERCENT]) / 100.);
 		}
 		else
 		{
-			maxValue -= it.abilities.increment[MAGIC_VALUE];
-			if(it.abilities.increment[MAGIC_PERCENT])
-				max = (int32_t)std::ceil((double)(max * it.abilities.increment[MAGIC_PERCENT]) / 100.);
+			maxValue -= it.abilities->increment[MAGIC_VALUE];
+			if(it.abilities->increment[MAGIC_PERCENT])
+				max = (int32_t)std::ceil((double)(max * it.abilities->increment[MAGIC_PERCENT]) / 100.);
 		}
 
 		bool removeCharges = false;
 		for(int32_t j = INCREMENT_FIRST; j <= INCREMENT_LAST; ++j)
 		{
-			if(!it.abilities.increment[(Increment_t)j])
+			if(!it.abilities->increment[(Increment_t)j])
 				continue;
 
 			removeCharges = true;

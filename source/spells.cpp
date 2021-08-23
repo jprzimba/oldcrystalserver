@@ -1752,7 +1752,7 @@ bool RuneSpell::Illusion(const RuneSpell* spell, Creature* creature, Item* item,
 	}
 
 	Item* illusionItem = thing->getItem();
-	if(!illusionItem || !illusionItem->isMoveable())
+	if(!illusionItem || !illusionItem->isMovable())
 	{
 		player->sendCancelMessage(RET_NOTPOSSIBLE);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);

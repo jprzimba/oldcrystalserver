@@ -3871,7 +3871,7 @@ int32_t LuaInterface::luaDoRelocate(lua_State* L)
 				{
 					const ItemType& it = Item::items[item->getID()];
 					if(!it.isGroundTile() && !it.alwaysOnTop && !it.isMagicField())
-						g_game.internalTeleport(item, toPos, false, FLAG_IGNORENOTMOVEABLE);
+						g_game.internalTeleport(item, toPos, false, FLAG_IGNORENOTMOVABLE);
 				}
 				else if(creatures)
 				{
@@ -4217,7 +4217,7 @@ int32_t LuaInterface::luaGetThingFromPos(lua_State* L)
 			if(!(thing = tile->getTopCreature()))
 			{
 				Item* item = tile->getTopDownItem();
-				if(item && item->isMoveable())
+				if(item && item->isMovable())
 					thing = item;
 			}
 		}
@@ -9383,11 +9383,11 @@ int32_t LuaInterface::luaGetItemInfo(lua_State* L)
 	setFieldBool(L, "vertical", item->isVertical);
 	setFieldBool(L, "horizontal", item->isHorizontal);
 	setFieldBool(L, "hangable", item->isHangable);
-	setFieldBool(L, "usable", item->useable);
-	setFieldBool(L, "movable", item->moveable);
+	setFieldBool(L, "usable", item->usable);
+	setFieldBool(L, "movable", item->movable);
 	setFieldBool(L, "pickupable", item->pickupable);
 	setFieldBool(L, "rotable", item->rotable);
-	setFieldBool(L, "replacable", item->replaceable);
+	setFieldBool(L, "replacable", item->replacable);
 	setFieldBool(L, "hasHeight", item->hasHeight);
 	setFieldBool(L, "blockSolid", item->blockSolid);
 	setFieldBool(L, "blockPickupable", item->blockPickupable);
@@ -9428,7 +9428,7 @@ int32_t LuaInterface::luaGetItemInfo(lua_State* L)
 	setField(L, "slotPosition", item->slotPosition);
 	setField(L, "wieldPosition", item->wieldPosition);
 	setField(L, "speed", item->speed);
-	setField(L, "maxTextLength", item->maxTextLen);
+	setField(L, "maxTextLength", item->maxTextLength);
 	setField(L, "writeOnceItemId", item->writeOnceItemId);
 	setField(L, "date", item->date);
 	setField(L, "writer", item->writer);
@@ -9467,19 +9467,19 @@ int32_t LuaInterface::luaGetItemInfo(lua_State* L)
 	setField(L, "vocationString", item->vocationString.c_str());
 
 	createTable(L, "abilities");
-	setFieldBool(L, "manaShield", item->abilities.manaShield);
-	setFieldBool(L, "invisible", item->abilities.invisible);
-	setFieldBool(L, "regeneration", item->abilities.regeneration);
-	setFieldBool(L, "preventLoss", item->abilities.preventLoss);
-	setFieldBool(L, "preventDrop", item->abilities.preventDrop);
-	setField(L, "elementType", (int32_t)item->abilities.elementType);
-	setField(L, "elementDamage", item->abilities.elementDamage);
-	setField(L, "speed", item->abilities.speed);
-	setField(L, "healthGain", item->abilities.healthGain);
-	setField(L, "healthTicks", item->abilities.healthTicks);
-	setField(L, "manaGain", item->abilities.manaGain);
-	setField(L, "manaTicks", item->abilities.manaTicks);
-	setField(L, "conditionSuppressions", item->abilities.conditionSuppressions);
+	setFieldBool(L, "manaShield", item->hasAbilities() ? item->abilities->manaShield : false);
+	setFieldBool(L, "invisible", item->hasAbilities() ? item->abilities->invisible : false);
+	setFieldBool(L, "regeneration", item->hasAbilities() ? item->abilities->regeneration : false);
+	setFieldBool(L, "preventLoss", item->hasAbilities() ? item->abilities->preventLoss : false);
+	setFieldBool(L, "preventDrop", item->hasAbilities() ? item->abilities->preventDrop : false);
+	setField(L, "elementType", (int32_t)item->hasAbilities() ? item->abilities->elementType : 0);
+	setField(L, "elementDamage", item->hasAbilities() ? item->abilities->elementDamage : 0);
+	setField(L, "speed", item->hasAbilities() ? item->abilities->speed : 0);
+	setField(L, "healthGain", item->hasAbilities() ? item->abilities->healthGain : 0);
+	setField(L, "healthTicks", item->hasAbilities() ? item->abilities->healthTicks : 0);
+	setField(L, "manaGain", item->hasAbilities() ? item->abilities->manaGain : 0);
+	setField(L, "manaTicks", item->hasAbilities() ? item->abilities->manaTicks : 0);
+	setField(L, "conditionSuppressions", item->hasAbilities() ? item->abilities->conditionSuppressions : 0);
 
 	//TODO: absorb, increment, reflect, skills, skillsPercent, stats, statsPercent
 

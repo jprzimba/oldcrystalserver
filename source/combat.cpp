@@ -537,13 +537,21 @@ bool Combat::CombatHealthFunc(Creature* caster, Creature* target, const CombatPa
 			change = random_range(var->minChange, var->maxChange, DISTRO_NORMAL);
 	}
 
-	if(g_game.combatBlockHit(params.combatType, caster, target, change, params.blockedByShield, params.blockedByArmor))
+	if(g_game.combatBlockHit(params.combatType, caster, target, change, params.blockedByShield, params.blockedByArmor, params.itemId != 0))
 		return false;
 
-	if(change < 0 && caster && caster->getPlayer() && target->getPlayer() && target->getPlayer()->getSkull() != SKULL_BLACK)
-		change = change / 2;
+	CombatParams _params = params;
+	if(_params.element.damage && _params.element.type != COMBAT_NONE)
+		g_game.combatBlockHit(_params.element.type, caster, target, _params.element.damage, params.blockedByShield, params.blockedByArmor, params.itemId != 0, true);
 
-	if(!g_game.combatChangeHealth(params.combatType, caster, target, change, params.effects.hit, params.effects.color))
+	if(caster && caster->getPlayer() && target->getPlayer() && target->getSkull() != SKULL_BLACK)
+	{
+		_params.element.damage /= 2;
+		if(change < 0)
+			change /= 2;
+	}
+
+	if(!g_game.combatChangeHealth(_params, caster, target, change, false))
 		return false;
 
 	CombatConditionFunc(caster, target, params, NULL);

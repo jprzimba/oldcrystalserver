@@ -915,6 +915,10 @@ bool ConditionDamage::setParam(ConditionParam_t param, int32_t value)
 			periodDamage = value;
 			break;
 
+		case CONDITIONPARAM_FIELD:
+			field = (value != 0);
+			break;
+
 		default:
 			break;
 	}

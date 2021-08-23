@@ -74,9 +74,10 @@ bool readXMLString(xmlNodePtr node, const char* tag, std::string& value);
 bool readXMLContentString(xmlNodePtr node, std::string& value);
 bool parseXMLContentString(xmlNodePtr node, std::string& value);
 std::string getLastXMLError();
-bool utf8ToLatin1(char* intext, std::string& outtext);
 
-StringVec explodeString(const std::string& string, const std::string& separator, bool trim = true);
+bool utf8ToLatin1(char* inText, std::string& outText);
+
+StringVec explodeString(const std::string& string, const std::string& separator, bool trim = true, uint16_t limit = 0);
 IntegerVec vectorAtoi(StringVec stringVector);
 bool hasBitSet(uint32_t flag, uint32_t flags);
 

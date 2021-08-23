@@ -309,7 +309,7 @@ void Game::cleanMapEx(uint32_t& count)
 				tit = tile->getItemList()->begin();
 				while(tile->getItemList() && tit != tile->getItemList()->end())
 				{
-					if((*tit)->isMoveable() && !(*tit)->isLoadedFromMap()
+					if((*tit)->isMovable() && !(*tit)->isLoadedFromMap()
 						&& !(*tit)->isScriptProtected())
 					{
 						internalRemoveItem(NULL, *tit);
@@ -322,8 +322,6 @@ void Game::cleanMapEx(uint32_t& count)
 						++tit;
 				}
 			}
-
-			trash.clear();
 		}
 		else
 		{
@@ -340,7 +338,7 @@ void Game::cleanMapEx(uint32_t& count)
 				tit = tile->getItemList()->begin();
 				while(tile->getItemList() && tit != tile->getItemList()->end())
 				{
-					if((*tit)->isMoveable() && !(*tit)->isLoadedFromMap()
+					if((*tit)->isMovable() && !(*tit)->isLoadedFromMap()
 						&& !(*tit)->isScriptProtected())
 					{
 						internalRemoveItem(NULL, *tit);
@@ -353,9 +351,9 @@ void Game::cleanMapEx(uint32_t& count)
 						++tit;
 				}
 			}
-
-			trash.clear();
 		}
+
+		trash.clear();
 	}
 	else if(g_config.getBool(ConfigManager::CLEAN_PROTECTED_ZONES))
 	{
@@ -372,7 +370,7 @@ void Game::cleanMapEx(uint32_t& count)
 					tit = tile->getItemList()->begin();
 					while(tile->getItemList() && tit != tile->getItemList()->end())
 					{
-						if((*tit)->isMoveable() && !(*tit)->isLoadedFromMap()
+						if((*tit)->isMovable() && !(*tit)->isLoadedFromMap()
 							&& !(*tit)->isScriptProtected())
 						{
 							internalRemoveItem(NULL, *tit);
@@ -403,7 +401,7 @@ void Game::cleanMapEx(uint32_t& count)
 					tit = tile->getItemList()->begin();
 					while(tile->getItemList() && tit != tile->getItemList()->end())
 					{
-						if((*tit)->isMoveable() && !(*tit)->isLoadedFromMap()
+						if((*tit)->isMovable() && !(*tit)->isLoadedFromMap()
 							&& !(*tit)->isScriptProtected())
 						{
 							internalRemoveItem(NULL, *tit);
@@ -436,7 +434,6 @@ void Game::cleanMap()
 	uint32_t dummy;
 	cleanMapEx(dummy);
 }
-
 
 void Game::proceduralRefresh(RefreshTiles::iterator* it/* = NULL*/)
 {
@@ -566,7 +563,7 @@ Thing* Game::internalGetThing(Player* player, const Position& pos, int32_t index
 			case STACKPOS_MOVE:
 			{
 				Item* item = tile->getTopDownItem();
-				if(item && item->isMoveable())
+				if(item && item->isMovable())
 					thing = item;
 				else
 					thing = tile->getTopVisibleCreature(player);
@@ -1106,7 +1103,7 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 	{
 		if(!movingCreature->isPushable())
 		{
-			player->sendCancelMessage(RET_NOTMOVEABLE);
+			player->sendCancelMessage(RET_NOTMOVABLE);
 			return false;
 		}
 
@@ -1168,7 +1165,7 @@ bool Game::playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
 				if(movingPlayer && movingPlayer->getLevel() >= protectionLevel
 					&& movingPlayer->getVocation()->isAttackable())
 				{
-					player->sendCancelMessage(RET_NOTMOVEABLE);
+					player->sendCancelMessage(RET_NOTMOVABLE);
 					return false;
 				}
 			}
@@ -1228,7 +1225,7 @@ ReturnValue Game::internalMoveCreature(Creature* creature, Direction direction, 
 			if((!(tmpTile = map->getTile(Position(currentPos.x, currentPos.y, currentPos.z - 1)))
 				|| (!tmpTile->ground && !tmpTile->hasProperty(BLOCKSOLID))) &&
 				(tmpTile = map->getTile(Position(destPos.x, destPos.y, destPos.z - 1)))
-				&& tmpTile->ground && !tmpTile->hasProperty(BLOCKSOLID))
+				&& tmpTile->ground && !tmpTile->hasProperty(BLOCKSOLID) && !tmpTile->hasProperty(FLOORCHANGEDOWN))
 			{
 				flags = flags | FLAG_IGNOREBLOCKITEM | FLAG_IGNOREBLOCKCREATURE;
 				destPos.z--;
@@ -1247,15 +1244,15 @@ ReturnValue Game::internalMoveCreature(Creature* creature, Direction direction, 
 	if((toTile = map->getTile(destPos)))
 		ret = internalMoveCreature(NULL, creature, fromTile, toTile, flags);
 
-	if(ret != RET_NOERROR)
-	{
-		if(Player* player = creature->getPlayer())
-		{
-			player->sendCancelMessage(ret);
-			player->sendCancelWalk();
-		}
-	}
+	if(ret == RET_NOERROR)
+		return RET_NOERROR;
 
+	Player* player = creature->getPlayer();
+	if(!player)
+		return ret;
+
+	player->sendCancelMessage(ret);
+	player->sendCancelWalk();
 	return ret;
 }
 
@@ -1348,7 +1345,7 @@ bool Game::playerMoveItem(uint32_t playerId, const Position& fromPos,
 	if(!player->hasCustomFlag(PlayerCustomFlag_CanPushAllItems) && (!item->isPushable() || (item->isLoadedFromMap() &&
 		(item->getUniqueId() != 0 || (item->getActionId() != 0 && item->getContainer())))))
 	{
-		player->sendCancelMessage(RET_NOTMOVEABLE);
+		player->sendCancelMessage(RET_NOTMOVABLE);
 		return false;
 	}
 
@@ -1708,7 +1705,7 @@ ReturnValue Game::internalRemoveItem(Creature* actor, Item* item, int32_t count 
 		count = item->getItemCount();
 
 	//check if we can remove this item
-	ReturnValue ret = cylinder->__queryRemove(item, count, flags | FLAG_IGNORENOTMOVEABLE);
+	ReturnValue ret = cylinder->__queryRemove(item, count, flags | FLAG_IGNORENOTMOVABLE);
 	if(ret != RET_NOERROR)
 		return ret;
 
@@ -2059,8 +2056,8 @@ Item* Game::transformItem(Item* item, uint16_t newId, int32_t newCount /*= -1*/)
 	const ItemType& newType = Item::items[newId];
 	if(curType.alwaysOnTop != newType.alwaysOnTop)
 	{
-		//This only occurs when you transform items on tiles from a downItem to a topItem (or vice versa)
-		//Remove the old, and add the new
+		// This only occurs when you transform items on tiles from a downItem to a topItem (or vice versa)
+		// Remove the old, and add the new
 		ReturnValue ret = internalRemoveItem(NULL, item);
 		if(ret != RET_NOERROR)
 			return item;
@@ -2075,11 +2072,14 @@ Item* Game::transformItem(Item* item, uint16_t newId, int32_t newCount /*= -1*/)
 			return NULL;
 
 		newItem->copyAttributes(item);
-		if(internalAddItem(NULL, cylinder, newItem, INDEX_WHEREEVER, FLAG_NOLIMIT) == RET_NOERROR)
-			return newItem;
+		if(internalAddItem(NULL, cylinder, newItem, INDEX_WHEREEVER, FLAG_NOLIMIT) != RET_NOERROR)
+		{
+			delete newItem;
+			return NULL;
+		}
 
-		delete newItem;
-		return NULL;
+		newItem->makeUnique(item);
+		return newItem;
 	}
 
 	if(curType.type == newType.type)
@@ -2089,36 +2089,38 @@ Item* Game::transformItem(Item* item, uint16_t newId, int32_t newCount /*= -1*/)
 		{
 			if(!item->isStackable() && (!item->getDefaultDuration() || item->getDuration() <= 0))
 			{
-				int32_t tmpId = newId;
-				if(curType.id == newType.id)
-					tmpId = curType.decayTo;
+				int16_t tmp = newId;
+				if(curType.id == newId)
+					tmp = curType.decayTo;
 
-				if(tmpId != -1)
-				{
-					item = transformItem(item, tmpId);
-					return item;
-				}
+				if(tmp != -1)
+					return transformItem(item, tmp);
 			}
 
 			internalRemoveItem(NULL, item);
 			return NULL;
 		}
 
-		uint16_t itemId = item->getID();
-		int32_t count = item->getSubType();
-
 		cylinder->postRemoveNotification(NULL, item, cylinder, itemIndex, false);
-		if(curType.id != newType.id)
+		uint16_t tmp = item->getID();
+		if(curType.id != newId)
 		{
-			itemId = newId;
+			tmp = newId;
 			if(newType.group != curType.group)
 				item->setDefaultSubtype();
+
+			if(curType.hasSubType() && !newType.hasSubType())
+			{
+				item->resetFluidType();
+				item->resetCharges();
+			}
 		}
 
+		int32_t count = item->getSubType();
 		if(newCount != -1 && newType.hasSubType())
 			count = newCount;
 
-		cylinder->__updateThing(item, itemId, count);
+		cylinder->__updateThing(item, tmp, count);
 		cylinder->postAddNotification(NULL, item, cylinder, itemIndex);
 		return item;
 	}
@@ -2131,16 +2133,13 @@ Item* Game::transformItem(Item* item, uint16_t newId, int32_t newCount /*= -1*/)
 		newItem = Item::CreateItem(newId, newCount);
 
 	if(!newItem)
-	{
-		#ifdef __DEBUG__
-		std::clog << "Error: [Game::transformItem] Item of type " << item->getID() << " transforming into invalid type " << newId << std::endl;
-		#endif
 		return NULL;
-	}
 
+	newItem->copyAttributes(item);
+	newItem->makeUnique(item);
 	cylinder->__replaceThing(itemIndex, newItem);
-	cylinder->postAddNotification(NULL, newItem, cylinder, itemIndex);
 
+	cylinder->postAddNotification(NULL, newItem, cylinder, itemIndex);
 	item->setParent(NULL);
 	cylinder->postRemoveNotification(NULL, item, cylinder, itemIndex, true);
 
@@ -2491,7 +2490,7 @@ bool Game::playerUseItemEx(uint32_t playerId, const Position& fromPos, int16_t f
 	}
 
 	Item* item = thing->getItem();
-	if(!item || !item->isUseable())
+	if(!item || !item->isUsable())
 	{
 		player->sendCancelMessage(RET_CANNOTUSETHISOBJECT);
 		return false;
@@ -2584,7 +2583,7 @@ bool Game::playerUseItem(uint32_t playerId, const Position& pos, int16_t stackpo
 	}
 
 	Item* item = thing->getItem();
-	if(!item || item->isUseable())
+	if(!item || item->isUsable())
 	{
 		player->sendCancelMessage(RET_CANNOTUSETHISOBJECT);
 		return false;
@@ -4235,7 +4234,7 @@ void Game::changeLight(const Creature* creature)
 }
 
 bool Game::combatBlockHit(CombatType_t combatType, Creature* attacker, Creature* target,
-	int32_t& healthChange, bool checkDefense, bool checkArmor)
+	int32_t& healthChange, bool checkDefense, bool checkArmor, bool field/* = false*/, bool element/* = false*/)
 {
 	if(healthChange > 0)
 		return false;
@@ -4249,7 +4248,8 @@ bool Game::combatBlockHit(CombatType_t combatType, Creature* attacker, Creature*
 	}
 
 	int32_t damage = -healthChange;
-	BlockType_t blockType = target->blockHit(attacker, combatType, damage, checkDefense, checkArmor);
+	BlockType_t blockType = target->blockHit(attacker, combatType,
+		damage, checkDefense, checkArmor, !field, field, element);
 
 	healthChange = -damage;
 	if(blockType == BLOCK_DEFENSE)
@@ -4295,7 +4295,17 @@ bool Game::combatBlockHit(CombatType_t combatType, Creature* attacker, Creature*
 }
 
 bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creature* target, int32_t healthChange,
-	MagicEffect_t hitEffect/* = MAGIC_EFFECT_UNKNOWN*/, Color_t hitColor/* = TEXTCOLOR_UNKNOWN*/, bool force/* = false*/)
+	MagicEffect_t hitEffect/* = MAGIC_EFFECT_UNKNOWN*/, Color_t hitColor/* = COLOR_UNKNOWN*/, bool force/* = false*/)
+{
+	CombatParams params;
+	params.effects.hit =  hitEffect;
+	params.effects.color = hitColor;
+
+	params.combatType = combatType;
+	return combatChangeHealth(params, attacker, target, healthChange, force);
+}
+
+bool Game::combatChangeHealth(const CombatParams& params, Creature* attacker, Creature* target, int32_t healthChange, bool force)
 {
 	const Position& targetPos = target->getPosition();
 	if(healthChange > 0)
@@ -4307,7 +4317,7 @@ bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creat
 		CreatureEventList statsChangeEvents = target->getCreatureEvents(CREATURE_EVENT_STATSCHANGE);
 		for(CreatureEventList::iterator it = statsChangeEvents.begin(); it != statsChangeEvents.end(); ++it)
 		{
-			if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHGAIN, combatType, healthChange))
+			if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHGAIN, params.combatType, healthChange))
 				deny = true;
 		}
 
@@ -4322,7 +4332,7 @@ bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creat
 			sprintf(buffer, "+%d", healthChange);
 
 			const SpectatorVec& list = getSpectators(targetPos);
-			if(combatType != COMBAT_HEALING)
+			if(params.combatType != COMBAT_HEALING)
 				addMagicEffect(list, targetPos, MAGIC_EFFECT_WRAPS_BLUE);
 
 			addAnimatedText(list, targetPos, COLOR_GREEN, buffer);
@@ -4340,7 +4350,7 @@ bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creat
 		int32_t damage = -healthChange;
 		if(damage != 0)
 		{
-			if(target->hasCondition(CONDITION_MANASHIELD) && combatType != COMBAT_UNDEFINEDDAMAGE)
+			if(target->hasCondition(CONDITION_MANASHIELD) && params.combatType != COMBAT_UNDEFINEDDAMAGE)
 			{
 				int32_t manaDamage = std::min(target->getMana(), damage);
 				damage = std::max((int32_t)0, damage - manaDamage);
@@ -4350,14 +4360,14 @@ bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creat
 					CreatureEventList statsChangeEvents = target->getCreatureEvents(CREATURE_EVENT_STATSCHANGE);
 					for(CreatureEventList::iterator it = statsChangeEvents.begin(); it != statsChangeEvents.end(); ++it)
 					{
-						if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_MANALOSS, combatType, manaDamage))
+						if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_MANALOSS, params.combatType, manaDamage))
 							deny = true;
 					}
 
 					if(deny)
 						return false;
 
-					target->drainMana(attacker, combatType, manaDamage);
+					target->drainMana(attacker, params.combatType, manaDamage);
 					char buffer[20];
 					sprintf(buffer, "%d", manaDamage);
 
@@ -4373,19 +4383,19 @@ bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creat
 				CreatureEventList statsChangeEvents = target->getCreatureEvents(CREATURE_EVENT_STATSCHANGE);
 				for(CreatureEventList::iterator it = statsChangeEvents.begin(); it != statsChangeEvents.end(); ++it)
 				{
-					if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHLOSS, combatType, damage))
+					if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHLOSS, params.combatType, damage))
 						deny = true;
 				}
 
 				if(deny)
 					return false;
 
-				target->drainHealth(attacker, combatType, damage);
+				target->drainHealth(attacker, params.combatType, damage);
 				addCreatureHealth(list, target);
 
 				Color_t textColor = COLOR_NONE;
 				MagicEffect_t magicEffect = MAGIC_EFFECT_NONE;
-				switch(combatType)
+				switch(params.combatType)
 				{
 					case COMBAT_PHYSICALDAMAGE:
 					{
@@ -4491,11 +4501,11 @@ bool Game::combatChangeHealth(CombatType_t combatType, Creature* attacker, Creat
 						break;
 				}
 
-				if(hitEffect != MAGIC_EFFECT_UNKNOWN)
-					magicEffect = hitEffect;
+				if(params.effects.hit != MAGIC_EFFECT_UNKNOWN)
+					magicEffect = params.effects.hit;
 
-				if(hitColor != COLOR_UNKNOWN)
-					textColor = hitColor;
+				if(params.effects.color != COLOR_UNKNOWN)
+					textColor = params.effects.color;
 
 				if(textColor < COLOR_NONE && magicEffect < MAGIC_EFFECT_NONE)
 				{

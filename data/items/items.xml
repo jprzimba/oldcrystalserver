@@ -17480,7 +17480,7 @@
 		<attribute key="weight" value="950" />
 		<attribute key="armor" value="2" />
 		<attribute key="slotType" value="feet" />
-		<attribute key="absorbPercentFire" value="90" />
+		<attribute key="fieldAbsorbPercentFire" value="90" />
 		<attribute key="decayTo" value="10022" />
 		<attribute key="transformDeEquipTo" value="9933" />
 		<attribute key="duration" value="3600" />

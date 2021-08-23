@@ -84,6 +84,22 @@ struct CombatEffects
 	bool show;
 };
 
+struct CombatElement
+{
+	CombatElement()
+	{
+		type = COMBAT_NONE;
+		damage = 0;
+	}
+
+	CombatType_t type;
+	int32_t damage;
+};
+
+class TargetCallback;
+class ValueCallback;
+class TileCallback;
+
 struct CombatParams
 {
 	CombatParams()
@@ -101,13 +117,14 @@ struct CombatParams
 
 	bool blockedByArmor, blockedByShield, targetCasterOrTopMost, targetPlayersOrSummons, differentAreaDamage, useCharges, isAggressive;
 	ConditionType_t dispelType;
-	CombatType_t combatType;
-	uint32_t itemId;
+	CombatType_t combatType, elementType;
+	uint32_t itemId, elementDamage;
 
 	TargetCallback* targetCallback;
 	ValueCallback* valueCallback;
 	TileCallback* tileCallback;
 	CombatEffects effects;
+	CombatElement element;
 
 	std::list<const Condition*> conditionList;
 };
@@ -350,7 +367,7 @@ class MagicField : public Item
 
 		virtual bool isBlocking(const Creature* creature) const;
 
-		bool isReplaceable() const {return Item::items[getID()].replaceable;}
+		bool isReplacable() const {return Item::items[getID()].replacable;}
 		bool isUnstepable() const {return id == ITEM_MAGICWALL_SAFE || id == ITEM_WILDGROWTH_SAFE;}
 		CombatType_t getCombatType() const
 		{

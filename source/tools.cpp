@@ -303,37 +303,39 @@ std::string getLastXMLError()
 	return ss.str();
 }
 
-bool utf8ToLatin1(char* intext, std::string& outtext)
+bool utf8ToLatin1(char* inText, std::string& outText)
 {
-	outtext = "";
-	if(!intext)
+	outText = "";
+	if(!inText)
 		return false;
 
-	int32_t inlen = strlen(intext);
-	if(!inlen)
+	int32_t inLen = strlen(inText);
+	if(!inLen)
 		return false;
 
-	int32_t outlen = inlen * 2;
-	uint8_t* outbuf = new uint8_t[outlen];
+	int32_t outLen = inLen << 1;
+	uint8_t* outBuf = new uint8_t[outLen];
 
-	int32_t res = UTF8Toisolat1(outbuf, &outlen, (uint8_t*)intext, &inlen);
+	int32_t res = UTF8Toisolat1(outBuf, &outLen, (uint8_t*)inText, &inLen);
 	if(res < 0)
 	{
-		delete[] outbuf;
+		delete[] outBuf;
 		return false;
 	}
 
-	outbuf[outlen] = '\0';
-	outtext = (char*)outbuf;
+	outBuf[outLen] = '\0';
+	outText = (char*)outBuf;
 
-	delete[] outbuf;
+	delete[] outBuf;
 	return true;
 }
 
-StringVec explodeString(const std::string& string, const std::string& separator, bool trim/* = true*/)
+StringVec explodeString(const std::string& string, const std::string& separator, bool trim/* = true*/, uint16_t limit/* = 0*/)
 {
 	StringVec returnVector;
 	size_t start = 0, end = 0;
+
+	uint16_t i = 1;
 	while((end = string.find(separator, start)) != std::string::npos)
 	{
 		std::string t = string.substr(start, end - start);
@@ -342,6 +344,10 @@ StringVec explodeString(const std::string& string, const std::string& separator,
 
 		returnVector.push_back(t);
 		start = end + separator.size();
+
+		++i;
+		if(limit > 0 && i > limit)
+			break;
 	}
 
 	returnVector.push_back(string.substr(start));

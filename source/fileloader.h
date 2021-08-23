@@ -19,10 +19,6 @@
 #define __FILELOADER__
 #include "otsystem.h"
 
-#ifdef __USE_ZLIB__
-#include <zlib.h>
-#endif
-
 struct NodeStruct;
 typedef NodeStruct* NODE;
 
@@ -39,7 +35,7 @@ struct NodeStruct
 	NodeStruct* next;
 	NodeStruct* child;
 
-	static void clearNet(NodeStruct* root) {if(root) clearChild(root); }
+	static void clearNet(NodeStruct* root) {if(root) clearChild(root);}
 	private:
 		static void clearNext(NodeStruct* node)
 		{
@@ -82,7 +78,7 @@ enum FILELOADER_ERRORS
 	ERROR_INVALID_FORMAT,
 	ERROR_TELL_ERROR,
 	ERROR_COULDNOTWRITE,
-	ERROR_CACHE_ERROR,
+	ERROR_CACHE_ERROR
 };
 
 class PropStream;
@@ -92,7 +88,7 @@ class FileLoader
 		FileLoader();
 		virtual ~FileLoader();
 
-		bool openFile(std::string name, bool write, bool caching = false);
+		bool openFile(const char* name, const char* identifier, bool write, bool caching = false);
 		const uint8_t* getProps(const NODE, uint32_t &size);
 		bool getProps(const NODE, PropStream& props);
 		NODE getChildNode(const NODE& parent, uint32_t &type) const;
@@ -129,11 +125,8 @@ class FileLoader
 				if(unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR))
 				{
 					uint8_t tmp = ESCAPE_CHAR;
-#ifdef __USE_ZLIB__
-					size_t value = gzwrite(m_file, &tmp, 1);
-#else
+
 					size_t value = fwrite(&tmp, 1, 1, m_file);
-#endif
 					if(value != 1)
 					{
 						m_lastError = ERROR_COULDNOTWRITE;
@@ -141,11 +134,7 @@ class FileLoader
 					}
 				}
 
-#ifdef __USE_ZLIB__
-				size_t value = gzwrite(m_file, &c, 1);
-#else
 				size_t value = fwrite(&c, 1, 1, m_file);
-#endif
 				if(value != 1)
 				{
 					m_lastError = ERROR_COULDNOTWRITE;
@@ -158,11 +147,8 @@ class FileLoader
 
 	protected:
 		FILELOADER_ERRORS m_lastError;
-#ifdef __USE_ZLIB__
-		gzFile m_file;
-#else
+
 		FILE* m_file;
-#endif
 
 		NODE m_root;
 		uint32_t m_buffer_size;
@@ -247,9 +233,11 @@ class PropStream
 		inline bool getString(std::string& ret)
 		{
 			uint16_t strLen;
-			if(!getShort(strLen))
-				return false;
+			return getShort(strLen) && getString(ret, strLen);
+		}
 
+		inline bool getString(std::string& ret, uint16_t strLen)
+		{
 			if(size() < (int32_t)strLen)
 				return false;
 

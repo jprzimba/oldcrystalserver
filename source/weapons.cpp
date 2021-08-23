@@ -538,67 +538,32 @@ bool Weapon::executeUseWeapon(Player* player, const LuaVariant& var) const
 }
 
 WeaponMelee::WeaponMelee(LuaInterface* _interface):
-	Weapon(_interface)
-{
-	elementType = COMBAT_NONE;
-	elementDamage = 0;
-}
-
-bool WeaponMelee::configureEvent(xmlNodePtr p)
-{
-	return Weapon::configureEvent(p);
-}
-
-bool WeaponMelee::configureWeapon(const ItemType& it)
-{
-	elementType = it.abilities.elementType;
-	elementDamage = it.abilities.elementDamage;
-	return Weapon::configureWeapon(it);
-}
+	Weapon(_interface) {}
 
 bool WeaponMelee::useWeapon(Player* player, Item* item, Creature* target) const
 {
-	if(!Weapon::useWeapon(player, item, target))
+	int32_t modifier = playerWeaponCheck(player, target);
+	if(!modifier)
 		return false;
 
-	if(elementDamage && elementType != COMBAT_NONE)
-	{
-		CombatParams element;
-		element.combatType = elementType;
-
-		int32_t damage = getElementDamage(player, item);
-		Combat::doCombatHealth(player, target, damage, damage, element);
-	}
-
-	return true;
-}
-
-void WeaponMelee::onUsedWeapon(Player* player, Item* item, Tile* destTile) const
-{
-	Weapon::onUsedWeapon(player, item, destTile);
-}
-
-void WeaponMelee::onUsedAmmo(Player* player, Item* item, Tile* destTile) const
-{
-	Weapon::onUsedAmmo(player, item, destTile);
+	return internalUseWeapon(player, item, target, modifier);
 }
 
 bool WeaponMelee::getSkillType(const Player* player, const Item* item,
-	skills_t& skill, uint32_t& skillpoint) const
+	skills_t& skill, uint64_t& skillPoint) const
 {
-	skillpoint = 0;
+	skillPoint = 0;
 	if(player->getAddAttackSkill())
 	{
 		switch(player->getLastAttackBlockType())
 		{
 			case BLOCK_ARMOR:
 			case BLOCK_NONE:
-				skillpoint = 1;
+				skillPoint = 1;
 				break;
 
 			case BLOCK_DEFENSE:
 			default:
-				skillpoint = 0;
 				break;
 		}
 	}
@@ -636,14 +601,14 @@ bool WeaponMelee::getSkillType(const Player* player, const Item* item,
 	return false;
 }
 
-int32_t WeaponMelee::getWeaponDamage(const Player* player, const Creature* target, const Item* item, bool maxDamage /*= false*/) const
+int32_t WeaponMelee::getWeaponDamage(const Player* player, const Creature*, const Item* item, bool maxDamage /*= false*/) const
 {
-	int32_t attackSkill = player->getWeaponSkill(item);
-	int32_t attackValue = std::max((int32_t)0, (int32_t(item->getAttack() + item->getExtraAttack()) - elementDamage));
+	int32_t attackSkill = player->getWeaponSkill(item), attackValue = std::max((int32_t)0,
+		(int32_t(item->getAttack() + item->getExtraAttack()) - item->getElementDamage()));
 	float attackFactor = player->getAttackFactor();
 
 	double maxValue = Weapons::getMaxWeaponDamage(player->getLevel(), attackSkill, attackValue, attackFactor);
-	if(random_range(1, 100) <= g_config.getNumber(ConfigManager::CRITICAL_HIT_CHANCE))
+	if(g_config.getNumber(ConfigManager::CRITICAL_HIT_CHANCE) >= random_range(1, 100))
 	{
 		maxValue = std::pow(maxValue, g_config.getDouble(ConfigManager::CRITICAL_HIT_MUL));
 		player->sendCritical();
@@ -660,23 +625,22 @@ int32_t WeaponMelee::getWeaponDamage(const Player* player, const Creature* targe
 	return -random_range(0, ret, DISTRO_NORMAL);
 }
 
-int32_t WeaponMelee::getElementDamage(const Player* player, const Item* item) const
+int32_t WeaponMelee::getWeaponElementDamage(const Player* player, const Item* item, bool maxDamage/* = false*/) const
 {
-	int32_t attackSkill = player->getWeaponSkill(item);
+	int32_t attackSkill = player->getWeaponSkill(item), attackValue = item->getElementDamage();
 	float attackFactor = player->getAttackFactor();
 
-	double maxValue = Weapons::getMaxWeaponDamage(player->getLevel(), attackSkill, elementDamage, attackFactor);
-	if(random_range(1, 100) <= g_config.getNumber(ConfigManager::CRITICAL_HIT_CHANCE))
-	{
-		maxValue = std::pow(maxValue, g_config.getDouble(ConfigManager::CRITICAL_HIT_MUL));
-		player->sendCritical();
-	}
+	double maxValue = Weapons::getMaxWeaponDamage(player->getLevel(), attackSkill, attackValue, attackFactor);
 
 	Vocation* vocation = player->getVocation();
 	if(vocation && vocation->getMultiplier(MULTIPLIER_MELEE) != 1.0)
 		maxValue *= vocation->getMultiplier(MULTIPLIER_MELEE);
 
-	return -random_range(0, (int32_t)std::floor(maxValue), DISTRO_NORMAL);
+	int32_t ret = (int32_t)std::floor(maxValue);
+	if(maxDamage)
+		return -ret;
+
+	return -random_range(0, ret, DISTRO_NORMAL);
 }
 
 WeaponDistance::WeaponDistance(LuaInterface* _interface):

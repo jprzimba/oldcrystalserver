@@ -90,7 +90,7 @@ Tile* IOMap::createTile(Item*& ground, Item* item, uint16_t px, uint16_t py, uin
 bool IOMap::loadMap(Map* map, const std::string& identifier)
 {
 	FileLoader f;
-	if(!f.openFile(identifier.c_str(), false, true))
+	if(!f.openFile(identifier.c_str(), "OTBM", false, true))
 	{
 		std::stringstream ss;
 		ss << "Could not open the file " << identifier << ".";
@@ -364,9 +364,9 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 								if(item->getItemCount() <= 0)
 									item->setItemCount(1);
 
-								if(house && item->isMoveable())
+								if(house && item->isMovable())
 								{
-									std::clog << "[Warning - IOMap::loadMap] Moveable item in house: " << house->getId()
+									std::clog << "[Warning - IOMap::loadMap] Movable item in house: " << house->getId()
 										<< ", item type: " << item->getID() << ", at position " << px << "/" << py << "/"
 										<< pz << std::endl;
 
@@ -473,9 +473,9 @@ bool IOMap::loadMap(Map* map, const std::string& identifier)
 								if(item->getItemCount() <= 0)
 									item->setItemCount(1);
 
-								if(house && item->isMoveable())
+								if(house && item->isMovable())
 								{
-									std::clog << "[Warning - IOMap::loadMap] Moveable item in house: "
+									std::clog << "[Warning - IOMap::loadMap] Movable item in house: "
 										<< house->getId() << ", item type: " << item->getID()
 										<< ", pos " << px << "/" << py << "/" << pz << std::endl;
 
