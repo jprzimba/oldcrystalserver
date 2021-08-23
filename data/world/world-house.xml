@@ -16,8 +16,8 @@
 	<house name="Desert House II" houseid="16" entryx="342" entryy="504" entryz="7" rent="5000" townid="2" size="35" />
 	<house name="Desert House III" houseid="17" entryx="320" entryy="492" entryz="7" rent="5000" townid="2" size="36" />
 	<house name="Desert House IV" houseid="18" entryx="327" entryy="492" entryz="7" rent="5000" townid="2" size="42" />
-	<house name="Desert House V" houseid="19" entryx="320" entryy="494" entryz="7" rent="5000" townid="2" size="36" />
-	<house name="Desert House VI" houseid="20" entryx="327" entryy="494" entryz="7" rent="5000" townid="2" size="43" />
+	<house name="Desert House V" houseid="19" entryx="320" entryy="493" entryz="7" rent="5000" townid="2" size="36" />
+	<house name="Desert House VI" houseid="20" entryx="327" entryy="493" entryz="7" rent="5000" townid="2" size="43" />
 	<house name="Desert House VII" houseid="21" entryx="330" entryy="489" entryz="6" rent="8000" townid="2" size="50" />
 	<house name="Desert House VIII" houseid="22" entryx="330" entryy="496" entryz="6" rent="8000" townid="2" size="60" />
 	<house name="Desert House IX" houseid="23" entryx="328" entryy="493" entryz="5" rent="8000" townid="2" size="48" />
