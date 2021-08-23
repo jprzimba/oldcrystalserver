@@ -668,3 +668,7 @@ function doNumberFormat(i)
 	until found == 0
 	return str
 end
+
+function isUnderWater(cid)
+	return isInArray(underWater, getTileInfo(getCreaturePosition(cid)).itemid)
+end
