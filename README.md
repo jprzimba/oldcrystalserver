@@ -9,4 +9,4 @@ Crystal Server is a server application written in C++ for the MMORPG Tibia. It i
 * Make the map like 8.6 style without changing it's essence.
 * Add quests to the map, Svargrond Arena, Inquisition.
 * Add npc addon by itens like Tibia RL.
-* Add some hunts to the map, Hellspawn, Drakens, Ghastly Dragons, Grim Reapers
+* Add some hunts to the map, Hellspawn, Drakens, Ghastly Dragons, Grim Reapers, Deeplings
