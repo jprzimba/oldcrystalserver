@@ -701,7 +701,10 @@ class Player : public Creature, public Cylinder
 
 		void setNextAction(int64_t time) {if(time > nextAction) {nextAction = time;}}
 		bool canDoAction() const {return nextAction <= OTSYS_TIME();}
-		uint32_t getNextActionTime() const;
+		uint32_t getNextActionTime(bool scheduler = true) const;
+
+		void setNextExAction(int64_t time) {if(time > nextExAction) nextExAction = time;}
+		bool canDoExAction() const {return nextExAction <= OTSYS_TIME();}
 
 		Item* getWriteItem(uint32_t& _windowTextId, uint16_t& _maxWriteLen);
 		void setWriteItem(Item* item, uint16_t _maxWriteLen = 0);
@@ -882,6 +885,7 @@ class Player : public Creature, public Cylinder
 		int64_t lastPong;
 		int64_t lastPing;
 		int64_t nextAction;
+		int64_t nextExAction;
 		uint64_t stamina;
 		uint64_t experience;
 		uint64_t manaSpent;

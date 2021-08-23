@@ -2552,9 +2552,8 @@ void ProtocolGame::sendOutfitWindow()
 
  	if(outfitList.size())
 	{
-		msg->put<char>((size_t)std::min((size_t)OUTFITS_MAX_NUMBER, outfitList.size()));
-		std::list<Outfit>::iterator it = outfitList.begin();
-		for(int32_t i = 0; it != outfitList.end() && i < OUTFITS_MAX_NUMBER; ++it, ++i)
+		msg->put<char>(outfitList.size());
+		for(std::list<Outfit>::iterator it = outfitList.begin(); it != outfitList.end(); ++it)
 		{
 			msg->put<uint16_t>(it->lookType);
 			msg->putString(it->name);

@@ -132,7 +132,10 @@ bool TalkActions::registerEvent(Event* event, xmlNodePtr p, bool override)
 
 bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std::string& words, bool ignoreAccess)
 {
-	std::string cmd[TALKFILTER_LAST] = words, param[TALKFILTER_LAST] = "";
+	std::string cmd[TALKFILTER_LAST], param[TALKFILTER_LAST];
+	for(int32_t i = 0; i < TALKFILTER_LAST; ++i)
+		cmd[i] = words;
+
 	std::string::size_type loc = words.find('"', 0);
 	if(loc != std::string::npos)
 	{
@@ -173,18 +176,28 @@ bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std:
 		return false;
 
 	Player* player = creature->getPlayer();
-	StringVec exceptions = talkAction->getExceptions();
-	if(player && ((!ignoreAccess && std::find(exceptions.begin(), exceptions.end(), asLowerCaseString(
-		player->getName())) == exceptions.end() && talkAction->getAccess() > player->getAccess())
-		|| player->isAccountManager()))
+	if(player)
 	{
-		if(player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
+		if(!player->canDoExAction())
+			return false;
+
+		StringVec exceptions = talkAction->getExceptions();
+		if((!ignoreAccess && std::find(exceptions.begin(), exceptions.end(), asLowerCaseString(
+			player->getName())) == exceptions.end() && (talkAction->getAccess() > player->getAccess()
+			|| (talkAction->hasGroups() && !talkAction->hasGroup(player->getGroupId()))))
+			|| player->isAccountManager())
 		{
-			player->sendTextMessage(MSG_STATUS_SMALL, "You cannot execute this talkaction.");
-			return true;
+			if(player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
+			{
+				player->sendTextMessage(MSG_STATUS_SMALL, "You cannot execute this talkaction.");
+				return true;
+			}
+
+			return false;
 		}
 
-		return false;
+		if(!player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
+			player->setNextExAction(OTSYS_TIME() + g_config.getNumber(ConfigManager::CUSTOM_ACTIONS_DELAY_INTERVAL) - 10);
 	}
 
 	if(talkAction->isLogged())
@@ -196,7 +209,7 @@ bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std:
 	}
 
 	if(talkAction->isScripted())
-		return talkAction->executeSay(creature, cmd[talkAction->getFilter()], param[talkAction->getFilter()], channelId);
+		return (talkAction->executeSay(creature, cmd[talkAction->getFilter()], param[talkAction->getFilter()], channelId) != 0);
 
 	if(TalkFunction* function = talkAction->getFunction())
 		return function(creature, cmd[talkAction->getFilter()], param[talkAction->getFilter()]);
@@ -227,6 +240,7 @@ Event(copy)
 	m_hidden = copy->m_hidden;
 	m_sensitive = copy->m_sensitive;
 	m_exceptions = copy->m_exceptions;
+	m_groups = copy->m_groups;
 }
 
 bool TalkAction::configureEvent(xmlNodePtr p)
@@ -256,6 +270,13 @@ bool TalkAction::configureEvent(xmlNodePtr p)
 	int32_t intValue;
 	if(readXMLInteger(p, "access", intValue))
 		m_access = intValue;
+
+	if(readXMLString(p, "group", strValue) || readXMLString(p, "groups", strValue))
+	{
+		m_groups.clear();
+		if(!parseIntegerVec(strValue, m_groups))
+			std::clog << "[Warning - TalkAction::configureEvent] Invalid group(s) for TalkAction: " << strValue << std::endl;
+	}
 
 	if(readXMLInteger(p, "channel", intValue))
 		m_channel = intValue;

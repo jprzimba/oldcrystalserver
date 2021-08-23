@@ -20,8 +20,7 @@
 
 #include "otsystem.h"
 #include "enums.h"
-
-#define OUTFITS_MAX_NUMBER 25
+#include "tools.h"
 
 enum AddonRequirement_t
 {
@@ -62,6 +61,7 @@ struct Outfit
 
 	uint32_t outfitId, lookType;
 	std::string name, storageId, storageValue;
+	IntegerVec groups;
 };
 
 typedef std::list<Outfit> OutfitList;

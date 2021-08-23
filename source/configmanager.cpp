@@ -158,6 +158,7 @@ bool ConfigManager::load()
 	m_integer[HIGHSCORES_UPDATETIME] = getGlobalNumber("updateHighscoresAfterMinutes", 60);
 	m_integer[ACTIONS_DELAY_INTERVAL] = getGlobalNumber("timeBetweenActions", 200);
 	m_integer[EX_ACTIONS_DELAY_INTERVAL] = getGlobalNumber("timeBetweenExActions", 1000);
+	m_integer[CUSTOM_ACTIONS_DELAY_INTERVAL] = getGlobalNumber("timeBetweenCustomActions", 500);
 	m_integer[PROTECTION_LEVEL] = getGlobalNumber("protectionLevel", 1);
 	m_integer[STATUSQUERY_TIMEOUT] = getGlobalNumber("statusTimeout", 5 * 60 * 1000);
 	m_integer[LEVEL_TO_FORM_GUILD] = getGlobalNumber("levelToFormGuild", 8);

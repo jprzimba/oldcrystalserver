@@ -72,7 +72,7 @@ Player::Player(const std::string& _name, ProtocolGame* p):
 	soul = guildId = levelPercent = magLevelPercent = magLevel = experience = damageImmunities = 0;
 	conditionImmunities = conditionSuppressions = groupId = managerNumber2 = town = skullEnd = 0;
 	lastLogin = lastLogout = lastIP = messageTicks = messageBuffer = nextAction = 0;
-	editListId = maxWriteLen = windowTextId = rankId = 0;
+	editListId = maxWriteLen = windowTextId = rankId = nextExAction = 0;
 
 	purchaseCallback = saleCallback = -1;
 	level = shootRange = 1;
@@ -1790,13 +1790,12 @@ void Player::setNextActionTask(SchedulerTask* task)
 	}
 }
 
-uint32_t Player::getNextActionTime() const
+uint32_t Player::getNextActionTime(bool scheduler/* = true*/) const
 {
-	int64_t time = nextAction - OTSYS_TIME();
-	if(time < SCHEDULER_MINTICKS)
-		return SCHEDULER_MINTICKS;
+	if(!scheduler)
+		return (uint32_t)std::max((int64_t)0, ((int64_t)nextAction - OTSYS_TIME()));
 
-	return time;
+	return (uint32_t)std::max((int64_t)SCHEDULER_MINTICKS, ((int64_t)nextAction - OTSYS_TIME()));
 }
 
 void Player::onThink(uint32_t interval)
@@ -3727,7 +3726,7 @@ void Player::onCombatRemoveCondition(const Creature* attacker, Condition* condit
 	{
 		if(!canDoAction())
 		{
-			int32_t delay = getNextActionTime();
+			int32_t delay = getNextActionTime(false);
 			delay -= (delay % EVENT_CREATURE_THINK_INTERVAL);
 			if(delay < 0)
 				removeCondition(condition);
@@ -4090,7 +4089,8 @@ bool Player::canWearOutfit(uint32_t outfitId, uint32_t addons)
 {
 	OutfitMap::iterator it = outfits.find(outfitId);
 	if(it == outfits.end() || (it->second.isPremium && !isPremium()) || getAccess() < it->second.accessLevel
-		|| ((it->second.addons & addons) != addons && !hasCustomFlag(PlayerCustomFlag_CanWearAllAddons)))
+		|| (!it->second.groups.empty() && std::find(it->second.groups.begin(), it->second.groups.end(), groupId)
+		== it->second.groups.end()) || ((it->second.addons & addons) != addons && !hasCustomFlag(PlayerCustomFlag_CanWearAllAddons)))
 		return false;
 
 	if(it->second.storageId.empty())
@@ -4098,20 +4098,18 @@ bool Player::canWearOutfit(uint32_t outfitId, uint32_t addons)
 
 	std::string value;
 	getStorage(it->second.storageId, value);
+	if(value == it->second.storageValue)
+		return true;
 
-	bool ret = value == it->second.storageValue;
-	if(ret)
-		return ret;
+	int32_t intValue = atoi(value.c_str());
+	if(!intValue && value != "0")
+		return false;
 
-	int32_t tmp = atoi(value.c_str());
-	if(!tmp && value != "0")
-		return ret;
-
-	tmp = atoi(it->second.storageValue.c_str());
+	int32_t tmp = atoi(it->second.storageValue.c_str());
 	if(!tmp && it->second.storageValue != "0")
-		return ret;
+		return false;
 
-	return atoi(value.c_str()) >= tmp;
+	return intValue >= tmp;
 }
 
 bool Player::addOutfit(uint32_t outfitId, uint32_t addons)
