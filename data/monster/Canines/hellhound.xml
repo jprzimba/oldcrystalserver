@@ -61,14 +61,10 @@
 		<item id="2231" chance="30000"/><!-- big bone -->
 		<item id="2393" chance="2000"/><!-- giant sword -->
 		<item id="2144" countmax="3" chance="9999"/><!-- black pearl -->
-		<item id="1987" chance="100000"><!-- bag -->
-			<inside>
-				<item id="2430" chance="2857"/><!-- knight axe -->
-				<item id="2383" chance="2500"/><!-- spike sword -->
-				<item id="2410" countmax="11" chance="15000"/><!-- throwing knife -->
-				<item id="6558" countmax="2" chance="8888"/><!-- concentrated demonic blood -->
-				<item id="6553" chance="1600"/><!-- ruthless axe -->
-			</inside>
-		</item>
+		<item id="2430" chance="2857"/><!-- knight axe -->
+		<item id="2383" chance="2500"/><!-- spike sword -->
+		<item id="2410" countmax="11" chance="15000"/><!-- throwing knife -->
+		<item id="6558" countmax="2" chance="8888"/><!-- concentrated demonic blood -->
+		<item id="6553" chance="1600"/><!-- ruthless axe -->
 	</loot>
 </monster>

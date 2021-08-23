@@ -55,14 +55,10 @@
 		<item id="2423" chance="3333"/><!-- clerical mace -->
 		<item id="2655" chance="1428"/><!-- red robe -->
 		<item id="7451" chance="828"/><!-- shadow sceptre -->
-		<item id="1987" chance="100000"><!-- bag -->
-			<inside>
-				<item id="5810" chance="555"/><!-- pirate voodoo doll -->
-				<item id="7426" chance="933"/><!-- amber staff -->
-				<item id="6087" chance="1428"/><!-- music sheet -->
-				<item id="5801" chance="909"/><!-- key ring -->
-				<item id="2183" chance="1000"/><!-- hailstorm rod -->
-			</inside>
-		</item>
+		<item id="5810" chance="555"/><!-- pirate voodoo doll -->
+		<item id="7426" chance="933"/><!-- amber staff -->
+		<item id="6087" chance="1428"/><!-- music sheet -->
+		<item id="5801" chance="909"/><!-- key ring -->
+		<item id="2183" chance="1000"/><!-- hailstorm rod -->
 	</loot>
 </monster>

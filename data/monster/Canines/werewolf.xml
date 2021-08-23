@@ -53,12 +53,8 @@
 		<item id="8473" chance="2000"/><!-- ultimate health potion -->
 		<item id="7591" chance="2000"/><!-- great health potion -->
 		<item id="7588" chance="2000"/><!-- strong health potion -->
-		<item id="1987" chance="100000"><!-- bag -->
-			<inside>
-				<item id="9808" chance="3000"/><!-- rusty armor -->
-				<item id="7439" chance="2000"/><!-- berserk potion -->
-				<item id="7383" chance="1800"/><!-- relic sword -->
-			</inside>
-		</item>
+		<item id="9808" chance="3000"/><!-- rusty armor -->
+		<item id="7439" chance="2000"/><!-- berserk potion -->
+		<item id="7383" chance="1800"/><!-- relic sword -->
 	</loot>
 </monster>

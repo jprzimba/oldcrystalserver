@@ -58,14 +58,10 @@
 		<item id="6087" chance="1428"/><!-- music sheet -->
 		<item id="2394" chance="3333"/><!-- morning star -->
 		<item id="2169" chance="1000"/><!-- time ring -->
-		<item id="1987" chance="100000"><!-- bag -->
-			<inside>
-				<item id="2181" chance="1333"/><!-- terra rod -->
-				<item id="2168" chance="1428"/><!-- life ring -->
-				<item id="5810" chance="555"/><!-- pirate voodoo doll -->
-				<item id="2652" chance="1666"/><!-- green tunic -->
-				<item id="5801" chance="909"/><!-- key ring -->
-			</inside>
-		</item>
+		<item id="2181" chance="1333"/><!-- terra rod -->
+		<item id="2168" chance="1428"/><!-- life ring -->
+		<item id="5810" chance="555"/><!-- pirate voodoo doll -->
+		<item id="2652" chance="1666"/><!-- green tunic -->
+		<item id="5801" chance="909"/><!-- key ring -->
 	</loot>
 </monster>

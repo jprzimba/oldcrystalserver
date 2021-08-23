@@ -52,14 +52,10 @@
 		<item id="7290" chance="3666"/><!-- shard -->
 		<item id="2145" countmax="1" chance="3333"/><!-- small diamond -->
 		<item id="7441" chance="2222"/><!-- ice cube -->
-		<item id="1987" chance="100000"><!-- bag -->
-			<inside>
-				<item id="2146" countmax="1" chance="4200"/><!-- small sapphire -->
-				<item id="2396" chance="2050"/><!-- ice rapier -->
-				<item id="2479" chance="2555"/><!-- strange helmet -->
-				<item id="7449" chance="1999"/><!-- crystal sword -->
-				<item id="2383" chance="3111"/><!-- spike sword -->
-			</inside>
-		</item>
+		<item id="2146" countmax="1" chance="4200"/><!-- small sapphire -->
+		<item id="2396" chance="2050"/><!-- ice rapier -->
+		<item id="2479" chance="2555"/><!-- strange helmet -->
+		<item id="7449" chance="1999"/><!-- crystal sword -->
+		<item id="2383" chance="3111"/><!-- spike sword -->
 	</loot>
 </monster>
