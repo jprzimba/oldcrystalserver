@@ -41,7 +41,7 @@ ItemType::ItemType()
 	group = ITEM_GROUP_NONE;
 	type = ITEM_TYPE_NONE;
 	stackable = usable = alwaysOnTop = lookThrough = pickupable = rotable = hasHeight = forceSerialize = false;
-	loaded = blockSolid = blockProjectile = blockPathFind = allowPickupable = isAnimation = cache = false;
+	loaded = blockSolid = blockProjectile = blockPathFind = allowPickupable = cache = false;
 	movable = walkStack = true;
 	alwaysOnTopOrder = 0;
 	rotateTo = 0;
@@ -250,7 +250,6 @@ int32_t Items::loadFromOtb(std::string file)
 		iType->rotable = hasBitSet(FLAG_ROTABLE, flags);
 		iType->canReadText = hasBitSet(FLAG_READABLE, flags);
 		iType->lookThrough = hasBitSet(FLAG_LOOKTHROUGH, flags);
-		iType->isAnimation = hasBitSet(FLAG_ANIMATION, flags);
 		iType->walkStack = hasBitSet(FLAG_WALKSTACK, flags);
 
 		attribute_t attr;

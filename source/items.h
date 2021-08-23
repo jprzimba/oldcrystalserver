@@ -26,7 +26,7 @@
 #include "position.h"
 #include <libxml/parser.h>
 
-#define ITEMS_SIZE 15000
+#define ITEMS_SIZE 11500
 #define ITEMS_INCREMENT 500
 #define ITEMS_RANDOMIZATION 50
 
@@ -142,7 +142,7 @@ class ItemType
 			allowDistRead, canReadText, canWriteText, forceSerialize, isVertical, isHorizontal, isHangable,
 			usable, movable, pickupable, rotable, replacable, lookThrough, walkStack, hasHeight, blockSolid,
 			blockPickupable, blockProjectile, blockPathFind, allowPickupable, alwaysOnTop, floorChange[CHANGE_LAST],
-			isAnimation, specialDoor, closingDoor, cache;
+			specialDoor, closingDoor, cache;
 
 		MagicEffect_t magicEffect;
 		FluidTypes_t fluidSource;
