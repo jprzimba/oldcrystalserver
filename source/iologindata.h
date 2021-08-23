@@ -123,7 +123,7 @@ class IOLoginData
 
 		typedef std::map<int32_t, std::pair<Item*, int32_t> > ItemMap;
 
-		bool saveItems(const Player* player, const ItemBlockList& itemList, DBInsert& query_insert);
+		bool saveItems(const Player* player, const ItemBlockList& itemList, DBInsert& databaseInsert);
 		void loadItems(ItemMap& itemMap, DBResult* result);
 
 		bool storeNameByGuid(uint32_t guid);

@@ -920,19 +920,19 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 	if(!db->query(query.str()))
 		return false;
 
-	DBInsert stmt(db);
+	DBInsert databaseInsert(db);
 	if(player->learnedInstantSpellList.size())
 	{
 		query.str("");
-		stmt.setQuery("INSERT INTO `player_spells` (`player_id`, `name`) VALUES ");
+		databaseInsert.setQuery("INSERT INTO `player_spells` (`player_id`, `name`) VALUES ");
 		for(LearnedInstantSpellList::const_iterator it = player->learnedInstantSpellList.begin(); it != player->learnedInstantSpellList.end(); ++it)
 		{
 			query << player->getGUID() << "," << db->escapeString(*it);
-			if(!stmt.addRow(query))
+			if(!databaseInsert.addRow(query))
 				return false;
 		}
 
-		if(!stmt.execute())
+		if(!databaseInsert.execute())
 			return false;
 	}
 
@@ -949,8 +949,8 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 			itemList.push_back(itemBlock(slotId, item));
 	}
 
-	stmt.setQuery("INSERT INTO `player_items` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
-	if(!saveItems(player, itemList, stmt))
+	databaseInsert.setQuery("INSERT INTO `player_items` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
+	if(!saveItems(player, itemList, databaseInsert))
 		return false;
 
 	itemList.clear();
@@ -975,8 +975,8 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 		if(!db->query(query.str()))
 			return false;
 
-		stmt.setQuery("INSERT INTO `player_depotitems` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
-		if(!saveItems(player, itemList, stmt))
+		databaseInsert.setQuery("INSERT INTO `player_depotitems` (`player_id`, `pid`, `sid`, `itemtype`, `count`, `attributes`) VALUES ");
+		if(!saveItems(player, itemList, databaseInsert))
 			return false;
 
 		itemList.clear();
@@ -990,15 +990,15 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 	player->generateReservedStorage();
 	query.str("");
 
-	stmt.setQuery("INSERT INTO `player_storage` (`player_id`, `key`, `value`) VALUES ");
+	databaseInsert.setQuery("INSERT INTO `player_storage` (`player_id`, `key`, `value`) VALUES ");
 	for(StorageMap::const_iterator cit = player->getStorageBegin(); cit != player->getStorageEnd(); ++cit)
 	{
 		query << player->getGUID() << "," << db->escapeString(cit->first) << "," << db->escapeString(cit->second);
-		if(!stmt.addRow(query))
+		if(!databaseInsert.addRow(query))
 			return false;
 	}
 
-	if(!stmt.execute())
+	if(!databaseInsert.execute())
 		return false;
 
 	if(g_config.getBool(ConfigManager::INGAME_GUILD_MANAGEMENT))
@@ -1009,15 +1009,15 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 		if(!db->query(query.str()))
 			return false;
 
-		stmt.setQuery("INSERT INTO `guild_invites` (`player_id`, `guild_id`) VALUES ");
+		databaseInsert.setQuery("INSERT INTO `guild_invites` (`player_id`, `guild_id`) VALUES ");
 		for(InvitedToGuildsList::const_iterator it = player->invitedToGuildsList.begin(); it != player->invitedToGuildsList.end(); ++it)
 		{
 			query << player->getGUID() << "," << (*it);
-			if(!stmt.addRow(query))
+			if(!databaseInsert.addRow(query))
 				return false;
 		}
 
-		if(!stmt.execute())
+		if(!databaseInsert.execute())
 			return false;
 	}
 
@@ -1032,9 +1032,9 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 		return false;
 
 	if(!g_config.getBool(ConfigManager::VIPLIST_PER_PLAYER))
-		stmt.setQuery("INSERT INTO `account_viplist` (`account_id`, `world_id`, `player_id`) VALUES ");
+		databaseInsert.setQuery("INSERT INTO `account_viplist` (`account_id`, `world_id`, `player_id`) VALUES ");
 	else
-		stmt.setQuery("INSERT INTO `player_viplist` (`player_id`, `vip_id`) VALUES ");
+		databaseInsert.setQuery("INSERT INTO `player_viplist` (`player_id`, `vip_id`) VALUES ");
 
 	for(VIPListSet::iterator it = player->VIPList.begin(); it != player->VIPList.end(); it++)
 	{
@@ -1047,18 +1047,18 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 			query << player->getGUID() << "," << (*it);
 
 
-		if(!stmt.addRow(query))
+		if(!databaseInsert.addRow(query))
 			return false;
 	}
 
-	if(!stmt.execute())
+	if(!databaseInsert.execute())
 		return false;
 
 	//End the transaction
 	return trans.commit();
 }
 
-bool IOLoginData::saveItems(const Player* player, const ItemBlockList& itemList, DBInsert& query_insert)
+bool IOLoginData::saveItems(const Player* player, const ItemBlockList& itemList, DBInsert& databaseInsert)
 {
 	Database* db = Database::getInstance();
 	typedef std::pair<Container*, uint32_t> Stack;
@@ -1079,7 +1079,7 @@ bool IOLoginData::saveItems(const Player* player, const ItemBlockList& itemList,
 
 		sprintf(buffer, "%d, %d, %d, %d, %d, %s", player->getGUID(), it->first, runningId, item->getID(),
 			(int32_t)item->getSubType(), db->escapeBlob(attributes, attributesSize).c_str());
-		if(!query_insert.addRow(buffer))
+		if(!databaseInsert.addRow(buffer))
 			return false;
 
 		if(Container* container = item->getContainer())
@@ -1107,12 +1107,12 @@ bool IOLoginData::saveItems(const Player* player, const ItemBlockList& itemList,
 
 			sprintf(buffer, "%d, %d, %d, %d, %d, %s", player->getGUID(), stack.second, runningId, item->getID(),
 				(int32_t)item->getSubType(), db->escapeBlob(attributes, attributesSize).c_str());
-			if(!query_insert.addRow(buffer))
+			if(!databaseInsert.addRow(buffer))
 				return false;
 		}
 	}
 
-	return query_insert.execute();
+	return databaseInsert.execute();
 }
 
 bool IOLoginData::playerDeath(Player* _player, const DeathList& dl)

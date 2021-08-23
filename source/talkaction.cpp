@@ -593,7 +593,7 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 			return false;
 		}
 
-		if(!tradePartner->isPremium() && !g_config.getBool(ConfigManager::HOUSE_NEED_PREMIUM))
+		if(g_config.getBool(ConfigManager::HOUSE_NEED_PREMIUM) && !tradePartner->isPremium())
 		{
 			player->sendCancel("Trade player does not have a premium account.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
