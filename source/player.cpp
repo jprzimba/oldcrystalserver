@@ -2344,6 +2344,8 @@ bool Player::onDeath()
 				loginPosition = masterPosition = rook->getPosition();
 				experience = magLevel = manaSpent = mana = manaMax = balance = marriage = 0;
 				promotionLevel = defaultOutfit.lookAddons = 0;
+				setSkull(SKULL_NONE);
+				g_game.updateCreatureSkull(this);
 
 				setTown(rook->getID());
 				setVocation(0);
