@@ -752,7 +752,6 @@ class Player : public Creature, public Cylinder
 
 		virtual bool onDeath();
 		virtual Item* createCorpse(DeathList deathList);
-		void sendToRook();
 
 		virtual void dropCorpse(DeathList deathList);
 		virtual void dropLoot(Container* corpse);
