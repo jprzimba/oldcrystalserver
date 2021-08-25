@@ -170,14 +170,17 @@ bool Outfits::parseOutfitNode(xmlNodePtr p)
 		if(readXMLInteger(listNode, "speed", intValue))
 			outfit.speed = intValue;
 
+		if(readXMLInteger(listNode, "attackspeed", intValue) || readXMLInteger(listNode, "attackSpeed", intValue))
+			outfit.attackSpeed = intValue;
+
 		for(xmlNodePtr configNode = listNode->children; configNode != NULL; configNode = configNode->next)
 		{
 			if(!xmlStrcmp(configNode->name, (const xmlChar*)"reflect"))
 			{
 				if(readXMLInteger(configNode, "percentAll", intValue))
 				{
-					for(uint32_t i = COMBAT_FIRST; i <= COMBAT_LAST; i++)
-						outfit.reflect[REFLECT_PERCENT][(CombatType_t)i] += intValue;
+					for(uint32_t i = (COMBAT_FIRST + 1); i <= COMBAT_LAST; i <<= 1)
+						outfit.reflect[REFLECT_PERCENT][i] += intValue;
 				}
 
 				if(readXMLInteger(configNode, "percentElements", intValue))

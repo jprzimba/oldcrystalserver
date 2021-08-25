@@ -304,7 +304,6 @@ bool ConfigManager::load()
 	m_boolean[STORE_DIRECTION] = getGlobalBool("storePlayerDirection", false);
 	m_boolean[DISPLAY_LOGGING] = getGlobalBool("displayPlayersLogging", true);
 	m_boolean[STAMINA_BONUS_PREMIUM] = getGlobalBool("staminaThresholdOnlyPremium", true);
-	m_boolean[BAN_UNKNOWN_BYTES] = getGlobalBool("autoBanishUnknownBytes", false);
 	m_boolean[ALLOW_CHANGEADDONS] = getGlobalBool("allowChangeAddons", true);
 	m_boolean[GHOST_INVISIBLE_EFFECT] = getGlobalBool("ghostModeInvisibleEffect", false);
 	m_boolean[SHOW_HEALING_DAMAGE_MONSTER] = getGlobalBool("showHealingDamageForMonsters", false);

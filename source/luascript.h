@@ -674,7 +674,7 @@ class LuaInterface
 		static const luaL_Reg luaSystemTable[2];
 		static int32_t luaSystemTime(lua_State* L);
 
-		static const luaL_Reg luaDatabaseTable[8];
+		static const luaL_Reg luaDatabaseTable[9];
 		static int32_t luaDatabaseExecute(lua_State* L);
 		static int32_t luaDatabaseStoreQuery(lua_State* L);
 		static int32_t luaDatabaseEscapeString(lua_State* L);
@@ -682,6 +682,7 @@ class LuaInterface
 		static int32_t luaDatabaseLastInsertId(lua_State* L);
 		static int32_t luaDatabaseStringComparer(lua_State* L);
 		static int32_t luaDatabaseUpdateLimiter(lua_State* L);
+		static int32_t luaDatabaseGetEngine(lua_State* L);
 
 		static const luaL_Reg luaResultTable[7];
 		static int32_t luaResultGetDataInt(lua_State* L);

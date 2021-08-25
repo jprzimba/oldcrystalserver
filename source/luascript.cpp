@@ -2431,6 +2431,9 @@ const luaL_Reg LuaInterface::luaDatabaseTable[] =
 	//db.updateLimiter()
 	{"updateLimiter", LuaInterface::luaDatabaseUpdateLimiter},
 
+	//db.getDatabaseEngine()
+	{"getDatabaseEngine", LuaInterface::luaDatabaseGetEngine},
+
 	{NULL,NULL}
 };
 
@@ -3513,7 +3516,9 @@ int32_t LuaInterface::luaDoPlayerAddSkillTry(lua_State* L)
 	if(lua_gettop(L) > 3)
 		multiplier = popNumber(L);
 
-	uint32_t n = popNumber(L), skillid = popNumber(L);
+	uint64_t n = popNumber(L);
+	uint16_t skillid = popNumber(L);
+
 	ScriptEnviroment* env = getEnv();
 	if(Player* player = env->getPlayerByUID(popNumber(L)))
 	{
@@ -10243,6 +10248,13 @@ int32_t LuaInterface::luaDatabaseUpdateLimiter(lua_State* L)
 {
 	//db.updateLimiter()
 	lua_pushstring(L, Database::getInstance()->getUpdateLimiter().c_str());
+	return 1;
+}
+
+int32_t LuaInterface::luaDatabaseGetEngine(lua_State* L)
+{
+	//db.getDatabaseEngine()
+	lua_pushnumber(L, Database::getInstance()->getDatabaseEngine());
 	return 1;
 }
 

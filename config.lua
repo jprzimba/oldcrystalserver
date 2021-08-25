@@ -110,7 +110,6 @@
 	broadcastBanishments = true
 	maxViolationCommentSize = 200
 	violationNameReportActionType = 2
-	autoBanishUnknownBytes = false
 
 	-- Battle
 	-- NOTE: showHealingDamageForMonsters inheritates from showHealingDamage.

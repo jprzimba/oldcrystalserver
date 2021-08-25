@@ -47,8 +47,8 @@ struct Outfit
 		isDefault = true;
 		requirement = REQUIREMENT_BOTH;
 		isPremium = manaShield = invisible = regeneration = false;
-		outfitId = lookType = addons = accessLevel = 0;
-		speed = healthGain = healthTicks = manaGain = manaTicks = conditionSuppressions = 0;
+		outfitId = lookType = addons = accessLevel = speed = attackSpeed = 0;
+		healthGain = healthTicks = manaGain = manaTicks = conditionSuppressions = 0;
 	}
 
 	bool isDefault, isPremium, manaShield, invisible, regeneration;
@@ -57,7 +57,7 @@ struct Outfit
 
 	uint16_t accessLevel, addons;
 	int32_t skills[SKILL_LAST + 1], skillsPercent[SKILL_LAST + 1], stats[STAT_LAST + 1], statsPercent[STAT_LAST + 1],
-		speed, healthGain, healthTicks, manaGain, manaTicks, conditionSuppressions;
+		speed, attackSpeed, healthGain, healthTicks, manaGain, manaTicks, conditionSuppressions;
 
 	uint32_t outfitId, lookType;
 	std::string name, storageId, storageValue;

@@ -4429,7 +4429,24 @@ uint64_t Player::getLostExperience() const
 
 uint32_t Player::getAttackSpeed() const
 {
-	return ((weapon && weapon->getAttackSpeed() != 0) ? weapon->getAttackSpeed() : (vocation->getAttackSpeed() / std::max((size_t)1, getWeapons().size())));
+	int32_t modifiers = 0;
+	if(outfitAttributes)
+	{
+		Outfit outfit;
+		if(Outfits::getInstance()->getOutfit(defaultOutfit.lookType, outfit))
+		{
+			if(outfit.attackSpeed == -1)
+				return 0;
+
+			modifiers += outfit.attackSpeed;
+		}
+	}
+
+	Item* _weapon = weapon;
+	if(!weapon || weapon->getWeaponType() == WEAPON_AMMO)
+		_weapon = const_cast<Player*>(this)->getWeapon(true);
+
+	return (((_weapon && _weapon->getAttackSpeed() != 0) ? _weapon->getAttackSpeed() : (vocation->getAttackSpeed() / std::max((size_t)1, getWeapons().size()))) + modifiers);
 }
 
 void Player::learnInstantSpell(const std::string& name)

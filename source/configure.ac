@@ -121,8 +121,8 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([ceil floor ftime gethostbyname gethostname memset pow sqrt strcasecmp strncasecmp strstr strtol])
 
 # check for xml2
-AM_PATH_XML2(2.6.5, , AC_MSG_ERROR([You need libxml2 >= 2.6.5 to compile CrystalServer!]))
-LIBS="$LIBS $XML_LIBS"
+AM_PATH_XML2(2.6.5, , AC_MSG_ERROR([You need libxml2 >= 2.6.5 to compile crystalserver!]))
+LIBS="$LIBS $XML_LIBS -lpthread"
 
 # check for zlib
 AC_CHECK_HEADERS([zlib.h], ,[AC_MSG_ERROR("zlib header not found.")])
