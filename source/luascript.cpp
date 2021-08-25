@@ -628,12 +628,15 @@ LuaInterface::LuaInterface(std::string interfaceName)
 {
 	m_luaState = NULL;
 	m_interfaceName = interfaceName;
-	m_lastEventTimerId = 1000;
+	m_lastTimer = 1000;
 	m_errors = true;
 }
 
 LuaInterface::~LuaInterface()
 {
+	for(LuaTimerEvents::iterator it = m_timerEvents.begin(); it != m_timerEvents.end(); ++it)
+		Scheduler::getInstance().stopEvent(it->second.eventId);
+
 	closeState();
 }
 
@@ -780,17 +783,14 @@ int32_t LuaInterface::getEvent(const std::string& eventName)
 
 std::string LuaInterface::getScript(int32_t scriptId)
 {
-	const static std::string tmp = "(Unknown script file)";
-	if(scriptId != EVENT_ID_LOADING)
-	{
-		ScriptsCache::iterator it = m_cacheFiles.find(scriptId);
-		if(it != m_cacheFiles.end())
-			return it->second;
+	if(scriptId == EVENT_ID_LOADING)
+		return m_loadingFile;
 
-		return tmp;
-	}
+	ScriptsCache::iterator it = m_cacheFiles.find(scriptId);
+	if(it != m_cacheFiles.end())
+		return it->second;
 
-	return m_loadingFile;
+	return "(Unknown script file)";
 }
 
 void LuaInterface::error(const char* function, const std::string& desc)
@@ -828,17 +828,14 @@ void LuaInterface::error(const char* function, const std::string& desc)
 bool LuaInterface::pushFunction(int32_t function)
 {
 	lua_getfield(m_luaState, LUA_REGISTRYINDEX, "EVENTS");
-	if(lua_istable(m_luaState, -1))
-	{
-		lua_pushnumber(m_luaState, function);
-		lua_rawget(m_luaState, -2);
+	if(!lua_istable(m_luaState, -1))
+		return false;
 
-		lua_remove(m_luaState, -2);
-		if(lua_isfunction(m_luaState, -1))
-			return true;
-	}
+	lua_pushnumber(m_luaState, function);
+	lua_rawget(m_luaState, -2);
 
-	return false;
+	lua_remove(m_luaState, -2);
+	return lua_isfunction(m_luaState, -1);
 }
 
 bool LuaInterface::initState()
@@ -885,36 +882,37 @@ bool LuaInterface::closeState()
 void LuaInterface::executeTimer(uint32_t eventIndex)
 {
 	LuaTimerEvents::iterator it = m_timerEvents.find(eventIndex);
-	if(it != m_timerEvents.end())
+	if(it == m_timerEvents.end())
+		return;
+
+	//push function
+	lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, it->second.function);
+	//push parameters
+	for(std::list<int32_t>::reverse_iterator rt = it->second.parameters.rbegin(); rt != it->second.parameters.rend(); ++rt)
+		lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, *rt);
+
+	//call the function
+	if(reserveEnv())
 	{
-		//push function
-		lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, it->second.function);
+		ScriptEnviroment* env = getEnv();
+		env->setTimerEvent();
 
-		//push parameters
-		for(std::list<int32_t>::reverse_iterator rt = it->second.parameters.rbegin(); rt != it->second.parameters.rend(); ++rt)
-			lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, *rt);
+		env->setScriptId(it->second.scriptId, this);
+		env->setNpc(it->second.npc);
 
-		//call the function
-		if(reserveEnv())
-		{
-			ScriptEnviroment* env = getEnv();
-			env->setTimerEvent();
-			env->setScriptId(it->second.scriptId, this);
-
-			callFunction(it->second.parameters.size());
-			releaseEnv();
-		}
-		else
-			std::clog << "[Error] Call stack overflow. LuaInterface::executeTimer" << std::endl;
-
-		//free resources
-		for(std::list<int32_t>::iterator lt = it->second.parameters.begin(); lt != it->second.parameters.end(); ++lt)
-			luaL_unref(m_luaState, LUA_REGISTRYINDEX, *lt);
-
-		it->second.parameters.clear();
-		luaL_unref(m_luaState, LUA_REGISTRYINDEX, it->second.function);
-		m_timerEvents.erase(it);
+		callFunction(it->second.parameters.size());
+		releaseEnv();
 	}
+	else
+		std::clog << "[Error - LuaInterface::executeTimer] Call stack overflow." << std::endl;
+
+	//free resources
+	for(std::list<int32_t>::iterator lt = it->second.parameters.begin(); lt != it->second.parameters.end(); ++lt)
+		luaL_unref(m_luaState, LUA_REGISTRYINDEX, *lt);
+
+	it->second.parameters.clear();
+	luaL_unref(m_luaState, LUA_REGISTRYINDEX, it->second.function);
+	m_timerEvents.erase(it);
 }
 
 int32_t LuaInterface::handleFunction(lua_State* L)
@@ -998,7 +996,7 @@ void LuaInterface::pushVariant(lua_State* L, const LuaVariant& var)
 	}
 }
 
-void LuaInterface::pushThing(lua_State* L, Thing* thing, uint32_t id/* = 0*/)
+void LuaInterface::pushThing(lua_State* L, Thing* thing, uint32_t id/* = 0*/, Recursive_t recursive/* = RECURSE_FIRST*/)
 {
 	lua_newtable(L);
 	if(thing && thing->getItem())
@@ -1007,14 +1005,36 @@ void LuaInterface::pushThing(lua_State* L, Thing* thing, uint32_t id/* = 0*/)
 		if(!id)
 			id = getEnv()->addThing(thing);
 
+		setField(L, "uniqueid", id);
 		setField(L, "uid", id);
 		setField(L, "itemid", item->getID());
+		setField(L, "id", item->getID());
 		if(item->hasSubType())
 			setField(L, "type", item->getSubType());
 		else
 			setField(L, "type", 0);
 
 		setField(L, "actionid", item->getActionId());
+		setField(L, "aid", item->getActionId());
+		if(recursive != RECURSE_NONE)
+		{
+			if(const Container* container = item->getContainer())
+			{
+				if(recursive == RECURSE_FIRST)
+					recursive = RECURSE_NONE;
+
+				ItemList::const_iterator it = container->getItems();
+				createTable(L, "items");
+				for(int32_t i = 1; it != container->getEnd(); ++it, ++i)
+				{
+					lua_pushnumber(L, i);
+					pushThing(L, *it, getEnv()->addThing(*it), recursive);
+					pushTable(L);
+				}
+
+				pushTable(L);
+			}
+		}
 	}
 	else if(thing && thing->getCreature())
 	{
@@ -1022,8 +1042,10 @@ void LuaInterface::pushThing(lua_State* L, Thing* thing, uint32_t id/* = 0*/)
 		if(!id)
 			id = creature->getID();
 
+		setField(L, "uniqueid", id);
 		setField(L, "uid", id);
 		setField(L, "itemid", 1);
+		setField(L, "id", 1);
 		if(creature->getPlayer())
 			setField(L, "type", 1);
 		else if(creature->getMonster())
@@ -1032,16 +1054,25 @@ void LuaInterface::pushThing(lua_State* L, Thing* thing, uint32_t id/* = 0*/)
 			setField(L, "type", 3);
 
 		if(const Player* player = creature->getPlayer())
+		{
 			setField(L, "actionid", player->getGUID());
+			setField(L, "aid", player->getGUID());
+		}
 		else
+		{
 			setField(L, "actionid", 0);
+			setField(L, "aid", 0);
+		}
 	}
 	else
 	{
 		setField(L, "uid", 0);
+		setField(L, "uniqueid", 0);
 		setField(L, "itemid", 0);
+		setField(L, "id", 0);
 		setField(L, "type", 0);
 		setField(L, "actionid", 0);
+		setField(L, "aid", 0);
 	}
 }
 
@@ -1586,10 +1617,10 @@ void LuaInterface::registerFunctions()
 	//getTileInfo(pos)
 	lua_register(m_luaState, "getTileInfo", LuaInterface::luaGetTileInfo);
 
-	//getThingFromPos(pos[, displayError = true])
-	lua_register(m_luaState, "getThingFromPos", LuaInterface::luaGetThingFromPos);
+	//getThingFromPosition(pos)
+	lua_register(m_luaState, "getThingFromPosition", LuaInterface::luaGetThingFromPosition);
 
-	//getThing(uid)
+	//getThing(uid[, recursive = RECURSE_FIRST])
 	lua_register(m_luaState, "getThing", LuaInterface::luaGetThing);
 
 	//doTileQueryAdd(uid, pos[, flags[, displayError = true]])
@@ -4198,18 +4229,13 @@ int32_t LuaInterface::luaDoDecayItem(lua_State* L)
 	return 1;
 }
 
-int32_t LuaInterface::luaGetThingFromPos(lua_State* L)
+int32_t LuaInterface::luaGetThingFromPosition(lua_State* L)
 {
-	//getThingFromPos(pos[, displayError = true])
-	//Note:
+	//getThingFromPosition(pos)
+	// Note:
 	//	stackpos = 255- top thing (movable item or creature)
 	//	stackpos = 254- magic field
 	//	stackpos = 253- top creature
-
-	bool displayError = true;
-	if(lua_gettop(L) > 1)
-		displayError = popNumber(L);
-
 	PositionEx pos;
 	popPosition(L, pos);
 
@@ -4241,9 +4267,7 @@ int32_t LuaInterface::luaGetThingFromPos(lua_State* L)
 		return 1;
 	}
 
-	if(displayError)
-		errorEx(getError(LUA_ERROR_TILE_NOT_FOUND));
-
+	errorEx(getError(LUA_ERROR_TILE_NOT_FOUND));
 	pushThing(L, NULL, 0);
 	return 1;
 }
@@ -5349,17 +5373,21 @@ int32_t LuaInterface::luaGetPlayerItemById(lua_State* L)
 
 int32_t LuaInterface::luaGetThing(lua_State* L)
 {
-	//getThing(uid)
-	uint32_t uid = popNumber(L);
+	//getThing(uid[, recursive = RECURSE_FIRST])
+	Recursive_t recursive = RECURSE_FIRST;
+	if(lua_gettop(L) > 1)
+		recursive = (Recursive_t)popNumber(L);
 
+	uint32_t uid = popNumber(L);
 	ScriptEnviroment* env = getEnv();
 	if(Thing* thing = env->getThingByUID(uid))
-		pushThing(L, thing, uid);
+		pushThing(L, thing, uid, recursive);
 	else
 	{
 		errorEx(getError(LUA_ERROR_THING_NOT_FOUND));
 		pushThing(L, NULL, 0);
 	}
+
 	return 1;
 }
 
@@ -8211,7 +8239,7 @@ int32_t LuaInterface::luaAddEvent(lua_State* L)
 	int32_t parameters = lua_gettop(L);
 	if(!lua_isfunction(L, -parameters)) //-parameters means the first parameter from left to right
 	{
-		errorEx("Callback parameter should be a function.");
+		errorEx("Callback parameter should be a function");
 		lua_pushboolean(L, false);
 		return 1;
 	}
@@ -8220,18 +8248,17 @@ int32_t LuaInterface::luaAddEvent(lua_State* L)
 	for(int32_t i = 0; i < parameters - 2; ++i) //-2 because addEvent needs at least two parameters
 		params.push_back(luaL_ref(L, LUA_REGISTRYINDEX));
 
-	uint32_t delay = std::max((int64_t)SCHEDULER_MINTICKS, popNumber(L));
-	LuaTimerEvent eventDesc;
+	LuaTimerEvent event;
+	event.eventId = Scheduler::getInstance().addEvent(createSchedulerTask(std::max((int64_t)SCHEDULER_MINTICKS, popNumber(L)),
+					boost::bind(&LuaInterface::executeTimer, interface, ++interface->m_lastTimer)));
 
-	eventDesc.parameters = params;
-	eventDesc.function = luaL_ref(L, LUA_REGISTRYINDEX);
-	eventDesc.scriptId = env->getScriptId();
+	event.parameters = params;
+	event.function = luaL_ref(L, LUA_REGISTRYINDEX);
+	event.scriptId = env->getScriptId();
+	event.npc = env->getNpc();
 
-	interface->m_timerEvents[++interface->m_lastEventTimerId] = eventDesc;
-	Scheduler::getInstance().addEvent(createSchedulerTask(delay, boost::bind(
-		&LuaInterface::executeTimer, interface, interface->m_lastEventTimerId)));
-
-	lua_pushnumber(L, interface->m_lastEventTimerId);
+	interface->m_timerEvents[interface->m_lastTimer] = event;
+	lua_pushnumber(L, interface->m_lastTimer);
 	return 1;
 }
 
@@ -8252,11 +8279,13 @@ int32_t LuaInterface::luaStopEvent(lua_State* L)
 	LuaTimerEvents::iterator it = interface->m_timerEvents.find(eventId);
 	if(it != interface->m_timerEvents.end())
 	{
+		Scheduler::getInstance().stopEvent(it->second.eventId);
 		for(std::list<int32_t>::iterator lt = it->second.parameters.begin(); lt != it->second.parameters.end(); ++lt)
 			luaL_unref(interface->m_luaState, LUA_REGISTRYINDEX, *lt);
-		it->second.parameters.clear();
 
+		it->second.parameters.clear();
 		luaL_unref(interface->m_luaState, LUA_REGISTRYINDEX, it->second.function);
+
 		interface->m_timerEvents.erase(it);
 		lua_pushboolean(L, true);
 	}

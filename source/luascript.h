@@ -18,23 +18,23 @@
 #ifndef __LUASCRIPT__
 #define __LUASCRIPT__
 #include "otsystem.h"
-#ifdef __LUAJIT__
-#include <luajit-2.0/lua.hpp>
-
-
+#if defined(__ALT_LUA_PATH__)
 extern "C"
 {
-	#include <luajit-2.0/luajit.h>
-	#include <luajit-2.0/lauxlib.h>
-	#include <luajit-2.0/lualib.h>
+	#include <lua5.1/lua.h>
+	#include <lua5.1/lauxlib.h>
+	#include <lua5.1/lualib.h>
 }
 #else
-
 extern "C"
 {
-	#include "lua.h"
-	#include "lualib.h"
-	#include "lauxlib.h"
+	#include <lua.h>
+	#include <lauxlib.h>
+	#include <lualib.h>
+
+	#ifdef __LUAJIT__
+	#include <luajit.h>
+	#endif
 }
 #endif
 
@@ -230,8 +230,14 @@ enum ErrorCode_t
 	LUA_ERROR_SPELL_NOT_FOUND
 };
 
-#define errorEx(a) error(__FUNCTION__, a)
+enum Recursive_t
+{
+	RECURSE_FIRST = -1,
+	RECURSE_NONE = 0,
+	RECURSE_ALL = 1
+};
 
+#define errorEx(a) error(__FUNCTION__, a)
 class LuaInterface
 {
 	public:
@@ -284,7 +290,7 @@ class LuaInterface
 		void dumpStack(lua_State* L = NULL);
 
 		//push/pop common structures
-		static void pushThing(lua_State* L, Thing* thing, uint32_t id = 0);
+		static void pushThing(lua_State* L, Thing* thing, uint32_t id = 0, Recursive_t recursive = RECURSE_FIRST);
 		static void pushVariant(lua_State* L, const LuaVariant& var);
 		static void pushPosition(lua_State* L, const PositionEx& position) {pushPosition(L, position, position.stackpos);}
 		static void pushPosition(lua_State* L, const Position& position, uint32_t stackpos);
@@ -458,7 +464,7 @@ class LuaInterface
 		static int32_t luaGetThingPosition(lua_State* L);
 		static int32_t luaDoItemRaidUnref(lua_State* L);
 		static int32_t luaHasItemProperty(lua_State* L);
-		static int32_t luaGetThingFromPos(lua_State* L);
+		static int32_t luaGetThingFromPosition(lua_State* L);
 		static int32_t luaGetTileItemById(lua_State* L);
 		static int32_t luaGetTileItemByType(lua_State* L);
 		static int32_t luaGetTileThingByPos(lua_State* L);
@@ -768,7 +774,7 @@ class LuaInterface
 		static int32_t internalGetPlayerInfo(lua_State* L, PlayerInfo_t info);
 
 		int32_t m_runningEvent;
-		uint32_t m_lastEventTimerId;
+		uint32_t m_lastTimer;
 		std::string m_loadingFile, m_interfaceName;
 
 		static ScriptEnviroment m_scriptEnv[21];
@@ -778,6 +784,8 @@ class LuaInterface
 		struct LuaTimerEvent
 		{
 			int32_t scriptId, function;
+			uint32_t eventId;
+			Npc* npc;
 			std::list<int32_t> parameters;
 		};
 

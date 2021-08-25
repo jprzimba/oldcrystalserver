@@ -96,7 +96,9 @@ getCreatureSkull = getCreatureSkullType
 getAccountNumberByName = getAccountIdByName
 getIPByName = getIpByName
 getPlayersByIP = getPlayersByIp
+getThingFromPos = getThingFromPosition
 getThingfromPos = getThingFromPos
+getHouseFromPos = getHouseFromPosition
 getPlayersByAccountNumber = getPlayersByAccountId
 getIPByPlayerName = getIpByName
 getPlayersByIPNumber = getPlayersByIp
@@ -152,7 +154,6 @@ db.stringComparison = db.stringComparer
 db.executeQuery = db.query
 db.quote = db.escapeString
 isNumeric = isNumber
-getHouseFromPos = getHouseFromPosition
 
 PlayerFlag_CannotUseCombat = 0
 PlayerFlag_CannotAttackPlayer = 1
