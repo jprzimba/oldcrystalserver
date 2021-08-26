@@ -672,3 +672,11 @@ end
 function isUnderWater(cid)
 	return isInArray(underWater, getTileInfo(getCreaturePosition(cid)).itemid)
 end
+
+function valid(f)
+	return function(p, ...)
+		if(isCreature(p)) then
+			return f(p, ...)
+		end
+	end
+end

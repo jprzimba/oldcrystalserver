@@ -98,6 +98,7 @@ bool ConfigManager::load()
 		m_string[DEFAULT_PRIORITY] = getGlobalString("defaultPriority", "high");
 
 		m_integer[GLOBALSAVE_H] = getGlobalNumber("globalSaveHour", 8);
+		m_integer[GLOBALSAVE_M] = getGlobalNumber("globalSaveMinute", 0);
 		m_integer[AUTO_SAVE_EACH_MINUTES] = getGlobalNumber("autoSaveEachMinutes", 0);
 		m_integer[SQL_PORT] = getGlobalNumber("sqlPort", 3306);
 		m_integer[SQL_KEEPALIVE] = getGlobalNumber("sqlKeepAlive", 0);
@@ -258,6 +259,7 @@ bool ConfigManager::load()
 	m_double[RATE_MONSTER_DEFENSE] = getGlobalDouble("rateMonsterDefense", 1);
 	m_double[CRITICAL_HIT_MUL] = getGlobalDouble("criticalHitMultiplier", 1);
 
+	m_boolean[CLOSE_INSTANCE_ON_SHUTDOWN]	= getGlobalBool("closeInstanceOnShutdown", true);
 	m_boolean[ACCOUNT_MANAGER] = getGlobalBool("accountManager", true);
 	m_boolean[NAMELOCK_MANAGER] = getGlobalBool("namelockManager", false);
 	m_boolean[START_CHOOSEVOC] = getGlobalBool("newPlayerChooseVoc", false);

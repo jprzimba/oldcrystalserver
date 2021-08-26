@@ -354,6 +354,8 @@
 	-- if you want such a system please check out data/globalevents/globalevents.xml.
 	globalSaveEnabled = false
 	globalSaveHour = 8
+	globalSaveMinute = 0
+	closeInstanceOnShutdown = true
 	shutdownAtGlobalSave = false
 	cleanMapAtGlobalSave = false
 

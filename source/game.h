@@ -159,7 +159,7 @@ class Game
 		bool isSwimmingPool(Item* item, const Tile* tile, bool checkProtection) const;
 
 		void autoSave();
-		void prepareGlobalSave();
+		void prepareGlobalSave(uint8_t minutes);
 		void globalSave();
 
 		/**
@@ -624,9 +624,6 @@ class Game
 		inline StageList::const_iterator getFirstStage() const {return stages.begin();}
 		inline StageList::const_iterator getLastStage() const {return stages.end();}
 		size_t getStagesCount() const {return stages.size();}
-
-		void setGlobalSaveMessage(int16_t key, bool value) {globalSaveMessage[key] = value;}
-		bool getGlobalSaveMessage(int16_t key) const {return globalSaveMessage[key];}
 
 		Map* getMap() {return map;}
 		const Map* getMap() const {return map;}

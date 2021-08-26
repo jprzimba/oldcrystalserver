@@ -92,6 +92,7 @@ class ConfigManager
 			SPAWNTOWN_ID,
 			ALLOW_CLONES,
 			GLOBALSAVE_H,
+			GLOBALSAVE_M,
 			START_LEVEL,
 			START_MAGICLEVEL,
 			HOUSE_PRICE,
@@ -304,6 +305,7 @@ class ConfigManager
 			CHRISTMAS_DECO,
 			HOUSE_SKIP_INIT_RENT,
 			ROOK_SYSTEM,
+			CLOSE_INSTANCE_ON_SHUTDOWN,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 
