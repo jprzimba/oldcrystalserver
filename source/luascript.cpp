@@ -1623,7 +1623,7 @@ void LuaInterface::registerFunctions()
 	//getThing(uid[, recursive = RECURSE_FIRST])
 	lua_register(m_luaState, "getThing", LuaInterface::luaGetThing);
 
-	//doTileQueryAdd(uid, pos[, flags[, displayError = true]])
+	//doTileQueryAdd(uid, pos[, flags])
 	lua_register(m_luaState, "doTileQueryAdd", LuaInterface::luaDoTileQueryAdd);
 
 	//doItemRaidUnref(uid)
@@ -1762,10 +1762,10 @@ void LuaInterface::registerFunctions()
 	//doCreateTeleport(itemid, topos, createpos)
 	lua_register(m_luaState, "doCreateTeleport", LuaInterface::luaDoCreateTeleport);
 
-	//doCreateMonster(name, pos[, extend = false[, force = false[, displayError = true]]])
+	//doCreateMonster(name, pos[, extend = false[, force = false]])
 	lua_register(m_luaState, "doCreateMonster", LuaInterface::luaDoCreateMonster);
 
-	//doCreateNpc(name, pos[, displayError = true])
+	//doCreateNpc(name, pos)
 	lua_register(m_luaState, "doCreateNpc", LuaInterface::luaDoCreateNpc);
 
 	//doSummonMonster(cid, name)
@@ -1900,7 +1900,7 @@ void LuaInterface::registerFunctions()
 	//getPlayerGUIDByName(name[, multiworld = false])
 	lua_register(m_luaState, "getPlayerGUIDByName", LuaInterface::luaGetPlayerGUIDByName);
 
-	//getPlayerNameByGUID(guid[, multiworld = false[, displayError = true]])
+	//getPlayerNameByGUID(guid[, multiworld = false])
 	lua_register(m_luaState, "getPlayerNameByGUID", LuaInterface::luaGetPlayerNameByGUID);
 
 	//registerCreatureEvent(uid, eventName)
@@ -2234,7 +2234,7 @@ void LuaInterface::registerFunctions()
 	//getTownName(townId)
 	lua_register(m_luaState, "getTownName", LuaInterface::luaGetTownName);
 
-	//getTownTemplePosition(townId[, displayError])
+	//getTownTemplePosition(townId)
 	lua_register(m_luaState, "getTownTemplePosition", LuaInterface::luaGetTownTemplePosition);
 
 	//getTownHouses(townId)
@@ -2258,7 +2258,7 @@ void LuaInterface::registerFunctions()
 	//getExperienceStageList()
 	lua_register(m_luaState, "getExperienceStageList", LuaInterface::luaGetExperienceStageList);
 
-	//getItemIdByName(name[, displayError = true])
+	//getItemIdByName(name)
 	lua_register(m_luaState, "getItemIdByName", LuaInterface::luaGetItemIdByName);
 
 	//getItemInfo(itemid)
@@ -4731,12 +4731,9 @@ int32_t LuaInterface::luaGetHouseFromPosition(lua_State* L)
 
 int32_t LuaInterface::luaDoCreateMonster(lua_State* L)
 {
-	//doCreateMonster(name, pos[, extend = false[, force = false[, displayError = true]]])
-	bool displayError = true, force = false, extend = false;
+	//doCreateMonster(name, pos[, extend = false[, force = false]])
+	bool force = false, extend = false;
 	int32_t params = lua_gettop(L);
-	if(params > 4)
-		displayError = popBoolean(L);
-
 	if(params > 3)
 		force = popBoolean(L);
 
@@ -4750,9 +4747,7 @@ int32_t LuaInterface::luaDoCreateMonster(lua_State* L)
 	Monster* monster = Monster::createMonster(name.c_str());
 	if(!monster)
 	{
-		if(displayError)
-			errorEx("Monster with name '" + name + "' not found");
-
+		errorEx("Monster with name '" + name + "' not found");
 		lua_pushboolean(L, false);
 		return 1;
 	}
@@ -4760,9 +4755,7 @@ int32_t LuaInterface::luaDoCreateMonster(lua_State* L)
 	if(!g_game.placeCreature(monster, pos, extend, force))
 	{
 		delete monster;
-		if(displayError)
-			errorEx("Cannot create monster: " + name);
-
+		errorEx("Cannot create monster: " + name);
 		lua_pushboolean(L, false);
 		return 1;
 	}
@@ -4774,37 +4767,23 @@ int32_t LuaInterface::luaDoCreateMonster(lua_State* L)
 
 int32_t LuaInterface::luaDoCreateNpc(lua_State* L)
 {
-	//doCreateNpc(name, pos[, extend = false[, force = false[, displayError = true]]])
-	bool displayError = true, force = false, extend = false;
-	int32_t params = lua_gettop(L);
-	if(params > 4)
-		displayError = popBoolean(L);
-
-	if(params > 3)
-		force = popBoolean(L);
-
-	if(params > 2)
-		extend = popBoolean(L);
-
+	//doCreateNpc(name, pos)
 	PositionEx pos;
 	popPosition(L, pos);
-
 	std::string name = popString(L);
+
 	Npc* npc = Npc::createNpc(name.c_str());
 	if(!npc)
 	{
-		if(displayError)
-			errorEx("Npc with name '" + name + "' not found");
-
+		errorEx("Npc with name '" + name + "' not found");
 		lua_pushboolean(L, false);
 		return 1;
 	}
 
-	if(!g_game.placeCreature(npc, pos, extend, force))
+	if(!g_game.placeCreature(npc, pos))
 	{
 		delete npc;
-		if(displayError)
-			errorEx("Cannot create npc: " + name);
+		errorEx("Cannot create npc: " + name);
 
 		lua_pushboolean(L, true); //for scripting compatibility
 		return 1;
@@ -5393,12 +5372,8 @@ int32_t LuaInterface::luaGetThing(lua_State* L)
 
 int32_t LuaInterface::luaDoTileQueryAdd(lua_State* L)
 {
-	//doTileQueryAdd(uid, pos[, flags[, displayError = true]])
+	//doTileQueryAdd(uid, pos[, flags])
 	uint32_t flags = 0, params = lua_gettop(L);
-	bool displayError = true;
-	if(params > 3)
-		displayError = popNumber(L);
-
 	if(params > 2)
 		flags = popNumber(L);
 
@@ -5410,9 +5385,7 @@ int32_t LuaInterface::luaDoTileQueryAdd(lua_State* L)
 	Tile* tile = g_game.getTile(pos);
 	if(!tile)
 	{
-		if(displayError)
-			errorEx(getError(LUA_ERROR_TILE_NOT_FOUND));
-
+		errorEx(getError(LUA_ERROR_THING_NOT_FOUND));
 		lua_pushnumber(L, (uint32_t)RET_NOTPOSSIBLE);
 		return 1;
 	}
@@ -5420,9 +5393,7 @@ int32_t LuaInterface::luaDoTileQueryAdd(lua_State* L)
 	Thing* thing = env->getThingByUID(uid);
 	if(!thing)
 	{
-		if(displayError)
-			errorEx(getError(LUA_ERROR_THING_NOT_FOUND));
-
+		errorEx(getError(LUA_ERROR_THING_NOT_FOUND));
 		lua_pushnumber(L, (uint32_t)RET_NOTPOSSIBLE);
 		return 1;
 	}
@@ -7278,23 +7249,16 @@ int32_t LuaInterface::luaGetPlayerGUIDByName(lua_State* L)
 
 int32_t LuaInterface::luaGetPlayerNameByGUID(lua_State* L)
 {
-	//getPlayerNameByGUID(guid[, multiworld = false[, displayError = true]])
-	int32_t parameters = lua_gettop(L);
-	bool multiworld = false, displayError = true;
-
-	if(parameters > 2)
-		displayError = popNumber(L);
-
-	if(parameters > 1)
-		multiworld = popNumber(L);
+	//getPlayerNameByGUID(guid[, multiworld = false])
+	bool multiworld = false;
+	if(lua_gettop(L) > 1)
+		multiworld = popBoolean(L);
 
 	uint32_t guid = popNumber(L);
 	std::string name;
 	if(!IOLoginData::getInstance()->getNameByGuid(guid, name, multiworld))
 	{
-		if(displayError)
-			errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
-
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
 		lua_pushnil(L);
 		return 1;
 	}
@@ -8980,10 +8944,6 @@ int32_t LuaInterface::luaGetTownName(lua_State* L)
 int32_t LuaInterface::luaGetTownTemplePosition(lua_State* L)
 {
 	//getTownTemplePosition(townId)
-	bool displayError = true;
-	if(lua_gettop(L) >= 2)
-		displayError = popNumber(L);
-
 	uint32_t townId = popNumber(L);
 	if(Town* town = Towns::getInstance()->getTown(townId))
 		pushPosition(L, town->getPosition(), 255);
@@ -9374,17 +9334,11 @@ int32_t LuaInterface::luaDoUpdateHouseAuctions(lua_State* L)
 
 int32_t LuaInterface::luaGetItemIdByName(lua_State* L)
 {
-	//getItemIdByName(name[, displayError = true])
-	bool displayError = true;
-	if(lua_gettop(L) >= 2)
-		displayError = popNumber(L);
-
+	//getItemIdByName(name)
 	int32_t itemId = Item::items.getItemIdByName(popString(L));
 	if(itemId == -1)
 	{
-		if(displayError)
-			errorEx(getError(LUA_ERROR_ITEM_NOT_FOUND));
-
+		errorEx(getError(LUA_ERROR_ITEM_NOT_FOUND));
 		lua_pushboolean(L, false);
 	}
 	else
@@ -10132,8 +10086,9 @@ int32_t LuaInterface::luaL_dodirectory(lua_State* L)
 int32_t LuaInterface::luaL_errors(lua_State* L)
 {
 	//errors(var)
-	lua_pushboolean(L, getEnv()->getInterface()->m_errors);
-	getEnv()->getInterface()->m_errors = popNumber(L);
+	bool status = getEnv()->getInterface()->m_errors;
+	getEnv()->getInterface()->m_errors = popBoolean(L);
+	lua_pushboolean(L, status);
 	return 1;
 }
 #define EXPOSE_LOG(Name, Stream)\

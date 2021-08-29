@@ -5307,3 +5307,4 @@ void Player::onUpdateQuest()
 {
 	sendTextMessage(MSG_EVENT_ADVANCE, "Your quest log has been updated.");
 }
+
