@@ -352,8 +352,9 @@ class Game
 		const SpectatorVec& getSpectators(const Position& centerPos) {return map->getSpectators(centerPos);}
 		void clearSpectatorCache() {if(map) map->clearSpectatorCache();}
 
-		ReturnValue internalMoveCreature(Creature* creature, Direction direction, uint32_t flags = 0);
-		ReturnValue internalMoveCreature(Creature* actor, Creature* creature, Cylinder* fromCylinder, Cylinder* toCylinder, uint32_t flags = 0);
+		ReturnValue internalMoveCreature(Creature* creature, const Direction& direction, uint32_t flags = 0);
+		ReturnValue internalMoveCreature(Creature* actor, Creature* creature, Cylinder* fromCylinder,
+			Cylinder* toCylinder, uint32_t flags = 0, const bool& forceTeleport = false);
 
 		ReturnValue internalMoveItem(Creature* actor, Cylinder* fromCylinder, Cylinder* toCylinder, int32_t index,
 			Item* item, uint32_t count, Item** _moveItem, uint32_t flags = 0);
@@ -429,7 +430,7 @@ class Game
 		  * \param flags optional flags to modify default behavior
 		  * \returns true if the teleportation was successful
 		  */
-		ReturnValue internalTeleport(Thing* thing, const Position& newPos, bool pushMove, uint32_t flags = 0);
+		ReturnValue internalTeleport(Thing* thing, const Position& newPos, const bool& forceTeleport, const uint32_t& flags = FLAG_NOLIMIT, bool fullTeleport = true);
 
 		/**
 			* Turn a creature to a different direction.
@@ -514,7 +515,7 @@ class Game
 		bool playerQuestInfo(uint32_t playerId, uint16_t questId);
 		bool playerRequestAddVip(uint32_t playerId, const std::string& name);
 		bool playerRequestRemoveVip(uint32_t playerId, uint32_t guid);
-		bool playerTurn(uint32_t playerId, Direction dir);
+		bool playerTurn(const uint32_t& playerId, const Direction& dir);
 		bool playerRequestOutfit(uint32_t playerId);
 		bool playerSay(uint32_t playerId, uint16_t channelId, SpeakClasses type,
 			const std::string& receiver, const std::string& text);

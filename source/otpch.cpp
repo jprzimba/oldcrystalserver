@@ -15,32 +15,4 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
 
-#ifdef __OTPCH__
-#error "Precompiled header should be included only once."
-#endif
-
-
-#ifdef _MSC_VER
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
-#endif
-
-#define __OTPCH__
-#if defined WINDOWS
-#include <winerror.h>
-#endif
-
-//libxml
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <libxml/threads.h>
-
-//boost
-#include <boost/config.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/regex.hpp>
-#include <boost/tokenizer.hpp>
-
-//otserv
-#include "thing.h"
+#include "otpch.h"

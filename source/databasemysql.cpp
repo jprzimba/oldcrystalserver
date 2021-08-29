@@ -15,7 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
 #include "otpch.h"
+#ifdef _MSC_VER
+#include <errmsg.h>
+#else
 #include <mysql/errmsg.h>
+#endif
 #include <iostream>
 
 #include "database.h"
@@ -305,7 +309,7 @@ void MySQLResult::free()
 bool MySQLResult::next()
 {
 	m_row = mysql_fetch_row(m_handle);
-	return m_row;
+	return (m_row != NULL);
 }
 
 MySQLResult::~MySQLResult()

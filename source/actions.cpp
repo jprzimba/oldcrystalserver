@@ -396,7 +396,7 @@ ReturnValue Actions::canUseFar(const Creature* creature, const Position& toPos, 
 	return RET_NOERROR;
 }
 
-Action* Actions::getAction(const Item* item, ActionType_t type/* = ACTION_ANY*/) const
+Action* Actions::getAction(const Item* item, ActionType_t type) const
 {
 	if(item->getUniqueId() && (type == ACTION_ANY || type == ACTION_UNIQUEID))
 	{
@@ -688,12 +688,6 @@ bool Actions::useItemEx(Player* player, const Position& fromPos, const Position&
 	player->stopWalk();
 	player->setNextAction(OTSYS_TIME() + g_config.getNumber(ConfigManager::EX_ACTIONS_DELAY_INTERVAL) - SCHEDULER_MINTICKS);
 
-	if(!getAction(item))
-	{
-		player->sendCancelMessage(RET_CANNOTUSETHISOBJECT);
-		return false;
-	}
-
 	int32_t fromStackPos = 0;
 	if(item->getParent())
 		fromStackPos = item->getParent()->__getIndexOfThing(item);
@@ -702,13 +696,11 @@ bool Actions::useItemEx(Player* player, const Position& fromPos, const Position&
 	PositionEx toPosEx(toPos, toStackPos);
 
 	ReturnValue ret = internalUseItemEx(player, fromPosEx, toPosEx, item, isHotkey, creatureId);
-	if(ret != RET_NOERROR)
-	{
-		player->sendCancelMessage(ret);
-		return false;
-	}
+	if (ret == RET_NOERROR)
+		return true;
 
-	return true;
+	player->sendCancelMessage(ret);
+	return false;
 }
 
 Action::Action(LuaInterface* _interface):

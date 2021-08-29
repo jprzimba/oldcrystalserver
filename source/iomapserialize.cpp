@@ -662,7 +662,7 @@ bool IOMapSerialize::saveHouseBinary(Database* db, DBInsert& stmt, House* house)
 	if(!attributesSize)
 		return true;
 
-	DBQuery query;
+	std::ostringstream query;
 	query << house->getId() << ", " << g_config.getNumber(ConfigManager::WORLD_ID)
 		<< ", " << db->escapeBlob(attributes, attributesSize);
 	return stmt.addRow(query);
@@ -681,7 +681,7 @@ bool IOMapSerialize::saveHouseBinaryTileBased(Database* db, DBInsert& stmt, Hous
 		if(!attributesSize)
 			continue;
 
-		DBQuery query;
+		std::ostringstream query;
 		query << house->getId() << ", " << g_config.getNumber(ConfigManager::WORLD_ID)
 			<< ", " << db->escapeBlob(attributes, attributesSize);
 		if(!stmt.addRow(query))

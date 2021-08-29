@@ -779,10 +779,18 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 {
 	if(preSave && player->health <= 0)
 	{
-		if(player->getSkull() == SKULL_BLACK)
+		if (g_config.getBool(ConfigManager::USE_BLACK_SKULL))
 		{
-			player->health = g_config.getNumber(ConfigManager::BLACK_SKULL_DEATH_HEALTH);
-			player->mana = g_config.getNumber(ConfigManager::BLACK_SKULL_DEATH_MANA);
+			if (player->getSkull() == SKULL_BLACK)
+			{
+				player->health = g_config.getNumber(ConfigManager::BLACK_SKULL_DEATH_HEALTH);
+				player->mana = g_config.getNumber(ConfigManager::BLACK_SKULL_DEATH_MANA);
+			}
+			else
+			{
+				player->health = player->healthMax;
+				player->mana = player->manaMax;
+			}
 		}
 		else
 		{
@@ -792,23 +800,15 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 	}
 
 	Database* db = Database::getInstance();
-	DBQuery query;
-	query << "SELECT `save` FROM `players` WHERE `id` = " << player->getGUID() << " LIMIT 1";
-
-	DBResult* result;
-	if(!(result = db->storeQuery(query.str())))
-		return false;
-
-	const bool save = result->getDataInt("save");
-	result->free();
+	std::ostringstream query;
 
 	DBTransaction trans(db);
-	if(!trans.begin())
+	if (!trans.begin())
 		return false;
 
 	query.str("");
 	query << "UPDATE `players` SET `lastlogin` = " << player->lastLogin << ", `lastip` = " << player->lastIP;
-	if(!save || !player->isSaving())
+	if (!player->isSaving() || !g_config.getBool(ConfigManager::SAVE_PLAYER_DATA))
 	{
 		query << " WHERE `id` = " << player->getGUID() << db->getUpdateLimiter();
 		if(!db->query(query.str()))
@@ -1069,16 +1069,14 @@ bool IOLoginData::saveItems(const Player* player, const ItemBlockList& itemList,
 	for(ItemBlockList::const_iterator it = itemList.begin(); it != itemList.end(); ++it, ++runningId)
 	{
 		item = it->second;
-
 		PropWriteStream propWriteStream;
 		item->serializeAttr(propWriteStream);
 
 		uint32_t attributesSize = 0;
 		const char* attributes = propWriteStream.getStream(attributesSize);
-		char buffer[attributesSize * 3 + 100]; //MUST be (size * 2), else people can crash server when filling writable with native characters
-
-		sprintf(buffer, "%d, %d, %d, %d, %d, %s", player->getGUID(), it->first, runningId, item->getID(),
-			(int32_t)item->getSubType(), db->escapeBlob(attributes, attributesSize).c_str());
+		std::ostringstream buffer;
+		buffer << player->getGUID() << "," << it->first << "," << runningId << "," << item->getID() << ","
+			<< (int32_t)item->getSubType() << "," << db->escapeBlob(attributes, attributesSize).c_str();
 		if(!databaseInsert.addRow(buffer))
 			return false;
 
@@ -1103,11 +1101,11 @@ bool IOLoginData::saveItems(const Player* player, const ItemBlockList& itemList,
 
 			uint32_t attributesSize = 0;
 			const char* attributes = propWriteStream.getStream(attributesSize);
-			char buffer[attributesSize * 3 + 100]; //MUST be (size * 2), else people can crash server when filling writable with native characters
 
-			sprintf(buffer, "%d, %d, %d, %d, %d, %s", player->getGUID(), stack.second, runningId, item->getID(),
-				(int32_t)item->getSubType(), db->escapeBlob(attributes, attributesSize).c_str());
-			if(!databaseInsert.addRow(buffer))
+			std::ostringstream buffer;
+			buffer << player->getGUID() << "," << stack.second << "," << runningId << "," << item->getID() << ","
+				<< (int32_t)item->getSubType() << "," << db->escapeBlob(attributes, attributesSize).c_str();
+			if (!databaseInsert.addRow(buffer))
 				return false;
 		}
 	}

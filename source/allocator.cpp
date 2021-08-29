@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
-#ifdef __OTSERV_ALLOCATOR__
 #include "otpch.h"
+#ifdef __OTSERV_ALLOCATOR__
 #include "allocator.h"
 
 //normal new/delete
@@ -45,6 +45,7 @@ void* operator new(size_t bytes, int32_t dummy)
 	return malloc(bytes);
 }
 #ifdef _MSC_VER
+
 void* operator new[](size_t bytes, int32_t dummy)
 {
 	return malloc(bytes);
@@ -64,7 +65,7 @@ void operator delete[](void* p, int32_t dummy)
 #ifdef __OTSERV_ALLOCATOR_STATS__
 void allocatorStatsThread(void* a)
 {
-	while(true)
+	while (true)
 	{
 		boost::this_thread::sleep(boost::posix_time::milliseconds(30000));
 		PoolManager::getInstance()->dumpStats();

@@ -64,10 +64,7 @@ std::string asLowerCaseString(const std::string& source);
 std::string asUpperCaseString(const std::string& source);
 bool booleanString(std::string source);
 
-bool readXMLInteger(xmlNodePtr node, const char* tag, int& value);
-#if defined WINDOWS && !defined __GNUC__
 bool readXMLInteger(xmlNodePtr node, const char* tag, int32_t& value);
-#endif
 bool readXMLInteger64(xmlNodePtr node, const char* tag, int64_t& value);
 bool readXMLFloat(xmlNodePtr node, const char* tag, float& value);
 bool readXMLString(xmlNodePtr node, const char* tag, std::string& value);
@@ -98,7 +95,9 @@ std::string parseParams(tokenizer::iterator &it, tokenizer::iterator end);
 
 int32_t random_range(int32_t lowest_number, int32_t highest_number, DistributionType_t type = DISTRO_UNIFORM);
 
-int32_t round(float v);
+#if !defined(_MSC_VER) || _MSC_VER < 1800
+double round(double v);
+#endif
 uint32_t rand24b();
 float box_muller(float m, float s);
 

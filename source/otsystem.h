@@ -28,6 +28,7 @@
 #include <list>
 #include <map>
 #include <limits>
+#include <chrono>
 
 #include <boost/version.hpp>
 #include <boost/utility.hpp>
@@ -37,93 +38,85 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+
 #include <cstddef>
 #include <cstdlib>
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
-	#include <cstdint>
+#include <cstdint>
 #else
-	#include <stdint.h>
+#include <stdint.h>
 #endif
 
 #ifndef __x86_64__
-	#ifdef _M_X64 // msvc
-		#define __x86_64__ 1
-	#else
-		#define __x86_64__ 0
-	#endif
+#ifdef _M_X64 // msvc
+#define __x86_64__ 1
+#else
+#define __x86_64__ 0
+#endif
 #endif
 
 #include <ctime>
 #include <cassert>
 #ifdef WINDOWS
-	#include <windows.h>
-	#include <sys/timeb.h>
+#include <windows.h>
+#include <sys/timeb.h>
 
-	#ifndef access
-	#define access _access
-	#endif
+#ifndef access
+#define access _access
+#endif
 
-	#ifndef timeb
-	#define timeb _timeb
-	#endif
+#ifndef EWOULDBLOCK
+#define EWOULDBLOCK WSAEWOULDBLOCK
+#endif
 
-	#ifndef ftime
-	#define ftime _ftime
-	#endif
+#ifndef errno
+#define errno WSAGetLastError()
+#endif
 
-	#ifndef EWOULDBLOCK
-	#define EWOULDBLOCK WSAEWOULDBLOCK
-	#endif
-
-	#ifndef errno
-	#define errno WSAGetLastError()
-	#endif
-
-	#ifndef OTSYS_SLEEP
-		#define OTSYS_SLEEP(n) Sleep(n)
-	#endif
+#ifndef OTSYS_SLEEP
+#define OTSYS_SLEEP(n) Sleep(n)
+#endif
 #else
-	#include <sys/timeb.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
+#include <sys/timeb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
-	#include <unistd.h>
-	#include <netdb.h>
-	#include <errno.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <errno.h>
 
-	#include <arpa/inet.h>
-	#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
-	#ifndef SOCKET
-	#define SOCKET int32_t
-	#endif
+#ifndef SOCKET
+#define SOCKET int32_t
+#endif
 
-	#ifndef closesocket
-	#define closesocket close
-	#endif
+#ifndef closesocket
+#define closesocket close
+#endif
 
-	#ifndef SOCKADDR
-	#define SOCKADDR sockaddr
-	#endif
+#ifndef SOCKADDR
+#define SOCKADDR sockaddr
+#endif
 
-	#ifndef SOCKET_ERROR
-	#define SOCKET_ERROR -1
-	#endif
+#ifndef SOCKET_ERROR
+#define SOCKET_ERROR -1
+#endif
 
-	inline void OTSYS_SLEEP(int32_t n)
-	{
-		timespec tv;
-		tv.tv_sec  = n / 1000;
-		tv.tv_nsec = (n % 1000) * 1000000;
-		nanosleep(&tv, NULL);
-	}
+inline void OTSYS_SLEEP(int32_t n)
+{
+	timespec tv;
+	tv.tv_sec = n / 1000;
+	tv.tv_nsec = (n % 1000) * 1000000;
+	nanosleep(&tv, NULL);
+}
 #endif
 
 inline int64_t OTSYS_TIME()
 {
-	timeb t;
-	ftime(&t);
-	return ((int64_t)t.millitm) + ((int64_t)t.time) * 1000;
+	using namespace std::chrono;
+	return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
 inline uint32_t swap_uint32(uint32_t val)

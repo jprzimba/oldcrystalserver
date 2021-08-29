@@ -306,6 +306,7 @@ class ConfigManager
 			HOUSE_SKIP_INIT_RENT,
 			ROOK_SYSTEM,
 			CLOSE_INSTANCE_ON_SHUTDOWN,
+			SAVE_PLAYER_DATA,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

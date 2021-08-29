@@ -399,7 +399,7 @@ bool Monster::searchTarget(TargetSearchType_t searchType /*= TARGETSEARCH_DEFAUL
 			}
 
 			if(target && selectTarget(target))
-				return target;
+				return true;
 
 			break;
 		}
@@ -618,8 +618,8 @@ void Monster::doAttacking(uint32_t interval)
 	if(!attackedCreature || (isSummon() && attackedCreature == this))
 		return;
 
-	bool updateLook = true, outOfRange = true;
-	resetTicks = interval;
+	bool updateLook = true;
+	resetTicks = (interval != 0);
 	attackTicks += interval;
 
 	const Position& myPos = getPosition();
@@ -660,14 +660,9 @@ void Monster::doAttacking(uint32_t interval)
 			}
 		}
 
-		if(inRange)
-			outOfRange = false;
-		else if(it->isMelee) //melee swing out of reach
+		if (!inRange && it->isMelee) //melee swing out of reach
 			extraMeleeAttack = true;
 	}
-
-	if(updateLook)
-		updateLookDirection();
 
 	if(resetTicks)
 		attackTicks = 0;

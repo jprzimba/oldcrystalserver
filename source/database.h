@@ -276,11 +276,11 @@ class DBInsert
 		*
 		* @param std::string& row data
 		*/
-		bool addRow(const std::string& row);
+		bool addRow(std::string row);
 		/**
 		* Allows to use addRow() with stringstream as parameter.
 		*/
-		bool addRow(std::stringstream& row);
+		bool addRow(std::ostringstream& row);
 
 		/**
 		* Executes current buffer.

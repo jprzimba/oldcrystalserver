@@ -1350,7 +1350,7 @@ void Npc::executeResponse(Player* player, NpcState* npcState, const NpcResponse*
 
 				case ACTION_SETIDLE:
 				{
-					npcState->isIdle = it->intValue;
+					npcState->isIdle = (it->intValue != 0);
 					break;
 				}
 

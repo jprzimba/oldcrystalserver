@@ -284,7 +284,7 @@ class Tile : public Cylinder
 		void updateTileFlags(Item* item, bool remove);
 
 	protected:
-		bool isDynamic() const {return (m_flags & TILESTATE_DYNAMIC_TILE);}
+		bool isDynamic() const { return (m_flags & TILESTATE_DYNAMIC_TILE) != 0; }
 
 	public:
 		QTreeLeafNode* qt_node;

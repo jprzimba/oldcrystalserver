@@ -259,6 +259,7 @@ bool ConfigManager::load()
 	m_double[RATE_MONSTER_DEFENSE] = getGlobalDouble("rateMonsterDefense", 1);
 	m_double[CRITICAL_HIT_MUL] = getGlobalDouble("criticalHitMultiplier", 1);
 
+	m_boolean[SAVE_PLAYER_DATA] = getGlobalBool("savePlayerData", true);
 	m_boolean[CLOSE_INSTANCE_ON_SHUTDOWN] = getGlobalBool("closeInstanceOnShutdown", true);
 	m_boolean[ACCOUNT_MANAGER] = getGlobalBool("accountManager", true);
 	m_boolean[NAMELOCK_MANAGER] = getGlobalBool("namelockManager", false);

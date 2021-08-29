@@ -823,8 +823,8 @@ bool TalkAction::guildCreate(Creature* creature, const std::string& cmd, const s
 		return true;
 	}
 
-	const uint32_t minLength = g_config.getNumber(ConfigManager::MIN_GUILDNAME);
-	const uint32_t maxLength = g_config.getNumber(ConfigManager::MAX_GUILDNAME);
+	uint32_t minLength = g_config.getNumber(ConfigManager::MIN_GUILDNAME),
+		maxLength = g_config.getNumber(ConfigManager::MAX_GUILDNAME);
 	if(param_.length() < minLength)
 	{
 		player->sendCancel("That guild name is too short, please select a longer name.");
@@ -847,18 +847,18 @@ bool TalkAction::guildCreate(Creature* creature, const std::string& cmd, const s
 	const uint32_t levelToFormGuild = g_config.getNumber(ConfigManager::LEVEL_TO_FORM_GUILD);
 	if(player->getLevel() < levelToFormGuild)
 	{
-		char buffer[70 + levelToFormGuild];
-		sprintf(buffer, "You have to be at least Level %d to form a guild.", levelToFormGuild);
-		player->sendCancel(buffer);
+		std::ostringstream stream;
+		stream << "You have to be at least Level " << levelToFormGuild << " to form a guild.";
+		player->sendCancel(stream.str());
 		return true;
 	}
 
 	const int32_t premiumDays = g_config.getNumber(ConfigManager::GUILD_PREMIUM_DAYS);
 	if(player->getPremiumDays() < premiumDays)
 	{
-		char buffer[70 + premiumDays];
-		sprintf(buffer, "You need to have at least %d premium days to form a guild.", premiumDays);
-		player->sendCancel(buffer);
+		std::ostringstream stream;
+		stream << "You need to have at least " << premiumDays << " premium days to form a guild.";
+		player->sendCancel(stream.str());
 		return true;
 	}
 

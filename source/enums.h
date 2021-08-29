@@ -344,11 +344,23 @@ struct War_t
 
 struct Outfit_t
 {
-	Outfit_t() {lookHead = lookBody = lookLegs = lookFeet = lookType = lookTypeEx = lookAddons = 0;}
+	Outfit_t()
+	{
+		lookType = lookTypeEx = 0;
+		lookHead = lookBody = lookLegs = lookFeet = lookAddons = 0;
+	}
+
+	Outfit_t(uint16_t _lookType)
+	{
+		lookType = _lookType;
+		lookTypeEx = 0;
+		lookHead = lookBody = lookLegs = lookFeet = lookAddons = 0;
+	}
+
 	uint16_t lookType, lookTypeEx;
 	uint8_t lookHead, lookBody, lookLegs, lookFeet, lookAddons;
 
-	bool operator==(const Outfit_t o) const
+	bool operator==(const Outfit_t& o) const
 	{
 		return (o.lookAddons == lookAddons
 			&& o.lookType == lookType && o.lookTypeEx == lookTypeEx
@@ -356,7 +368,7 @@ struct Outfit_t
 			&& o.lookLegs == lookLegs && o.lookFeet == lookFeet);
 	}
 
-	bool operator!=(const Outfit_t o) const
+	bool operator!=(const Outfit_t& o) const
 	{
 		return !(*this == o);
 	}
