@@ -234,6 +234,7 @@
 	-- Saving-related
 	-- houseDataStorage can be binary, relational and binary-tilebased
 	saveGlobalStorage = true
+	savePlayerData = true
 	houseDataStorage = "binary"
 	storePlayerDirection = false
 
