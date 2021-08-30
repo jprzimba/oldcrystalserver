@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<monster name="Dreadbeast" species="undead" nameDescription="a dreadbeast" race="undead" experience="580" speed="200" manacost="800">
-	<health now="515" max="515"/>
+<monster name="Dreadbeast" nameDescription="a dreadbeast" race="undead" experience="250" speed="210" manacost="800">
+	<health now="800" max="800"/>
 	<look type="101" head="20" body="30" legs="40" feet="50" corpse="3031"/>
 	<targetchange interval="60000" chance="10"/>
 	<strategy attack="100" defense="0"/>
@@ -12,33 +12,55 @@
 		<flag convinceable="1"/>
 		<flag pushable="0"/>
 		<flag canpushitems="1"/>
-		<flag staticattack="80"/>
-		<flag lightlevel="0"/>
-		<flag lightcolor="0"/>
+		<flag canpushcreatures="1"/>
 		<flag targetdistance="1"/>
+		<flag staticattack="90"/>
 		<flag runonhealth="0"/>
 	</flags>
 	<attacks>
-		<attack name="melee" interval="2000" min="-0" max="-100"/>
-		<attack name="lifedrain" interval="2000" chance="20" radius="1" target ="1" min="-150" max="-250">
-			<attribute key="areaEffect" value="yellowenergy"/>
-			<attribute key="shootEffect" value="suddendeath"/>
-		</attack>
-		<attack name="lifedrain" interval="2000" chance="20" radius="1" target ="1" min="-150" max="-250">
-			<attribute key="areaEffect" value="purpleenergy"/>
-			<attribute key="shootEffect" value="suddendeath"/>
+		<attack name="melee" interval="2000" min="0" max="-50" poison="20"/>
+		<attack name="drown" interval="2000" chance="15" range="5" target="1" min="-150" max="-400">
+		<attribute key="areaEffect" value="bluebubble"/>
+		<attribute key="shootEffect" value="ice"/>
+	</attack>
+		<attack name="lifedrain" interval="2000" chance="10" range="5" target="1" min="0" max="0">
+			<attribute key="areaEffect" value="redshimmer"/>
 		</attack>
 	</attacks>
-	<defenses armor="34" defense="36"/>
+	<defenses armor="20" defense="35">
+		<defense name="healing" interval="2000" chance="10" min="60" max="100">
+			<attribute key="areaEffect" value="blueshimmer"/>
+		</defense>
+	</defenses>
 	<elements>
-		<element firePercent="70"/>
-		<element physicalPercent="-25"/>
+		<element physicalPercent="30"/>
+		<element firePercent="55"/>
+		<element energyPercent="15"/>
+		<element icePercent="40"/>
+		<element drownPercent="75"/>
+		<element holyPercent="-50"/>
 	</elements>
 	<immunities>
-		<immunity poison="1"/>
+		<immunity death="1"/>
+		<immunity earth="1"/>
+		<immunity lifedrain="1"/>
 		<immunity paralyze="1"/>
+		<immunity invisible="1"/>
 	</immunities>
 	<loot>
-		<!-- TODO: loot -->
+		<item id="2230" chance="13100" /><!-- bone -->
+		<item id="2148" countmax="90" chance="4425" /><!-- gold coin -->
+		<item id="2229" chance="1925" /><!-- skull -->
+		<item id="5925" chance="800" /><!-- hardened bone -->
+		<item id="2231" chance="3000" /><!-- big bone -->
+		<item id="7618" chance="200" /><!-- health potion -->
+		<item id="1987" chance="100000"><!-- bag -->
+		<inside>
+			<item id="2463" chance="2725" /><!-- plate armor -->
+			<item id="2449" chance="2175" /><!-- bone club -->
+			<item id="2541" chance="900" /><!-- bone shield -->
+			<item id="2796" chance="1000" /><!-- green mushroom -->
+		</inside>
+		</item>
 	</loot>
 </monster>
