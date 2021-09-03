@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
-
 #include "otpch.h"
 #include "game.h"
 
@@ -709,38 +708,14 @@ void Game::internalGetPosition(Item* item, Position& pos, int16_t& stackpos)
 
 Creature* Game::getCreatureByID(uint32_t id)
 {
-	if (id <= Player::playerAutoID)
-		return getPlayerByID(id);
-	else if (id <= Monster::monsterAutoID)
-		return getMonsterByID(id);
-	else if (id <= Npc::npcAutoID)
-		return getNpcByID(id);
-
-	return NULL;
-}
-
-Monster* Game::getMonsterByID(uint32_t id)
-{
-	if (id == 0)
+	if(!id)
 		return NULL;
 
-	auto it = monsters.find(id);
-	if (it == monsters.end())
-		return NULL;
+	AutoList<Creature>::iterator it = autoList.find(id);
+	if(it != autoList.end() && !it->second->isRemoved())
+		return it->second;
 
-	return it->second;
-}
-
-Npc* Game::getNpcByID(uint32_t id)
-{
-	if (id == 0)
-		return NULL;
-
-	auto it = npcs.find(id);
-	if (it == npcs.end())
-		return NULL;
-
-	return it->second;
+	return NULL; //just in case the player doesnt exist
 }
 
 Player* Game::getPlayerByID(uint32_t id)

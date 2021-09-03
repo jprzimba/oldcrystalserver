@@ -15,7 +15,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //////////////////////////////////////////////////////////////////////
-
 #include "otpch.h"
 #include "connection.h"
 
@@ -34,6 +33,10 @@
 
 extern ConfigManager g_config;
 bool Connection::m_logError = true;
+
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+uint32_t Connection::connectionCount = 0;
+#endif
 
 Connection_ptr ConnectionManager::createConnection(boost::asio::ip::tcp::socket* socket,
 	boost::asio::io_service& io_service, ServicePort_ptr servicer)

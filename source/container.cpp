@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
-
 #include "otpch.h"
 
 #include "container.h"
@@ -141,9 +140,13 @@ std::stringstream& Container::getContentDescription(std::stringstream& s) const
 {
 	bool begin = true;
 	Container* evil = const_cast<Container*>(this);
-	for(ContainerIterator it = evil->begin(); it != evil->end(); ++it)
+	for (ContainerIterator it = evil->begin(); it != evil->end(); ++it)
 	{
-		if(!begin)
+		Container* tmp = (*it)->getContainer();
+		if (tmp && !tmp->empty())
+			continue;
+
+		if (!begin)
 			s << ", ";
 		else
 			begin = false;
@@ -151,7 +154,7 @@ std::stringstream& Container::getContentDescription(std::stringstream& s) const
 		s << (*it)->getNameDescription();
 	}
 
-	if(begin)
+	if (begin)
 		s << "nothing";
 
 	return s;

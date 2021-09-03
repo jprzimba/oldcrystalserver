@@ -131,15 +131,17 @@ typedef std::list<uint32_t> InvitedToGuildsList;
 typedef std::list<Party*> PartyList;
 typedef std::map<uint32_t, War_t> WarMap;
 
-static constexpr int32_t PLAYER_MAX_SPEED = 1500;
-static constexpr int32_t PLAYER_MIN_SPEED = 10;
-
+#define SPEED_MAX 1500
+#define SPEED_MIN 10
 #define STAMINA_MAX (42 * 60 * 60 * 1000)
 #define STAMINA_MULTIPLIER (60 * 1000)
 
 class Player : public Creature, public Cylinder
 {
 	public:
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+		static uint32_t playerCount;
+#endif
 		Player(const std::string& name, ProtocolGame* p);
 		virtual ~Player();
 
@@ -162,13 +164,8 @@ class Player : public Creature, public Cylinder
 		void setGUID(uint32_t _guid) {guid = _guid;}
 		uint32_t getGUID() const {return guid;}
 
-		void setID() override
-		{
-			if (id == 0)
-				id = playerAutoID++;
-		}
-
 		static AutoList<Player> autoList;
+		virtual uint32_t rangeId() {return 0x10000000;}
 
 		void addList();
 		void removeList();
@@ -741,10 +738,8 @@ class Player : public Creature, public Cylinder
 			if(!hasFlag(PlayerFlag_SetMaxSpeed))
 				baseSpeed = vocation->getBaseSpeed() + (2 * (level - 1));
 			else
-				baseSpeed = PLAYER_MAX_SPEED;
+				baseSpeed = SPEED_MAX;
 		}
-
-		static uint32_t playerAutoID;
 
 		void updateInventoryWeight();
 		void updateInventoryGoods(uint32_t itemId);
@@ -789,7 +784,16 @@ class Player : public Creature, public Cylinder
 		virtual void __internalAddThing(uint32_t index, Thing* thing);
 
 		uint32_t getVocAttackSpeed() const {return vocation->getAttackSpeed();}
-		int32_t getStepSpeed() const override {return std::max<int32_t>(PLAYER_MIN_SPEED, std::min<int32_t>(PLAYER_MAX_SPEED, getSpeed()));}
+		virtual int32_t getStepSpeed() const
+		{
+			if(getSpeed() > SPEED_MAX)
+				return SPEED_MAX;
+
+			if(getSpeed() < SPEED_MIN)
+				return SPEED_MIN;
+
+			return getSpeed();
+		}
 
 		virtual uint32_t getDamageImmunities() const {return damageImmunities;}
 		virtual uint32_t getConditionImmunities() const {return conditionImmunities;}

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
-
 #include "otpch.h"
 #include "talkaction.h"
 
@@ -33,6 +32,13 @@
 #include "teleport.h"
 #include "status.h"
 #include "textlogger.h"
+
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+#include "outputmessage.h"
+#include "connection.h"
+#include "protocollogin.h"
+#include "protocolold.h"
+#endif
 
 #include "configmanager.h"
 #include "game.h"
@@ -313,6 +319,8 @@ bool TalkAction::loadFunction(const std::string& functionName)
 		m_function = thingProporties;
 	else if(m_functionName == "banishmentinfo")
 		m_function = banishmentInfo;
+	else if(m_functionName == "diagnostics")
+		m_function = diagnostics;
 	else if(m_functionName == "ghost")
 		m_function = ghost;
 	else if(m_functionName == "software")
@@ -1157,6 +1165,50 @@ bool TalkAction::banishmentInfo(Creature* creature, const std::string& cmd, cons
 		<< ".\nThe comment given was:\n" << ban.comment.c_str() << ".\n" << end.c_str() << (deletion ? "." : formatDateEx(ban.expires).c_str()) << ".";
 
 	player->sendFYIBox(ss.str());
+	return true;
+}
+
+bool TalkAction::diagnostics(Creature* creature, const std::string& cmd, const std::string& param)
+{
+	Player* player = creature->getPlayer();
+	if(!player)
+		return false;
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+
+	std::stringstream s;
+	s << "Server diagonostic:" << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
+
+	s.str("");
+	s << "World:" << std::endl
+		<< "--------------------" << std::endl
+		<< "Player: " << g_game.getPlayersOnline() << " (" << Player::playerCount << ")" << std::endl
+		<< "Npc: " << g_game.getNpcsOnline() << " (" << Npc::npcCount << ")" << std::endl
+		<< "Monster: " << g_game.getMonstersOnline() << " (" << Monster::monsterCount << ")" << std::endl << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
+
+	s.str("");
+	s << "Protocols:" << std::endl
+		<< "--------------------" << std::endl
+		<< "ProtocolGame: " << ProtocolGame::protocolGameCount << std::endl
+		<< "ProtocolLogin: " << ProtocolLogin::protocolLoginCount << std::endl
+		<< "ProtocolStatus: " << ProtocolStatus::protocolStatusCount << std::endl
+		<< "ProtocolOld: " << ProtocolOld::protocolOldCount << std::endl << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
+
+	s.str("");
+	s << "Connections:" << std::endl
+		<< "--------------------" << std::endl
+		<< "Active connections: " << Connection::connectionCount << std::endl
+		<< "Total message pool: " << OutputMessagePool::getInstance()->getTotalMessageCount() << std::endl
+		<< "Auto message pool: " << OutputMessagePool::getInstance()->getAutoMessageCount() << std::endl
+		<< "Queued message pool: " << OutputMessagePool::getInstance()->getQueuedMessageCount() << std::endl
+		<< "Free message pool: " << OutputMessagePool::getInstance()->getAvailableMessageCount() << std::endl;
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, s.str());
+
+#else
+	player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Command not available, please rebuild your software with -D__ENABLE_SERVER_DIAG__");
+#endif
 	return true;
 }
 

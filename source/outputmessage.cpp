@@ -14,12 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
-
 #include "otpch.h"
 #include "scheduler.h"
 
 #include "outputmessage.h"
 #include "protocol.h"
+
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+uint32_t OutputMessagePool::outputMessagePoolCount = OUTPUT_POOL_SIZE;
+#endif
 
 OutputMessagePool::OutputMessagePool()
 {
@@ -172,6 +175,9 @@ OutputMessage_ptr OutputMessagePool::getOutputMessage(Protocol* protocol, bool a
 
 	if(m_outputMessages.empty())
 	{
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+		outputMessagePoolCount++;
+#endif
 		OutputMessage* msg = new OutputMessage();
 		m_outputMessages.push_back(msg);
 #ifdef __TRACK_NETWORK__

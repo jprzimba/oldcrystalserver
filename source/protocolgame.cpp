@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
-
 #include "otpch.h"
 
 #include <boost/function.hpp>
@@ -58,6 +57,10 @@ void ProtocolGame::addGameTaskInternal(uint32_t delay, const FunctionType& func)
 	else
 		Dispatcher::getInstance().addTask(createTask(func));
 }
+
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+uint32_t ProtocolGame::protocolGameCount = 0;
+#endif
 
 void ProtocolGame::setPlayer(Player* p)
 {

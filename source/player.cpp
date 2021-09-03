@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
-
 #include "otpch.h"
 #include <iostream>
 
@@ -44,8 +43,11 @@ extern MoveEvents* g_moveEvents;
 extern Weapons* g_weapons;
 extern CreatureEvents* g_creatureEvents;
 
-uint32_t Player::playerAutoID = 0x10000000;
+
 AutoList<Player> Player::autoList;
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+uint32_t Player::playerCount = 0;
+#endif
 MuteCountMap Player::muteCountMap;
 
 Player::Player(const std::string& _name, ProtocolGame* p):
@@ -117,10 +119,17 @@ Player::Player(const std::string& _name, ProtocolGame* p):
 
 	for(int32_t i = 0; i <= 12; ++i)
 		talkState[i] = false;
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+
+	playerCount++;
+#endif
 }
 
 Player::~Player()
 {
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+	playerCount--;
+#endif
 	setWriteItem(NULL);
 	for(int32_t i = 0; i < 11; i++)
 	{

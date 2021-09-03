@@ -18,12 +18,51 @@
 #ifndef __TEMPLATES__
 #define __TEMPLATES__
 #include "otsystem.h"
-#include <unordered_map>
 
-template<class T> class AutoList : public std::unordered_map<uint32_t, T*>
+template<class T> class AutoList : public std::map<uint32_t, T*>
 {
 	public:
 		AutoList() {}
 		virtual ~AutoList() {}
+};
+
+class AutoId
+{
+	public:
+		AutoId()
+		{
+			boost::recursive_mutex::scoped_lock lockClass(lock);
+			++count;
+			if(count >= 0xFFFFFF)
+				count = 1000;
+
+			while(list.find(count) != list.end())
+			{
+				if(count >= 0xFFFFFF)
+					count = 1000;
+				else
+					++count;
+			}
+
+			list.insert(count);
+			autoId = count;
+		}
+
+		virtual ~AutoId()
+		{
+			std::set<uint32_t>::iterator it = list.find(autoId);
+			if(it != list.end())
+				list.erase(it);
+		}
+
+		uint32_t autoId;
+
+	protected:
+		static uint32_t count;
+
+		typedef std::set<uint32_t> List;
+		static List list;
+
+		static boost::recursive_mutex lock;
 };
 #endif

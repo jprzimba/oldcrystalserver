@@ -103,6 +103,9 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
 			CONNECTION_STATE_CLOSED
 		};
 
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+		static uint32_t connectionCount;
+#endif
 	private:
 		Connection(boost::asio::ip::tcp::socket* socket, boost::asio::io_service& io_service, ServicePort_ptr servicePort):
 			m_socket(socket), m_readTimer(io_service), m_writeTimer(io_service), m_service(io_service), m_servicePort(servicePort)
@@ -111,12 +114,21 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
 			m_connectionState = CONNECTION_STATE_OPEN;
 			m_receivedFirst = m_writeError = m_readError = false;
 			m_protocol = NULL;
+
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+			connectionCount++;
+#endif
 		}
 
 		friend class ConnectionManager;
 
 	public:
-		virtual ~Connection() {}
+		virtual ~Connection()
+		{
+#ifdef __ENABLE_SERVER_DIAGNOSTIC__
+			connectionCount--;
+#endif
+		}
 
 		boost::asio::ip::tcp::socket& getHandle() {return *m_socket;}
 		uint32_t getIP() const;

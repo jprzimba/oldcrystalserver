@@ -110,6 +110,7 @@ class TalkAction : public Event
 		static TalkFunction guildCreate;
 		static TalkFunction thingProporties;
 		static TalkFunction banishmentInfo;
+		static TalkFunction diagnostics;
 		static TalkFunction ghost;
 		static TalkFunction software;
 
