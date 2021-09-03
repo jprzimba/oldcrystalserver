@@ -41,9 +41,6 @@ class Monster : public Creature
 		Monster(MonsterType* _mType);
 
 	public:
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-		static uint32_t monsterCount;
-#endif
 		virtual ~Monster();
 
 		static Monster* createMonster(MonsterType* mType);
@@ -52,7 +49,12 @@ class Monster : public Creature
 		virtual Monster* getMonster() {return this;}
 		virtual const Monster* getMonster() const {return this;}
 
-		virtual uint32_t rangeId() {return 0x40000000;}
+		void setID() override
+		{
+			if (id == 0)
+				id = monsterAutoID++;
+		}
+
 		static AutoList<Monster> autoList;
 
 		void addList() {autoList[id] = this;}
@@ -116,6 +118,8 @@ class Monster : public Creature
 
 		virtual BlockType_t blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
 			bool checkDefense = false, bool checkArmor = false);
+
+		static uint32_t monsterAutoID;
 
 	private:
 		CreatureList targetList;

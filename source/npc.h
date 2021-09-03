@@ -343,16 +343,18 @@ struct Voice
 class Npc : public Creature
 {
 	public:
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-		static uint32_t npcCount;
-#endif
 		virtual ~Npc();
 		static Npc* createNpc(const std::string& name);
 
 		virtual Npc* getNpc() {return this;}
 		virtual const Npc* getNpc() const {return this;}
 
-		virtual uint32_t rangeId() {return 0x80000000;}
+		void setID() override
+		{
+			if (id == 0)
+				id = npcAutoID++;
+		}
+
 		static AutoList<Npc> autoList;
 
 		void addList() {autoList[id] = this;}
@@ -382,6 +384,8 @@ class Npc : public Creature
 
 		void setCreatureFocus(Creature* creature);
 		NpcScript* getInterface();
+
+		static uint32_t npcAutoID;
 
 	protected:
 		Npc(const std::string& _name);

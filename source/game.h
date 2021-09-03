@@ -223,6 +223,20 @@ class Game
 		Creature* getCreatureByID(uint32_t id);
 
 		/**
+		* Returns a monster based on the unique creature identifier
+		* \param id is the unique monster id to get a monster pointer to
+		* \returns A Monster pointer to the monster
+		*/
+		Monster* getMonsterByID(uint32_t id);
+
+		/**
+		* Returns an npc based on the unique creature identifier
+		* \param id is the unique npc id to get a npc pointer to
+		* \returns A NPC pointer to the npc
+		*/
+		Npc* getNpcByID(uint32_t id);
+
+		/**
 		  * Returns a player based on the unique creature identifier
 		  * \param id is the unique player id to get a player pointer to
 		  * \returns A Pointer to the player
@@ -636,7 +650,7 @@ class Game
 		std::map<Item*, int32_t> grounds;
 #endif
 
-	protected:
+	private:
 		bool playerWhisper(Player* player, const std::string& text);
 		bool playerYell(Player* player, const std::string& text);
 		bool playerSpeakTo(Player* player, SpeakClasses type, const std::string& receiver, const std::string& text);
@@ -651,6 +665,9 @@ class Game
 			int32_t type;
 			void* data;
 		};
+
+		std::map<uint32_t, Npc*> npcs;
+		std::map<uint32_t, Monster*> monsters;
 
 		std::vector<Thing*> releaseThings;
 		std::map<Item*, uint32_t> tradeItems;

@@ -160,7 +160,7 @@ class FrozenPathingConditionCall
 		Position targetPos;
 };
 
-class Creature : public AutoId, virtual public Thing
+class Creature : virtual public Thing
 {
 	protected:
 		Creature();
@@ -181,22 +181,12 @@ class Creature : public AutoId, virtual public Thing
 		virtual const std::string& getNameDescription() const = 0;
 		virtual std::string getDescription(int32_t lookDistance) const;
 
+		virtual void setID() = 0;
 		uint32_t getID() const {return id;}
-		void setID()
-		{
-			/*
-			 * 0x10000000 - Player
-			 * 0x40000000 - Monster
-			 * 0x80000000 - NPC
-			 */
-			if(!id)
-				id = autoId | rangeId();
-		}
 
 		void setRemoved() {removed = true;}
 		virtual bool isRemoved() const {return removed;}
 
-		virtual uint32_t rangeId() = 0;
 		virtual void removeList() = 0;
 		virtual void addList() = 0;
 

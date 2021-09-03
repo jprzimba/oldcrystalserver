@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
+
 #include "otpch.h"
 
 #include "monster.h"
@@ -30,10 +31,8 @@ extern Game g_game;
 extern ConfigManager g_config;
 extern Monsters g_monsters;
 
+uint32_t Monster::monsterAutoID = 0x40000000;
 AutoList<Monster>Monster::autoList;
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-uint32_t Monster::monsterCount = 0;
-#endif
 
 Monster* Monster::createMonster(MonsterType* mType)
 {
@@ -90,20 +89,13 @@ Monster::Monster(MonsterType* _mType):
 		if(!registerCreatureEvent(*it))
 			std::clog << "[Warning - Monster::Monster] Unknown event name - " << *it << std::endl;
 	}
-
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-	monsterCount++;
-#endif
 }
 
 Monster::~Monster()
 {
 	clearTargetList();
 	clearFriendList();
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
 
-	monsterCount--;
-#endif
 	if(raid)
 	{
 		raid->unRef();

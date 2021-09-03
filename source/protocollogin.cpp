@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
+
 #include "otpch.h"
 #include <iomanip>
 
@@ -33,10 +34,6 @@ extern ConfigManager g_config;
 extern Game g_game;
 
 extern std::list<std::pair<uint32_t, uint32_t> > serverIps;
-
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-uint32_t ProtocolLogin::protocolLoginCount = 0;
-#endif
 
 void ProtocolLogin::deleteProtocolTask()
 {

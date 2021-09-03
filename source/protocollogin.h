@@ -25,24 +25,13 @@ class OutputMessage;
 class ProtocolLogin : public Protocol
 {
 	public:
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-		static uint32_t protocolLoginCount;
-#endif
 		virtual void onRecvFirstMessage(NetworkMessage& msg) {parseFirstPacket(msg);}
 
 		ProtocolLogin(Connection_ptr connection) : Protocol(connection)
 		{
 			enableChecksum();
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-			protocolLoginCount++;
-#endif
 		}
-		virtual ~ProtocolLogin()
-		{
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-			protocolLoginCount--;
-#endif
-		}
+		virtual ~ProtocolLogin() {}
 
 		enum {protocolId = 0x01};
 		enum {isSingleSocket = false};

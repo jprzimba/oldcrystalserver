@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
+
 #include "otpch.h"
 
 #include "protocolold.h"
@@ -22,10 +23,6 @@
 
 #include "game.h"
 extern Game g_game;
-
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-uint32_t ProtocolOld::protocolOldCount = 0;
-#endif
 
 #ifdef __DEBUG_NET_DETAIL__
 void ProtocolOld::deleteProtocolTask()

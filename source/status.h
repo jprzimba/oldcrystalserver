@@ -37,23 +37,10 @@ typedef std::map<uint32_t, int64_t> IpConnectMap;
 class ProtocolStatus : public Protocol
 {
 	public:
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-		static uint32_t protocolStatusCount;
-#endif
 		virtual void onRecvFirstMessage(NetworkMessage& msg);
 
-		ProtocolStatus(Connection_ptr connection): Protocol(connection)
-		{
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-			protocolStatusCount++;
-#endif
-		}
-		virtual ~ProtocolStatus()
-		{
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-			protocolStatusCount--;
-#endif
-		}
+		ProtocolStatus(Connection_ptr connection): Protocol(connection) {}
+		virtual ~ProtocolStatus() {}
 
 		enum {protocolId = 0xFF};
 		enum {isSingleSocket = false};

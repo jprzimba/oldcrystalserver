@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
+
 #include "otpch.h"
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -38,10 +39,8 @@ extern ConfigManager g_config;
 extern Game g_game;
 extern Spells* g_spells;
 
+uint32_t Npc::npcAutoID = 0x80000000;
 AutoList<Npc> Npc::autoList;
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-uint32_t Npc::npcCount = 0;
-#endif
 NpcScript* Npc::m_interface = NULL;
 
 void Npcs::reload()
@@ -71,9 +70,6 @@ Npc* Npc::createNpc(const std::string& name)
 Npc::Npc(const std::string& _name):
 	Creature()
 {
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-	npcCount++;
-#endif
 	m_filename = getFilePath(FILE_TYPE_OTHER, "npc/" + _name + ".xml");
 
 	m_npcEventHandler = NULL;
@@ -84,9 +80,6 @@ Npc::Npc(const std::string& _name):
 Npc::~Npc()
 {
 	reset();
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-	npcCount--;
-#endif
 }
 
 bool Npc::load()

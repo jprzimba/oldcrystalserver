@@ -37,14 +37,8 @@ typedef boost::shared_ptr<NetworkMessage> NetworkMessage_ptr;
 class ProtocolGame : public Protocol
 {
 	public:
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-		static uint32_t protocolGameCount;
-#endif
 		ProtocolGame(Connection_ptr connection): Protocol(connection)
 		{
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-			protocolGameCount++;
-#endif
 			player = NULL;
 			m_eventConnect = 0;
 			m_debugAssertSent = m_acceptPackets = false;
@@ -52,9 +46,6 @@ class ProtocolGame : public Protocol
 
 		virtual ~ProtocolGame()
 		{
-#ifdef __ENABLE_SERVER_DIAGNOSTIC__
-			protocolGameCount--;
-#endif
 			player = NULL;
 		}
 

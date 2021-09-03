@@ -51,7 +51,6 @@
     <ClInclude Include="..\itemattributes.h" />
     <ClInclude Include="..\itemloader.h" />
     <ClInclude Include="..\items.h" />
-    <ClInclude Include="..\lockfree.h" />
     <ClInclude Include="..\luascript.h" />
     <ClInclude Include="..\mailbox.h" />
     <ClInclude Include="..\map.h" />

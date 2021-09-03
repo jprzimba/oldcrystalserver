@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ////////////////////////////////////////////////////////////////////////
+
 #include "otpch.h"
 
 #include "creature.h"
@@ -31,10 +32,6 @@
 
 #include "configmanager.h"
 #include "game.h"
-
-boost::recursive_mutex AutoId::lock;
-uint32_t AutoId::count = 1000;
-AutoId::List AutoId::list;
 
 extern Game g_game;
 extern ConfigManager g_config;
