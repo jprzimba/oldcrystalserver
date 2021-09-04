@@ -69,7 +69,7 @@ inline uint32_t Depot::getDepotId() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("depotid", ok);
-	if(ok)
+	if (ok)
 		return (uint32_t)v;
 
 	return 0;

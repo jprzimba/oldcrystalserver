@@ -33,12 +33,12 @@ class AutoId
 		{
 			boost::recursive_mutex::scoped_lock lockClass(lock);
 			++count;
-			if(count >= 0xFFFFFF)
+			if (count >= 0xFFFFFF)
 				count = 1000;
 
-			while(list.find(count) != list.end())
+			while (list.find(count) != list.end())
 			{
-				if(count >= 0xFFFFFF)
+				if (count >= 0xFFFFFF)
 					count = 1000;
 				else
 					++count;
@@ -51,7 +51,7 @@ class AutoId
 		virtual ~AutoId()
 		{
 			std::set<uint32_t>::iterator it = list.find(autoId);
-			if(it != list.end())
+			if (it != list.end())
 				list.erase(it);
 		}
 

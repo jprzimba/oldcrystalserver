@@ -207,7 +207,7 @@ class Game
 		/**
 		  * Set a single tile of the map, position is read from this tile
 		  */
-		void setTile(Tile* newTile) {if(map) return map->setTile(newTile->getPosition(), newTile);}
+		void setTile(Tile* newTile) {if (map) return map->setTile(newTile->getPosition(), newTile);}
 
 		/**
 		  * Get a leaf of the map.
@@ -350,7 +350,7 @@ class Game
 			int32_t minRangeY = 0, int32_t maxRangeY = 0)
 			{map->getSpectators(list, centerPos, checkforduplicate, multifloor, minRangeX, maxRangeX, minRangeY, maxRangeY);}
 		const SpectatorVec& getSpectators(const Position& centerPos) {return map->getSpectators(centerPos);}
-		void clearSpectatorCache() {if(map) map->clearSpectatorCache();}
+		void clearSpectatorCache() {if (map) map->clearSpectatorCache();}
 
 		ReturnValue internalMoveCreature(Creature* creature, const Direction& direction, uint32_t flags = 0);
 		ReturnValue internalMoveCreature(Creature* actor, Creature* creature, Cylinder* fromCylinder,

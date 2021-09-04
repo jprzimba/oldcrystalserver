@@ -52,7 +52,7 @@ class NetworkMessage
 		T get(bool peek = false)
 		{
 			T value = *(T*)(m_buffer + m_position);
-			if(peek)
+			if (peek)
 				return value;
 
 			m_position += sizeof(T);
@@ -72,7 +72,7 @@ class NetworkMessage
 		template<typename T>
 		void put(T value)
 		{
-			if(!hasSpace(sizeof(T)))
+			if (!hasSpace(sizeof(T)))
 				return;
 
 			*(T*)(m_buffer + m_position) = value;

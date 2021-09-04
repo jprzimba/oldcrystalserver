@@ -35,15 +35,15 @@ Database* _Database::_instance = NULL;
 
 Database* _Database::getInstance()
 {
-	if(!_instance)
+	if (!_instance)
 	{
 #if defined MULTI_SQL_DRIVERS
 #ifdef __USE_MYSQL__
-		if(g_config.getString(ConfigManager::SQL_TYPE) == "mysql")
+		if (g_config.getString(ConfigManager::SQL_TYPE) == "mysql")
 			_instance = new DatabaseMySQL;
 #endif
 #ifdef __USE_SQLITE__
-		if(g_config.getString(ConfigManager::SQL_TYPE) == "sqlite")
+		if (g_config.getString(ConfigManager::SQL_TYPE) == "sqlite")
 			_instance = new DatabaseSQLite;
 #endif
 #else
@@ -57,7 +57,7 @@ Database* _Database::getInstance()
 
 DBResult* _Database::verifyResult(DBResult* result)
 {
-	if(result->next())
+	if (result->next())
 		return result;
 
 	result->free();

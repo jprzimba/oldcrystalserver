@@ -68,56 +68,56 @@ ScriptManager::ScriptManager()
 bool ScriptManager::loadSystem()
 {
 	std::clog << "Loading weapons... ";
-	if(!g_weapons->loadFromXml())
+	if (!g_weapons->loadFromXml())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;
 	}
 
 	std::clog << "done." << std::endl << "Preparing weapons... ";
-	if(!g_weapons->loadDefaults())
+	if (!g_weapons->loadDefaults())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;
 	}
 
 	std::clog << "done." << std::endl << "Loading spells... ";
-	if(!g_spells->loadFromXml())
+	if (!g_spells->loadFromXml())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;
 	}
 
 	std::clog << "done." << std::endl << "Loading actions... ";
-	if(!g_actions->loadFromXml())
+	if (!g_actions->loadFromXml())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;
 	}
 
 	std::clog << "done." << std::endl << "Loading talkactions... ";
-	if(!g_talkActions->loadFromXml())
+	if (!g_talkActions->loadFromXml())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;
 	}
 
 	std::clog << "done." << std::endl << "Loading movements... ";
-	if(!g_moveEvents->loadFromXml())
+	if (!g_moveEvents->loadFromXml())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;
 	}
 
 	std::clog << "done." << std::endl << "Loading creaturescripts... ";
-	if(!g_creatureEvents->loadFromXml())
+	if (!g_creatureEvents->loadFromXml())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;
 	}
 
 	std::clog << "done." << std::endl << "Loading globalscripts... ";
-	if(!g_globalEvents->loadFromXml())
+	if (!g_globalEvents->loadFromXml())
 	{
 		std::clog << "failed!" << std::endl;
 		return false;

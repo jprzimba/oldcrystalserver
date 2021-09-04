@@ -37,10 +37,10 @@ std::string transformToMD5(std::string plainText, bool upperCase)
 	MD5_Final(md, &c);
 
 	char output[(MD5_DIGEST_LENGTH << 1) + 1];
-	for(int32_t i = 0; i < (int32_t)sizeof(md); ++i)
+	for (int32_t i = 0; i < (int32_t)sizeof(md); ++i)
 		sprintf(output + (i << 1), "%.2X", md[i]);
 
-	if(upperCase)
+	if (upperCase)
 		return std::string(output);
 
 	return asLowerCaseString(std::string(output));
@@ -56,10 +56,10 @@ std::string transformToSHA1(std::string plainText, bool upperCase)
 	SHA1_Final(md, &c);
 
 	char output[(SHA_DIGEST_LENGTH << 1) + 1];
-	for(int32_t i = 0; i < (int32_t)sizeof(md); ++i)
+	for (int32_t i = 0; i < (int32_t)sizeof(md); ++i)
 		sprintf(output + (i << 1), "%.2X", md[i]);
 
-	if(upperCase)
+	if (upperCase)
 		return std::string(output);
 
 	return asLowerCaseString(std::string(output));
@@ -75,10 +75,10 @@ std::string transformToSHA256(std::string plainText, bool upperCase)
 	SHA256_Final(md, &c);
 
 	char output[(SHA256_DIGEST_LENGTH << 1) + 1];
-	for(int32_t i = 0; i < (int32_t)sizeof(md); ++i)
+	for (int32_t i = 0; i < (int32_t)sizeof(md); ++i)
 		sprintf(output + (i << 1), "%.2X", md[i]);
 
-	if(upperCase)
+	if (upperCase)
 		return std::string(output);
 
 	return asLowerCaseString(std::string(output));
@@ -94,10 +94,10 @@ std::string transformToSHA512(std::string plainText, bool upperCase)
 	SHA512_Final(md, &c);
 
 	char output[(SHA512_DIGEST_LENGTH << 1) + 1];
-	for(int32_t i = 0; i < (int32_t)sizeof(md); ++i)
+	for (int32_t i = 0; i < (int32_t)sizeof(md); ++i)
 		sprintf(output + (i << 1), "%.2X", md[i]);
 
-	if(upperCase)
+	if (upperCase)
 		return std::string(output);
 
 	return asLowerCaseString(std::string(output));
@@ -121,7 +121,7 @@ void _encrypt(std::string& str, bool upperCase)
 			break;
 		default:
 		{
-			if(upperCase)
+			if (upperCase)
 				std::transform(str.begin(), str.end(), str.begin(), upchar);
 
 			break;
@@ -138,10 +138,10 @@ bool encryptTest(std::string plain, std::string& hash)
 
 void replaceString(std::string& text, const std::string key, const std::string value)
 {
-	if(value.find(key) != std::string::npos) //don't allow infinite loops
+	if (value.find(key) != std::string::npos) //don't allow infinite loops
 		return;
 
-	for(std::string::size_type keyStart = text.find(key); keyStart
+	for (std::string::size_type keyStart = text.find(key); keyStart
 		!= std::string::npos; keyStart = text.find(key))
 		text.replace(keyStart, key.size(), value);
 }
@@ -200,7 +200,7 @@ bool readXMLInteger(xmlNodePtr node, const char* tag, int32_t& value)
 bool readXMLInteger64(xmlNodePtr node, const char* tag, int64_t& value)
 {
 	char* nodeValue = (char*)xmlGetProp(node, (xmlChar*)tag);
-	if(!nodeValue)
+	if (!nodeValue)
 		return false;
 
 	value = atoll(nodeValue);
@@ -211,7 +211,7 @@ bool readXMLInteger64(xmlNodePtr node, const char* tag, int64_t& value)
 bool readXMLFloat(xmlNodePtr node, const char* tag, float& value)
 {
 	char* nodeValue = (char*)xmlGetProp(node, (xmlChar*)tag);
-	if(!nodeValue)
+	if (!nodeValue)
 		return false;
 
 	value = atof(nodeValue);
@@ -222,10 +222,10 @@ bool readXMLFloat(xmlNodePtr node, const char* tag, float& value)
 bool readXMLString(xmlNodePtr node, const char* tag, std::string& value)
 {
 	char* nodeValue = (char*)xmlGetProp(node, (xmlChar*)tag);
-	if(!nodeValue)
+	if (!nodeValue)
 		return false;
 
-	if(!utf8ToLatin1(nodeValue, value))
+	if (!utf8ToLatin1(nodeValue, value))
 		value = nodeValue;
 
 	xmlFree(nodeValue);
@@ -235,10 +235,10 @@ bool readXMLString(xmlNodePtr node, const char* tag, std::string& value)
 bool readXMLContentString(xmlNodePtr node, std::string& value)
 {
 	char* nodeValue = (char*)xmlNodeGetContent(node);
-	if(!nodeValue)
+	if (!nodeValue)
 		return false;
 
-	if(!utf8ToLatin1(nodeValue, value))
+	if (!utf8ToLatin1(nodeValue, value))
 		value = nodeValue;
 
 	xmlFree(nodeValue);
@@ -249,15 +249,15 @@ bool parseXMLContentString(xmlNodePtr node, std::string& value)
 {
 	bool result = false;
 	std::string compareValue;
-	while(node)
+	while (node)
 	{
-		if(xmlStrcmp(node->name, (const xmlChar*)"text") && node->type != XML_CDATA_SECTION_NODE)
+		if (xmlStrcmp(node->name, (const xmlChar*)"text") && node->type != XML_CDATA_SECTION_NODE)
 		{
 			node = node->next;
 			continue;
 		}
 
-		if(!readXMLContentString(node, compareValue))
+		if (!readXMLContentString(node, compareValue))
 		{
 			node = node->next;
 			continue;
@@ -266,10 +266,10 @@ bool parseXMLContentString(xmlNodePtr node, std::string& value)
 		trim_left(compareValue, "\r");
 		trim_left(compareValue, "\n");
 		trim_left(compareValue, " ");
-		if(compareValue.length() > value.length())
+		if (compareValue.length() > value.length())
 		{
 			value = compareValue;
-			if(!result)
+			if (!result)
 				result = true;
 		}
 
@@ -283,7 +283,7 @@ std::string getLastXMLError()
 {
 	std::stringstream ss;
 	xmlErrorPtr lastError = xmlGetLastError();
-	if(lastError->line)
+	if (lastError->line)
 		ss << "Line: " << lastError->line << ", ";
 
 	ss << "Info: " << lastError->message << std::endl;
@@ -293,18 +293,18 @@ std::string getLastXMLError()
 bool utf8ToLatin1(char* inText, std::string& outText)
 {
 	outText = "";
-	if(!inText)
+	if (!inText)
 		return false;
 
 	int32_t inLen = strlen(inText);
-	if(!inLen)
+	if (!inLen)
 		return false;
 
 	int32_t outLen = inLen << 1;
 	uint8_t* outBuf = new uint8_t[outLen];
 
 	int32_t res = UTF8Toisolat1(outBuf, &outLen, (uint8_t*)inText, &inLen);
-	if(res < 0)
+	if (res < 0)
 	{
 		delete[] outBuf;
 		return false;
@@ -323,17 +323,17 @@ StringVec explodeString(const std::string& string, const std::string& separator,
 	size_t start = 0, end = 0;
 
 	uint16_t i = 1;
-	while((end = string.find(separator, start)) != std::string::npos)
+	while ((end = string.find(separator, start)) != std::string::npos)
 	{
 		std::string t = string.substr(start, end - start);
-		if(trim)
+		if (trim)
 			trimString(t);
 
 		returnVector.push_back(t);
 		start = end + separator.size();
 
 		++i;
-		if(limit > 0 && i > limit)
+		if (limit > 0 && i > limit)
 			break;
 	}
 
@@ -344,7 +344,7 @@ StringVec explodeString(const std::string& string, const std::string& separator,
 IntegerVec vectorAtoi(StringVec stringVector)
 {
 	IntegerVec returnVector;
-	for(StringVec::iterator it = stringVector.begin(); it != stringVector.end(); ++it)
+	for (StringVec::iterator it = stringVector.begin(); it != stringVector.end(); ++it)
 		returnVector.push_back(atoi((*it).c_str()));
 
 	return returnVector;
@@ -378,7 +378,7 @@ float box_muller(float m, float s)
 	static float y2;
 
 	static bool useLast = false;
-	if(useLast) // use value from previous call
+	if (useLast) // use value from previous call
 	{
 		y1 = y2;
 		useLast = false;
@@ -394,7 +394,7 @@ float box_muller(float m, float s)
 		x2 = 2.0 * r2 - 1.0;
 		w = x1 * x1 + x2 * x2;
 	}
-	while(w >= 1.0);
+	while (w >= 1.0);
 	w = sqrt((-2.0 * log(w)) / w);
 
 	y1 = x1 * w;
@@ -406,10 +406,10 @@ float box_muller(float m, float s)
 
 int32_t random_range(int32_t lowestNumber, int32_t highestNumber, DistributionType_t type /*= DISTRO_UNIFORM*/)
 {
-	if(highestNumber == lowestNumber)
+	if (highestNumber == lowestNumber)
 		return lowestNumber;
 
-	if(lowestNumber > highestNumber)
+	if (lowestNumber > highestNumber)
 		std::swap(lowestNumber, highestNumber);
 
 	switch(type)
@@ -428,7 +428,7 @@ int32_t random_range(int32_t lowestNumber, int32_t highestNumber, DistributionTy
 
 char upchar(char character)
 {
-	if((character >= 97 && character <= 122) || (character <= -1 && character >= -32))
+	if ((character >= 97 && character <= 122) || (character <= -1 && character >= -32))
 		character -= 32;
 
 	return character;
@@ -459,9 +459,9 @@ bool isValidAccountName(std::string text)
 	toLowerCaseString(text);
 
 	uint32_t textLength = text.length();
-	for(uint32_t size = 0; size < textLength; size++)
+	for (uint32_t size = 0; size < textLength; size++)
 	{
-		if(!isLowercaseLetter(text[size]) && !isNumber(text[size]))
+		if (!isLowercaseLetter(text[size]) && !isNumber(text[size]))
 			return false;
 	}
 
@@ -473,9 +473,9 @@ bool isValidPassword(std::string text)
 	toLowerCaseString(text);
 
 	uint32_t textLength = text.length();
-	for(uint32_t size = 0; size < textLength; size++)
+	for (uint32_t size = 0; size < textLength; size++)
 	{
-		if(!isLowercaseLetter(text[size]) && !isNumber(text[size]) && !isPasswordCharacter(text[size]))
+		if (!isLowercaseLetter(text[size]) && !isNumber(text[size]) && !isPasswordCharacter(text[size]))
 			return false;
 	}
 
@@ -486,43 +486,43 @@ bool isValidName(std::string text, bool forceUppercaseOnFirstLetter/* = true*/)
 {
 	uint32_t textLength = text.length(), lenBeforeSpace = 1, lenBeforeQuote = 1, lenBeforeDash = 1, repeatedCharacter = 0;
 	char lastChar = 32;
-	if(forceUppercaseOnFirstLetter)
+	if (forceUppercaseOnFirstLetter)
 	{
-		if(!isUppercaseLetter(text[0]))
+		if (!isUppercaseLetter(text[0]))
 			return false;
 	}
-	else if(!isLowercaseLetter(text[0]) && !isUppercaseLetter(text[0]))
+	else if (!isLowercaseLetter(text[0]) && !isUppercaseLetter(text[0]))
 		return false;
 
-	for(uint32_t size = 1; size < textLength; size++)
+	for (uint32_t size = 1; size < textLength; size++)
 	{
-		if(text[size] != 32)
+		if (text[size] != 32)
 		{
 			lenBeforeSpace++;
-			if(text[size] != 39)
+			if (text[size] != 39)
 				lenBeforeQuote++;
 			else
 			{
-				if(lenBeforeQuote <= 1 || size == textLength - 1 || text[size + 1] == 32)
+				if (lenBeforeQuote <= 1 || size == textLength - 1 || text[size + 1] == 32)
 					return false;
 
 				lenBeforeQuote = 0;
 			}
 
-			if(text[size] != 45)
+			if (text[size] != 45)
 				lenBeforeDash++;
 			else
 			{
-				if(lenBeforeDash <= 1 || size == textLength - 1 || text[size + 1] == 32)
+				if (lenBeforeDash <= 1 || size == textLength - 1 || text[size + 1] == 32)
 					return false;
 
 				lenBeforeDash = 0;
 			}
 
-			if(text[size] == lastChar)
+			if (text[size] == lastChar)
 			{
 				repeatedCharacter++;
-				if(repeatedCharacter > 2)
+				if (repeatedCharacter > 2)
 					return false;
 			}
 			else
@@ -532,13 +532,13 @@ bool isValidName(std::string text, bool forceUppercaseOnFirstLetter/* = true*/)
 		}
 		else
 		{
-			if(lenBeforeSpace <= 1 || size == textLength - 1 || text[size + 1] == 32)
+			if (lenBeforeSpace <= 1 || size == textLength - 1 || text[size + 1] == 32)
 				return false;
 
 			lenBeforeSpace = lenBeforeQuote = lenBeforeDash = 0;
 		}
 
-		if(!(isLowercaseLetter(text[size]) || text[size] == 32 || text[size] == 39 || text[size] == 45
+		if (!(isLowercaseLetter(text[size]) || text[size] == 32 || text[size] == 39 || text[size] == 45
 			|| (isUppercaseLetter(text[size]) && text[size - 1] == 32)))
 			return false;
 	}
@@ -549,9 +549,9 @@ bool isValidName(std::string text, bool forceUppercaseOnFirstLetter/* = true*/)
 bool isNumbers(std::string text)
 {
 	uint32_t textLength = text.length();
-	for(uint32_t size = 0; size < textLength; size++)
+	for (uint32_t size = 0; size < textLength; size++)
 	{
-		if(!isNumber(text[size]))
+		if (!isNumber(text[size]))
 			return false;
 	}
 
@@ -576,10 +576,10 @@ std::string generateRecoveryKey(int32_t fieldCount, int32_t fieldLenght, bool mi
 		do
 		{
 			madeNumber = madeCharacter = false;
-			if((mixCase && !random_range(0, 2)) || (!mixCase && !random_range(0, 1)))
+			if ((mixCase && !random_range(0, 2)) || (!mixCase && !random_range(0, 1)))
 			{
 				number = random_range(2, 9);
-				if(number != lastNumber)
+				if (number != lastNumber)
 				{
 					key << number;
 					lastNumber = number;
@@ -588,12 +588,12 @@ std::string generateRecoveryKey(int32_t fieldCount, int32_t fieldLenght, bool mi
 			}
 			else
 			{
-				if(mixCase && !random_range(0, 1))
+				if (mixCase && !random_range(0, 1))
 					character = (char)random_range(97, 122);
 				else
 					character = (char)random_range(65, 90);
 
-				if(character != lastCharacter)
+				if (character != lastCharacter)
 				{
 					key << character;
 					lastCharacter = character;
@@ -601,14 +601,14 @@ std::string generateRecoveryKey(int32_t fieldCount, int32_t fieldLenght, bool mi
 				}
 			}
 		}
-		while((!madeCharacter && !madeNumber) ? true : (++j && j < fieldLenght));
+		while ((!madeCharacter && !madeNumber) ? true : (++j && j < fieldLenght));
 		lastCharacter = character = number = j = 0;
 
 		lastNumber = 99;
-		if(i < fieldCount - 1)
+		if (i < fieldCount - 1)
 			key << "-";
 	}
-	while(++i && i < fieldCount);
+	while (++i && i < fieldCount);
 	return key.str();
 }
 
@@ -620,21 +620,21 @@ std::string trimString(std::string& str)
 
 std::string parseParams(tokenizer::iterator &it, tokenizer::iterator end)
 {
-	if(it == end)
+	if (it == end)
 		return "";
 
 	std::string tmp = (*it);
 	++it;
-	if(tmp[0] == '"')
+	if (tmp[0] == '"')
 	{
 		tmp.erase(0, 1);
-		while(it != end && tmp[tmp.length() - 1] != '"')
+		while (it != end && tmp[tmp.length() - 1] != '"')
 		{
 			tmp += " " + (*it);
 			++it;
 		}
 
-		if(tmp.length() > 0 && tmp[tmp.length() - 1] == '"')
+		if (tmp.length() > 0 && tmp[tmp.length() - 1] == '"')
 			tmp.erase(tmp.length() - 1);
 	}
 
@@ -643,12 +643,12 @@ std::string parseParams(tokenizer::iterator &it, tokenizer::iterator end)
 
 std::string formatDate(time_t _time/* = 0*/)
 {
-	if(!_time)
+	if (!_time)
 		_time = time(NULL);
 
 	const tm* tms = localtime(&_time);
 	std::stringstream s;
-	if(tms)
+	if (tms)
 		s << tms->tm_mday << "/" << (tms->tm_mon + 1) << "/" << (tms->tm_year + 1900) << " " << tms->tm_hour << ":" << tms->tm_min << ":" << tms->tm_sec;
 	else
 		s << "UNIX Time: " << (int32_t)_time;
@@ -658,12 +658,12 @@ std::string formatDate(time_t _time/* = 0*/)
 
 std::string formatDateEx(time_t _time/* = 0*/, std::string format/* = "%d %b %Y, %H:%M:%S"*/)
 {
-	if(!_time)
+	if (!_time)
 		_time = time(NULL);
 
 	const tm* tms = localtime(&_time);
 	char buffer[100];
-	if(tms)
+	if (tms)
 		strftime(buffer, 25, format.c_str(), tms);
 	else
 		sprintf(buffer, "UNIX Time: %d", (int32_t)_time);
@@ -673,30 +673,30 @@ std::string formatDateEx(time_t _time/* = 0*/, std::string format/* = "%d %b %Y,
 
 std::string formatTime(time_t _time/* = 0*/, bool ms/* = false*/)
 {
-	if(!_time)
+	if (!_time)
 		_time = time(NULL);
-	else if(ms)
+	else if (ms)
 		ms = false;
 
 	const tm* tms = localtime(&_time);
 	std::stringstream s;
-	if(tms)
+	if (tms)
 	{
 		s << tms->tm_hour << ":" << tms->tm_min << ":";
-		if(tms->tm_sec < 10)
+		if (tms->tm_sec < 10)
 			s << "0";
 
 		s << tms->tm_sec;
-		if(ms)
+		if (ms)
 		{
 			timeb t;
 			ftime(&t);
 
 			s << "."; // make it format zzz
-			if(t.millitm < 10)
+			if (t.millitm < 10)
 				s << "0";
 
-			if(t.millitm < 100)
+			if (t.millitm < 100)
 				s << "0";
 
 			s << t.millitm;
@@ -718,19 +718,19 @@ std::string convertIPAddress(uint32_t ip)
 Skulls_t getSkulls(std::string strValue)
 {
 	std::string tmpStrValue = asLowerCaseString(strValue);
-	if(tmpStrValue == "black" || tmpStrValue == "5")
+	if (tmpStrValue == "black" || tmpStrValue == "5")
 		return SKULL_BLACK;
 
-	if(tmpStrValue == "red" || tmpStrValue == "4")
+	if (tmpStrValue == "red" || tmpStrValue == "4")
 		return SKULL_RED;
 
-	if(tmpStrValue == "white" || tmpStrValue == "3")
+	if (tmpStrValue == "white" || tmpStrValue == "3")
 		return SKULL_WHITE;
 
-	if(tmpStrValue == "green" || tmpStrValue == "2")
+	if (tmpStrValue == "green" || tmpStrValue == "2")
 		return SKULL_GREEN;
 
-	if(tmpStrValue == "yellow" || tmpStrValue == "1")
+	if (tmpStrValue == "yellow" || tmpStrValue == "1")
 		return SKULL_YELLOW;
 
 	return SKULL_NONE;
@@ -739,34 +739,34 @@ Skulls_t getSkulls(std::string strValue)
 PartyShields_t getShields(std::string strValue)
 {
 	std::string tmpStrValue = asLowerCaseString(strValue);
-	if(tmpStrValue == "whitenoshareoff" || tmpStrValue == "10")
+	if (tmpStrValue == "whitenoshareoff" || tmpStrValue == "10")
 		return SHIELD_YELLOW_NOSHAREDEXP;
 
-	if(tmpStrValue == "blueshareoff" || tmpStrValue == "9")
+	if (tmpStrValue == "blueshareoff" || tmpStrValue == "9")
 		return SHIELD_BLUE_NOSHAREDEXP;
 
-	if(tmpStrValue == "yellowshareblink" || tmpStrValue == "8")
+	if (tmpStrValue == "yellowshareblink" || tmpStrValue == "8")
 		return SHIELD_YELLOW_NOSHAREDEXP_BLINK;
 
-	if(tmpStrValue == "blueshareblink" || tmpStrValue == "7")
+	if (tmpStrValue == "blueshareblink" || tmpStrValue == "7")
 		return SHIELD_BLUE_NOSHAREDEXP_BLINK;
 
-	if(tmpStrValue == "yellowshareon" || tmpStrValue == "6")
+	if (tmpStrValue == "yellowshareon" || tmpStrValue == "6")
 		return SHIELD_YELLOW_SHAREDEXP;
 
-	if(tmpStrValue == "blueshareon" || tmpStrValue == "5")
+	if (tmpStrValue == "blueshareon" || tmpStrValue == "5")
 		return SHIELD_BLUE_SHAREDEXP;
 
-	if(tmpStrValue == "yellow" || tmpStrValue == "4")
+	if (tmpStrValue == "yellow" || tmpStrValue == "4")
 		return SHIELD_YELLOW;
 
-	if(tmpStrValue == "blue" || tmpStrValue == "3")
+	if (tmpStrValue == "blue" || tmpStrValue == "3")
 		return SHIELD_BLUE;
 
-	if(tmpStrValue == "whiteyellow" || tmpStrValue == "2")
+	if (tmpStrValue == "whiteyellow" || tmpStrValue == "2")
 		return SHIELD_WHITEYELLOW;
 
-	if(tmpStrValue == "whiteblue" || tmpStrValue == "1")
+	if (tmpStrValue == "whiteblue" || tmpStrValue == "1")
 		return SHIELD_WHITEBLUE;
 
 	return SHIELD_NONE;
@@ -775,13 +775,13 @@ PartyShields_t getShields(std::string strValue)
 GuildEmblems_t getEmblems(std::string strValue)
 {
 	std::string tmpStrValue = asLowerCaseString(strValue);
-	if(tmpStrValue == "blue" || tmpStrValue == "3")
+	if (tmpStrValue == "blue" || tmpStrValue == "3")
 		return EMBLEM_BLUE;
 
-	if(tmpStrValue == "red" || tmpStrValue == "2")
+	if (tmpStrValue == "red" || tmpStrValue == "2")
 		return EMBLEM_RED;
 
-	if(tmpStrValue == "green" || tmpStrValue == "1")
+	if (tmpStrValue == "green" || tmpStrValue == "1")
 		return EMBLEM_GREEN;
 
 	return EMBLEM_NONE;
@@ -789,28 +789,28 @@ GuildEmblems_t getEmblems(std::string strValue)
 
 Direction getDirection(std::string string)
 {
-	if(string == "north" || string == "n" || string == "0")
+	if (string == "north" || string == "n" || string == "0")
 		return NORTH;
 
-	if(string == "east" || string == "e" || string == "1")
+	if (string == "east" || string == "e" || string == "1")
 		return EAST;
 
-	if(string == "south" || string == "s" || string == "2")
+	if (string == "south" || string == "s" || string == "2")
 		return SOUTH;
 
-	if(string == "west" || string == "w" || string == "3")
+	if (string == "west" || string == "w" || string == "3")
 		return WEST;
 
-	if(string == "southwest" || string == "south west" || string == "south-west" || string == "sw" || string == "4")
+	if (string == "southwest" || string == "south west" || string == "south-west" || string == "sw" || string == "4")
 		return SOUTHWEST;
 
-	if(string == "southeast" || string == "south east" || string == "south-east" || string == "se" || string == "5")
+	if (string == "southeast" || string == "south east" || string == "south-east" || string == "se" || string == "5")
 		return SOUTHEAST;
 
-	if(string == "northwest" || string == "north west" || string == "north-west" || string == "nw" || string == "6")
+	if (string == "northwest" || string == "north west" || string == "north-west" || string == "nw" || string == "6")
 		return NORTHWEST;
 
-	if(string == "northeast" || string == "north east" || string == "north-east" || string == "ne" || string == "7")
+	if (string == "northeast" || string == "north east" || string == "north-east" || string == "ne" || string == "7")
 		return NORTHEAST;
 
 	return SOUTH;
@@ -819,33 +819,33 @@ Direction getDirection(std::string string)
 Direction getDirectionTo(Position pos1, Position pos2, bool extended/* = true*/)
 {
 	Direction direction = NORTH;
-	if(pos1.x > pos2.x)
+	if (pos1.x > pos2.x)
 	{
 		direction = WEST;
-		if(extended)
+		if (extended)
 		{
-			if(pos1.y > pos2.y)
+			if (pos1.y > pos2.y)
 				direction = NORTHWEST;
-			else if(pos1.y < pos2.y)
+			else if (pos1.y < pos2.y)
 				direction = SOUTHWEST;
 		}
 	}
-	else if(pos1.x < pos2.x)
+	else if (pos1.x < pos2.x)
 	{
 		direction = EAST;
-		if(extended)
+		if (extended)
 		{
-			if(pos1.y > pos2.y)
+			if (pos1.y > pos2.y)
 				direction = NORTHEAST;
-			else if(pos1.y < pos2.y)
+			else if (pos1.y < pos2.y)
 				direction = SOUTHEAST;
 		}
 	}
 	else
 	{
-		if(pos1.y > pos2.y)
+		if (pos1.y > pos2.y)
 			direction = NORTH;
-		else if(pos1.y < pos2.y)
+		else if (pos1.y < pos2.y)
 			direction = SOUTH;
 	}
 
@@ -1182,9 +1182,9 @@ SkillIdNames skillIdNames[] =
 
 MagicEffect_t getMagicEffect(const std::string& strValue)
 {
-	for(uint32_t i = 0; i < sizeof(magicEffectNames) / sizeof(MagicEffectNames); ++i)
+	for (uint32_t i = 0; i < sizeof(magicEffectNames) / sizeof(MagicEffectNames); ++i)
 	{
-		if(boost::algorithm::iequals(strValue.c_str(), magicEffectNames[i].name))
+		if (boost::algorithm::iequals(strValue.c_str(), magicEffectNames[i].name))
 			return magicEffectNames[i].magicEffect;
 	}
 
@@ -1193,9 +1193,9 @@ MagicEffect_t getMagicEffect(const std::string& strValue)
 
 ShootEffect_t getShootType(const std::string& strValue)
 {
-	for(uint32_t i = 0; i < sizeof(shootTypeNames) / sizeof(ShootTypeNames); ++i)
+	for (uint32_t i = 0; i < sizeof(shootTypeNames) / sizeof(ShootTypeNames); ++i)
 	{
-		if(boost::algorithm::iequals(strValue.c_str(), shootTypeNames[i].name))
+		if (boost::algorithm::iequals(strValue.c_str(), shootTypeNames[i].name))
 			return shootTypeNames[i].shootType;
 	}
 
@@ -1204,9 +1204,9 @@ ShootEffect_t getShootType(const std::string& strValue)
 
 CombatType_t getCombatType(const std::string& strValue)
 {
-	for(uint32_t i = 0; i < sizeof(combatTypeNames) / sizeof(CombatTypeNames); ++i)
+	for (uint32_t i = 0; i < sizeof(combatTypeNames) / sizeof(CombatTypeNames); ++i)
 	{
-		if(boost::algorithm::iequals(strValue.c_str(), combatTypeNames[i].name))
+		if (boost::algorithm::iequals(strValue.c_str(), combatTypeNames[i].name))
 			return combatTypeNames[i].combatType;
 	}
 
@@ -1215,9 +1215,9 @@ CombatType_t getCombatType(const std::string& strValue)
 
 Ammo_t getAmmoType(const std::string& strValue)
 {
-	for(uint32_t i = 0; i < sizeof(ammoTypeNames) / sizeof(AmmoTypeNames); ++i)
+	for (uint32_t i = 0; i < sizeof(ammoTypeNames) / sizeof(AmmoTypeNames); ++i)
 	{
-		if(boost::algorithm::iequals(strValue.c_str(), ammoTypeNames[i].name))
+		if (boost::algorithm::iequals(strValue.c_str(), ammoTypeNames[i].name))
 			return ammoTypeNames[i].ammoType;
 	}
 
@@ -1226,9 +1226,9 @@ Ammo_t getAmmoType(const std::string& strValue)
 
 AmmoAction_t getAmmoAction(const std::string& strValue)
 {
-	for(uint32_t i = 0; i < sizeof(ammoActionNames) / sizeof(AmmoActionNames); ++i)
+	for (uint32_t i = 0; i < sizeof(ammoActionNames) / sizeof(AmmoActionNames); ++i)
 	{
-		if(boost::algorithm::iequals(strValue.c_str(), ammoActionNames[i].name))
+		if (boost::algorithm::iequals(strValue.c_str(), ammoActionNames[i].name))
 			return ammoActionNames[i].ammoAction;
 	}
 
@@ -1237,9 +1237,9 @@ AmmoAction_t getAmmoAction(const std::string& strValue)
 
 FluidTypes_t getFluidType(const std::string& strValue)
 {
-	for(uint32_t i = 0; i < sizeof(fluidTypeNames) / sizeof(FluidTypeNames); ++i)
+	for (uint32_t i = 0; i < sizeof(fluidTypeNames) / sizeof(FluidTypeNames); ++i)
 	{
-		if(boost::algorithm::iequals(strValue.c_str(), fluidTypeNames[i].name))
+		if (boost::algorithm::iequals(strValue.c_str(), fluidTypeNames[i].name))
 			return fluidTypeNames[i].fluidType;
 	}
 
@@ -1248,9 +1248,9 @@ FluidTypes_t getFluidType(const std::string& strValue)
 
 skills_t getSkillId(const std::string& strValue)
 {
-	for(uint32_t i = 0; i < sizeof(skillIdNames) / sizeof(SkillIdNames); ++i)
+	for (uint32_t i = 0; i < sizeof(skillIdNames) / sizeof(SkillIdNames); ++i)
 	{
-		if(boost::algorithm::iequals(strValue.c_str(), skillIdNames[i].name))
+		if (boost::algorithm::iequals(strValue.c_str(), skillIdNames[i].name))
 			return skillIdNames[i].skillId;
 	}
 
@@ -1299,7 +1299,7 @@ std::string getSkillName(uint16_t skillId, bool suffix/* = true*/)
 		case SKILL_FIST:
 		{
 			std::string tmp = "fist";
-			if(suffix)
+			if (suffix)
 				tmp += " fighting";
 
 			return tmp;
@@ -1307,7 +1307,7 @@ std::string getSkillName(uint16_t skillId, bool suffix/* = true*/)
 		case SKILL_CLUB:
 		{
 			std::string tmp = "club";
-			if(suffix)
+			if (suffix)
 				tmp += " fighting";
 
 			return tmp;
@@ -1315,7 +1315,7 @@ std::string getSkillName(uint16_t skillId, bool suffix/* = true*/)
 		case SKILL_SWORD:
 		{
 			std::string tmp = "sword";
-			if(suffix)
+			if (suffix)
 				tmp += " fighting";
 
 			return tmp;
@@ -1323,7 +1323,7 @@ std::string getSkillName(uint16_t skillId, bool suffix/* = true*/)
 		case SKILL_AXE:
 		{
 			std::string tmp = "axe";
-			if(suffix)
+			if (suffix)
 				tmp += " fighting";
 
 			return tmp;
@@ -1331,7 +1331,7 @@ std::string getSkillName(uint16_t skillId, bool suffix/* = true*/)
 		case SKILL_DIST:
 		{
 			std::string tmp = "distance";
-			if(suffix)
+			if (suffix)
 				tmp += " fighting";
 
 			return tmp;
@@ -1447,7 +1447,7 @@ std::string getAction(ViolationAction_t actionId, bool ipBanishment)
 			break;
 	}
 
-	if(ipBanishment)
+	if (ipBanishment)
 		action += " + IP Banishment";
 
 	return action;
@@ -1456,13 +1456,13 @@ std::string getAction(ViolationAction_t actionId, bool ipBanishment)
 std::string parseVocationString(StringVec vocStringVec)
 {
 	std::string str = "";
-	if(!vocStringVec.empty())
+	if (!vocStringVec.empty())
 	{
-		for(StringVec::iterator it = vocStringVec.begin(); it != vocStringVec.end(); ++it)
+		for (StringVec::iterator it = vocStringVec.begin(); it != vocStringVec.end(); ++it)
 		{
-			if((*it) != vocStringVec.front())
+			if ((*it) != vocStringVec.front())
 			{
-				if((*it) != vocStringVec.back())
+				if ((*it) != vocStringVec.back())
 					str += ", ";
 				else
 					str += " and ";
@@ -1478,19 +1478,19 @@ std::string parseVocationString(StringVec vocStringVec)
 
 bool parseVocationNode(xmlNodePtr vocationNode, VocationMap& vocationMap, StringVec& vocStringVec, std::string& errorStr)
 {
-	if(xmlStrcmp(vocationNode->name,(const xmlChar*)"vocation"))
+	if (xmlStrcmp(vocationNode->name,(const xmlChar*)"vocation"))
 		return true;
 
 	int32_t vocationId = -1;
 	std::string strValue, tmpStrValue;
-	if(readXMLString(vocationNode, "name", strValue))
+	if (readXMLString(vocationNode, "name", strValue))
 	{
 		vocationId = Vocations::getInstance()->getVocationId(strValue);
-		if(vocationId != -1)
+		if (vocationId != -1)
 		{
 			vocationMap[vocationId] = true;
 			int32_t promotedVocation = Vocations::getInstance()->getPromotedVocation(vocationId);
-			if(promotedVocation != -1)
+			if (promotedVocation != -1)
 				vocationMap[promotedVocation] = true;
 		}
 		else
@@ -1499,27 +1499,27 @@ bool parseVocationNode(xmlNodePtr vocationNode, VocationMap& vocationMap, String
 			return false;
 		}
 	}
-	else if(readXMLString(vocationNode, "id", strValue))
+	else if (readXMLString(vocationNode, "id", strValue))
 	{
 		IntegerVec intVector;
-		if(!parseIntegerVec(strValue, intVector))
+		if (!parseIntegerVec(strValue, intVector))
 		{
 			errorStr = "Invalid vocation id - '" + strValue + "'";
 			return false;
 		}
 
 		size_t size = intVector.size();
-		for(size_t i = 0; i < size; ++i)
+		for (size_t i = 0; i < size; ++i)
 		{
 			Vocation* vocation = Vocations::getInstance()->getVocation(intVector[i]);
-			if(vocation && vocation->getName() != "")
+			if (vocation && vocation->getName() != "")
 			{
 				vocationId = vocation->getId();
 				strValue = vocation->getName();
 
 				vocationMap[vocationId] = true;
 				int32_t promotedVocation = Vocations::getInstance()->getPromotedVocation(vocationId);
-				if(promotedVocation != -1)
+				if (promotedVocation != -1)
 					vocationMap[promotedVocation] = true;
 			}
 			else
@@ -1533,7 +1533,7 @@ bool parseVocationNode(xmlNodePtr vocationNode, VocationMap& vocationMap, String
 		}
 	}
 
-	if(vocationId != -1 && (!readXMLString(vocationNode, "showInDescription", tmpStrValue) || booleanString(tmpStrValue)))
+	if (vocationId != -1 && (!readXMLString(vocationNode, "showInDescription", tmpStrValue) || booleanString(tmpStrValue)))
 		vocStringVec.push_back(asLowerCaseString(strValue));
 
 	return true;
@@ -1543,16 +1543,16 @@ bool parseIntegerVec(std::string str, IntegerVec& intVector)
 {
 	StringVec strVector = explodeString(str, ";");
 	IntegerVec tmpIntVector;
-	for(StringVec::iterator it = strVector.begin(); it != strVector.end(); ++it)
+	for (StringVec::iterator it = strVector.begin(); it != strVector.end(); ++it)
 	{
 		tmpIntVector = vectorAtoi(explodeString((*it), "-"));
-		if(!tmpIntVector[0] && it->substr(0, 1) != "0")
+		if (!tmpIntVector[0] && it->substr(0, 1) != "0")
 			continue;
 
 		intVector.push_back(tmpIntVector[0]);
-		if(tmpIntVector.size() > 1)
+		if (tmpIntVector.size() > 1)
 		{
-			while(tmpIntVector[0] < tmpIntVector[1])
+			while (tmpIntVector[0] < tmpIntVector[1])
 				intVector.push_back(++tmpIntVector[0]);
 		}
 	}
@@ -1563,7 +1563,7 @@ bool parseIntegerVec(std::string str, IntegerVec& intVector)
 bool fileExists(const char* filename)
 {
 	FILE* f = fopen(filename, "rb");
-	if(!f)
+	if (!f)
 		return false;
 
 	fclose(f);
@@ -1572,12 +1572,12 @@ bool fileExists(const char* filename)
 
 uint32_t adlerChecksum(uint8_t* data, size_t length)
 {
-	if(length > NETWORK_MAX_SIZE || !length)
+	if (length > NETWORK_MAX_SIZE || !length)
 		return 0;
 
 	const uint16_t adler = 65521;
 	uint32_t a = 1, b = 0;
-	while(length > 0)
+	while (length > 0)
 	{
 		size_t tmp = length > 5552 ? 5552 : length;
 		length -= tmp;
@@ -1586,7 +1586,7 @@ uint32_t adlerChecksum(uint8_t* data, size_t length)
 			a += *data++;
 			b += a;
 		}
-		while(--tmp);
+		while (--tmp);
 		a %= adler;
 		b %= adler;
 	}
@@ -1618,7 +1618,7 @@ std::string getFilePath(FileType_t type, std::string name/* = ""*/)
 		case FILE_TYPE_CONFIG:
 		{
 			#if defined(__HOMEDIR_CONF__)
-			if(fileExists("~/.tcs/" + name))
+			if (fileExists("~/.tcs/" + name))
 				path = "~/.tcs/" + name;
 			else
 			#endif

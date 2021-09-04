@@ -27,11 +27,11 @@ Depot::Depot(uint16_t type):
 
 Attr_ReadValue Depot::readAttr(AttrTypes_t attr, PropStream& propStream)
 {
-	if(attr != ATTR_DEPOT_ID)
+	if (attr != ATTR_DEPOT_ID)
 		return Item::readAttr(attr, propStream);
 
 	uint16_t depotId;
-	if(!propStream.getShort(depotId))
+	if (!propStream.getShort(depotId))
 		return ATTR_READ_ERROR;
 
 	setAttribute("depotid", depotId);
@@ -72,14 +72,14 @@ ReturnValue Depot::__queryMaxCount(int32_t index, const Thing* thing, uint32_t c
 void Depot::postAddNotification(Creature* actor, Thing* thing, const Cylinder* oldParent,
 	int32_t index, cylinderlink_t link /*= LINK_OWNER*/)
 {
-	if(getParent())
+	if (getParent())
 		getParent()->postAddNotification(actor, thing, oldParent, index, LINK_PARENT);
 }
 
 void Depot::postRemoveNotification(Creature* actor, Thing* thing, const Cylinder* newParent,
 	int32_t index, bool isCompleteRemoval, cylinderlink_t link /*= LINK_OWNER*/)
 {
-	if(getParent())
+	if (getParent())
 		getParent()->postRemoveNotification(actor, thing, newParent,
 			index, isCompleteRemoval, LINK_PARENT);
 }

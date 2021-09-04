@@ -64,7 +64,7 @@ TalkActions::~TalkActions()
 
 void TalkActions::clear()
 {
-	for(TalkActionsMap::iterator it = talksMap.begin(); it != talksMap.end(); ++it)
+	for (TalkActionsMap::iterator it = talksMap.begin(); it != talksMap.end(); ++it)
 		delete it->second;
 
 	talksMap.clear();
@@ -76,7 +76,7 @@ void TalkActions::clear()
 
 Event* TalkActions::getEvent(const std::string& nodeName)
 {
-	if(asLowerCaseString(nodeName) == "talkaction")
+	if (asLowerCaseString(nodeName) == "talkaction")
 		return new TalkAction(&m_interface);
 
 	return NULL;
@@ -85,15 +85,15 @@ Event* TalkActions::getEvent(const std::string& nodeName)
 bool TalkActions::registerEvent(Event* event, xmlNodePtr p, bool override)
 {
 	TalkAction* talkAction = dynamic_cast<TalkAction*>(event);
-	if(!talkAction)
+	if (!talkAction)
 		return false;
 
 	std::string strValue;
-	if(readXMLString(p, "default", strValue) && booleanString(strValue))
+	if (readXMLString(p, "default", strValue) && booleanString(strValue))
 	{
-		if(!defaultTalkAction)
+		if (!defaultTalkAction)
 			defaultTalkAction = talkAction;
-		else if(override)
+		else if (override)
 		{
 			delete defaultTalkAction;
 			defaultTalkAction = talkAction;
@@ -104,17 +104,17 @@ bool TalkActions::registerEvent(Event* event, xmlNodePtr p, bool override)
 		return true;
 	}
 	
-	if(!readXMLString(p, "separator", strValue) || strValue.empty())
+	if (!readXMLString(p, "separator", strValue) || strValue.empty())
 		strValue = ";";
 
 	StringVec strVector = explodeString(talkAction->getWords(), strValue);
-	for(StringVec::iterator it = strVector.begin(); it != strVector.end(); ++it)
+	for (StringVec::iterator it = strVector.begin(); it != strVector.end(); ++it)
 	{
 		trimString(*it);
 		talkAction->setWords(*it);
-		if(talksMap.find(*it) != talksMap.end())
+		if (talksMap.find(*it) != talksMap.end())
 		{
-			if(!override)
+			if (!override)
 			{
 				std::clog << "[Warning - TalkAction::configureEvent] Duplicate registered talkaction with words: " << (*it) << std::endl;
 				continue;
@@ -133,11 +133,11 @@ bool TalkActions::registerEvent(Event* event, xmlNodePtr p, bool override)
 bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std::string& words, bool ignoreAccess)
 {
 	std::string cmd[TALKFILTER_LAST], param[TALKFILTER_LAST];
-	for(int32_t i = 0; i < TALKFILTER_LAST; ++i)
+	for (int32_t i = 0; i < TALKFILTER_LAST; ++i)
 		cmd[i] = words;
 
 	std::string::size_type loc = words.find('"', 0);
-	if(loc != std::string::npos)
+	if (loc != std::string::npos)
 	{
 		cmd[TALKFILTER_QUOTATION] = std::string(words, 0, loc);
 		param[TALKFILTER_QUOTATION] = std::string(words, (loc + 1), (words.size() - (loc - 1)));
@@ -145,13 +145,13 @@ bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std:
 	}
 
 	loc = words.find(" ", 0);
-	if(loc != std::string::npos)
+	if (loc != std::string::npos)
 	{
 		cmd[TALKFILTER_WORD] = std::string(words, 0, loc);
 		param[TALKFILTER_WORD] = std::string(words, (loc + 1), (words.size() - (loc - 1)));
 
 		std::string::size_type spaceLoc = words.find(" ", ++loc);
-		if(spaceLoc != std::string::npos)
+		if (spaceLoc != std::string::npos)
 		{
 			cmd[TALKFILTER_WORD_SPACED] = std::string(words, 0, spaceLoc);
 			param[TALKFILTER_WORD_SPACED] = std::string(words, (spaceLoc + 1), (words.size() - (spaceLoc - 1)));
@@ -159,9 +159,9 @@ bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std:
 	}
 
 	TalkAction* talkAction = NULL;
-	for(TalkActionsMap::iterator it = talksMap.begin(); it != talksMap.end(); ++it)
+	for (TalkActionsMap::iterator it = talksMap.begin(); it != talksMap.end(); ++it)
 	{
-		if(it->first == cmd[it->second->getFilter()] || (!it->second->isSensitive()
+		if (it->first == cmd[it->second->getFilter()] || (!it->second->isSensitive()
 			&& boost::algorithm::iequals(it->first, cmd[it->second->getFilter()])))
 		{
 			talkAction = it->second;
@@ -169,25 +169,25 @@ bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std:
 		}
 	}
 
-	if(!talkAction && defaultTalkAction)
+	if (!talkAction && defaultTalkAction)
 		talkAction = defaultTalkAction;
 
-	if(!talkAction || (talkAction->getChannel() != -1 && talkAction->getChannel() != channelId))
+	if (!talkAction || (talkAction->getChannel() != -1 && talkAction->getChannel() != channelId))
 		return false;
 
 	Player* player = creature->getPlayer();
-	if(player)
+	if (player)
 	{
-		if(!player->canDoExAction())
+		if (!player->canDoExAction())
 			return false;
 
 		StringVec exceptions = talkAction->getExceptions();
-		if((!ignoreAccess && std::find(exceptions.begin(), exceptions.end(), asLowerCaseString(
+		if ((!ignoreAccess && std::find(exceptions.begin(), exceptions.end(), asLowerCaseString(
 			player->getName())) == exceptions.end() && (talkAction->getAccess() > player->getAccess()
 			|| (talkAction->hasGroups() && !talkAction->hasGroup(player->getGroupId()))))
 			|| player->isAccountManager())
 		{
-			if(player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
+			if (player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
 			{
 				player->sendTextMessage(MSG_STATUS_SMALL, "You cannot execute this talkaction.");
 				return true;
@@ -196,22 +196,22 @@ bool TalkActions::onPlayerSay(Creature* creature, uint16_t channelId, const std:
 			return false;
 		}
 
-		if(!player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
+		if (!player->hasCustomFlag(PlayerCustomFlag_GamemasterPrivileges))
 			player->setNextExAction(OTSYS_TIME() + g_config.getNumber(ConfigManager::CUSTOM_ACTIONS_DELAY_INTERVAL) - 10);
 	}
 
-	if(talkAction->isLogged())
+	if (talkAction->isLogged())
 	{
-		if(player)
+		if (player)
 			player->sendTextMessage(MSG_STATUS_CONSOLE_RED, words.c_str());
 
 		Logger::getInstance()->eFile("talkactions/" + creature->getName() + ".log", words, true);
 	}
 
-	if(talkAction->isScripted())
+	if (talkAction->isScripted())
 		return (talkAction->executeSay(creature, cmd[talkAction->getFilter()], param[talkAction->getFilter()], channelId) != 0);
 
-	if(TalkFunction* function = talkAction->getFunction())
+	if (TalkFunction* function = talkAction->getFunction())
 		return function(creature, cmd[talkAction->getFilter()], param[talkAction->getFilter()]);
 
 	return false;
@@ -246,51 +246,51 @@ Event(copy)
 bool TalkAction::configureEvent(xmlNodePtr p)
 {
 	std::string strValue;
-	if(readXMLString(p, "words", strValue))
+	if (readXMLString(p, "words", strValue))
 		m_words = strValue;
-	else if(!readXMLString(p, "default", strValue) || !booleanString(strValue))
+	else if (!readXMLString(p, "default", strValue) || !booleanString(strValue))
 	{
 		std::clog << "[Error - TalkAction::configureEvent] No words for TalkAction." << std::endl;
 		return false;
 	}
 
-	if(readXMLString(p, "filter", strValue))
+	if (readXMLString(p, "filter", strValue))
 	{
 		std::string tmpStrValue = asLowerCaseString(strValue);
-		if(tmpStrValue == "quotation")
+		if (tmpStrValue == "quotation")
 			m_filter = TALKFILTER_QUOTATION;
-		else if(tmpStrValue == "word")
+		else if (tmpStrValue == "word")
 			m_filter = TALKFILTER_WORD;
-		else if(tmpStrValue == "word-spaced")
+		else if (tmpStrValue == "word-spaced")
 			m_filter = TALKFILTER_WORD_SPACED;
 		else
 			std::clog << "[Warning - TalkAction::configureEvent] Unknown filter for TalkAction: " << strValue << ", using default." << std::endl;
 	}
 
 	int32_t intValue;
-	if(readXMLInteger(p, "access", intValue))
+	if (readXMLInteger(p, "access", intValue))
 		m_access = intValue;
 
-	if(readXMLString(p, "group", strValue) || readXMLString(p, "groups", strValue))
+	if (readXMLString(p, "group", strValue) || readXMLString(p, "groups", strValue))
 	{
 		m_groups.clear();
-		if(!parseIntegerVec(strValue, m_groups))
+		if (!parseIntegerVec(strValue, m_groups))
 			std::clog << "[Warning - TalkAction::configureEvent] Invalid group(s) for TalkAction: " << strValue << std::endl;
 	}
 
-	if(readXMLInteger(p, "channel", intValue))
+	if (readXMLInteger(p, "channel", intValue))
 		m_channel = intValue;
 
-	if(readXMLString(p, "logged", strValue) || readXMLString(p, "log", strValue))
+	if (readXMLString(p, "logged", strValue) || readXMLString(p, "log", strValue))
 		m_logged = booleanString(strValue);
 
-	if(readXMLString(p, "hide", strValue) || readXMLString(p, "hidden", strValue))
+	if (readXMLString(p, "hide", strValue) || readXMLString(p, "hidden", strValue))
 		m_hidden = booleanString(strValue);
 
-	if(readXMLString(p, "case-sensitive", strValue) || readXMLString(p, "casesensitive", strValue) || readXMLString(p, "sensitive", strValue))
+	if (readXMLString(p, "case-sensitive", strValue) || readXMLString(p, "casesensitive", strValue) || readXMLString(p, "sensitive", strValue))
 		m_sensitive = booleanString(strValue);
 
-	if(readXMLString(p, "exception", strValue))
+	if (readXMLString(p, "exception", strValue))
 		m_exceptions = explodeString(asLowerCaseString(strValue), ";");
 
 	return true;
@@ -299,31 +299,31 @@ bool TalkAction::configureEvent(xmlNodePtr p)
 bool TalkAction::loadFunction(const std::string& functionName)
 {
 	m_functionName = asLowerCaseString(functionName);
-	if(m_functionName == "housebuy")
+	if (m_functionName == "housebuy")
 		m_function = houseBuy;
- 	else if(m_functionName == "housesell")
+ 	else if (m_functionName == "housesell")
 		m_function = houseSell;
-	else if(m_functionName == "housekick")
+	else if (m_functionName == "housekick")
 		m_function = houseKick;
-	else if(m_functionName == "housedoorlist")
+	else if (m_functionName == "housedoorlist")
 		m_function = houseDoorList;
-	else if(m_functionName == "houseguestlist")
+	else if (m_functionName == "houseguestlist")
 		m_function = houseGuestList;
-	else if(m_functionName == "housesubownerlist")
+	else if (m_functionName == "housesubownerlist")
 		m_function = houseSubOwnerList;
- 	else if(m_functionName == "guildjoin")
+ 	else if (m_functionName == "guildjoin")
 		m_function = guildJoin;
- 	else if(m_functionName == "guildcreate")
+ 	else if (m_functionName == "guildcreate")
 		m_function = guildCreate;
-	else if(m_functionName == "thingproporties")
+	else if (m_functionName == "thingproporties")
 		m_function = thingProporties;
-	else if(m_functionName == "banishmentinfo")
+	else if (m_functionName == "banishmentinfo")
 		m_function = banishmentInfo;
-	else if(m_functionName == "diagnostics")
+	else if (m_functionName == "diagnostics")
 		m_function = diagnostics;
-	else if(m_functionName == "ghost")
+	else if (m_functionName == "ghost")
 		m_function = ghost;
-	else if(m_functionName == "software")
+	else if (m_functionName == "software")
 		m_function = software;
 	else
 	{
@@ -338,11 +338,11 @@ bool TalkAction::loadFunction(const std::string& functionName)
 int32_t TalkAction::executeSay(Creature* creature, const std::string& words, std::string param, uint16_t channel)
 {
 	//onSay(cid, words, param, channel)
-	if(m_interface->reserveEnv())
+	if (m_interface->reserveEnv())
 	{
 		trimString(param);
 		ScriptEnviroment* env = m_interface->getEnv();
-		if(m_scripted == EVENT_SCRIPT_BUFFER)
+		if (m_scripted == EVENT_SCRIPT_BUFFER)
 		{
 			env->setRealPos(creature->getPosition());
 			std::stringstream scriptstream;
@@ -352,11 +352,11 @@ int32_t TalkAction::executeSay(Creature* creature, const std::string& words, std
 			scriptstream << "local param = \"" << param << "\"" << std::endl;
 			scriptstream << "local channel = " << channel << std::endl;
 
-			if(m_scriptData)
+			if (m_scriptData)
 				scriptstream << *m_scriptData;
 
 			bool result = true;
-			if(m_interface->loadBuffer(scriptstream.str()))
+			if (m_interface->loadBuffer(scriptstream.str()))
 			{
 				lua_State* L = m_interface->getState();
 				result = m_interface->getGlobalBool(L, "_result", true);
@@ -399,12 +399,12 @@ int32_t TalkAction::executeSay(Creature* creature, const std::string& words, std
 bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player || !g_config.getBool(ConfigManager::HOUSE_BUY_AND_SELL))
+	if (!player || !g_config.getBool(ConfigManager::HOUSE_BUY_AND_SELL))
 		return false;
 
 	const Position& pos = getNextPosition(player->getDirection(), player->getPosition());
 	Tile* tile = g_game.getTile(pos);
-	if(!tile)
+	if (!tile)
 	{
 		player->sendCancel("You have to be looking at door of flat you would like to purchase.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -412,30 +412,30 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 	}
 
 	House* house = tile->getHouse();
-	if(!house)
+	if (!house)
 	{
 		player->sendCancel("You have to be looking at door of flat you would like to purchase.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if(!house->getDoorByPosition(pos))
+	if (!house->getDoorByPosition(pos))
 	{
 		player->sendCancel("You have to be looking at door of flat you would like to purchase.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if(house->isBidded())
+	if (house->isBidded())
 	{
 		player->sendCancel("You cannot buy house which is currently bidded on an auction.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if(!house->isGuild())
+	if (!house->isGuild())
 	{
-		if(Houses::getInstance()->getHouseByPlayerId(player->getGUID()))
+		if (Houses::getInstance()->getHouseByPlayerId(player->getGUID()))
 		{
 			player->sendCancel("You already rent another house.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -443,7 +443,7 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 		}
 
 		uint16_t accountHouses = g_config.getNumber(ConfigManager::HOUSES_PER_ACCOUNT);
-		if(accountHouses > 0 && Houses::getInstance()->getHousesCount(player->getAccount()) >= accountHouses)
+		if (accountHouses > 0 && Houses::getInstance()->getHousesCount(player->getAccount()) >= accountHouses)
 		{
 			char buffer[80];
 			sprintf(buffer, "You may own only %d house%s per account.", accountHouses, (accountHouses != 1 ? "s" : ""));
@@ -453,7 +453,7 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 			return false;
 		}
 
-		if(g_config.getBool(ConfigManager::HOUSE_NEED_PREMIUM) && !player->isPremium())
+		if (g_config.getBool(ConfigManager::HOUSE_NEED_PREMIUM) && !player->isPremium())
 		{
 			player->sendCancelMessage(RET_YOUNEEDPREMIUMACCOUNT);
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -461,7 +461,7 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 		}
 
 		uint32_t levelToBuyHouse = g_config.getNumber(ConfigManager::LEVEL_TO_BUY_HOUSE);
-		if(player->getLevel() < levelToBuyHouse)
+		if (player->getLevel() < levelToBuyHouse)
 		{
 			char buffer[90];
 			sprintf(buffer, "You have to be at least Level %d to purchase a house.", levelToBuyHouse);
@@ -472,14 +472,14 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 	}
 	else
 	{
-		if(!player->getGuildId() || player->getGuildLevel() != GUILDLEVEL_LEADER)
+		if (!player->getGuildId() || player->getGuildLevel() != GUILDLEVEL_LEADER)
 		{
 			player->sendCancel("You have to be at least a guild leader to purchase a hall.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 			return false;
 		}
 
-		if(Houses::getInstance()->getHouseByGuildId(player->getGuildId()))
+		if (Houses::getInstance()->getHouseByGuildId(player->getGuildId()))
 		{
 			player->sendCancel("Your guild rents already another hall.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -487,14 +487,14 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 		}
 	}
 
-	if(house->getOwner())
+	if (house->getOwner())
 	{
 		player->sendCancel("This flat is already owned by someone else.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if((uint64_t)g_game.getMoney(player) < house->getPrice() || !g_game.removeMoney(player, house->getPrice()))
+	if ((uint64_t)g_game.getMoney(player) < house->getPrice() || !g_game.removeMoney(player, house->getPrice()))
 	{
 		player->sendCancel("You do not have enough money.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -502,7 +502,7 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 	}
 
 	house->setOwnerEx(player->getGUID(), true);
-	if(g_config.getBool(ConfigManager::HOUSE_SKIP_INIT_RENT))
+	if (g_config.getBool(ConfigManager::HOUSE_SKIP_INIT_RENT))
 	{
 		uint32_t paidUntil = time(NULL);
 		switch(Houses::getInstance()->getRentPeriod())
@@ -528,16 +528,16 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 	}
 
 	std::string ret = "You have successfully bought this ";
-	if(house->isGuild())
+	if (house->isGuild())
 		ret += "hall";
 	else
 		ret += "house";
 
 	ret += ", remember to leave money at ";
-	if(house->isGuild())
+	if (house->isGuild())
 		ret += "guild owner ";
 
-	if(g_config.getBool(ConfigManager::BANK_SYSTEM))
+	if (g_config.getBool(ConfigManager::BANK_SYSTEM))
 		ret += "bank or ";
 
 	ret += "depot of this town for rent.";
@@ -550,18 +550,18 @@ bool TalkAction::houseBuy(Creature* creature, const std::string& cmd, const std:
 bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player || !g_config.getBool(ConfigManager::HOUSE_BUY_AND_SELL))
+	if (!player || !g_config.getBool(ConfigManager::HOUSE_BUY_AND_SELL))
 		return false;
 
 	House* house = Houses::getInstance()->getHouseByPlayerId(player->getGUID());
-	if(!house && (!player->getGuildId() || !(house = Houses::getInstance()->getHouseByGuildId(player->getGuildId()))))
+	if (!house && (!player->getGuildId() || !(house = Houses::getInstance()->getHouseByGuildId(player->getGuildId()))))
 	{
 		player->sendCancel("You do not rent any flat.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if(house->isGuild() && player->getGuildLevel() != GUILDLEVEL_LEADER)
+	if (house->isGuild() && player->getGuildLevel() != GUILDLEVEL_LEADER)
 	{
 		player->sendCancel("You have to be at least a guild leader to sell this hall.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -569,7 +569,7 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 	}
 
 	Tile* tile = g_game.getTile(player->getPosition());
-	if(!tile || !tile->getHouseTile() || tile->getHouseTile()->getHouse() != house)
+	if (!tile || !tile->getHouseTile() || tile->getHouseTile()->getHouse() != house)
 	{
 		player->sendCancel("You have to be inside a house that you would like to sell.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -578,23 +578,23 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 
 	Player* tradePartner = NULL;
 	ReturnValue ret = g_game.getPlayerByNameWildcard(param, tradePartner);
-	if(ret != RET_NOERROR)
+	if (ret != RET_NOERROR)
 	{
 		player->sendCancelMessage(ret);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if(tradePartner == player)
+	if (tradePartner == player)
 	{
 		player->sendCancel("You cannot trade with yourself.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if(!house->isGuild())
+	if (!house->isGuild())
 	{
-		if(Houses::getInstance()->getHouseByPlayerId(tradePartner->getGUID()))
+		if (Houses::getInstance()->getHouseByPlayerId(tradePartner->getGUID()))
 		{
 			player->sendCancel("Trade player already rents another house.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -602,7 +602,7 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 		}
 
 		uint16_t housesPerAccount = g_config.getNumber(ConfigManager::HOUSES_PER_ACCOUNT);
-		if(housesPerAccount > 0 && Houses::getInstance()->getHousesCount(tradePartner->getAccount()) >= housesPerAccount)
+		if (housesPerAccount > 0 && Houses::getInstance()->getHousesCount(tradePartner->getAccount()) >= housesPerAccount)
 		{
 			char buffer[100];
 			sprintf(buffer, "Trade player has reached limit of %d house%s per account.", housesPerAccount, (housesPerAccount != 1 ? "s" : ""));
@@ -612,7 +612,7 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 			return false;
 		}
 
-		if(g_config.getBool(ConfigManager::HOUSE_NEED_PREMIUM) && !tradePartner->isPremium())
+		if (g_config.getBool(ConfigManager::HOUSE_NEED_PREMIUM) && !tradePartner->isPremium())
 		{
 			player->sendCancel("Trade player does not have a premium account.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -620,7 +620,7 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 		}
 
 		uint32_t levelToBuyHouse = g_config.getNumber(ConfigManager::LEVEL_TO_BUY_HOUSE);
-		if(tradePartner->getLevel() < levelToBuyHouse)
+		if (tradePartner->getLevel() < levelToBuyHouse)
 		{
 			char buffer[100];
 			sprintf(buffer, "Trade player has to be at least Level %d to buy house.", levelToBuyHouse);
@@ -632,14 +632,14 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 	}
 	else
 	{
-		if(!tradePartner->getGuildId() || tradePartner->getGuildLevel() != GUILDLEVEL_LEADER)
+		if (!tradePartner->getGuildId() || tradePartner->getGuildLevel() != GUILDLEVEL_LEADER)
 		{
 			player->sendCancel("Trade player has to be at least a guild leader to buy a hall.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 			return false;
 		}
 
-		if(Houses::getInstance()->getHouseByGuildId(tradePartner->getGuildId()))
+		if (Houses::getInstance()->getHouseByGuildId(tradePartner->getGuildId()))
 		{
 			player->sendCancel("Trade player's guild already rents another hall.");
 			g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -647,14 +647,14 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 		}
 	}
 
-	if(!Position::areInRange<3,3,0>(tradePartner->getPosition(), player->getPosition()))
+	if (!Position::areInRange<3,3,0>(tradePartner->getPosition(), player->getPosition()))
 	{
 		player->sendCancel("Trade player is too far away.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		return false;
 	}
 
-	if(!Houses::getInstance()->payRent(player, house, 0))
+	if (!Houses::getInstance()->payRent(player, house, 0))
 	{
 		player->sendCancel("You have to pay a pre-rent first.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -665,7 +665,7 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 	player->transferContainer.__addThing(NULL, transferItem);
 
 	player->transferContainer.setParent(player);
-	if(!g_game.internalStartTrade(player, tradePartner, transferItem))
+	if (!g_game.internalStartTrade(player, tradePartner, transferItem))
 		transferItem->onTradeEvent(ON_TRADE_CANCEL, player, NULL);
 
 	g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_WRAPS_BLUE);
@@ -675,15 +675,15 @@ bool TalkAction::houseSell(Creature* creature, const std::string& cmd, const std
 bool TalkAction::houseKick(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
 	Player* targetPlayer = NULL;
-	if(g_game.getPlayerByNameWildcard(param, targetPlayer) != RET_NOERROR)
+	if (g_game.getPlayerByNameWildcard(param, targetPlayer) != RET_NOERROR)
 		targetPlayer = player;
 
 	House* house = Houses::getInstance()->getHouseByPlayer(targetPlayer);
-	if(!house || !house->kickPlayer(player, targetPlayer))
+	if (!house || !house->kickPlayer(player, targetPlayer))
 	{
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		player->sendCancelMessage(RET_NOTPOSSIBLE);
@@ -697,11 +697,11 @@ bool TalkAction::houseKick(Creature* creature, const std::string& cmd, const std
 bool TalkAction::houseDoorList(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
 	House* house = Houses::getInstance()->getHouseByPlayer(player);
-	if(!house)
+	if (!house)
 	{
 		player->sendCancelMessage(RET_NOTPOSSIBLE);
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -709,7 +709,7 @@ bool TalkAction::houseDoorList(Creature* creature, const std::string& cmd, const
 	}
 
 	Door* door = house->getDoorByPosition(getNextPosition(player->getDirection(), player->getPosition()));
-	if(door && house->canEditAccessList(door->getDoorId(), player))
+	if (door && house->canEditAccessList(door->getDoorId(), player))
 	{
 		player->setEditHouse(house, door->getDoorId());
 		player->sendHouseWindow(house, door->getDoorId());
@@ -727,11 +727,11 @@ bool TalkAction::houseDoorList(Creature* creature, const std::string& cmd, const
 bool TalkAction::houseGuestList(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
 	House* house = Houses::getInstance()->getHouseByPlayer(player);
-	if(house && house->canEditAccessList(GUEST_LIST, player))
+	if (house && house->canEditAccessList(GUEST_LIST, player))
 	{
 		player->setEditHouse(house, GUEST_LIST);
 		player->sendHouseWindow(house, GUEST_LIST);
@@ -749,11 +749,11 @@ bool TalkAction::houseGuestList(Creature* creature, const std::string& cmd, cons
 bool TalkAction::houseSubOwnerList(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
 	House* house = Houses::getInstance()->getHouseByPlayer(player);
-	if(house && house->canEditAccessList(SUBOWNER_LIST, player))
+	if (house && house->canEditAccessList(SUBOWNER_LIST, player))
 	{
 		player->setEditHouse(house, SUBOWNER_LIST);
 		player->sendHouseWindow(house, SUBOWNER_LIST);
@@ -771,24 +771,24 @@ bool TalkAction::houseSubOwnerList(Creature* creature, const std::string& cmd, c
 bool TalkAction::guildJoin(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player || !g_config.getBool(ConfigManager::INGAME_GUILD_MANAGEMENT))
+	if (!player || !g_config.getBool(ConfigManager::INGAME_GUILD_MANAGEMENT))
 		return false;
 
 	std::string param_ = param;
 	trimString(param_);
-	if(!player->getGuildId())
+	if (!player->getGuildId())
 	{
 		uint32_t guildId;
-		if(IOGuild::getInstance()->getGuildId(guildId, param_))
+		if (IOGuild::getInstance()->getGuildId(guildId, param_))
 		{
-			if(player->isGuildInvited(guildId))
+			if (player->isGuildInvited(guildId))
 			{
 				IOGuild::getInstance()->joinGuild(player, guildId);
 				player->sendTextMessage(MSG_INFO_DESCR, "You have joined the guild.");
 
 				char buffer[80];
 				sprintf(buffer, "%s has joined the guild.", player->getName().c_str());
-				if(ChatChannel* guildChannel = g_chat.getChannel(player, 0x00))
+				if (ChatChannel* guildChannel = g_chat.getChannel(player, 0x00))
 					guildChannel->talk(player, SPEAK_CHANNEL_RA, buffer);
 			}
 			else
@@ -806,10 +806,10 @@ bool TalkAction::guildJoin(Creature* creature, const std::string& cmd, const std
 bool TalkAction::guildCreate(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player || !g_config.getBool(ConfigManager::INGAME_GUILD_MANAGEMENT))
+	if (!player || !g_config.getBool(ConfigManager::INGAME_GUILD_MANAGEMENT))
 		return false;
 
-	if(player->getGuildId())
+	if (player->getGuildId())
 	{
 		player->sendCancel("You are already in a guild.");
 		return true;
@@ -817,7 +817,7 @@ bool TalkAction::guildCreate(Creature* creature, const std::string& cmd, const s
 
 	std::string param_ = param;
 	trimString(param_);
-	if(!isValidName(param_))
+	if (!isValidName(param_))
 	{
 		player->sendCancel("That guild name contains illegal characters, please choose another name.");
 		return true;
@@ -825,27 +825,27 @@ bool TalkAction::guildCreate(Creature* creature, const std::string& cmd, const s
 
 	uint32_t minLength = g_config.getNumber(ConfigManager::MIN_GUILDNAME),
 		maxLength = g_config.getNumber(ConfigManager::MAX_GUILDNAME);
-	if(param_.length() < minLength)
+	if (param_.length() < minLength)
 	{
 		player->sendCancel("That guild name is too short, please select a longer name.");
 		return true;
 	}
 
-	if(param_.length() > maxLength)
+	if (param_.length() > maxLength)
 	{
 		player->sendCancel("That guild name is too long, please select a shorter name.");
 		return true;
 	}
 
 	uint32_t guildId;
-	if(IOGuild::getInstance()->getGuildId(guildId, param_))
+	if (IOGuild::getInstance()->getGuildId(guildId, param_))
 	{
 		player->sendCancel("There is already a guild with that name.");
 		return true;
 	}
 
 	const uint32_t levelToFormGuild = g_config.getNumber(ConfigManager::LEVEL_TO_FORM_GUILD);
-	if(player->getLevel() < levelToFormGuild)
+	if (player->getLevel() < levelToFormGuild)
 	{
 		std::ostringstream stream;
 		stream << "You have to be at least Level " << levelToFormGuild << " to form a guild.";
@@ -854,7 +854,7 @@ bool TalkAction::guildCreate(Creature* creature, const std::string& cmd, const s
 	}
 
 	const int32_t premiumDays = g_config.getNumber(ConfigManager::GUILD_PREMIUM_DAYS);
-	if(player->getPremiumDays() < premiumDays)
+	if (player->getPremiumDays() < premiumDays)
 	{
 		std::ostringstream stream;
 		stream << "You need to have at least " << premiumDays << " premium days to form a guild.";
@@ -874,12 +874,12 @@ bool TalkAction::guildCreate(Creature* creature, const std::string& cmd, const s
 bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
 	const Position& pos = getNextPosition(player->getDirection(), player->getPosition());
 	Tile* tile = g_game.getTile(pos);
-	if(!tile)
+	if (!tile)
 	{
 		player->sendTextMessage(MSG_STATUS_SMALL, "No tile found.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -887,7 +887,7 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 	}
 
 	Thing* thing = tile->getTopVisibleThing(creature);
-	if(!thing)
+	if (!thing)
 	{
 		player->sendTextMessage(MSG_STATUS_SMALL, "No object found.");
 		g_game.addMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
@@ -898,45 +898,45 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 	tokenizer tokens(param, sep);
 
 	std::string invalid;
-	for(tokenizer::iterator it = tokens.begin(); it != tokens.end();)
+	for (tokenizer::iterator it = tokens.begin(); it != tokens.end();)
 	{
 		std::string action = parseParams(it, tokens.end());
 		toLowerCaseString(action);
-		if(Item* item = thing->getItem())
+		if (Item* item = thing->getItem())
 		{
-			if(action == "set" || action == "add" || action == "new")
+			if (action == "set" || action == "add" || action == "new")
 			{
 				std::string type = parseParams(it, tokens.end()), key = parseParams(it,
 					tokens.end()), value = parseParams(it, tokens.end());
-				if(type == "integer" || type == "number" || type == "int" || type == "num")
+				if (type == "integer" || type == "number" || type == "int" || type == "num")
 					item->setAttribute(key.c_str(), atoi(value.c_str()));
-				else if(type == "float" || type == "double")
+				else if (type == "float" || type == "double")
 					item->setAttribute(key.c_str(), (float)atof(value.c_str()));
-				else if(type == "bool" || type == "boolean")
+				else if (type == "bool" || type == "boolean")
 					item->setAttribute(key.c_str(), booleanString(value));
 				else
 					item->setAttribute(key.c_str(), value);
 			}
-			else if(action == "erase" || action == "remove" || action == "delete")
+			else if (action == "erase" || action == "remove" || action == "delete")
 				item->eraseAttribute(parseParams(it, tokens.end()).c_str());
-			else if(action == "action" || action == "actionid" || action == "aid")
+			else if (action == "action" || action == "actionid" || action == "aid")
 			{
 				int32_t tmp = atoi(parseParams(it, tokens.end()).c_str());
-				if(tmp > 0)
+				if (tmp > 0)
 					item->setActionId(tmp);
 				else
 					item->resetActionId();
 			}
-			else if(action == "unique" || action == "uniqueid" || action == "uid")
+			else if (action == "unique" || action == "uniqueid" || action == "uid")
 			{
 				int32_t tmp = atoi(parseParams(it, tokens.end()).c_str());
-				if(tmp >= 1000 || tmp <= 0xFFFF)
+				if (tmp >= 1000 || tmp <= 0xFFFF)
 					item->setUniqueId(tmp);
 			}
-			else if(action == "destination" || action == "position" || action == "pos"
+			else if (action == "destination" || action == "position" || action == "pos"
 				|| action == "dest" || action == "location" || action == "loc") //TODO: doesn't work
 			{
-				if(Teleport* teleport = item->getTeleport())
+				if (Teleport* teleport = item->getTeleport())
 					teleport->setDestination(Position(atoi(parseParams(it, tokens.end()).c_str()), atoi(
 						parseParams(it, tokens.end()).c_str()), atoi(parseParams(it, tokens.end()).c_str())));
 			}
@@ -948,62 +948,62 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 				break;
 			}
 		}
-		else if(Creature* _creature = thing->getCreature())
+		else if (Creature* _creature = thing->getCreature())
 		{
-			if(action == "health")
+			if (action == "health")
 				_creature->changeHealth(atoi(parseParams(it, tokens.end()).c_str()));
-			else if(action == "maxhealth")
+			else if (action == "maxhealth")
 				_creature->changeMaxHealth(atoi(parseParams(it, tokens.end()).c_str()));
-			else if(action == "mana")
+			else if (action == "mana")
 				_creature->changeMana(atoi(parseParams(it, tokens.end()).c_str()));
-			else if(action == "maxmana")
+			else if (action == "maxmana")
 				_creature->changeMaxMana(atoi(parseParams(it, tokens.end()).c_str()));
-			else if(action == "basespeed")
+			else if (action == "basespeed")
 				_creature->setBaseSpeed(atoi(parseParams(it, tokens.end()).c_str()));
-			else if(action == "droploot")
+			else if (action == "droploot")
 				_creature->setDropLoot((lootDrop_t)atoi(parseParams(it, tokens.end()).c_str()));
-			else if(action == "lossskill")
+			else if (action == "lossskill")
 				_creature->setLossSkill(booleanString(parseParams(it, tokens.end())));
-			else if(action == "storage")
+			else if (action == "storage")
 				_creature->setStorage(parseParams(it, tokens.end()), parseParams(it, tokens.end()));
-			else if(action == "cannotmove")
+			else if (action == "cannotmove")
 			{
 				_creature->setNoMove(booleanString(parseParams(it, tokens.end())));
 				_creature->onWalkAborted();
 			}
-			else if(action == "skull")
+			else if (action == "skull")
 			{
 				_creature->setSkull(getSkulls(parseParams(it, tokens.end())));
 				g_game.updateCreatureSkull(_creature);
 			}
-			else if(action == "shield")
+			else if (action == "shield")
 			{
 				_creature->setShield(getShields(parseParams(it, tokens.end())));
 				g_game.updateCreatureShield(_creature);
 			}
-			else if(action == "emblem")
+			else if (action == "emblem")
 			{
 				_creature->setEmblem(getEmblems(parseParams(it, tokens.end())));
 				g_game.updateCreatureEmblem(_creature);
 			}
-			else if(action == "speaktype")
+			else if (action == "speaktype")
 				_creature->setSpeakType((SpeakClasses)atoi(parseParams(it, tokens.end()).c_str()));
-			else if(Player* _player = _creature->getPlayer())
+			else if (Player* _player = _creature->getPlayer())
 			{
-				if(action == "fyi")
+				if (action == "fyi")
 					_player->sendFYIBox(parseParams(it, tokens.end()).c_str());
-				else if(action == "tutorial")
+				else if (action == "tutorial")
 					_player->sendTutorial(atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "guildlevel")
+				else if (action == "guildlevel")
 					_player->setGuildLevel((GuildLevel_t)atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "guildrank")
+				else if (action == "guildrank")
 					_player->setRankId(atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "guildnick")
+				else if (action == "guildnick")
 					_player->setGuildNick(parseParams(it, tokens.end()).c_str());
-				else if(action == "group")
+				else if (action == "group")
 				{
 					uint16_t tmp = atoi(parseParams(it, tokens.end()).c_str());
-					if(tmp >= player->getGroupId())
+					if (tmp >= player->getGroupId())
 					{
 						invalid = "security failure - you can set only lower group than your own!";
 						break;
@@ -1011,35 +1011,35 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 					else
 						_player->setGroupId(tmp);
 				}
-				else if(action == "vocation")
+				else if (action == "vocation")
 					_player->setVocation(atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "sex" || action == "gender")
+				else if (action == "sex" || action == "gender")
 					_player->setSex(atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "stamina")
+				else if (action == "stamina")
 					_player->setStaminaMinutes(atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "town" || action == "temple")
+				else if (action == "town" || action == "temple")
 				{
-					if(Town* town = Towns::getInstance()->getTown(parseParams(it, tokens.end())))
+					if (Town* town = Towns::getInstance()->getTown(parseParams(it, tokens.end())))
 					{
 						_player->setMasterPosition(town->getPosition());
 						_player->setTown(town->getID());
 					}
 				}
-				else if(action == "balance")
+				else if (action == "balance")
 					_player->balance = atoi(parseParams(it, tokens.end()).c_str());
-				else if(action == "marriage" || action == "partner")
+				else if (action == "marriage" || action == "partner")
 					_player->marriage = atoi(parseParams(it, tokens.end()).c_str());
-				else if(action == "rates")
+				else if (action == "rates")
 					_player->rates[atoi(parseParams(it, tokens.end()).c_str())] = atof(
 						parseParams(it, tokens.end()).c_str());
-				else if(action == "idle")
+				else if (action == "idle")
 					_player->setIdleTime(atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "capacity" || action == "cap")
+				else if (action == "capacity" || action == "cap")
 					_player->setCapacity(atoi(parseParams(it, tokens.end()).c_str()));
-				else if(action == "execute")
+				else if (action == "execute")
 					g_talkActions->onPlayerSay(_player, atoi(parseParams(it, tokens.end()).c_str()),
 						parseParams(it, tokens.end()), booleanString(parseParams(it, tokens.end())));
-				else if(action == "saving" || action == "save")
+				else if (action == "saving" || action == "save")
 					_player->switchSaving();
 				else
 				{
@@ -1059,19 +1059,19 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 		}
 	}
 
-	if(invalid.empty())
+	if (invalid.empty())
 	{
 		const SpectatorVec& list = g_game.getSpectators(pos);
 		SpectatorVec::const_iterator it;
 
 		Player* tmpPlayer = NULL;
-		for(it = list.begin(); it != list.end(); ++it)
+		for (it = list.begin(); it != list.end(); ++it)
 		{
-			if((tmpPlayer = (*it)->getPlayer()))
+			if ((tmpPlayer = (*it)->getPlayer()))
 				tmpPlayer->sendUpdateTile(tile, pos);
 		}
 
-		for(it = list.begin(); it != list.end(); ++it)
+		for (it = list.begin(); it != list.end(); ++it)
 			(*it)->onUpdateTile(tile, pos);
 	}
 	else
@@ -1087,7 +1087,7 @@ bool TalkAction::thingProporties(Creature* creature, const std::string& cmd, con
 bool TalkAction::banishmentInfo(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
 	StringVec params = explodeString(param, ",");
@@ -1096,30 +1096,30 @@ bool TalkAction::banishmentInfo(Creature* creature, const std::string& cmd, cons
 
 	Ban ban;
 	ban.type = BAN_ACCOUNT;
-	if(params.size() > 1)
+	if (params.size() > 1)
 	{
 		trimString(params[1]);
-		if(params[0].substr(0, 1) == "p")
+		if (params[0].substr(0, 1) == "p")
 		{
 			what = "Character";
 			ban.type = BAN_PLAYER;
 			ban.param = PLAYERBAN_BANISHMENT;
 
 			ban.value = atoi(params[1].c_str());
-			if(!ban.value)
+			if (!ban.value)
 			{
 				IOLoginData::getInstance()->getGuidByName(ban.value, params[1], true);
-				if(!ban.value)
+				if (!ban.value)
 					ban.value = IOLoginData::getInstance()->getAccountIdByName(params[1]);
 			}
 		}
 		else
 		{
 			ban.value = atoi(params[1].c_str());
-			if(!ban.value)
+			if (!ban.value)
 			{
 				IOLoginData::getInstance()->getAccountId(params[1], ban.value);
-				if(!ban.value)
+				if (!ban.value)
 					ban.value = IOLoginData::getInstance()->getAccountIdByName(params[1]);
 			}
 		}
@@ -1127,22 +1127,22 @@ bool TalkAction::banishmentInfo(Creature* creature, const std::string& cmd, cons
 	else
 	{
 		ban.value = atoi(params[0].c_str());
-		if(!ban.value)
+		if (!ban.value)
 		{
 			IOLoginData::getInstance()->getAccountId(params[0], ban.value);
-			if(!ban.value)
+			if (!ban.value)
 				ban.value = IOLoginData::getInstance()->getAccountIdByName(params[0]);
 		}
 	}
 
-	if(!ban.value)
+	if (!ban.value)
 	{
 		toLowerCaseString(what);
 		player->sendCancel("Invalid " + what + (std::string)" name or id.");
 		return true;
 	}
 
-	if(!IOBan::getInstance()->getData(ban))
+	if (!IOBan::getInstance()->getData(ban))
 	{
 		player->sendCancel("That player or account is not banished or deleted.");
 		return true;
@@ -1150,13 +1150,13 @@ bool TalkAction::banishmentInfo(Creature* creature, const std::string& cmd, cons
 
 	bool deletion = ban.expires < 0;
 	std::string admin = "Automatic ";
-	if(!ban.adminId)
+	if (!ban.adminId)
 		admin += (deletion ? "deletion" : "banishment");
 	else
 		IOLoginData::getInstance()->getNameByGuid(ban.adminId, admin, true);
 
 	std::string end = "Banishment will be lifted at:\n";
-	if(deletion)
+	if (deletion)
 		end = what + (std::string)" won't be undeleted";
 
 	std::stringstream ss;
@@ -1171,7 +1171,7 @@ bool TalkAction::banishmentInfo(Creature* creature, const std::string& cmd, cons
 bool TalkAction::diagnostics(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 #ifdef __ENABLE_SERVER_DIAGNOSTIC__
 
@@ -1215,10 +1215,10 @@ bool TalkAction::diagnostics(Creature* creature, const std::string& cmd, const s
 bool TalkAction::ghost(Creature* creature, const std::string& cmd, const std::string& param)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
-	if(player->hasFlag(PlayerFlag_CannotBeSeen))
+	if (player->hasFlag(PlayerFlag_CannotBeSeen))
 	{
 		player->sendTextMessage(MSG_INFO_DESCR, "Command disabled for players with special, invisibility flag.");
 		return true;
@@ -1229,47 +1229,47 @@ bool TalkAction::ghost(Creature* creature, const std::string& cmd, const std::st
 	Player* tmpPlayer = NULL;
 
 	Condition* condition = NULL;
-	if((condition = player->getCondition(CONDITION_GAMEMASTER, CONDITIONID_DEFAULT, GAMEMASTER_INVISIBLE)))
+	if ((condition = player->getCondition(CONDITION_GAMEMASTER, CONDITIONID_DEFAULT, GAMEMASTER_INVISIBLE)))
 	{
 		player->sendTextMessage(MSG_INFO_DESCR, "You are visible again.");
 		IOLoginData::getInstance()->updateOnlineStatus(player->getGUID(), true);
-		for(AutoList<Player>::iterator pit = Player::autoList.begin(); pit != Player::autoList.end(); ++pit)
+		for (AutoList<Player>::iterator pit = Player::autoList.begin(); pit != Player::autoList.end(); ++pit)
 		{
-			if(!pit->second->canSeeCreature(player))
+			if (!pit->second->canSeeCreature(player))
 				pit->second->notifyLogIn(player);
 		}
 
-		for(it = list.begin(); it != list.end(); ++it)
+		for (it = list.begin(); it != list.end(); ++it)
 		{
-			if((tmpPlayer = (*it)->getPlayer()) && !tmpPlayer->canSeeCreature(player))
+			if ((tmpPlayer = (*it)->getPlayer()) && !tmpPlayer->canSeeCreature(player))
 				tmpPlayer->sendMagicEffect(player->getPosition(), MAGIC_EFFECT_TELEPORT);
 		}
 
 		player->removeCondition(condition);
 		g_game.internalCreatureChangeVisible(creature, VISIBLE_GHOST_APPEAR);
 	}
-	else if((condition = Condition::createCondition(CONDITIONID_DEFAULT, CONDITION_GAMEMASTER, -1, 0, false, GAMEMASTER_INVISIBLE)))
+	else if ((condition = Condition::createCondition(CONDITIONID_DEFAULT, CONDITION_GAMEMASTER, -1, 0, false, GAMEMASTER_INVISIBLE)))
 	{
 		player->addCondition(condition);
 		g_game.internalCreatureChangeVisible(creature, VISIBLE_GHOST_DISAPPEAR);
-		for(it = list.begin(); it != list.end(); ++it)
+		for (it = list.begin(); it != list.end(); ++it)
 		{
-			if((tmpPlayer = (*it)->getPlayer()) && !tmpPlayer->canSeeCreature(player))
+			if ((tmpPlayer = (*it)->getPlayer()) && !tmpPlayer->canSeeCreature(player))
 				tmpPlayer->sendMagicEffect(player->getPosition(), MAGIC_EFFECT_POFF);
 		}
 
-		for(AutoList<Player>::iterator pit = Player::autoList.begin(); pit != Player::autoList.end(); ++pit)
+		for (AutoList<Player>::iterator pit = Player::autoList.begin(); pit != Player::autoList.end(); ++pit)
 		{
-			if(!pit->second->canSeeCreature(player))
+			if (!pit->second->canSeeCreature(player))
 				pit->second->notifyLogOut(player);
 		}
 
 		IOLoginData::getInstance()->updateOnlineStatus(player->getGUID(), false);
-		if(player->isTrading())
+		if (player->isTrading())
 			g_game.internalCloseTrade(player);
 
 		player->clearPartyInvitations();
-		if(player->getParty())
+		if (player->getParty())
 			player->getParty()->leave(player);
 
 		player->sendTextMessage(MSG_INFO_DESCR, "You are now invisible.");
@@ -1281,7 +1281,7 @@ bool TalkAction::ghost(Creature* creature, const std::string& cmd, const std::st
 bool TalkAction::software(Creature* creature, const std::string&, const std::string&)
 {
 	Player* player = creature->getPlayer();
-	if(!player)
+	if (!player)
 		return false;
 
 	std::stringstream s;

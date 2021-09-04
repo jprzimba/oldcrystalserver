@@ -30,7 +30,7 @@ Group Groups::defGroup = Group();
 
 void Groups::clear()
 {
-	for(GroupsMap::iterator it = groupsMap.begin(); it != groupsMap.end(); ++it)
+	for (GroupsMap::iterator it = groupsMap.begin(); it != groupsMap.end(); ++it)
 		delete it->second;
 
 	groupsMap.clear();
@@ -45,7 +45,7 @@ bool Groups::reload()
 bool Groups::loadFromXml()
 {
 	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_XML, "groups.xml").c_str());
-	if(!doc)
+	if (!doc)
 	{
 		std::clog << "[Warning - Groups::loadFromXml] Cannot load groups file."
 			<< std::endl << getLastXMLError() << std::endl;
@@ -53,7 +53,7 @@ bool Groups::loadFromXml()
 	}
 
 	xmlNodePtr p, root = xmlDocGetRootElement(doc);
-	if(xmlStrcmp(root->name,(const xmlChar*)"groups"))
+	if (xmlStrcmp(root->name,(const xmlChar*)"groups"))
 	{
 		std::clog << "[Error - Groups::loadFromXml] Malformed groups file." << std::endl;
 		xmlFreeDoc(doc);
@@ -61,7 +61,7 @@ bool Groups::loadFromXml()
 	}
 
 	p = root->children;
-	while(p)
+	while (p)
 	{
 		parseGroupNode(p);
 		p = p->next;
@@ -73,11 +73,11 @@ bool Groups::loadFromXml()
 
 bool Groups::parseGroupNode(xmlNodePtr p)
 {
-	if(xmlStrcmp(p->name, (const xmlChar*)"group"))
+	if (xmlStrcmp(p->name, (const xmlChar*)"group"))
 		return false;
 
 	int32_t intValue;
-	if(!readXMLInteger(p, "id", intValue))
+	if (!readXMLInteger(p, "id", intValue))
 	{
 		std::clog << "[Warning - Groups::parseGroupNode] Missing group id." << std::endl;
 		return false;
@@ -87,42 +87,42 @@ bool Groups::parseGroupNode(xmlNodePtr p)
 	int64_t int64Value;
 
 	Group* group = new Group(intValue);
-	if(readXMLString(p, "name", strValue))
+	if (readXMLString(p, "name", strValue))
 	{
 		group->setFullName(strValue);
 		group->setName(asLowerCaseString(strValue));
 	}
 
-	if(readXMLInteger64(p, "flags", int64Value))
+	if (readXMLInteger64(p, "flags", int64Value))
 		group->setFlags(int64Value);
 
-	if(readXMLInteger64(p, "customFlags", int64Value))
+	if (readXMLInteger64(p, "customFlags", int64Value))
 		group->setCustomFlags(int64Value);
 
-	if(readXMLInteger(p, "access", intValue))
+	if (readXMLInteger(p, "access", intValue))
 		group->setAccess(intValue);
 
-	if(readXMLInteger(p, "ghostAccess", intValue))
+	if (readXMLInteger(p, "ghostAccess", intValue))
 		group->setGhostAccess(intValue);
 	else
 		group->setGhostAccess(group->getAccess());
 
-	if(readXMLInteger(p, "violationReasons", intValue))
+	if (readXMLInteger(p, "violationReasons", intValue))
 		group->setViolationReasons(intValue);
 
-	if(readXMLInteger(p, "nameViolationFlags", intValue))
+	if (readXMLInteger(p, "nameViolationFlags", intValue))
 		group->setNameViolationFlags(intValue);
 
-	if(readXMLInteger(p, "statementViolationFlags", intValue))
+	if (readXMLInteger(p, "statementViolationFlags", intValue))
 		group->setStatementViolationFlags(intValue);
 
-	if(readXMLInteger(p, "depotLimit", intValue))
+	if (readXMLInteger(p, "depotLimit", intValue))
 		group->setDepotLimit(intValue);
 
-	if(readXMLInteger(p, "maxVips", intValue))
+	if (readXMLInteger(p, "maxVips", intValue))
 		group->setMaxVips(intValue);
 
-	if(readXMLInteger(p, "outfit", intValue))
+	if (readXMLInteger(p, "outfit", intValue))
 		group->setOutfit(intValue);
 
 	groupsMap[group->getId()] = group;
@@ -132,7 +132,7 @@ bool Groups::parseGroupNode(xmlNodePtr p)
 Group* Groups::getGroup(uint32_t groupId)
 {
 	GroupsMap::iterator it = groupsMap.find(groupId);
-	if(it != groupsMap.end())
+	if (it != groupsMap.end())
 		return it->second;
 
 	std::clog << "[Warning - Groups::getGroup] Group " << groupId << " not found." << std::endl;
@@ -141,9 +141,9 @@ Group* Groups::getGroup(uint32_t groupId)
 
 int32_t Groups::getGroupId(const std::string& name)
 {
-	for(GroupsMap::iterator it = groupsMap.begin(); it != groupsMap.end(); ++it)
+	for (GroupsMap::iterator it = groupsMap.begin(); it != groupsMap.end(); ++it)
 	{
-		if(boost::algorithm::iequals(it->second->getName(), name))
+		if (boost::algorithm::iequals(it->second->getName(), name))
 			return it->first;
 	}
 
@@ -152,7 +152,7 @@ int32_t Groups::getGroupId(const std::string& name)
 
 uint32_t Group::getDepotLimit(bool premium) const
 {
-	if(m_depotLimit > 0)
+	if (m_depotLimit > 0)
 		return m_depotLimit;
 
 	return (premium ? g_config.getNumber(ConfigManager::DEFAULT_DEPOT_SIZE_PREMIUM)
@@ -161,7 +161,7 @@ uint32_t Group::getDepotLimit(bool premium) const
 
 uint32_t Group::getMaxVips(bool premium) const
 {
-	if(m_maxVips > 0)
+	if (m_maxVips > 0)
 		return m_maxVips;
 
 	return (premium ? g_config.getNumber(ConfigManager::VIPLIST_DEFAULT_PREMIUM_LIMIT) : g_config.getNumber(ConfigManager::VIPLIST_DEFAULT_LIMIT));

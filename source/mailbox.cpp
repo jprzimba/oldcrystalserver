@@ -80,7 +80,7 @@ ReturnValue Mailbox::__queryMaxCount(int32_t index, const Thing* thing, uint32_t
 void Mailbox::__addThing(Creature* actor, int32_t, Thing* thing)
 {
 	Item* item = thing->getItem();
-	if(!item)
+	if (!item)
 		return;
 
 	if (canSend(item, actor) == RET_NOERROR)
@@ -117,16 +117,16 @@ bool Mailbox::getDepotId(const std::string& townString, uint32_t& depotId)
 
 bool Mailbox::getRecipient(Item* item, std::string& name, uint32_t& depotId)
 {
-	if(!item)
+	if (!item)
 		return false;
 
-	if(item->getID() == ITEM_PARCEL) /**We need to get the text from the label incase its a parcel**/
+	if (item->getID() == ITEM_PARCEL) /**We need to get the text from the label incase its a parcel**/
 	{
-		if(Container* parcel = item->getContainer())
+		if (Container* parcel = item->getContainer())
 		{
-			for(ItemList::const_iterator cit = parcel->getItems(); cit != parcel->getEnd(); ++cit)
+			for (ItemList::const_iterator cit = parcel->getItems(); cit != parcel->getEnd(); ++cit)
 			{
-				if((*cit)->getID() == ITEM_LABEL && !(*cit)->getText().empty())
+				if ((*cit)->getID() == ITEM_LABEL && !(*cit)->getText().empty())
 				{
 					item = (*cit);
 					break;
@@ -134,31 +134,31 @@ bool Mailbox::getRecipient(Item* item, std::string& name, uint32_t& depotId)
 			}
 		}
 	}
-	else if(item->getID() != ITEM_LETTER) /**The item is somehow not a parcel or letter**/
+	else if (item->getID() != ITEM_LETTER) /**The item is somehow not a parcel or letter**/
 	{
 		std::clog << "[Error - Mailbox::getReciver] Trying to get receiver from unkown item with id: " << item->getID() << "!" << std::endl;
 		return false;
 	}
 
-	if(!item || item->getText().empty()) /**No label/letter found or its empty.**/
+	if (!item || item->getText().empty()) /**No label/letter found or its empty.**/
 		return false;
 
 	std::istringstream iss(item->getText(), std::istringstream::in);
 	uint32_t curLine = 0;
 
 	std::string tmp, townString;
-	while(getline(iss, tmp, '\n') && curLine < 2)
+	while (getline(iss, tmp, '\n') && curLine < 2)
 	{
-		if(curLine == 0)
+		if (curLine == 0)
 			name = tmp;
-		else if(curLine == 1)
+		else if (curLine == 1)
 			townString = tmp;
 
 		++curLine;
 	}
 
 	trimString(name);
-	if(townString.empty())
+	if (townString.empty())
 		return false;
 
 	trimString(townString);

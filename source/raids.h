@@ -123,7 +123,7 @@ class Raid
 		bool hasRef() const {return refCount > 0;}
 
 		void addRef() {++refCount;}
-		void unRef() {--refCount; if(refCount <= 0) resetRaid(true);}
+		void unRef() {--refCount; if (refCount <= 0) resetRaid(true);}
 
 	private:
 		std::string name;

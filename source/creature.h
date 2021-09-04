@@ -189,7 +189,7 @@ class Creature : public AutoId, virtual public Thing
 			 * 0x40000000 - Monster
 			 * 0x80000000 - NPC
 			 */
-			if(!id)
+			if (!id)
 				id = autoId | rangeId();
 		}
 
@@ -241,12 +241,12 @@ class Creature : public AutoId, virtual public Thing
 		{
 			int32_t oldSpeed = getSpeed();
 			varSpeed = varSpeedDelta;
-			if(getSpeed() <= 0)
+			if (getSpeed() <= 0)
 			{
 				stopEventWalk();
 				cancelNextWalk = true;
 			}
-			else if(oldSpeed <= 0 && !listWalkDir.empty())
+			else if (oldSpeed <= 0 && !listWalkDir.empty())
 				addEventWalk();
 		}
 

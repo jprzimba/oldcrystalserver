@@ -15,6 +15,10 @@
 	newPlayerTownId = 1
 	newPlayerLevel = 10
 	newPlayerMagicLevel = 0
+	newCharacterLookHead = 25
+	newCharacterLookBody = 35
+	newCharacterLookLegs = 45
+	newCharacterLookFeet = 55
 	generateAccountNumber = false
 	generateAccountSalt = false
 

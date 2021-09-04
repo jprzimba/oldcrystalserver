@@ -36,7 +36,7 @@ class Task
 		void unsetExpiration() {m_expiration = boost::date_time::not_a_date_time;}
 		bool hasExpired() const
 		{
-			if(m_expiration == boost::date_time::not_a_date_time)
+			if (m_expiration == boost::date_time::not_a_date_time)
 				return false;
 
 			return m_expiration < boost::get_system_time();

@@ -127,7 +127,7 @@ class ServiceManager : boost::noncopyable
 template <typename ProtocolType>
 bool ServiceManager::add(uint16_t port, IPAddressList ips)
 {
-	if(!port)
+	if (!port)
 	{
 		std::clog << "ERROR: No port provided for service " << ProtocolType::protocolName() << ", service disabled." << std::endl;
 		return false;
@@ -135,7 +135,7 @@ bool ServiceManager::add(uint16_t port, IPAddressList ips)
 
 	ServicePort_ptr servicePort;
 	AcceptorsMap::iterator it = m_acceptors.find(port);
-	if(it == m_acceptors.end())
+	if (it == m_acceptors.end())
 	{
 		servicePort.reset(new ServicePort(m_io_service));
 		servicePort->open(ips, port);
@@ -144,7 +144,7 @@ bool ServiceManager::add(uint16_t port, IPAddressList ips)
 	else
 	{
 		servicePort = it->second;
-		if(servicePort->isSingleSocket() || ProtocolType::isSingleSocket)
+		if (servicePort->isSingleSocket() || ProtocolType::isSingleSocket)
 		{
 			std::clog << "ERROR: " << ProtocolType::protocolName() << " and " << servicePort->getProtocolNames()
 				<< " cannot use the same port (" << port << ")." << std::endl;

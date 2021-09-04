@@ -217,13 +217,13 @@ class Tile : public Cylinder
 
 		ZoneType_t getZone() const
 		{
-			if(hasFlag(TILESTATE_PROTECTIONZONE))
+			if (hasFlag(TILESTATE_PROTECTIONZONE))
 				return ZONE_PROTECTION;
 
-			if(hasFlag(TILESTATE_OPTIONALZONE))
+			if (hasFlag(TILESTATE_OPTIONALZONE))
 				return ZONE_OPTIONAL;
 
-			if(hasFlag(TILESTATE_HARDCOREZONE))
+			if (hasFlag(TILESTATE_HARDCOREZONE))
 				return ZONE_HARDCORE;
 
 			return ZONE_OPEN;
@@ -341,7 +341,7 @@ inline Tile::~Tile() {}
 
 inline CreatureVector* Tile::getCreatures()
 {
-	if(isDynamic())
+	if (isDynamic())
 		return static_cast<DynamicTile*>(this)->DynamicTile::getCreatures();
 
 	return static_cast<StaticTile*>(this)->StaticTile::getCreatures();
@@ -349,7 +349,7 @@ inline CreatureVector* Tile::getCreatures()
 
 inline const CreatureVector* Tile::getCreatures() const
 {
-	if(isDynamic())
+	if (isDynamic())
 		return static_cast<const DynamicTile*>(this)->DynamicTile::getCreatures();
 
 	return static_cast<const StaticTile*>(this)->StaticTile::getCreatures();
@@ -357,7 +357,7 @@ inline const CreatureVector* Tile::getCreatures() const
 
 inline CreatureVector* Tile::makeCreatures()
 {
-	if(isDynamic())
+	if (isDynamic())
 		return static_cast<DynamicTile*>(this)->DynamicTile::makeCreatures();
 
 	return static_cast<StaticTile*>(this)->StaticTile::makeCreatures();
@@ -365,7 +365,7 @@ inline CreatureVector* Tile::makeCreatures()
 
 inline TileItemVector* Tile::getItemList()
 {
-	if(isDynamic())
+	if (isDynamic())
 		return static_cast<DynamicTile*>(this)->DynamicTile::getItemList();
 
 	return static_cast<StaticTile*>(this)->StaticTile::getItemList();
@@ -373,7 +373,7 @@ inline TileItemVector* Tile::getItemList()
 
 inline const TileItemVector* Tile::getItemList() const
 {
-	if(isDynamic())
+	if (isDynamic())
 		return static_cast<const DynamicTile*>(this)->DynamicTile::getItemList();
 
 	return static_cast<const StaticTile*>(this)->StaticTile::getItemList();
@@ -381,7 +381,7 @@ inline const TileItemVector* Tile::getItemList() const
 
 inline TileItemVector* Tile::makeItemList()
 {
-	if(isDynamic())
+	if (isDynamic())
 		return static_cast<DynamicTile*>(this)->DynamicTile::makeItemList();
 
 	return static_cast<StaticTile*>(this)->StaticTile::makeItemList();

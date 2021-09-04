@@ -38,45 +38,45 @@ ConfigManager::ConfigManager()
 
 bool ConfigManager::load()
 {
-	if(L)
+	if (L)
 		lua_close(L);
 
 	L = luaL_newstate();
-	if(!L)
+	if (!L)
 		return false;
 
 	luaL_openlibs(L);
-	if(luaL_dofile(L, m_string[CONFIG_FILE].c_str()))
+	if (luaL_dofile(L, m_string[CONFIG_FILE].c_str()))
 	{
 		lua_close(L);
 		L = NULL;
 		return false;
 	}
 
-	if(!m_loaded) //info that must be loaded one time (unless we reset the modules involved)
+	if (!m_loaded) //info that must be loaded one time (unless we reset the modules involved)
 	{
-		if(m_string[DATA_DIRECTORY] == "")
+		if (m_string[DATA_DIRECTORY] == "")
 			m_string[DATA_DIRECTORY] = getGlobalString("dataDirectory", "data/");
 
-		if(m_string[LOGS_DIRECTORY] == "")
+		if (m_string[LOGS_DIRECTORY] == "")
 			m_string[LOGS_DIRECTORY] = getGlobalString("logsDirectory", "logs/");
 
-		if(m_string[IP_STRING] == "")
+		if (m_string[IP_STRING] == "")
 			m_string[IP_STRING] = getGlobalString("ip", "127.0.0.1");
 
-		if(m_string[RUNFILE] == "")
+		if (m_string[RUNFILE] == "")
 			m_string[RUNFILE] = getGlobalString("runFile", "");
 
-		if(m_string[OUTPUT_LOG] == "")
+		if (m_string[OUTPUT_LOG] == "")
 			m_string[OUTPUT_LOG] = getGlobalString("outputLog", "");
 
-		if(m_integer[LOGIN_PORT] == 0)
+		if (m_integer[LOGIN_PORT] == 0)
 			m_integer[LOGIN_PORT] = getGlobalNumber("loginPort", 7171);
 
-		if(m_integer[GAME_PORT] == 0)
+		if (m_integer[GAME_PORT] == 0)
 			m_integer[GAME_PORT] = getGlobalNumber("gamePort", 7172);
 
-		if(m_integer[STATUS_PORT] == 0)
+		if (m_integer[STATUS_PORT] == 0)
 			m_integer[STATUS_PORT] = getGlobalNumber("statusPort", 7171);
 
 		#ifdef MULTI_SQL_DRIVERS
@@ -223,6 +223,10 @@ bool ConfigManager::load()
 	m_integer[MANAGER_ACCNAME_MAX_LENGTH] = getGlobalNumber("maxAccountNameLength", 25);
 	m_integer[MANAGER_MIN_PLAYER_NAME_LENGTH] = getGlobalNumber("minNewCharacterNameLength", 3);
 	m_integer[MANAGER_MAX_PLAYER_NAME_LENGTH] = getGlobalNumber("maxNewCharacterNameLength", 25);
+	m_integer[MANAGER_LOOKHEAD] = getGlobalNumber("newCharacterLookHead", 10);
+	m_integer[MANAGER_LOOKBODY] = getGlobalNumber("newCharacterLookBody", 20);
+	m_integer[MANAGER_LOOKLEGS] = getGlobalNumber("newCharacterLookLegs", 30);
+	m_integer[MANAGER_LOOKFEET] = getGlobalNumber("newCharacterLookFeet", 40);
 	m_integer[CRITICAL_HIT_CHANCE] = getGlobalNumber("criticalHitChance", 5);
 	m_integer[CRITICAL_COLOR] = getGlobalNumber("criticalHitColor", COLOR_TEAL);
 	m_integer[MIN_GUILD_NICK] = getGlobalNumber("minGuildNickLength", 2);
@@ -348,32 +352,32 @@ bool ConfigManager::load()
 
 bool ConfigManager::reload()
 {
-	if(!m_loaded)
+	if (!m_loaded)
 		return false;
 
 	uint32_t tmp = m_integer[HOUSE_PRICE];
-	if(!load())
+	if (!load())
 		return false;
 
-	if((uint32_t)m_integer[HOUSE_PRICE] == tmp)
+	if ((uint32_t)m_integer[HOUSE_PRICE] == tmp)
 		return true;
 
-	for(HouseMap::iterator it = Houses::getInstance()->getHouseBegin();
+	for (HouseMap::iterator it = Houses::getInstance()->getHouseBegin();
 		it != Houses::getInstance()->getHouseEnd(); ++it)
 	{
 		uint32_t price = it->second->getTilesCount() * m_integer[HOUSE_PRICE];
-		if(m_boolean[HOUSE_RENTASPRICE])
+		if (m_boolean[HOUSE_RENTASPRICE])
 		{
 			uint32_t rent = it->second->getRent();
-			if(!m_boolean[HOUSE_PRICEASRENT] && it->second->getPrice() != rent)
+			if (!m_boolean[HOUSE_PRICEASRENT] && it->second->getPrice() != rent)
 				price = rent;
 		}
 
 		it->second->setPrice(price);
-		if(m_boolean[HOUSE_PRICEASRENT])
+		if (m_boolean[HOUSE_PRICEASRENT])
 			it->second->setRent(price);
 
-		if(!it->second->getOwner())
+		if (!it->second->getOwner())
 			it->second->updateDoorDescription();
 	}
 
@@ -382,10 +386,10 @@ bool ConfigManager::reload()
 
 const std::string& ConfigManager::getString(uint32_t _what) const
 {
-	if((m_loaded && _what < LAST_STRING_CONFIG) || _what <= CONFIG_FILE)
+	if ((m_loaded && _what < LAST_STRING_CONFIG) || _what <= CONFIG_FILE)
 		return m_string[_what];
 
-	if(!m_startup)
+	if (!m_startup)
 		std::clog << "[Warning - ConfigManager::getString] " << _what << std::endl;
 
 	return m_string[DUMMY_STR];
@@ -393,10 +397,10 @@ const std::string& ConfigManager::getString(uint32_t _what) const
 
 bool ConfigManager::getBool(uint32_t _what) const
 {
-	if(m_loaded && _what < LAST_BOOL_CONFIG)
+	if (m_loaded && _what < LAST_BOOL_CONFIG)
 		return m_boolean[_what];
 
-	if(!m_startup)
+	if (!m_startup)
 		std::clog << "[Warning - ConfigManager::getBool] " << _what << std::endl;
 
 	return false;
@@ -404,10 +408,10 @@ bool ConfigManager::getBool(uint32_t _what) const
 
 int32_t ConfigManager::getNumber(uint32_t _what) const
 {
-	if(m_loaded && _what < LAST_INTEGER_CONFIG)
+	if (m_loaded && _what < LAST_INTEGER_CONFIG)
 		return m_integer[_what];
 
-	if(!m_startup)
+	if (!m_startup)
 		std::clog << "[Warning - ConfigManager::getNumber] " << _what << std::endl;
 
 	return 0;
@@ -415,10 +419,10 @@ int32_t ConfigManager::getNumber(uint32_t _what) const
 
 double ConfigManager::getDouble(uint32_t _what) const
 {
-	if(m_loaded && _what < LAST_DOUBLE_CONFIG)
+	if (m_loaded && _what < LAST_DOUBLE_CONFIG)
 		return m_double[_what];
 
-	if(!m_startup)
+	if (!m_startup)
 		std::clog << "[Warning - ConfigManager::getDouble] " << _what << std::endl;
 
 	return 0;
@@ -426,7 +430,7 @@ double ConfigManager::getDouble(uint32_t _what) const
 
 bool ConfigManager::setString(uint32_t _what, const std::string& _value)
 {
-	if(_what < LAST_STRING_CONFIG)
+	if (_what < LAST_STRING_CONFIG)
 	{
 		m_string[_what] = _value;
 		return true;
@@ -438,7 +442,7 @@ bool ConfigManager::setString(uint32_t _what, const std::string& _value)
 
 bool ConfigManager::setNumber(uint32_t _what, int32_t _value)
 {
-	if(_what < LAST_INTEGER_CONFIG)
+	if (_what < LAST_INTEGER_CONFIG)
 	{
 		m_integer[_what] = _value;
 		return true;
@@ -450,7 +454,7 @@ bool ConfigManager::setNumber(uint32_t _what, int32_t _value)
 
 bool ConfigManager::setBool(uint32_t _what, bool _value)
 {
-	if(_what < LAST_BOOL_CONFIG)
+	if (_what < LAST_BOOL_CONFIG)
 	{
 		m_boolean[_what] = _value;
 		return true;
