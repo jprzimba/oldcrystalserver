@@ -196,6 +196,7 @@ class ConfigManager
 			MAIL_ATTEMPTS_FADE,
 			MAIL_ATTEMPTS,
 			MAIL_BLOCK,
+			MAX_PACKETS_PER_SECOND,
 			LAST_INTEGER_CONFIG /* this must be the last one */
 		};
 

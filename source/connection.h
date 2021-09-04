@@ -113,6 +113,8 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
 			m_refCount = m_pendingWrite = m_pendingRead = 0;
 			m_connectionState = CONNECTION_STATE_OPEN;
 			m_receivedFirst = m_writeError = m_readError = false;
+			m_packetsSent = 0;
+			m_timeConnected = time(NULL);
 			m_protocol = NULL;
 
 #ifdef __ENABLE_SERVER_DIAGNOSTIC__
@@ -174,6 +176,9 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
 		boost::asio::io_service& m_service;
 		ServicePort_ptr m_servicePort;
 		bool m_receivedFirst, m_writeError, m_readError;
+
+		time_t m_timeConnected;
+		uint32_t m_packetsSent;
 
 		int32_t m_pendingWrite, m_pendingRead;
 		ConnectionState_t m_connectionState;

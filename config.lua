@@ -29,6 +29,7 @@
 	rookLevelToLeaveRook = 8
 
 	-- Connection config
+	-- NOTE: set maxPacketsPerSecond to 0 to disable.
 	worldId = 0
 	ip = "127.0.0.1"
 	bindOnlyGlobalAddress = false
@@ -49,6 +50,7 @@
 	forceSlowConnectionsToDisconnect = false
 	loginOnlyWithLoginServer = false
 	premiumPlayerSkipWaitList = false
+	maxPacketsPerSecond = 50
 
 	-- RSA
 	-- NOTE: These should not be changed unless you know what your doing!

@@ -245,6 +245,7 @@ bool ConfigManager::load()
 	m_integer[MAIL_ATTEMPTS] = getGlobalNumber("mailMaxAttempts", 20);
 	m_integer[MAIL_BLOCK] = getGlobalNumber("mailBlockPeriod", 3600000);
 	m_integer[MAIL_ATTEMPTS_FADE] = getGlobalNumber("mailAttemptsFadeTime", 600000);
+	m_integer[MAX_PACKETS_PER_SECOND] = getGlobalNumber("maxPacketsPerSecond", 50);
 
 	m_double[RATE_EXPERIENCE] = getGlobalDouble("rateExperience", 1);
 	m_double[RATE_SKILL] = getGlobalDouble("rateSkill", 1);

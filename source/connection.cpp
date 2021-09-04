@@ -44,9 +44,9 @@ Connection_ptr ConnectionManager::createConnection(boost::asio::ip::tcp::socket*
 	#ifdef __DEBUG_NET_DETAIL__
 	std::clog << "Creating new Connection" << std::endl;
 	#endif
+
 	boost::recursive_mutex::scoped_lock lockClass(m_connectionManagerLock);
 	Connection_ptr connection = boost::shared_ptr<Connection>(new Connection(socket, io_service, servicer));
-
 	m_connections.push_back(connection);
 	return connection;
 }
@@ -79,7 +79,7 @@ void ConnectionManager::shutdown()
 			(*it)->m_socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
 			(*it)->m_socket->close(error);
 		}
-		catch(std::exception&) {}
+		catch (std::exception&) {}
 	}
 
 	m_connections.clear();
@@ -218,13 +218,17 @@ void Connection::closeSocket()
 	#ifdef __DEBUG_NET_DETAIL__
 	std::clog << "Connection::closeSocket" << std::endl;
 	#endif
+
 	m_connectionLock.lock();
+
 	if (m_socket->is_open())
 	{
 		#ifdef __DEBUG_NET_DETAIL__
 		std::clog << "Closing socket" << std::endl;
 		#endif
+
 		m_pendingRead = m_pendingWrite = 0;
+
 		try
 		{
 			boost::system::error_code error;
@@ -258,9 +262,11 @@ void Connection::closeSocket()
 
 void Connection::releaseConnection()
 {
-	if (m_refCount > 0) //Reschedule it and try again.
+	if (m_refCount > 0)
+	{	//Reschedule it and try again.
 		Scheduler::getInstance().addEvent(createSchedulerTask(SCHEDULER_MINTICKS,
 			boost::bind(&Connection::releaseConnection, this)));
+	}
 	else
 		deleteConnection();
 }
@@ -353,6 +359,24 @@ void Connection::parseHeader(const boost::system::error_code& error)
 		close();
 		m_connectionLock.unlock();
 		return;
+	}
+
+	if (g_config.getNumber(ConfigManager::MAX_PACKETS_PER_SECOND) != 0)
+	{
+		uint32_t timePassed = std::max<uint32_t>(1, (time(NULL) - m_timeConnected) + 1);
+		if ((++m_packetsSent / timePassed) > (uint32_t)g_config.getNumber(ConfigManager::MAX_PACKETS_PER_SECOND))
+		{
+			std::clog << convertIPAddress(getIP()) << " disconnected for exceeding packet per second limit." << std::endl;
+			close();
+			m_connectionLock.unlock();
+			return;
+		}
+
+		if (timePassed > 2)
+		{
+			m_timeConnected = time(NULL);
+			m_packetsSent = 0;
+		}
 	}
 
 	--m_pendingRead;
