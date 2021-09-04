@@ -29,14 +29,43 @@
 extern ConfigManager g_config;
 extern Game g_game;
 
-ReturnValue Mailbox::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
-	uint32_t flags) const
+ReturnValue Mailbox::canSend(const Item* item, Creature* actor) const
 {
-	if(const Item* item = thing->getItem())
+	if (item->getID() != ITEM_PARCEL && item->getID() != ITEM_LETTER)
+		return RET_NOTPOSSIBLE;
+
+	if (actor)
 	{
-		if(canSend(item))
-			return RET_NOERROR;
+		if (Player* player = actor->getPlayer())
+		{
+			if (player->hasCondition(CONDITION_MUTED, 2))
+				return RET_YOUAREEXHAUSTED;
+
+			if (player->getMailAttempts() >= g_config.getNumber(ConfigManager::MAIL_ATTEMPTS))
+			{
+				if (Condition* condition = Condition::createCondition(CONDITIONID_DEFAULT,
+					CONDITION_MUTED, g_config.getNumber(ConfigManager::MAIL_BLOCK), 0, false, 2))
+				{
+					player->addCondition(condition);
+					player->setLastMail(1); // auto erase
+				}
+
+				return RET_YOUAREEXHAUSTED;
+			}
+
+			player->setLastMail(OTSYS_TIME());
+			player->addMailAttempt();
+		}
 	}
+
+	return RET_NOERROR;
+}
+
+ReturnValue Mailbox::__queryAdd(int32_t, const Thing* thing, uint32_t,
+	uint32_t, Creature* actor/* = NULL*/) const
+{
+	if (const Item* item = thing->getItem())
+		return canSend(item, actor);
 
 	return RET_NOTPOSSIBLE;
 }
@@ -48,13 +77,13 @@ ReturnValue Mailbox::__queryMaxCount(int32_t index, const Thing* thing, uint32_t
 	return RET_NOERROR;
 }
 
-void Mailbox::__addThing(Creature* actor, int32_t index, Thing* thing)
+void Mailbox::__addThing(Creature* actor, int32_t, Thing* thing)
 {
 	Item* item = thing->getItem();
 	if(!item)
 		return;
 
-	if(canSend(item))
+	if (canSend(item, actor) == RET_NOERROR)
 		sendItem(actor, item);
 }
 
@@ -62,7 +91,7 @@ bool Mailbox::sendItem(Creature* actor, Item* item)
 {
 	uint32_t depotId = 0;
 	std::string name;
-	if(!getRecipient(item, name, depotId) || name.empty() || !depotId)
+	if (!getRecipient(item, name, depotId) || name.empty() || !depotId)
 		return false;
 
 	return IOLoginData::getInstance()->playerMail(actor, name, depotId, item);
@@ -71,21 +100,15 @@ bool Mailbox::sendItem(Creature* actor, Item* item)
 bool Mailbox::getDepotId(const std::string& townString, uint32_t& depotId)
 {
 	Town* town = Towns::getInstance()->getTown(townString);
-	if(!town)
+	if (!town)
 		return false;
 
 	std::string disabledTowns = g_config.getString(ConfigManager::MAILBOX_DISABLED_TOWNS);
-	if(disabledTowns.size())
-	{	
+	if (disabledTowns.size())
+	{
 		IntegerVec tmpVec = vectorAtoi(explodeString(disabledTowns, ","));
-		if(tmpVec[0] != 0)
-		{
-			for(IntegerVec::iterator it = tmpVec.begin(); it != tmpVec.end(); ++it)
-			{
-				if(town->getID() == uint32_t(*it))
-					return false;
-			}
-		}
+		if (tmpVec[0] != 0 && std::find(tmpVec.begin(), tmpVec.end(), town->getID()) != tmpVec.end())
+			return false;
 	}
 
 	depotId = town->getID();

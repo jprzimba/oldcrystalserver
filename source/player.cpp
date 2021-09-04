@@ -68,7 +68,7 @@ Player::Player(const std::string& _name, ProtocolGame* p):
 	vocationId = VOCATION_NONE;
 
 	promotionLevel = walkTaskEvent = actionTaskEvent = nextStepEvent = bloodHitCount = shieldBlockCount = 0;
-	lastAttack = idleTime = marriage = blessings = balance = premiumDays = mana = manaMax = manaSpent = 0;
+	mailAttempts = lastAttack = idleTime = marriage = blessings = balance = premiumDays = mana = manaMax = manaSpent = 0;
 	soul = guildId = levelPercent = magLevelPercent = magLevel = experience = damageImmunities = 0;
 	conditionImmunities = conditionSuppressions = groupId = managerNumber2 = town = skullEnd = 0;
 	lastLogin = lastLogout = lastIP = messageTicks = messageBuffer = nextAction = 0;
@@ -80,7 +80,7 @@ Player::Player(const std::string& _name, ProtocolGame* p):
 	soulMax = 100;
 	capacity = 400.00;
 	stamina = STAMINA_MAX;
-	lastLoad = lastPing = lastPong = OTSYS_TIME();
+	lastLoad = lastPing = lastPong = lastMail = OTSYS_TIME();
 
 	writeItem = NULL;
 	group = NULL;
@@ -1650,6 +1650,8 @@ void Player::onCreatureMove(const Creature* creature, const Tile* newTile, const
 void Player::onAddContainerItem(const Container* container, const Item* item)
 {
 	checkTradeState(item);
+	if (backpack.first && (const_cast<Container*>(container) != backpack.first || backpack.first->full()))
+		backpack.first = NULL;
 }
 
 void Player::onUpdateContainerItem(const Container* container, uint8_t slot,
@@ -1664,6 +1666,7 @@ void Player::onUpdateContainerItem(const Container* container, uint8_t slot,
 
 void Player::onRemoveContainerItem(const Container* container, uint8_t slot, const Item* item)
 {
+	backpack.first = NULL;
 	if(tradeState == TRADE_TRANSFER)
 		return;
 
@@ -1712,6 +1715,7 @@ void Player::onUpdateInventoryItem(slots_t slot, Item* oldItem, const ItemType& 
 
 void Player::onRemoveInventoryItem(slots_t slot, Item* item)
 {
+	backpack.first = NULL;
 	if(tradeState == TRADE_TRANSFER)
 		return;
 
@@ -1826,6 +1830,9 @@ void Player::onThink(uint32_t interval)
 		messageTicks = 0;
 		addMessageBuffer();
 	}
+
+	if (lastMail && lastMail < (uint64_t)(OTSYS_TIME() + g_config.getNumber(ConfigManager::MAIL_ATTEMPTS_FADE)))
+		mailAttempts = lastMail = 0;
 }
 
 bool Player::isMuted(uint16_t channelId, SpeakClasses type, uint32_t& time)
@@ -2662,85 +2669,85 @@ bool Player::hasCapacity(const Item* item, uint32_t count) const
 	return (itemWeight < getFreeCapacity());
 }
 
-ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count, uint32_t flags) const
+ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count, uint32_t flags, Creature*) const
 {
 	const Item* item = thing->getItem();
-	if(!item)
+	if (!item)
 		return RET_NOTPOSSIBLE;
 
-	if(!item->isPickupable() || (hasFlag(PlayerFlag_CannotPickupItem) &&
+	if (!item->isPickupable() || (hasFlag(PlayerFlag_CannotPickupItem) &&
 		item->getParent() && item->getParent() != VirtualCylinder::virtualCylinder))
 		return RET_CANNOTPICKUP;
 
 	bool childOwner = ((flags & FLAG_CHILDISOWNER) == FLAG_CHILDISOWNER), skipLimit = ((flags & FLAG_NOLIMIT) == FLAG_NOLIMIT);
-	if(childOwner)
+	if (childOwner)
 	{
 		//a child container is querying the player, just check if enough capacity
-		if(skipLimit || hasCapacity(item, count))
+		if (skipLimit || hasCapacity(item, count))
 			return RET_NOERROR;
 
 		return RET_NOTENOUGHCAPACITY;
 	}
 
 	ReturnValue ret = RET_NOERROR;
-	if((item->getSlotPosition() & SLOTP_HEAD) || (item->getSlotPosition() & SLOTP_NECKLACE) ||
+	if ((item->getSlotPosition() & SLOTP_HEAD) || (item->getSlotPosition() & SLOTP_NECKLACE) ||
 		(item->getSlotPosition() & SLOTP_BACKPACK) || (item->getSlotPosition() & SLOTP_ARMOR) ||
 		(item->getSlotPosition() & SLOTP_LEGS) || (item->getSlotPosition() & SLOTP_FEET) ||
-		(item->getSlotPosition() & SLOTP_RING))
+		(item->getSlotPosition() & SLOTP_RING) || (item->getSlotPosition() & SLOTP_AMMO))
 		ret = RET_CANNOTBEDRESSED;
-	else if(item->getSlotPosition() & SLOTP_TWO_HAND)
+	else if (item->getSlotPosition() & SLOTP_TWO_HAND)
 		ret = RET_PUTTHISOBJECTINBOTHHANDS;
-	else if((item->getSlotPosition() & SLOTP_RIGHT) || (item->getSlotPosition() & SLOTP_LEFT))
+	else if ((item->getSlotPosition() & SLOTP_RIGHT) || (item->getSlotPosition() & SLOTP_LEFT))
 		ret = RET_PUTTHISOBJECTINYOURHAND;
 
-	switch(index)
+	switch (index)
 	{
 		case SLOT_HEAD:
-			if(item->getSlotPosition() & SLOTP_HEAD)
+			if (item->getSlotPosition() & SLOTP_HEAD)
 				ret = RET_NOERROR;
 			break;
 		case SLOT_NECKLACE:
-			if(item->getSlotPosition() & SLOTP_NECKLACE)
+			if (item->getSlotPosition() & SLOTP_NECKLACE)
 				ret = RET_NOERROR;
 			break;
 		case SLOT_BACKPACK:
-			if(item->getSlotPosition() & SLOTP_BACKPACK)
+			if (item->getSlotPosition() & SLOTP_BACKPACK)
 				ret = RET_NOERROR;
 			break;
 		case SLOT_ARMOR:
-			if(item->getSlotPosition() & SLOTP_ARMOR)
+			if (item->getSlotPosition() & SLOTP_ARMOR)
 				ret = RET_NOERROR;
 			break;
 		case SLOT_RIGHT:
-			if(item->getSlotPosition() & SLOTP_RIGHT)
+			if (item->getSlotPosition() & SLOTP_RIGHT)
 			{
-				if(!g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
+				if (!g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
 				{
-					if(!item->isWeapon() || (item->getWeaponType() != WEAPON_SHIELD && !item->isDualWield()))
+					if (!item->isWeapon() || (item->getWeaponType() != WEAPON_SHIELD && !item->isDualWield()))
 						ret = RET_NOTPOSSIBLE;
-					else if(inventory[SLOT_LEFT] && inventory[SLOT_LEFT]->getSlotPosition() & SLOTP_TWO_HAND)
+					else if (inventory[SLOT_LEFT] && inventory[SLOT_LEFT]->getSlotPosition() & SLOTP_TWO_HAND)
 						ret = RET_DROPTWOHANDEDITEM;
 					else
 						ret = RET_NOERROR;
 				}
-				else if(item->getSlotPosition() & SLOTP_TWO_HAND)
+				else if (item->getSlotPosition() & SLOTP_TWO_HAND)
 				{
-					if(inventory[SLOT_LEFT] && inventory[SLOT_LEFT] != item)
+					if (inventory[SLOT_LEFT] && inventory[SLOT_LEFT] != item)
 						ret = RET_BOTHHANDSNEEDTOBEFREE;
 					else
 						ret = RET_NOERROR;
 				}
-				else if(inventory[SLOT_LEFT])
+				else if (inventory[SLOT_LEFT])
 				{
 					const Item* leftItem = inventory[SLOT_LEFT];
 					WeaponType_t type = item->getWeaponType(), leftType = leftItem->getWeaponType();
-					if(leftItem->getSlotPosition() & SLOTP_TWO_HAND)
+					if (leftItem->getSlotPosition() & SLOTP_TWO_HAND)
 						ret = RET_DROPTWOHANDEDITEM;
-					else if(item == leftItem && item->getItemCount() == count)
+					else if (item == leftItem && item->getItemCount() == count)
 						ret = RET_NOERROR;
-					else if(leftType == WEAPON_SHIELD && type == WEAPON_SHIELD)
+					else if (leftType == WEAPON_SHIELD && type == WEAPON_SHIELD)
 						ret = RET_CANONLYUSEONESHIELD;
-					else if(!leftItem->isWeapon() || !item->isWeapon() ||
+					else if (!leftItem->isWeapon() || !item->isWeapon() ||
 						leftType == WEAPON_AMMO || type == WEAPON_AMMO ||
 						leftType == WEAPON_SHIELD || type == WEAPON_SHIELD ||
 						(leftItem->isDualWield() && item->isDualWield()))
@@ -2753,35 +2760,35 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 			}
 			break;
 		case SLOT_LEFT:
-			if(item->getSlotPosition() & SLOTP_LEFT)
+			if (item->getSlotPosition() & SLOTP_LEFT)
 			{
-				if(!g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
+				if (!g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
 				{
-					if(!item->isWeapon() || item->getWeaponType() == WEAPON_SHIELD)
+					if (!item->isWeapon() || item->getWeaponType() == WEAPON_SHIELD)
 						ret = RET_NOTPOSSIBLE;
-					else if(inventory[SLOT_RIGHT] && item->getSlotPosition() & SLOTP_TWO_HAND)
+					else if (inventory[SLOT_RIGHT] && item->getSlotPosition() & SLOTP_TWO_HAND)
 						ret = RET_BOTHHANDSNEEDTOBEFREE;
 					else
 						ret = RET_NOERROR;
 				}
-				else if(item->getSlotPosition() & SLOTP_TWO_HAND)
+				else if (item->getSlotPosition() & SLOTP_TWO_HAND)
 				{
-					if(inventory[SLOT_RIGHT] && inventory[SLOT_RIGHT] != item)
+					if (inventory[SLOT_RIGHT] && inventory[SLOT_RIGHT] != item)
 						ret = RET_BOTHHANDSNEEDTOBEFREE;
 					else
 						ret = RET_NOERROR;
 				}
-				else if(inventory[SLOT_RIGHT])
+				else if (inventory[SLOT_RIGHT])
 				{
 					const Item* rightItem = inventory[SLOT_RIGHT];
 					WeaponType_t type = item->getWeaponType(), rightType = rightItem->getWeaponType();
-					if(rightItem->getSlotPosition() & SLOTP_TWO_HAND)
+					if (rightItem->getSlotPosition() & SLOTP_TWO_HAND)
 						ret = RET_DROPTWOHANDEDITEM;
-					else if(item == rightItem && item->getItemCount() == count)
+					else if (item == rightItem && item->getItemCount() == count)
 						ret = RET_NOERROR;
-					else if(rightType == WEAPON_SHIELD && type == WEAPON_SHIELD)
+					else if (rightType == WEAPON_SHIELD && type == WEAPON_SHIELD)
 						ret = RET_CANONLYUSEONESHIELD;
-					else if(!rightItem->isWeapon() || !item->isWeapon() ||
+					else if (!rightItem->isWeapon() || !item->isWeapon() ||
 						rightType == WEAPON_AMMO || type == WEAPON_AMMO ||
 						rightType == WEAPON_SHIELD || type == WEAPON_SHIELD ||
 						(rightItem->isDualWield() && item->isDualWield()))
@@ -2794,19 +2801,19 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 			}
 			break;
 		case SLOT_LEGS:
-			if(item->getSlotPosition() & SLOTP_LEGS)
+			if (item->getSlotPosition() & SLOTP_LEGS)
 				ret = RET_NOERROR;
 			break;
 		case SLOT_FEET:
-			if(item->getSlotPosition() & SLOTP_FEET)
+			if (item->getSlotPosition() & SLOTP_FEET)
 				ret = RET_NOERROR;
 			break;
 		case SLOT_RING:
-			if(item->getSlotPosition() & SLOTP_RING)
+			if (item->getSlotPosition() & SLOTP_RING)
 				ret = RET_NOERROR;
 			break;
 		case SLOT_AMMO:
-			if(item->getSlotPosition() & SLOTP_AMMO || g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
+			if (item->getSlotPosition() & SLOTP_AMMO || g_config.getBool(ConfigManager::CLASSIC_EQUIPMENT_SLOTS))
 				ret = RET_NOERROR;
 			break;
 		case SLOT_WHEREEVER:
@@ -2818,28 +2825,28 @@ ReturnValue Player::__queryAdd(int32_t index, const Thing* thing, uint32_t count
 			break;
 	}
 
-		Player* self = const_cast<Player*>(this);
-	if(ret == RET_NOERROR)
+	Player* self = const_cast<Player*>(this);
+	if (ret == RET_NOERROR)
 	{
 		//need an exchange with source?
 		Item* tmpItem = NULL;
-		if((tmpItem = getInventoryItem((slots_t)index)) && (!tmpItem->isStackable() || tmpItem->getID() != item->getID()))
+		if ((tmpItem = getInventoryItem((slots_t)index)) && (!tmpItem->isStackable() || tmpItem->getID() != item->getID()))
 			return RET_NEEDEXCHANGE;
 
-		if(!g_moveEvents->onPlayerEquip(self, const_cast<Item*>(item), (slots_t)index, true))
+		if (!g_moveEvents->onPlayerEquip(self, const_cast<Item*>(item), (slots_t)index, true))
 			return RET_CANNOTBEDRESSED;
 	}
 
-	if((ret == RET_NOERROR || ret == RET_NOTENOUGHROOM) && !hasCapacity(item, count)) //check if enough capacity
+	if ((ret == RET_NOERROR || ret == RET_NOTENOUGHROOM) && !hasCapacity(item, count)) //check if enough capacity
 		return RET_NOTENOUGHCAPACITY;
 
-	if(index == SLOT_LEFT || index == SLOT_RIGHT)
+	if (index == SLOT_LEFT || index == SLOT_RIGHT)
 	{
-		if(ret == RET_NOERROR && item->getWeaponType() != WEAPON_NONE)
+		if (ret == RET_NOERROR && item->getWeaponType() != WEAPON_NONE)
 			self->setLastAttack(OTSYS_TIME());
 
 		Item* tmpItem = inventory[(slots_t)index];
-		if(ret == RET_BOTHHANDSNEEDTOBEFREE && g_game.internalAddItem(
+		if (ret == RET_BOTHHANDSNEEDTOBEFREE && g_game.internalAddItem(
 			NULL, self, tmpItem, INDEX_WHEREEVER) == RET_NOERROR)
 		{
 			self->sendRemoveInventoryItem((slots_t)index, tmpItem);
@@ -2893,7 +2900,7 @@ ReturnValue Player::__queryMaxCount(int32_t index, const Thing* thing, uint32_t 
 	return RET_NOERROR;
 }
 
-ReturnValue Player::__queryRemove(const Thing* thing, uint32_t count, uint32_t flags) const
+ReturnValue Player::__queryRemove(const Thing* thing, uint32_t count, uint32_t flags, Creature*) const
 {
 	int32_t index = __getIndexOfThing(thing);
 	if(index == -1)
@@ -2915,25 +2922,34 @@ ReturnValue Player::__queryRemove(const Thing* thing, uint32_t count, uint32_t f
 Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** destItem,
 	uint32_t& flags)
 {
-	if(!index /*drop to capacity window*/ || index == INDEX_WHEREEVER)
+	if (!index /*drop to capacity window*/ || index == INDEX_WHEREEVER)
 	{
 		*destItem = NULL;
 		const Item* item = thing->getItem();
-		if(!item)
+		if (!item)
 			return this;
+
+		bool autoStack = (flags & FLAG_IGNOREAUTOSTACK) != FLAG_IGNOREAUTOSTACK;
+		if ((!autoStack || !item->isStackable()) && backpack.first &&
+			backpack.first->__queryAdd(backpack.second, item, item->getItemCount(), flags))
+		{
+			index = backpack.second;
+			if (backpack.second != INDEX_WHEREEVER)
+				++backpack.second;
+
+			return backpack.first;
+		}
 
 		std::list<std::pair<Container*, int32_t> > containers;
 		std::list<std::pair<Cylinder*, int32_t> > freeSlots;
-
-		bool autoStack = !((flags & FLAG_IGNOREAUTOSTACK) == FLAG_IGNOREAUTOSTACK);
-		for(int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
+		for (int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
 		{
-			if(Item* invItem = inventory[i])
+			if (Item* invItem = inventory[i])
 			{
-				if(invItem == item || invItem == tradeItem)
+				if (invItem == item || invItem == tradeItem)
 					continue;
 
-				if(autoStack && item->isStackable() && __queryAdd(i, item, item->getItemCount(), 0)
+				if (autoStack && item->isStackable() && __queryAdd(i, item, item->getItemCount(), 0)
 					== RET_NOERROR && invItem->getID() == item->getID() && invItem->getItemCount() < 100)
 				{
 					*destItem = invItem;
@@ -2941,21 +2957,22 @@ Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** 
 					return this;
 				}
 
-				if(Container* container = invItem->getContainer())
+				if (Container* container = invItem->getContainer())
 				{
-					if(!autoStack && container->__queryAdd(INDEX_WHEREEVER,
-						item, item->getItemCount(), flags) == RET_NOERROR)
+					if (!autoStack && container->__queryAdd(
+						INDEX_WHEREEVER, item, item->getItemCount(), flags) == RET_NOERROR)
 					{
 						index = INDEX_WHEREEVER;
+						backpack = std::make_pair(container, index + 1);
 						return container;
 					}
 
 					containers.push_back(std::make_pair(container, 0));
 				}
 			}
-			else if(!autoStack)
+			else if (!autoStack)
 			{
-				if(__queryAdd(i, item, item->getItemCount(), 0) == RET_NOERROR)
+				if (__queryAdd(i, item, item->getItemCount(), 0) == RET_NOERROR)
 				{
 					index = i;
 					return this;
@@ -2966,23 +2983,23 @@ Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** 
 		}
 
 		int32_t deepness = g_config.getNumber(ConfigManager::PLAYER_DEEPNESS);
-		while(!containers.empty())
+		while (!containers.empty())
 		{
 			Container* tmpContainer = containers.front().first;
 			int32_t level = containers.front().second;
 
 			containers.pop_front();
-			if(!tmpContainer)
+			if (!tmpContainer)
 				continue;
 
-			for(uint32_t n = 0; n < tmpContainer->capacity(); ++n)
+			for (uint32_t n = 0; n < tmpContainer->capacity(); ++n)
 			{
-				if(Item* tmpItem = tmpContainer->getItem(n))
+				if (Item* tmpItem = tmpContainer->getItem(n))
 				{
-					if(tmpItem == item || tmpItem == tradeItem)
+					if (tmpItem == item || tmpItem == tradeItem)
 						continue;
 
-					if(autoStack && item->isStackable() && tmpContainer->__queryAdd(n, item, item->getItemCount(),
+					if (autoStack && item->isStackable() && tmpContainer->__queryAdd(n, item, item->getItemCount(),
 						0) == RET_NOERROR && tmpItem->getID() == item->getID() && tmpItem->getItemCount() < 100)
 					{
 						index = n;
@@ -2990,26 +3007,28 @@ Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** 
 						return tmpContainer;
 					}
 
-					if(Container* container = tmpItem->getContainer())
+					if (Container* container = tmpItem->getContainer())
 					{
-						if(!autoStack && container->__queryAdd(INDEX_WHEREEVER,
+						if (!autoStack && container->__queryAdd(INDEX_WHEREEVER,
 							item, item->getItemCount(), flags) == RET_NOERROR)
 						{
 							index = INDEX_WHEREEVER;
+							backpack = std::make_pair(container, index + 1);
 							return container;
 						}
 
-						if(deepness < 0 || level < deepness)
+						if (deepness < 0 || level < deepness)
 							containers.push_back(std::make_pair(container, level + 1));
 					}
 				}
 				else
 				{
-					if(!autoStack)
+					if (!autoStack)
 					{
-						if(tmpContainer->__queryAdd(n, item, item->getItemCount(), 0) == RET_NOERROR)
+						if (tmpContainer->__queryAdd(n, item, item->getItemCount(), 0) == RET_NOERROR)
 						{
 							index = n;
+							backpack = std::make_pair(tmpContainer, index + 1);
 							return tmpContainer;
 						}
 					}
@@ -3021,18 +3040,18 @@ Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** 
 			}
 		}
 
-		if(autoStack)
+		if (autoStack)
 		{
-			while(!freeSlots.empty())
+			while (!freeSlots.empty())
 			{
 				Cylinder* tmpCylinder = freeSlots.front().first;
 				int32_t i = freeSlots.front().second;
 
 				freeSlots.pop_front();
-				if(!tmpCylinder)
+				if (!tmpCylinder)
 					continue;
 
-				if(tmpCylinder->__queryAdd(i, item, item->getItemCount(), flags) == RET_NOERROR)
+				if (tmpCylinder->__queryAdd(i, item, item->getItemCount(), flags) == RET_NOERROR)
 				{
 					index = i;
 					return tmpCylinder;
@@ -3044,10 +3063,10 @@ Cylinder* Player::__queryDestination(int32_t& index, const Thing* thing, Item** 
 	}
 
 	Thing* destThing = __getThing(index);
-	if(destThing)
+	if (destThing)
 		*destItem = destThing->getItem();
 
-	if(Cylinder* subCylinder = dynamic_cast<Cylinder*>(destThing))
+	if (Cylinder* subCylinder = dynamic_cast<Cylinder*>(destThing))
 	{
 		index = INDEX_WHEREEVER;
 		*destItem = NULL;

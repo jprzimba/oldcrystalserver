@@ -238,6 +238,9 @@ bool ConfigManager::load()
 	m_integer[ROOK_TOWN]	= getGlobalNumber("rookTownId", 1);
 	m_integer[ROOK_LEVELTO] = getGlobalNumber("rookLevelToGetRooked", 5);
 	m_integer[ROOK_TOLEVEL] = getGlobalNumber("rookLevelToLeaveRook", 8);
+	m_integer[MAIL_ATTEMPTS] = getGlobalNumber("mailMaxAttempts", 20);
+	m_integer[MAIL_BLOCK] = getGlobalNumber("mailBlockPeriod", 3600000);
+	m_integer[MAIL_ATTEMPTS_FADE] = getGlobalNumber("mailAttemptsFadeTime", 600000);
 
 	m_double[RATE_EXPERIENCE] = getGlobalDouble("rateExperience", 1);
 	m_double[RATE_SKILL] = getGlobalDouble("rateSkill", 1);
@@ -337,6 +340,7 @@ bool ConfigManager::load()
 	m_boolean[CHRISTMAS_DECO] = getGlobalBool("useChristmasDecoration", false);
 	m_boolean[HOUSE_SKIP_INIT_RENT] = getGlobalBool("houseSkipInitialRent", true);
 	m_boolean[ROOK_SYSTEM]	= getGlobalBool("useRookSystem", false);
+	m_boolean[HOUSE_PROTECTION] = getGlobalBool("houseProtection", true);
 
 	m_loaded = true;
 	return true;

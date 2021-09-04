@@ -60,17 +60,17 @@ class Cylinder
 		virtual const Creature* getCreature() const = 0;
 
 		/**
-		  * Query if the cylinder can add an object
-		  * \param index points to the destination index (inventory slot/container position)
-			* -1 is a internal value and means add to a empty position, with no destItem
-		  * \param thing the object to move/add
-		  * \param count is the amount that we want to move/add
-		  * \param flags if FLAG_CHILDISOWNER if set the query is from a child-cylinder (check cap etc.)
-			* if FLAG_NOLIMIT is set blocking items/container limits is ignored
-		  * \returns ReturnValue holds the return value
-		  */
+		* Query if the cylinder can add an object
+		* \param index points to the destination index (inventory slot/container position)
+		* -1 is a internal value and means add to a empty position, with no destItem
+		* \param thing the object to move/add
+		* \param count is the amount that we want to move/add
+		* \param flags if FLAG_CHILDISOWNER if set the query is from a child-cylinder (check cap etc.)
+		* if FLAG_NOLIMIT is set blocking items/container limits is ignored
+		* \returns ReturnValue holds the return value
+		*/
 		virtual ReturnValue __queryAdd(int32_t index, const Thing* Item, uint32_t count,
-			uint32_t flags) const = 0;
+			uint32_t flags, Creature* actor = NULL) const = 0;
 
 		/**
 		  * Query the cylinder how much it can accept
@@ -86,13 +86,13 @@ class Cylinder
 			uint32_t& maxQueryCount, uint32_t flags) const = 0;
 
 		/**
-		  * Query if the cylinder can remove an object
-		  * \param item the object to move/remove
-		  * \param count is the amount that we want to remove
-		  * \param flags optional flags to modifiy the default behaviour
-		  * \returns ReturnValue holds the return value
-		  */
-		virtual ReturnValue __queryRemove(const Thing* thing, uint32_t count, uint32_t flags) const = 0;
+		* Query if the cylinder can remove an object
+		* \param item the object to move/remove
+		* \param count is the amount that we want to remove
+		* \param flags optional flags to modifiy the default behaviour
+		* \returns ReturnValue holds the return value
+		*/
+		virtual ReturnValue __queryRemove(const Thing* thing, uint32_t count, uint32_t flags, Creature* actor = NULL) const = 0;
 
 		/**
 		  * Query the destination cylinder
@@ -241,12 +241,15 @@ class VirtualCylinder : public Cylinder
 		virtual Creature* getCreature() {return NULL;}
 		virtual const Creature* getCreature() const {return NULL;}
 
-		virtual ReturnValue __queryAdd(int32_t index, const Thing* thing, uint32_t count,
-			uint32_t flags) const {return RET_NOTPOSSIBLE;}
+		virtual ReturnValue __queryAdd(int32_t, const Thing*, uint32_t,
+			uint32_t, Creature* = NULL) const {
+			return RET_NOTPOSSIBLE;
+		}
 		virtual ReturnValue __queryMaxCount(int32_t index, const Thing* thing, uint32_t count,
 			uint32_t& maxQueryCount, uint32_t flags) const {return RET_NOTPOSSIBLE;}
-		virtual ReturnValue __queryRemove(const Thing* thing, uint32_t count,
-			uint32_t flags) const {return (thing->getParent() == this ? RET_NOERROR : RET_NOTPOSSIBLE);}
+		virtual ReturnValue __queryRemove(const Thing* thing, uint32_t, uint32_t, Creature* = NULL) const {
+			return (thing->getParent() == this ? RET_NOERROR : RET_NOTPOSSIBLE);
+		}
 		virtual Cylinder* __queryDestination(int32_t& index, const Thing* thing, Item** destItem,
 			uint32_t& flags) {return NULL;}
 

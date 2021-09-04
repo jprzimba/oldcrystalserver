@@ -268,9 +268,10 @@ void Container::onRemoveContainerItem(uint32_t index, Item* item)
 }
 
 ReturnValue Container::__queryAdd(int32_t index, const Thing* thing, uint32_t count,
-	uint32_t flags) const
+	uint32_t flags, Creature* actor/* = NULL*/) const
 {
-	if(((flags & FLAG_CHILDISOWNER) == FLAG_CHILDISOWNER))
+	bool childIsOwner = hasBitSet(FLAG_CHILDISOWNER, flags);
+	if (childIsOwner)
 	{
 		//a child container is querying, since we are the top container (not carried by a player)
 		//just return with no error.
@@ -296,12 +297,12 @@ ReturnValue Container::__queryAdd(int32_t index, const Thing* thing, uint32_t co
 		}
 	}
 
-	if(index == INDEX_WHEREEVER && !((flags & FLAG_NOLIMIT) == FLAG_NOLIMIT) && full())
+	if (index == INDEX_WHEREEVER && size() >= capacity() && !hasBitSet(FLAG_NOLIMIT, flags))
 		return RET_CONTAINERNOTENOUGHROOM;
 
 	const Cylinder* topParent = getTopParent();
-	if(topParent != this)
-		return topParent->__queryAdd(INDEX_WHEREEVER, item, count, flags | FLAG_CHILDISOWNER);
+	if (topParent != this)
+		return topParent->__queryAdd(INDEX_WHEREEVER, item, count, flags | FLAG_CHILDISOWNER, actor);
 
 	return RET_NOERROR;
 }
@@ -335,7 +336,7 @@ ReturnValue Container::__queryMaxCount(int32_t index, const Thing* thing, uint32
 				if((*cit) != item && (*cit)->getID() == item->getID() && (*cit)->getItemCount() < 100)
 				{
 					uint32_t remainder = (100 - (*cit)->getItemCount());
-					if(__queryAdd(slotIndex, item, remainder, flags) == RET_NOERROR)
+					if (__queryAdd(slotIndex, item, remainder, flags) == RET_NOERROR)
 						n += remainder;
 				}
 			}
@@ -369,7 +370,7 @@ ReturnValue Container::__queryMaxCount(int32_t index, const Thing* thing, uint32
 	return RET_NOERROR;
 }
 
-ReturnValue Container::__queryRemove(const Thing* thing, uint32_t count, uint32_t flags) const
+ReturnValue Container::__queryRemove(const Thing* thing, uint32_t count, uint32_t flags, Creature*) const
 {
 	int32_t index = __getIndexOfThing(thing);
 	if(index == -1)
@@ -391,23 +392,24 @@ ReturnValue Container::__queryRemove(const Thing* thing, uint32_t count, uint32_
 Cylinder* Container::__queryDestination(int32_t& index, const Thing* thing, Item** destItem,
 	uint32_t& flags)
 {
-	if(index == 254 /*move up*/)
+	if (index == 254 /*move up*/)
 	{
 		index = INDEX_WHEREEVER;
 		*destItem = NULL;
 
 		Container* parentContainer = dynamic_cast<Container*>(getParent());
-		if(parentContainer)
+		if (parentContainer)
 			return parentContainer;
 
 		return this;
 	}
-	else if(index == 255 /*add wherever*/)
+
+	if (index == 255 /*add wherever*/)
 	{
 		index = INDEX_WHEREEVER;
 		*destItem = NULL;
 	}
-	else if(index >= (int32_t)capacity())
+	else if (index >= (int32_t)capacity())
 	{
 		/*
 		if you have a container, maximize it to show all 20 slots
@@ -422,17 +424,17 @@ Cylinder* Container::__queryDestination(int32_t& index, const Thing* thing, Item
 	}
 
 	const Item* item = thing->getItem();
-	if(!item)
+	if (!item)
 		return this;
 
-	if(!((flags & FLAG_IGNOREAUTOSTACK) == FLAG_IGNOREAUTOSTACK)
+	if (!((flags & FLAG_IGNOREAUTOSTACK) == FLAG_IGNOREAUTOSTACK)
 		&& item->isStackable() && item->getParent() != this)
 	{
 		//try to find a suitable item to stack with
 		uint32_t n = itemlist.size();
-		for(ItemList::reverse_iterator cit = itemlist.rbegin(); cit != itemlist.rend(); ++cit, --n)
+		for (ItemList::reverse_iterator cit = itemlist.rbegin(); cit != itemlist.rend(); ++cit, --n)
 		{
-			if((*cit)->getID() == item->getID() && (*cit)->getItemCount() < 100)
+			if ((*cit)->getID() == item->getID() && (*cit)->getItemCount() < 100)
 			{
 				*destItem = (*cit);
 				index = n;
@@ -441,13 +443,13 @@ Cylinder* Container::__queryDestination(int32_t& index, const Thing* thing, Item
 		}
 	}
 
-	if(index != INDEX_WHEREEVER)
+	if (index != INDEX_WHEREEVER)
 	{
 		Thing* destThing = __getThing(index);
-		if(destThing)
+		if (destThing)
 			*destItem = destThing->getItem();
 
-		if(Cylinder* subCylinder = dynamic_cast<Cylinder*>(*destItem))
+		if (Cylinder* subCylinder = dynamic_cast<Cylinder*>(*destItem))
 		{
 			index = INDEX_WHEREEVER;
 			*destItem = NULL;

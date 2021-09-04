@@ -47,8 +47,8 @@ class Depot : public Container
 		virtual Creature* getCreature() {return NULL;}
 		virtual const Creature* getCreature() const {return NULL;}
 
-		virtual ReturnValue __queryAdd(int32_t index, const Thing* thing, uint32_t count,
-			uint32_t flags) const;
+		ReturnValue __queryAdd(int32_t index, const Thing* thing, uint32_t count,
+			uint32_t flags, Creature* actor = NULL) const;
 
 		virtual ReturnValue __queryMaxCount(int32_t index, const Thing* thing, uint32_t count,
 			uint32_t& maxQueryCount, uint32_t flags) const;
