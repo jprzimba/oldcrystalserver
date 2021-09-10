@@ -427,18 +427,26 @@ Cylinder* Container::__queryDestination(int32_t& index, const Thing* thing, Item
 	if (!item)
 		return this;
 
-	if (!((flags & FLAG_IGNOREAUTOSTACK) == FLAG_IGNOREAUTOSTACK)
-		&& item->isStackable() && item->getParent() != this)
+	bool autoStack = !((flags & FLAG_IGNOREAUTOSTACK) == FLAG_IGNOREAUTOSTACK);
+	if (autoStack)
 	{
-		//try to find a suitable item to stack with
-		uint32_t n = itemlist.size();
-		for (ItemList::reverse_iterator cit = itemlist.rbegin(); cit != itemlist.rend(); ++cit, --n)
+		if (item->isStackable())
 		{
-			if ((*cit)->getID() == item->getID() && (*cit)->getItemCount() < 100)
+			if (item->getParent() != this)
 			{
-				*destItem = (*cit);
-				index = n;
-				return this;
+				//try find a suitable item to stack with
+				uint32_t n = 0;
+				for (ItemList::iterator cit = itemlist.begin(); cit != itemlist.end(); ++cit)
+				{
+					if ((*cit) != item && (*cit)->getID() == item->getID() && (*cit)->getItemCount() < 100)
+					{
+						*destItem = (*cit);
+						index = n;
+						return this;
+					}
+
+					++n;
+				}
 			}
 		}
 	}
@@ -449,7 +457,9 @@ Cylinder* Container::__queryDestination(int32_t& index, const Thing* thing, Item
 		if (destThing)
 			*destItem = destThing->getItem();
 
-		if (Cylinder* subCylinder = dynamic_cast<Cylinder*>(*destItem))
+		Cylinder* subCylinder = dynamic_cast<Cylinder*>(*destItem);
+
+		if (subCylinder)
 		{
 			index = INDEX_WHEREEVER;
 			*destItem = NULL;
