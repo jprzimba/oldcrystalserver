@@ -346,6 +346,7 @@ bool ConfigManager::load()
 	m_boolean[HOUSE_SKIP_INIT_RENT] = getGlobalBool("houseSkipInitialRent", true);
 	m_boolean[ROOK_SYSTEM]	= getGlobalBool("useRookSystem", false);
 	m_boolean[HOUSE_PROTECTION] = getGlobalBool("houseProtection", true);
+	m_boolean[HARDCOREPVP_INVISIBLE_ROKEN_STEALTHRING] = getGlobalBool("hardcorePvPInvisibleBrokenStealthRing", false);
 
 	m_loaded = true;
 	return true;

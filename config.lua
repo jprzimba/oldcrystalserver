@@ -146,6 +146,7 @@
 	optionalWarAttackableAlly = false
 	fistBaseAttack = 7
 	recoverManaAfterDeathInPvPZone = false
+	hardcorePvPInvisibleBrokenStealthRing = false
 
 	-- Spells
 	formulaLevel = 5.0

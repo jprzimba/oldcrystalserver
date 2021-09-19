@@ -316,6 +316,7 @@ class ConfigManager
 			ROOK_SYSTEM,
 			CLOSE_INSTANCE_ON_SHUTDOWN,
 			SAVE_PLAYER_DATA,
+			HARDCOREPVP_INVISIBLE_ROKEN_STEALTHRING,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

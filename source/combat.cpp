@@ -605,8 +605,22 @@ bool Combat::CombatConditionFunc(Creature* caster, Creature* target, const Comba
 
 bool Combat::CombatDispelFunc(Creature* caster, Creature* target, const CombatParams& params, void* data)
 {
-	if (!target->hasCondition(params.dispelType))
+	if (!target->hasCondition(params.dispelType, -1, false))
 		return false;
+
+	if (g_config.getBool(ConfigManager::HARDCOREPVP_INVISIBLE_ROKEN_STEALTHRING))
+	{
+		if (params.dispelType == CONDITION_INVISIBLE)
+		{
+			if (Player* player = target->getPlayer())
+			{
+				Item* item = player->getEquippedItem(SLOT_RING);
+				if (item && item->getID() == ITEM_STEALTH_RING && (g_game.getWorldType() == WORLDTYPE_HARDCORE
+					|| player->getTile()->hasFlag(TILESTATE_HARDCOREZONE)) && random_range(1, 100) <= 10)
+					g_game.internalRemoveItem(NULL, item);
+			}
+		}
+	}
 
 	target->removeCondition(caster, params.dispelType);
 	return true;
