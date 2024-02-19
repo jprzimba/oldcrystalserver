@@ -28,7 +28,6 @@
 #include <list>
 #include <map>
 #include <limits>
-#include <chrono>
 
 #include <boost/version.hpp>
 #include <boost/utility.hpp>
@@ -115,8 +114,9 @@ inline void OTSYS_SLEEP(int32_t n)
 
 inline int64_t OTSYS_TIME()
 {
-	using namespace std::chrono;
-	return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	timeb t;
+	ftime(&t);
+	return ((int64_t)t.millitm) + ((int64_t)t.time) * 1000;
 }
 
 inline uint32_t swap_uint32(uint32_t val)

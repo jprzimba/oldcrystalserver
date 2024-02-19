@@ -240,7 +240,7 @@ bool ProtocolLogin::parseFirstPacket(NetworkMessage& msg)
 		}
 
 		//Add premium days
-		if (g_config.getBool(ConfigManager::FREE_PREMIUM))
+		if(g_config.getBool(ConfigManager::FREE_PREMIUM))
 			output->put<uint16_t>(GRATIS_PREMIUM);
 		else
 			output->put<uint16_t>(account.premiumDays);

@@ -332,43 +332,25 @@ uint64_t IOLoginData::createAccount(std::string name, std::string password)
 
 void IOLoginData::removePremium(Account account)
 {
-	bool save = false;
 	uint64_t timeNow = time(NULL);
-	if (account.premiumDays != 0 && account.premiumDays != (uint16_t)GRATIS_PREMIUM)
+	if(account.premiumDays > 0 && account.premiumDays < 65535)
 	{
-		if (account.lastDay == 0)
+		uint32_t days = (uint32_t)std::ceil((timeNow - account.lastDay) / 86400);
+		if(days > 0)
 		{
-			account.lastDay = timeNow;
-			save = true;
-		}
-		else
-		{
-			uint32_t days = (timeNow - account.lastDay) / 86400;
-			if (days > 0)
-			{
-				if (account.premiumDays >= days)
-				{
-					account.premiumDays -= days;
-					uint32_t remainder = (timeNow - account.lastDay) % 86400;
-					account.lastDay = timeNow - remainder;
-				}
-				else
-				{
-					account.premiumDays = 0;
-					account.lastDay = 0;
-				}
-				save = true;
-			}
-		}
-	}
-	else if (account.lastDay != 0)
-	{
-		account.lastDay = 0;
-		save = true;
-	}
+			if(account.premiumDays >= days)
+				account.premiumDays -= days;
+			else
+				account.premiumDays = 0;
 
-	if (save && !saveAccount(account))
-		std::clog << "ERROR: Failed to save account: " << account.name << "!" << std::endl;
+			account.lastDay = timeNow;
+		}
+	}
+	else
+		account.lastDay = timeNow;
+
+	if(!saveAccount(account))
+		std::clog << "> ERROR: Failed to save account: " << account.name << "!" << std::endl;
 }
 
 const Group* IOLoginData::getPlayerGroupByAccount(uint32_t accountId)
@@ -1344,7 +1326,7 @@ bool IOLoginData::isPremium(uint32_t guid)
 
 	const uint32_t premium = result->getDataInt("premdays");
 	result->free();
-	return premium > 0;
+	return premium;
 }
 
 bool IOLoginData::playerExists(uint32_t guid, bool multiworld /*= false*/, bool checkCache /*= true*/)

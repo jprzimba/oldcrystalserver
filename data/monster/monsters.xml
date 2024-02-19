@@ -417,19 +417,14 @@
 	<monster name="Badger" file="Misc/badger.xml"/>
 	<monster name="Bat" file="Misc/bat.xml"/>
 	<monster name="Deer" file="Misc/deer.xml"/>
-	<monster name="Doom Deer" file="Misc/doom deer.xml"/>
-	<monster name="Evil Sheep Lord" file="Misc/evil sheep lord.xml"/>
-	<monster name="Evil Sheep" file="Misc/evil sheep.xml"/>
 	<monster name="Hacker" file="Misc/hacker.xml"/>
 	<monster name="Halloween Hare" file="Misc/halloweenhare.xml"/>
 	<monster name="Hyaena" file="Misc/hyaena.xml"/>
-	<monster name="Killer Rabbit" file="Misc/killer rabbit.xml"/>
 	<monster name="Pig" file="Misc/pig.xml"/>
 	<monster name="Rabbit" file="Misc/rabbit.xml"/>
 	<monster name="Silver Rabbit" file="Misc/silver rabbit.xml"/>
 	<monster name="Skunk" file="Misc/skunk.xml"/>
 	<monster name="Squirrel" file="Misc/squirrel.xml"/>
-	<monster name="Vampire Pig" file="Misc/vampire pig.xml"/>
 
 	<!-- Monks -->
 	<monster name="Dark Monk" file="Monks/dark monk.xml"/>
