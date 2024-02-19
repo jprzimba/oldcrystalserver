@@ -1376,7 +1376,9 @@
 		<monster name="Fire Elemental" x="-14" y="-1" z="7" spawntime="60" />
 		<monster name="Demon" x="-10" y="-1" z="7" spawntime="60" />
 		<monster name="Demon" x="-3" y="1" z="7" spawntime="60" />
+		<monster name="Demon" x="3" y="1" z="7" spawntime="60" />
 		<monster name="Behemoth" x="-13" y="3" z="7" spawntime="60" />
+		<monster name="Behemoth" x="-10" y="3" z="7" spawntime="60" />
 		<monster name="Dragon Lord" x="12" y="3" z="7" spawntime="60" />
 		<monster name="Dragon Lord" x="17" y="3" z="7" spawntime="60" />
 		<monster name="Behemoth" x="2" y="4" z="7" spawntime="60" />
@@ -1395,6 +1397,7 @@
 		<monster name="Dragon Lord" x="9" y="13" z="7" spawntime="60" />
 		<monster name="Fire Elemental" x="11" y="13" z="7" spawntime="60" />
 		<monster name="Fire Elemental" x="-3" y="14" z="7" spawntime="60" />
+		<monster name="Behemoth" x="-6" y="15" z="7" spawntime="60" />
 		<monster name="Fire Elemental" x="4" y="15" z="7" spawntime="60" />
 	</spawn>
 	<spawn centerx="361" centery="551" centerz="7" radius="5">
@@ -2319,6 +2322,9 @@
 		<monster name="Dworc Venomsniper" x="-2" y="1" z="8" spawntime="60" />
 		<monster name="Dworc Fleshhunter" x="0" y="4" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="429" centery="448" centerz="8" radius="1">
+		<npc name="Jimbim" x="-1" y="0" z="8" spawntime="60" direction="2" />
+	</spawn>
 	<spawn centerx="543" centery="449" centerz="8" radius="5">
 		<monster name="Dworc Fleshhunter" x="1" y="-2" z="8" spawntime="60" />
 		<monster name="Dworc Fleshhunter" x="-3" y="0" z="8" spawntime="60" />
@@ -2334,6 +2340,32 @@
 	</spawn>
 	<spawn centerx="329" centery="451" centerz="8" radius="2">
 		<monster name="Quara Constrictor" x="0" y="0" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="413" centery="454" centerz="8" radius="5">
+		<monster name="Training Monk" x="-5" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-2" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="3" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-2" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="3" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="4" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="446" centery="454" centerz="8" radius="7">
+		<monster name="Training Monk" x="-3" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="2" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="7" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="4" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="345" centery="456" centerz="8" radius="2">
 		<monster name="Quara Constrictor" x="0" y="0" z="8" spawntime="60" />
@@ -2388,6 +2420,9 @@
 		<monster name="Larva" x="4" y="-3" z="8" spawntime="60" />
 		<monster name="Larva" x="0" y="2" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="429" centery="467" centerz="8" radius="1">
+		<npc name="Jimbim" x="-1" y="0" z="8" spawntime="60" direction="2" />
+	</spawn>
 	<spawn centerx="509" centery="467" centerz="8" radius="1">
 		<monster name="Rotworm" x="0" y="0" z="8" spawntime="40" />
 	</spawn>
@@ -2408,6 +2443,32 @@
 	<spawn centerx="382" centery="473" centerz="8" radius="5">
 		<npc name="Dark Rodo" x="0" y="0" z="8" spawntime="60" direction="2" />
 		<npc name="Seller" x="-5" y="4" z="8" spawntime="60" direction="2" />
+	</spawn>
+	<spawn centerx="413" centery="473" centerz="8" radius="5">
+		<monster name="Training Monk" x="-5" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-2" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="3" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-2" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="3" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="4" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="446" centery="473" centerz="8" radius="7">
+		<monster name="Training Monk" x="-3" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="2" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="7" y="-4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="-3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="3" z="8" spawntime="60" />
+		<monster name="Training Monk" x="-5" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="0" y="4" z="8" spawntime="60" />
+		<monster name="Training Monk" x="5" y="4" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="286" centery="474" centerz="8" radius="5">
 		<monster name="Larva" x="3" y="-4" z="8" spawntime="60" />
@@ -2625,6 +2686,8 @@
 		<monster name="Necromancer" x="0" y="-2" z="8" spawntime="40" />
 		<monster name="Skeleton" x="-2" y="0" z="8" spawntime="60" />
 		<monster name="Skeleton" x="2" y="0" z="8" spawntime="60" />
+		<monster name="Ghoul" x="-2" y="2" z="8" spawntime="60" />
+		<monster name="Ghoul" x="2" y="2" z="8" spawntime="60" />
 		<monster name="Demon Skeleton" x="0" y="3" z="8" spawntime="40" />
 	</spawn>
 	<spawn centerx="531" centery="539" centerz="8" radius="3">
@@ -2633,6 +2696,7 @@
 	</spawn>
 	<spawn centerx="437" centery="540" centerz="8" radius="2">
 		<monster name="Ghoul" x="0" y="-1" z="8" spawntime="40" />
+		<monster name="Ghoul" x="0" y="2" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="515" centery="540" centerz="8" radius="1">
 		<monster name="Dwarf" x="0" y="-1" z="8" spawntime="40" />
@@ -2640,6 +2704,7 @@
 	</spawn>
 	<spawn centerx="417" centery="542" centerz="8" radius="2">
 		<monster name="Ghoul" x="-1" y="0" z="8" spawntime="40" />
+		<monster name="Ghoul" x="0" y="2" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="571" centery="542" centerz="8" radius="5">
 		<monster name="Valkyrie" x="1" y="-4" z="8" spawntime="40" />
@@ -2681,8 +2746,15 @@
 		<monster name="Lich" x="3" y="10" z="8" spawntime="60" />
 		<monster name="Serpent Spawn" x="7" y="10" z="8" spawntime="60" />
 	</spawn>
+	<spawn centerx="459" centery="551" centerz="8" radius="1">
+		<monster name="Ghoul" x="0" y="0" z="8" spawntime="60" />
+	</spawn>
 	<spawn centerx="423" centery="552" centerz="8" radius="2">
 		<monster name="Ghoul" x="0" y="0" z="8" spawntime="40" />
+		<monster name="Ghoul" x="-1" y="2" z="8" spawntime="60" />
+	</spawn>
+	<spawn centerx="439" centery="553" centerz="8" radius="1">
+		<monster name="Ghoul" x="0" y="0" z="8" spawntime="60" />
 	</spawn>
 	<spawn centerx="442" centery="554" centerz="8" radius="2">
 		<monster name="Ghoul" x="0" y="-1" z="8" spawntime="40" />
