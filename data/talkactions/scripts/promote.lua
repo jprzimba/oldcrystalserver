@@ -1,42 +1,47 @@
 local config = {
-	broadcast = false
+    broadcast = false
 }
 
 function onSay(cid, words, param, channel)
-	if(param == '') then
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Command param required.")
-		return true
-	end
+    if param == '' then
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Command param required.")
+        return true
+    end
 
-	local pid = getPlayerByNameWildcard(param)
-	if(not pid) then
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Player " .. param .. " not found.")
-		return true
-	end
+    local targetPlayer = getPlayerByNameWildcard(param)
 
-	if(getPlayerAccess(pid) >= getPlayerAccess(cid)) then
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Cannot perform action.")
-		return true
-	end
+    if not targetPlayer then
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Player " .. param .. " not found.")
+        return true
+    end
 
-	local g = 1
-	if(words:sub(2, 2) == "d") then
-		g = -1
-	end
+    if getPlayerAccess(targetPlayer) >= getPlayerAccess(cid) then
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Cannot perform action.")
+        return true
+    end
 
-	local newId = getPlayerGroupId(pid) + g
-	if(newId <= 0 or not setPlayerGroupId(pid, newId)) then
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Cannot perform action.")
-		return true
-	end
+    local direction = 1
+    if words:sub(2, 2) == "d" then
+        direction = -1
+    end
 
-	local str = "been " .. (g == 1 and "promoted" or "demoted") .. " to " .. getGroupInfo(newId).name .. "."
-	if(not config.broadcast) then
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, param .. " has " .. str)
-	else
-		doBroadcastMessage(param .. " has " .. str, MESSAGE_EVENT_ADVANCE)
-	end
+    local newGroupId = getPlayerGroupId(targetPlayer) + direction
 
-	doPlayerSendTextMessage(pid, MESSAGE_EVENT_ADVANCE, "You have " .. str)
-	return true
+    if newGroupId <= 0 or not setPlayerGroupId(targetPlayer, newGroupId) then
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Cannot perform action.")
+        return true
+    end
+
+    local groupName = getGroupInfo(newGroupId).name
+    local actionType = (direction == 1) and "promoted" or "demoted"
+    local actionMessage = param .. " has been " .. actionType .. " to " .. groupName .. "."
+
+    if not config.broadcast then
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, actionMessage)
+    else
+        doBroadcastMessage(actionMessage, MESSAGE_EVENT_ADVANCE)
+    end
+
+    doPlayerSendTextMessage(targetPlayer, MESSAGE_EVENT_ADVANCE, "You have " .. actionMessage)
+    return true
 end

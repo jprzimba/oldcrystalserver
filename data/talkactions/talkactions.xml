@@ -45,7 +45,7 @@
 	<talkaction log="yes" words="/clean" access="3" event="script" value="clean.lua"/>
 	<talkaction log="yes" words="/reports" access="3" event="script" value="reports.lua"/>
 	<talkaction log="yes" words="/mc" access="3" event="script" value="multicheck.lua"/>
-	<talkaction log="yes" words="/wp" access="3" event="script" value="waypoints.lua"/>
+	<talkaction log="yes" words="!wp;/wp;!waypoint;/waypoint" access="3" event="script" value="waypoints.lua"/>
 
 	<!-- Senior Tutors -->
 	<talkaction log="yes" words="/notations" access="2" event="script" value="notations.lua"/>

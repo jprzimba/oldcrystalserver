@@ -1,10 +1,11 @@
 function onSay(cid, words, param, channel)
-	param = tonumber(param)
-	if(not param or param < 0 or param > CONST_ME_LAST) then
-		doPlayerSendCancel(cid, "Numeric param may not be lower than 0 and higher than " .. CONST_ME_LAST .. ".")
-		return true
-	end
+    local effectID = tonumber(param)
 
-	doSendMagicEffect(getCreaturePosition(cid), param)
-	return true
+    if not effectID or effectID < 0 or effectID > CONST_ME_LAST then
+        doPlayerSendCancel(cid, "Numeric param may not be lower than 0 and higher than " .. CONST_ME_LAST .. ".")
+        return true
+    end
+
+    doSendMagicEffect(getCreaturePosition(cid), effectID)
+    return true
 end

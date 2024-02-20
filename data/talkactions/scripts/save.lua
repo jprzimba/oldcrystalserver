@@ -1,28 +1,31 @@
 local savingEvent = 0
 
 function onSay(cid, words, param, channel)
-	local tmp = tonumber(param)
-	if(tmp ~= nil) then
-		stopEvent(savingEvent)
-		save(tmp * 60 * 1000)
-	elseif(param == '') then
-		doSaveServer()
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Server saved.")
-	else
-		local tid = getPlayerByNameWildcard(param)
-		if(not tid or (isPlayerGhost(tid) and getPlayerGhostAccess(tid) > getPlayerGhostAccess(cid))) then
-			doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Player " .. param .. " not found.")
-		else
-			doPlayerSave(tid)
-		end
-	end
+    local delayMinutes = tonumber(param)
 
-	return true
+    if delayMinutes then
+        stopEvent(savingEvent)
+        save(delayMinutes * 60 * 1000)
+    elseif param == '' then
+        doSaveServer()
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Server saved.")
+    else
+        local targetPlayer = getPlayerByNameWildcard(param)
+
+        if not targetPlayer or (isPlayerGhost(targetPlayer) and getPlayerGhostAccess(targetPlayer) > getPlayerGhostAccess(cid)) then
+            doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Player " .. param .. " not found.")
+        else
+            doPlayerSave(targetPlayer)
+        end
+    end
+
+    return true
 end
 
 function save(delay)
-	doSaveServer()
-	if(delay > 0) then
-		savingEvent = addEvent(save, delay, delay)
-	end
+    doSaveServer()
+
+    if delay > 0 then
+        savingEvent = addEvent(save, delay, delay)
+    end
 end

@@ -33,13 +33,14 @@
 ]
 
 [ Charges made
-	[ 0.1.8
+	[ 1.0
 		[ DISTRO
 			Game protocol 8.60. (Tryller)
 			War system. (Elf, Tryller)
 			Auto stacking items. (Elf)
 			Drop surprise bags from monsters configurable in config.lua. (Zorzin, Tryller)
 			Cristimas decoration. (Zorzin, Tryller)
+			Rework some talkactions. (Tryller)
 		]
 
 		[ MAP

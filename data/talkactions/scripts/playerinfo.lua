@@ -1,37 +1,57 @@
 function onSay(cid, words, param, channel)
-	if(param == '') then
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Command param required.")
-		return true
-	end
+    if param == '' then
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Command param required.")
+        return true
+    end
 
-	local pid = getPlayerByNameWildcard(param)
-	if(not pid or (isPlayerGhost(pid) and getPlayerGhostAccess(pid) > getPlayerGhostAccess(cid))) then
-		doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Player " .. param .. " not found.")
-		return true
-	end
+    local targetPlayer = getPlayerByNameWildcard(param)
 
-	local tmp = {accountId = getPlayerAccountId(pid), ip = getPlayerIp(pid)}
-	local pos = getCreaturePosition(pid)
-	doPlayerPopupFYI(cid, "Information about player" ..
-		"\nName: " .. getCreatureName(pid) ..
-		"\nGUID: " .. getPlayerGUID(pid) ..
-		"\nGroup: " .. getPlayerGroupName(pid) ..
-		"\nAccess: " .. getPlayerAccess(pid) ..
-		"\nVocation: " .. getVocationInfo(getPlayerVocation(pid)).name ..
-		"\nStatus:" ..
-			"\nLevel - " .. getPlayerLevel(pid) .. ", Magic Level - " .. getPlayerMagLevel(pid) .. ", Speed - " .. getCreatureSpeed(pid) ..
-			"\nHealth - " .. getCreatureHealth(pid) .. " / " .. getCreatureMaxHealth(pid) .. ", Mana - " .. getCreatureMana(pid) .. " / " .. getCreatureMaxMana(pid) ..
-			"\nSkills:" ..
-			"\nFist - " .. getPlayerSkillLevel(pid, SKILL_FIST) .. ", Club - " .. getPlayerSkillLevel(pid, SKILL_CLUB) .. ", Sword - " .. getPlayerSkillLevel(pid, SKILL_SWORD) .. ", Axe - " .. getPlayerSkillLevel(pid, SKILL_AXE) ..
-			"\nDistance - " .. getPlayerSkillLevel(pid, SKILL_DISTANCE) .. ", Shielding - " .. getPlayerSkillLevel(pid, SKILL_SHIELD) .. ", Fishing - " .. getPlayerSkillLevel(pid, SKILL_FISHING) ..
-		"\nCash:" ..
-			"\nCrystal - " .. getPlayerItemCount(pid, 2160) .. ", Platinum - " .. getPlayerItemCount(pid, 2152) .. ", Gold - " .. getPlayerItemCount(pid, 2148) ..
-			"\nBalance: " .. getPlayerBalance(pid) ..
-			"\nPosition: [X - " .. pos.x .. " | Y - " .. pos.y .. " | Z - " .. pos.z .. "]" ..
-		"\n\nInformation about account" ..
-		"\nName: " .. getPlayerAccount(pid) ..
-		"\nID: " .. tmp.accountId ..
-		"\nNotations: " .. getNotationsCount(tmp.accountId) ..
-		"\nIP: " .. doConvertIntegerToIp(tmp.ip) .. " (" .. tmp.ip .. ")")
-	return true
+    if not targetPlayer or (isPlayerGhost(targetPlayer) and getPlayerGhostAccess(targetPlayer) > getPlayerGhostAccess(cid)) then
+        doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Player " .. param .. " not found.")
+        return true
+    end
+
+    local targetPos = getCreaturePosition(targetPlayer)
+    local targetVocation = getVocationInfo(getPlayerVocation(targetPlayer))
+
+    local playerSkills = {
+        fist = getPlayerSkillLevel(targetPlayer, SKILL_FIST),
+        club = getPlayerSkillLevel(targetPlayer, SKILL_CLUB),
+        sword = getPlayerSkillLevel(targetPlayer, SKILL_SWORD),
+        axe = getPlayerSkillLevel(targetPlayer, SKILL_AXE),
+        distance = getPlayerSkillLevel(targetPlayer, SKILL_DISTANCE),
+        shielding = getPlayerSkillLevel(targetPlayer, SKILL_SHIELD),
+        fishing = getPlayerSkillLevel(targetPlayer, SKILL_FISHING)
+    }
+
+    local playerCash = {
+        crystal = getPlayerItemCount(targetPlayer, 2160),
+        platinum = getPlayerItemCount(targetPlayer, 2152),
+        gold = getPlayerItemCount(targetPlayer, 2148)
+    }
+
+    doPlayerPopupFYI(cid, "Information about player" ..
+        "\nName: " .. getCreatureName(targetPlayer) ..
+        "\nGUID: " .. getPlayerGUID(targetPlayer) ..
+        "\nGroup: " .. getPlayerGroupName(targetPlayer) ..
+        "\nAccess: " .. getPlayerAccess(targetPlayer) ..
+        "\nVocation: " .. targetVocation.name ..
+        "\n\nStatus:" ..
+        "\nLevel - " .. getPlayerLevel(targetPlayer) .. ", Magic Level - " .. getPlayerMagLevel(targetPlayer) .. ", Speed - " .. getCreatureSpeed(targetPlayer) ..
+        "\nHealth - " .. getCreatureHealth(targetPlayer) .. " / " .. getCreatureMaxHealth(targetPlayer) .. ", Mana - " .. getCreatureMana(targetPlayer) .. " / " .. getCreatureMaxMana(targetPlayer) ..
+        "\n\nSkills:" ..
+        "\nFist - " .. playerSkills.fist .. ", Club - " .. playerSkills.club .. ", Sword - " .. playerSkills.sword .. ", Axe - " .. playerSkills.axe ..
+        "\nDistance - " .. playerSkills.distance .. ", Shielding - " .. playerSkills.shielding .. ", Fishing - " .. playerSkills.fishing ..
+        "\n\nCash:" ..
+        "\nCrystal - " .. playerCash.crystal .. ", Platinum - " .. playerCash.platinum .. ", Gold - " .. playerCash.gold ..
+        "\nBalance: " .. getPlayerBalance(targetPlayer) ..
+        "\n\nPosition: [X - " .. targetPos.x .. " | Y - " .. targetPos.y .. " | Z - " .. targetPos.z .. "]" ..
+        "\n\nInformation about account" ..
+        "\nName: " .. getPlayerAccount(targetPlayer) ..
+        "\nID: " .. getPlayerAccountId(targetPlayer) ..
+        "\nNotations: " .. getNotationsCount(getPlayerAccountId(targetPlayer)) ..
+        "\nIP: " .. doConvertIntegerToIp(getPlayerIp(targetPlayer)) .. " (" .. getPlayerIp(targetPlayer) .. ")"
+    )
+
+    return true
 end

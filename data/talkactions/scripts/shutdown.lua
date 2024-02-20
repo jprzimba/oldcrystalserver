@@ -1,47 +1,50 @@
 local shutdownEvent = 0
 
 function onSay(cid, words, param, channel)
-	if(param == '') then
-		doSetGameState(GAMESTATE_SHUTDOWN)
-		return true
-	end
+    if param == '' then
+        doSetGameState(GAMESTATE_SHUTDOWN)
+        return true
+    end
 
-	if(isInArray({"cancel", "stop"}, param:lower())) then
-		stopEvent(shutdownEvent)
-		shutdownEvent = 0
-		return true
-	elseif(param:lower() == "kill") then
-		os.exit()
-		return true
-	end
+    local lowerParam = param:lower()
 
-	param = tonumber(param)
-	if(not param or param < 0) then
-		doPlayerSendCancel(cid, "Numeric param may not be lower than 0.")
-		return true
-	end
+    if isInArray({"cancel", "stop"}, lowerParam) then
+        stopEvent(shutdownEvent)
+        shutdownEvent = 0
+        return true
+    elseif lowerParam == "kill" then
+        os.exit()
+        return true
+    end
 
-	if(shutdownEvent ~= 0) then
-		stopEvent(shutdownEvent)
-	end
+    local minutes = tonumber(param)
 
-	return prepareShutdown(math.abs(math.ceil(param)))
+    if not minutes or minutes < 0 then
+        doPlayerSendCancel(cid, "Numeric param may not be lower than 0.")
+        return true
+    end
+
+    if shutdownEvent ~= 0 then
+        stopEvent(shutdownEvent)
+    end
+
+    return prepareShutdown(math.abs(math.ceil(minutes)))
 end
 
 function prepareShutdown(minutes)
-	if(minutes <= 0) then
-		doSetGameState(GAMESTATE_SHUTDOWN)
-		return false
-	end
+    if minutes <= 0 then
+        doSetGameState(GAMESTATE_SHUTDOWN)
+        return false
+    end
 
-	if(minutes == 1) then
-		doBroadcastMessage("Server is going down in " .. minutes .. " minute, please log out now!")
-	elseif(minutes <= 3) then
-		doBroadcastMessage("Server is going down in " .. minutes .. " minutes, please log out.")
-	else
-		doBroadcastMessage("Server is going down in " .. minutes .. " minutes.")
-	end
+    local message = "Server is going down in " .. minutes .. " " .. (minutes == 1 and "minute" or "minutes")
 
-	shutdownEvent = addEvent(prepareShutdown, 60000, minutes - 1)
-	return true
+    if minutes <= 3 then
+        doBroadcastMessage(message .. ", please log out.")
+    else
+        doBroadcastMessage(message .. ".")
+    end
+
+    shutdownEvent = addEvent(prepareShutdown, 60000, minutes - 1)
+    return true
 end
