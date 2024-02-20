@@ -1970,18 +1970,18 @@ const ItemType& Items::getItemIdByClientId(int32_t spriteId) const
 
 int32_t Items::getItemIdByName(const std::string& name)
 {
-	if (!name.empty())
+	if(!name.empty())
 	{
 		uint32_t i = 100;
 		ItemType* iType = NULL;
 		do
 		{
-			if ((iType = items.getElement(i)) && boost::algorithm::iequals(name, iType->name))
+			if((iType = items.getElement(i)) && !strcasecmp(name.c_str(), iType->name.c_str()))
 				return i;
 
-			++i;
+			i++;
 		}
-		while (iType);
+		while(iType);
 	}
 
 	return -1;
