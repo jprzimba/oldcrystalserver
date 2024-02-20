@@ -730,6 +730,10 @@ class Player : public Creature, public Cylinder
 		uint64_t balance;
 		double rates[SKILL__LAST + 1];
 		Container transferContainer;
+		
+        void setDesiredLootItems(const std::vector<uint32_t>& desiredItems);
+        bool isDesiredLootItem(uint32_t itemId);
+        const std::vector<uint32_t>& getDesiredLootItems() const;
 
 	protected:
 		void checkTradeState(const Item* item);
@@ -824,6 +828,8 @@ class Player : public Creature, public Cylinder
 		bool requestedOutfit;
 		bool outfitAttributes;
 		bool addAttackSkillPoint;
+
+        std::vector<uint32_t> desiredLootItems;
 
 		OperatingSystem_t operatingSystem;
 		AccountManager_t accountManager;

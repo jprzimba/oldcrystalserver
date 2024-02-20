@@ -1186,6 +1186,37 @@ uint32_t DatabaseManager::updateDatabase()
 			return 28;
 		}
 
+        case 28:
+        {
+            std::clog << "Updating database to version 29..." << std::endl;
+        
+            std::string createTableQuery;
+            if (db->getDatabaseEngine() == DATABASE_ENGINE_SQLITE)
+            {
+                query << "CREATE TABLE IF NOT EXISTS `player_loot_items` ("
+                                   "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                   "`player_id` INT(11) NOT NULL, "
+                                   "`item_id` INT(11) NOT NULL"
+                                   ");";
+            }
+            else
+            {
+                query << "CREATE TABLE IF NOT EXISTS `player_loot_items` ("
+                                   "`id` INT(11) NOT NULL AUTO_INCREMENT, "
+                                   "`player_id` INT(11) NOT NULL, "
+                                   "`item_id` INT(11) NOT NULL, "
+                                   "PRIMARY KEY (`id`), "
+                                   "KEY `player_id` (`player_id`), "
+                                   "KEY `item_id` (`item_id`) "
+                                   ") ENGINE=InnoDB;";
+            }
+        
+            db->query(query.str());
+            registerDatabaseConfig("db_version", 29);
+            return 29;
+        }
+
+
 		default:
 			break;
 	}

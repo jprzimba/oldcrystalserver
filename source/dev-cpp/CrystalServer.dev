@@ -1,7 +1,7 @@
 [Project]
 FileName=CrystalServer.dev
 Name=Crystal Server
-UnitCount=157
+UnitCount=156
 Type=1
 Ver=1
 ObjFiles=
@@ -1557,22 +1557,12 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit155]
-FileName=..\Makefile.am
+[Unit156]
+FileName=..\otserv.ico
 CompileCpp=1
 Folder=Crystal Server
 Compile=0
 Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit156]
-FileName=..\otpch.cpp
-CompileCpp=1
-Folder=Crystal Server
-Compile=1
-Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
@@ -1711,6 +1701,16 @@ BuildCmd=
 FileName=..\globalevent.h
 CompileCpp=1
 Folder=CrystalServer
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit155]
+FileName=..\otpch.cpp
+CompileCpp=1
+Folder=Crystal Server
 Compile=1
 Link=1
 Priority=1000

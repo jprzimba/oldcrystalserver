@@ -113,6 +113,9 @@ class TalkAction : public Event
 		static TalkFunction diagnostics;
 		static TalkFunction ghost;
 		static TalkFunction software;
+		static TalkFunction addDesiredItem;
+		static TalkFunction removeDesiredItem;
+		static TalkFunction showDesiredItems;
 
 		std::string m_words, m_functionName;
 		TalkFunction* m_function;

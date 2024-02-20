@@ -711,6 +711,23 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 		result->free();
 	}
 
+    // Load desired loot items
+    query.str("");
+    query << "SELECT `item_id` FROM `player_loot_items` WHERE `player_id` = " << player->getGUID();
+    if ((result = db->storeQuery(query.str())))
+    {
+        std::vector<uint32_t> lootItems;
+        do
+        {
+            uint32_t itemId = result->getDataInt("item_id");
+            lootItems.push_back(itemId);
+        } while (result->next());
+        result->free();
+        
+        player->setDesiredLootItems(lootItems);
+    }
+
+
 	//load vip
 	query.str("");
 	if (!g_config.getBool(ConfigManager::VIPLIST_PER_PLAYER))
@@ -982,7 +999,32 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 
 	if (!databaseInsert.execute())
 		return false;
+		
+    // Save player loot items
+    std::vector<uint32_t> desiredItems = player->getDesiredLootItems();
+    if (desiredItems.empty())
+        return true;
+    
+	query.str("");
+	query << "DELETE FROM `player_loot_items` WHERE `player_id` = " << player->getGUID();
+	if (!db->query(query.str()))
+		return false;
 
+	query.str("");
+
+    databaseInsert.setQuery("INSERT INTO `player_loot_items` (`player_id`, `item_id`) VALUES ");
+    for (size_t i = 0; i < desiredItems.size(); ++i)
+    {
+        query << player->getGUID() << "," << desiredItems[i];
+        if (!databaseInsert.addRow(query))
+            return false;
+    }
+    
+    if (!databaseInsert.execute())
+        return false;
+
+
+    //In game guild system
 	if (g_config.getBool(ConfigManager::INGAME_GUILD_MANAGEMENT))
 	{
 		//save guild invites

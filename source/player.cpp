@@ -5327,3 +5327,18 @@ void Player::onUpdateQuest()
 	sendTextMessage(MSG_EVENT_ADVANCE, "Your quest log has been updated.");
 }
 
+
+void Player::setDesiredLootItems(const std::vector<uint32_t>& desiredItems)
+{
+    desiredLootItems = desiredItems;
+}
+
+bool Player::isDesiredLootItem(uint32_t itemId)
+{
+    return std::find(desiredLootItems.begin(), desiredLootItems.end(), itemId) != desiredLootItems.end();
+}
+
+const std::vector<uint32_t>& Player::getDesiredLootItems() const
+{
+    return desiredLootItems;
+}
