@@ -1195,8 +1195,8 @@ uint32_t DatabaseManager::updateDatabase()
             {
                 query << "CREATE TABLE IF NOT EXISTS `player_loot_items` ("
                                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
-                                   "`player_id` INT(11) NOT NULL, "
-                                   "`item_id` INT(11) NOT NULL"
+                                   "`player_id` INTEGER NOT NULL, "
+                                   "`item_id` INTEGER NOT NULL"
                                    ");";
             }
             else
