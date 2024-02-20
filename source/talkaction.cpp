@@ -1307,7 +1307,7 @@ bool TalkAction::addDesiredItem(Creature* creature, const std::string&, const st
     for (size_t i = 0; i < params.size(); ++i)
     {
         uint32_t itemId = Item::items.getItemIdByName(params[i]);
-        if(itemId == -1)
+        if (itemId == -1)
         {
             player->sendTextMessage(MSG_STATUS_CONSOLE_BLUE, "Item not found: " + params[i]);
             return true;     
