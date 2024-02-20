@@ -548,6 +548,10 @@ void otserv(StringVec, ServiceManager* services)
 	else
 		ScriptManager::getInstance();
 
+	std::clog << ">> Loading mods..." << std::endl;
+	if(!ScriptManager::getInstance()->loadMods())
+		startupErrorMessage();
+
 	#ifdef __LOGIN_SERVER__
 	std::clog << "Loading game servers" << std::endl;
 	if (!GameServers::getInstance()->loadFromXml(true))

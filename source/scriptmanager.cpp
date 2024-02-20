@@ -126,3 +126,240 @@ bool ScriptManager::loadSystem()
 	std::clog << "done." << std::endl;
 	return true;
 }
+
+
+
+bool ScriptManager::loadMods()
+{
+	boost::filesystem::path modsPath(getFilePath(FILE_TYPE_MOD));
+	if(!boost::filesystem::exists(modsPath))
+	{
+		std::clog << "[Error - ScriptManager::loadMods] Could not locate mods directory" << std::endl;
+		return false;
+	}
+
+	int32_t i = 0, j = 0;
+	bool enabled = false;
+	for(boost::filesystem::directory_iterator it(modsPath), end; it != end; ++it)
+	{
+		std::string s = BOOST_DIR_ITER_FILENAME(it);
+		if(boost::filesystem::is_directory(it->status()) && (s.size() > 4 ? s.substr(s.size() - 4) : "") != ".xml")
+			continue;
+
+		std::clog << "> Loading " << s << "...";
+		if(loadFromXml(s, enabled))
+		{
+			std::clog << " done";
+			if(!enabled)
+			{
+				++j;
+				std::clog << ", but disabled";
+			}
+
+			std::clog << ".";
+		}
+		else
+			std::clog << " failed!";
+
+		std::clog << std::endl;
+		++i;
+	}
+
+	std::clog << "> " << i << " mods were loaded";
+	if(j)
+		std::clog << " (" << j << " disabled)";
+
+	std::clog << "." << std::endl;
+	modsLoaded = true;
+	return true;
+}
+
+void ScriptManager::clearMods()
+{
+	modMap.clear();
+	libMap.clear();
+}
+
+bool ScriptManager::reloadMods()
+{
+	clearMods();
+	return loadMods();
+}
+
+bool ScriptManager::loadFromXml(const std::string& file, bool& enabled)
+{
+	enabled = false;
+	xmlDocPtr doc = xmlParseFile(getFilePath(FILE_TYPE_MOD, file).c_str());
+	if(!doc)
+	{
+		std::clog << "[Error - ScriptManager::loadFromXml] Cannot load mod " << file << std::endl;
+		std::clog << getLastXMLError() << std::endl;
+		return false;
+	}
+
+	int32_t intValue;
+	std::string strValue;
+
+	xmlNodePtr p, root = xmlDocGetRootElement(doc);
+	if(xmlStrcmp(root->name,(const xmlChar*)"mod"))
+	{
+		std::clog << "[Error - ScriptManager::loadFromXml] Malformed mod " << file << std::endl;
+		std::clog << getLastXMLError() << std::endl;
+
+		xmlFreeDoc(doc);
+		return false;
+	}
+
+	if(!readXMLString(root, "name", strValue))
+		strValue = file;
+
+	ModBlock mod;
+	mod.enabled = true;
+	mod.name = strValue;
+	if(readXMLString(root, "enabled", strValue) && !booleanString(strValue))
+		mod.enabled = false;
+
+	mod.file = file;
+	if(readXMLString(root, "author", strValue))
+		mod.author = strValue;
+
+	if(readXMLString(root, "version", strValue))
+		mod.version = strValue;
+
+	if(readXMLString(root, "contact", strValue))
+		mod.contact = strValue;
+
+	bool supported = true;
+	for(p = root->children; p; p = p->next)
+	{
+		if(xmlStrcmp(p->name, (const xmlChar*)"server"))
+			continue;
+
+		supported = false;
+		for(xmlNodePtr versionNode = p->children; versionNode; versionNode = versionNode->next)
+		{
+			std::string id = SOFTWARE_VERSION;
+			if(readXMLString(versionNode, "id", strValue))
+				id = asLowerCaseString(strValue);
+
+			IntegerVec protocol;
+			protocol.push_back(CLIENT_VERSION_MIN);
+			if(readXMLString(versionNode, "protocol", strValue))
+				protocol = vectorAtoi(explodeString(strValue, "-"));
+
+			int16_t patch = VERSION_PATCH, database = VERSION_DATABASE;
+			if(readXMLInteger(versionNode, "patch", intValue))
+				patch = intValue;
+
+			if(readXMLInteger(versionNode, "database", intValue))
+				database = intValue;
+
+			if(id == asLowerCaseString(SOFTWARE_VERSION) && patch >= VERSION_PATCH && database >= VERSION_DATABASE
+				&& protocol[0] >= CLIENT_VERSION_MIN && (protocol.size() < 2 || protocol[1] <= CLIENT_VERSION_MAX))
+			{
+				supported = true;
+				break;
+			}
+		}
+	}
+
+	if(!supported)
+	{
+		std::clog << "[Warning - ScriptManager::loadFromXml] Your server is not supported by mod " << file << std::endl;
+		xmlFreeDoc(doc);
+		return false;
+	}
+
+	if(mod.enabled)
+	{
+		std::string scriptsPath = getFilePath(FILE_TYPE_MOD, "scripts/");
+		for(p = root->children; p; p = p->next)
+		{
+			if(!xmlStrcmp(p->name, (const xmlChar*)"quest"))
+				Quests::getInstance()->parseQuestNode(p, modsLoaded);
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"outfit"))
+				Outfits::getInstance()->parseOutfitNode(p);
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"vocation"))
+				Vocations::getInstance()->parseVocationNode(p); //duplicates checking is dangerous, shouldn't be performed until we find some good solution
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"group"))
+				Groups::getInstance()->parseGroupNode(p); //duplicates checking is dangerous, shouldn't be performed until we find some good solution
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"raid"))
+				Raids::getInstance()->parseRaidNode(p, modsLoaded, FILE_TYPE_MOD); //TODO: support mods path
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"spawn"))
+				Spawns::getInstance()->parseSpawnNode(p, modsLoaded);
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"channel"))
+				g_chat.parseChannelNode(p); //TODO: duplicates- channel destructor needs to send closeChannel to users!
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"monster"))
+			{
+				std::string path, name;
+				if((readXMLString(p, "file", path) || readXMLString(p, "path", path)) && readXMLString(p, "name", name))
+					g_monsters.loadMonster(getFilePath(FILE_TYPE_MOD, "monster/" + path), name, true);
+			}
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"item"))
+			{
+				if(readXMLInteger(p, "id", intValue))
+					Item::items.parseItemNode(p, intValue);
+			}
+			if(!xmlStrcmp(p->name, (const xmlChar*)"description") || !xmlStrcmp(p->name, (const xmlChar*)"info"))
+			{
+				if(parseXMLContentString(p->children, strValue))
+				{
+					replaceString(strValue, "\t", "");
+					mod.description = strValue;
+				}
+			}
+			else if(!xmlStrcmp(p->name, (const xmlChar*)"lib") || !xmlStrcmp(p->name, (const xmlChar*)"config"))
+			{
+				if(!readXMLString(p, "name", strValue))
+				{
+					if(!xmlStrcmp(p->name, (const xmlChar*)"lib"))
+						strValue = mod.name + "-lib";
+					else if(!xmlStrcmp(p->name, (const xmlChar*)"config"))
+						strValue = mod.name + "-config";
+				}
+				else
+					toLowerCaseString(strValue);
+
+				std::string strLib;
+				if(parseXMLContentString(p->children, strLib))
+				{
+					LibMap::iterator it = libMap.find(strValue);
+					if(it == libMap.end())
+					{
+						LibBlock lb;
+						lb.first = file;
+						lb.second = strLib;
+
+						libMap[strValue] = lb;
+					}
+					else
+						std::clog << "[Warning - ScriptManager::loadFromXml] Duplicated lib in mod "
+							<< strValue << ", previously declared in " << it->second.first << std::endl;
+				}
+			}
+			else if(!g_actions->parseEventNode(p, scriptsPath, modsLoaded))
+			{
+				if(!g_talkActions->parseEventNode(p, scriptsPath, modsLoaded))
+				{
+					if(!g_moveEvents->parseEventNode(p, scriptsPath, modsLoaded))
+					{
+						if(!g_creatureEvents->parseEventNode(p, scriptsPath, modsLoaded))
+						{
+							if(!g_globalEvents->parseEventNode(p, scriptsPath, modsLoaded))
+							{
+								if(!g_spells->parseEventNode(p, scriptsPath, modsLoaded))
+									g_weapons->parseEventNode(p, scriptsPath, modsLoaded);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	enabled = mod.enabled;
+	modMap[mod.name] = mod;
+
+	xmlFreeDoc(doc);
+	return true;
+}

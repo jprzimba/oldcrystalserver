@@ -102,7 +102,8 @@ enum ReloadInfo_t
 	RELOAD_TALKACTIONS = 19,
 	RELOAD_VOCATIONS = 20,
 	RELOAD_WEAPONS = 21,
-	RELOAD_ALL = 22,
+	RELOAD_MODS = 22,
+	RELOAD_ALL = 23,
 	RELOAD_LAST = RELOAD_WEAPONS
 };
 
@@ -363,10 +364,12 @@ class Game
 			uint32_t flags = 0, bool test = false);
 		ReturnValue internalAddItem(Creature* actor, Cylinder* toCylinder, Item* item, int32_t index,
 			uint32_t flags, bool test, uint32_t& remainderCount);
-
+		ReturnValue internalAddItem(Creature* actor, Cylinder* toCylinder, Item* item, int32_t index,
+			uint32_t flags, bool test, uint32_t& remainderCount, Item** stackItem);
 		ReturnValue internalRemoveItem(Creature* actor, Item* item, int32_t count = -1,  bool test = false, uint32_t flags = 0);
 
-		ReturnValue internalPlayerAddItem(Creature* actor, Player* player, Item* item, bool dropOnMap = true);
+		ReturnValue internalPlayerAddItem(Creature* actor, Player* player, Item* item,
+			bool dropOnMap = true, slots_t slot = SLOT_WHEREEVER);
 
 		/**
 		  * Find an item of a certain type

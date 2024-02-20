@@ -75,6 +75,12 @@ Npc::Npc(const std::string& _name):
 	npcCount++;
 #endif
 	m_filename = getFilePath(FILE_TYPE_OTHER, "npc/" + _name + ".xml");
+	if(!fileExists(m_filename.c_str()))
+	{
+		std::string tmp = getFilePath(FILE_TYPE_MOD, "npc/" + _name + ".xml");
+		if(fileExists(tmp.c_str()))
+			m_filename = tmp;
+	}
 
 	m_npcEventHandler = NULL;
 	loaded = false;
@@ -337,7 +343,8 @@ bool Npc::loadFromXml(const std::string& filename)
 		return true;
 
 	replaceString(scriptfile, "|DATA|", getFilePath(FILE_TYPE_OTHER, "npc/scripts"));
-	if (scriptfile.find("/") == std::string::npos)
+	replaceString(scriptfile, "|MODS|", getFilePath(FILE_TYPE_MOD, "npc"));
+	if(scriptfile.find("/") == std::string::npos)
 		scriptfile = getFilePath(FILE_TYPE_OTHER, "npc/scripts/" + scriptfile);
 
 	m_npcEventHandler = new NpcEvents(scriptfile, this);
