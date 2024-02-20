@@ -376,8 +376,7 @@
 
 	-- Spawns
 	allowBlockSpawn = false
-	rateSpawnMin = 1
-	rateSpawnMax = 1
+	rateSpawn = 1
 	deSpawnRange = 2
 	deSpawnRadius = 50
 
@@ -393,6 +392,7 @@
 	location = "Brazil"
 	statusPort = 7171
 	statusTimeout = 5 * 60 * 1000
+	confirmOutdatedVersion = true
 
 	-- Logs
 	-- NOTE: This kind of logging does not work in GUI version.

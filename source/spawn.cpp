@@ -356,9 +356,8 @@ void Spawn::checkSpawn()
 		}
 
 		spawnMonster(it->first, sb.mType, sb.pos, sb.direction);
-		uint32_t minSpawnCount = g_config.getNumber(ConfigManager::RATE_SPAWN_MIN),
-			maxSpawnCount = g_config.getNumber(ConfigManager::RATE_SPAWN_MAX);
-		if (++spawnCount >= (uint32_t)random_range(minSpawnCount, maxSpawnCount))
+		++spawnCount;
+		if(spawnCount >= (uint32_t)g_config.getNumber(ConfigManager::RATE_SPAWN))
 			break;
 	}
 
