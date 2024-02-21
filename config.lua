@@ -248,7 +248,6 @@
 	-- Saving-related
 	-- houseDataStorage can be binary, relational and binary-tilebased
 	saveGlobalStorage = true
-	savePlayerData = true
 	houseDataStorage = "binary"
 	storePlayerDirection = false
 
@@ -300,9 +299,10 @@
 	-- Blessings
 	-- NOTE: blessingReduction* regards items/containers loss.
 	-- eachBlessReduction is how much each bless reduces the experience/magic/skills loss.
+	blessings = true
 	blessingOnlyPremium = true
 	blessingReductionBase = 30
-	blessingReductionDecreament = 5
+	blessingReductionDecrement = 5
 	eachBlessReduction = 8
 
 	-- Rates

@@ -187,7 +187,7 @@ bool ConfigManager::load()
 	m_integer[STAMINA_LIMIT_TOP] = getGlobalNumber("staminaRatingLimitTop", 41 * 60);
 	m_integer[STAMINA_LIMIT_BOTTOM] = getGlobalNumber("staminaRatingLimitBottom", 14 * 60);
 	m_integer[BLESS_REDUCTION_BASE] = getGlobalNumber("blessingReductionBase", 30);
-	m_integer[BLESS_REDUCTION_DECREAMENT] = getGlobalNumber("blessingReductionDecreament", 5);
+	m_integer[BLESS_REDUCTION_DECREMENT] = getGlobalNumber("blessingReductionDecrement", 5);
 	m_integer[BLESS_REDUCTION] = getGlobalNumber("eachBlessReduction", 8);
 	m_integer[NICE_LEVEL] = getGlobalNumber("niceLevel", 5);
 	m_integer[EXPERIENCE_COLOR] = getGlobalNumber("gainExperienceColor", COLOR_WHITE);
@@ -266,7 +266,6 @@ bool ConfigManager::load()
 	m_double[RATE_MONSTER_DEFENSE] = getGlobalDouble("rateMonsterDefense", 1);
 	m_double[CRITICAL_HIT_MUL] = getGlobalDouble("criticalHitMultiplier", 1);
 
-	m_boolean[SAVE_PLAYER_DATA] = getGlobalBool("savePlayerData", true);
 	m_boolean[CLOSE_INSTANCE_ON_SHUTDOWN] = getGlobalBool("closeInstanceOnShutdown", true);
 	m_boolean[ACCOUNT_MANAGER] = getGlobalBool("accountManager", true);
 	m_boolean[NAMELOCK_MANAGER] = getGlobalBool("namelockManager", false);
@@ -304,6 +303,7 @@ bool ConfigManager::load()
 	m_boolean[UNIFIED_SPELLS] = getGlobalBool("unifiedSpells", true);
 	m_boolean[SAVE_GLOBAL_STORAGE] = getGlobalBool("saveGlobalStorage", true);
 	m_boolean[FORCE_CLOSE_SLOW_CONNECTION] = getGlobalBool("forceSlowConnectionsToDisconnect", false);
+	m_boolean[BLESSINGS] = getGlobalBool("blessings", true);
 	m_boolean[BLESSING_ONLY_PREMIUM] = getGlobalBool("blessingOnlyPremium", true);
 	m_boolean[BED_REQUIRE_PREMIUM] = getGlobalBool("bedsRequirePremium", true);
 	m_boolean[ALLOW_CHANGECOLORS] = getGlobalBool("allowChangeColors", true);

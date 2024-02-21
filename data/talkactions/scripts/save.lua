@@ -15,7 +15,7 @@ function onSay(cid, words, param, channel)
         if not targetPlayer or (isPlayerGhost(targetPlayer) and getPlayerGhostAccess(targetPlayer) > getPlayerGhostAccess(cid)) then
             doPlayerSendTextMessage(cid, MESSAGE_STATUS_CONSOLE_BLUE, "Player " .. param .. " not found.")
         else
-            doPlayerSave(targetPlayer)
+            doPlayerSave(targetPlayer, true)
         end
     end
 
@@ -23,7 +23,7 @@ function onSay(cid, words, param, channel)
 end
 
 function save(delay)
-    doSaveServer()
+    doSaveServer(true)
 
     if delay > 0 then
         savingEvent = addEvent(save, delay, delay)

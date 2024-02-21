@@ -1,71 +1,43 @@
--- Dont change ids if you dont change it in map edito
+-- Don't change IDs if you don't change it in map editor
 local ACTION_IDS = {
-	NORTH = 2017,
-	SOUTH = 2018,
-	WEST = 2019,
-	EAST = 2020
+    NORTH = 2017,
+    SOUTH = 2018,
+    WEST = 2019,
+    EAST = 2020
 }
 
-local emptyRoom = true -- dont change it
-
 function onUse(cid, item, fromPosition, itemEx, toPosition)
-	currentCharPosition = getPlayerPosition(cid)
-	if (item.actionid == ACTION_IDS.NORTH) then
-		if (currentCharPosition.y < fromPosition.y) then
-			othersidePos = {x = fromPosition.x, y = fromPosition.y + 1, z = fromPosition.z}
-		else
-			othersidePos = {x = fromPosition.x, y = fromPosition.y - 1, z = fromPosition.z, stackpos = STACKPOS_TOP_CREATURE}
-			things = getThingfromPos(othersidePos)
-			if (things.itemid == 1) then
-				if (getPlayerLevel(things.uid) > 0) then
-					emptyRoom = false
-				end
-			end
-		end
-	elseif (item.actionid == ACTION_IDS.SOUTH) then
-		if (currentCharPosition.y > fromPosition.y) then
-			othersidePos = {x=fromPosition.x, y=fromPosition.y-1, z=fromPosition.z}
-		else
-			othersidePos = {x = fromPosition.x, y = fromPosition.y + 1, z = fromPosition.z, stackpos = STACKPOS_TOP_CREATURE}
-			things = getThingfromPos(othersidePos)
-			if (things.itemid == 1) then
-				if (getPlayerLevel(things.uid) > 0) then
-					emptyRoom = false
-				end
-			end
-		end
-	elseif (item.actionid == ACTION_IDS.EAST) then
-		if (currentCharPosition.x > fromPosition.x) then
-			othersidePos = {x = fromPosition.x - 1, y = fromPosition.y, z = fromPosition.z}
-		else
-			othersidePos = {x = fromPosition.x + 1, y = fromPosition.y, z = fromPosition.z, stackpos = STACKPOS_TOP_CREATURE}
-			things = getThingfromPos(othersidePos)
-			if (things.itemid == 1) then
-				if (getPlayerLevel(things.uid) > 0) then
-					emptyRoom = false
-				end
-			end
-		end
-	elseif (item.actionid == ACTION_IDS.WEST) then
-		if (currentCharPosition.x < fromPosition.x) then
-			othersidePos = {x = fromPosition.x + 1, y = fromPosition.y, z = fromPosition.z}
-		else
-			othersidePos = {x = fromPosition.x - 1, y = fromPosition.y, z = fromPosition.z, stackpos= STACKPOS_TOP_CREATURE}
-			things = getThingfromPos(othersidePos)
-			if (things.itemid == 1) then
-				if (getPlayerLevel(things.uid) > 0) then
-					emptyRoom = false
-				end
-			end
-		end
-	end
+    local emptyRoom = true
+    local currentCharPosition = getPlayerPosition(cid)
+    local othersidePos = {}
 
-	if (emptyRoom == true) then
-		doTeleportThing(cid, othersidePos)
-		doSendMagicEffect(othersidePos, CONST_ME_TELEPORT)
-	else
-		doPlayerSendTextMessage(cid, MESSAGE_INFO_DESCR, "The room is full, please try another room.")
-	end
+    if item.actionid == ACTION_IDS.NORTH then
+        othersidePos = currentCharPosition.y < fromPosition.y and {x = fromPosition.x, y = fromPosition.y + 1, z = fromPosition.z}
+                                                         or {x = fromPosition.x, y = fromPosition.y - 1, z = fromPosition.z, stackpos = STACKPOS_TOP_CREATURE}
+    elseif item.actionid == ACTION_IDS.SOUTH then
+        othersidePos = currentCharPosition.y > fromPosition.y and {x = fromPosition.x, y = fromPosition.y - 1, z = fromPosition.z}
+                                                         or {x = fromPosition.x, y = fromPosition.y + 1, z = fromPosition.z, stackpos = STACKPOS_TOP_CREATURE}
+    elseif item.actionid == ACTION_IDS.EAST then
+        othersidePos = currentCharPosition.x > fromPosition.x and {x = fromPosition.x - 1, y = fromPosition.y, z = fromPosition.z}
+                                                         or {x = fromPosition.x + 1, y = fromPosition.y, z = fromPosition.z, stackpos = STACKPOS_TOP_CREATURE}
+    elseif item.actionid == ACTION_IDS.WEST then
+        othersidePos = currentCharPosition.x < fromPosition.x and {x = fromPosition.x + 1, y = fromPosition.y, z = fromPosition.z}
+                                                         or {x = fromPosition.x - 1, y = fromPosition.y, z = fromPosition.z, stackpos = STACKPOS_TOP_CREATURE}
+    end
 
-	return true
+    if othersidePos.x and othersidePos.y then
+        local things = getThingfromPos(othersidePos)
+        if things.itemid == 1 and getPlayerLevel(things.uid) > 0 then
+            emptyRoom = false
+        end
+    end
+
+    if emptyRoom then
+        doTeleportThing(cid, othersidePos)
+        doSendMagicEffect(othersidePos, CONST_ME_TELEPORT)
+    else
+        doPlayerSendTextMessage(cid, MESSAGE_INFO_DESCR, "The room is full, please try another room.")
+    end
+
+    return true
 end

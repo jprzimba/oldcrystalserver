@@ -688,7 +688,8 @@ class Player : public Creature, public Cylinder
 			{if (client) client->sendTutorial(tutorialId);}
 		void sendAddMarker(const Position& pos, MapMarks_t markType, const std::string& desc)
 			{if (client) client->sendAddMarker(pos, markType, desc);}
-		void sendCritical() const;
+
+		void displayCriticalHit() const;
 
 		void receivePing() {lastPong = OTSYS_TIME();}
 		virtual void onThink(uint32_t interval);
@@ -734,6 +735,10 @@ class Player : public Creature, public Cylinder
         void setDesiredLootItems(const std::vector<uint32_t>& desiredItems);
         bool isDesiredLootItem(uint32_t itemId);
         const std::vector<uint32_t>& getDesiredLootItems() const;
+        
+		const std::vector<Container*>& getContainers() const {
+			return containers;
+		}
 
 	protected:
 		void checkTradeState(const Item* item);
@@ -830,6 +835,7 @@ class Player : public Creature, public Cylinder
 		bool addAttackSkillPoint;
 
         std::vector<uint32_t> desiredLootItems;
+		std::vector<Container*> containers;
 
 		OperatingSystem_t operatingSystem;
 		AccountManager_t accountManager;

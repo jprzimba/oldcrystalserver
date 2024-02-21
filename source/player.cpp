@@ -815,24 +815,27 @@ void Player::dropLoot(Container* corpse)
 	if (!corpse || lootDrop != LOOT_DROP_FULL)
 		return;
 
-	uint32_t loss = lossPercent[LOSS_CONTAINERS], start = g_config.getNumber(
-		ConfigManager::BLESS_REDUCTION_BASE), bless = getBlessings();
-	while (bless > 0 && loss > 0)
+	uint32_t loss = lossPercent[LOSS_CONTAINERS];
+	if(g_config.getBool(ConfigManager::BLESSINGS))
 	{
-		loss -= start;
-		start -= g_config.getNumber(ConfigManager::BLESS_REDUCTION_DECREAMENT);
-		bless--;
+		uint32_t start = g_config.getNumber(ConfigManager::BLESS_REDUCTION_BASE), bless = getBlessings();
+		while(bless > 0 && loss > 0)
+		{
+			loss -= start;
+			start -= g_config.getNumber(ConfigManager::BLESS_REDUCTION_DECREMENT);
+			bless--;
+		}
 	}
 
 	uint32_t itemLoss = (uint32_t)std::floor((5. + loss) * lossPercent[LOSS_ITEMS] / 1000.);
-	for (int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
+	for(int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
 	{
 		Item* item = inventory[i];
-		if (!item)
+		if(!item)
 			continue;
 
-		uint32_t rand = random_range(1, 100);
-		if (skull > SKULL_WHITE || (item->getContainer() && rand < loss) || (!item->getContainer() && rand < itemLoss))
+		uint32_t tmp = random_range(1, 100);
+		if(skull > SKULL_WHITE || (item->getContainer() && tmp < loss) || (!item->getContainer() && tmp < itemLoss))
 		{
 			g_game.internalMoveItem(NULL, this, corpse, INDEX_WHEREEVER, item, item->getItemCount(), 0);
 			sendRemoveInventoryItem((slots_t)i, inventory[(slots_t)i]);
@@ -3879,18 +3882,17 @@ void Player::onAttackedCreatureDrain(Creature* target, int32_t points)
 		&& target->getMonster() && target->getMonster()->isHostile()) //we have fulfilled a requirement for shared experience
 		getParty()->addPlayerDamageMonster(this, points);
 
-	char buffer[100];
-	sprintf(buffer, "You deal %d damage to %s.", points, target->getNameDescription().c_str());
-	sendTextMessage(MSG_STATUS_DEFAULT, buffer);
+    std::string message = "You deal " + intToString(points) + " damage to " + target->getNameDescription() + ".";
+    sendTextMessage(MSG_STATUS_DEFAULT, message.c_str());
 }
 
 void Player::onSummonAttackedCreatureDrain(Creature* summon, Creature* target, int32_t points)
 {
 	Creature::onSummonAttackedCreatureDrain(summon, target, points);
 
-	char buffer[100];
-	sprintf(buffer, "Your %s deals %d damage to %s.", summon->getName().c_str(), points, target->getNameDescription().c_str());
-	sendTextMessage(MSG_EVENT_DEFAULT, buffer);
+    std::string message = "Your " + summon->getName() + " deals " + intToString(points) +
+                          " damage to " + target->getNameDescription() + ".";
+    sendTextMessage(MSG_EVENT_DEFAULT, message.c_str());
 }
 
 void Player::onTargetCreatureGainHealth(Creature* target, int32_t points)
@@ -4406,7 +4408,8 @@ void Player::setPromotionLevel(uint32_t pLevel)
 
 uint16_t Player::getBlessings() const
 {
-	if (!isPremium() && g_config.getBool(ConfigManager::BLESSING_ONLY_PREMIUM))
+	if(!g_config.getBool(ConfigManager::BLESSINGS) || (!isPremium() &&
+		g_config.getBool(ConfigManager::BLESSING_ONLY_PREMIUM)))
 		return 0;
 
 	uint16_t count = 0;
@@ -5211,6 +5214,7 @@ bool Player::removePartyInvitation(Party* party)
 		invitePartyList.erase(it);
 		return true;
 	}
+
 	return false;
 }
 
@@ -5316,7 +5320,7 @@ bool Player::transferMoneyTo(const std::string& name, uint64_t amount)
 	return true;
 }
 
-void Player::sendCritical() const
+void Player::displayCriticalHit() const
 {
 	if (g_config.getBool(ConfigManager::DISPLAY_CRITICAL_HIT))
 		g_game.addAnimatedText(getPosition(), g_config.getNumber(ConfigManager::CRITICAL_COLOR), "CRITICAL!");
@@ -5342,3 +5346,4 @@ const std::vector<uint32_t>& Player::getDesiredLootItems() const
 {
     return desiredLootItems;
 }
+
