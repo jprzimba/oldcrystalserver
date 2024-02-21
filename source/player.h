@@ -706,7 +706,7 @@ class Player : public Creature, public Cylinder
 
 		void setNextAction(int64_t time) {if (time > nextAction) {nextAction = time;}}
 		bool canDoAction() const {return nextAction <= OTSYS_TIME();}
-		uint32_t getNextActionTime(bool scheduler = true) const;
+		uint32_t getNextActionTime() const;
 
 		void setNextExAction(int64_t time) {if (time > nextExAction) nextExAction = time;}
 		bool canDoExAction() const {return nextExAction <= OTSYS_TIME();}
@@ -732,13 +732,9 @@ class Player : public Creature, public Cylinder
 		double rates[SKILL__LAST + 1];
 		Container transferContainer;
 		
-        void setDesiredLootItems(const std::vector<uint32_t>& desiredItems);
-        bool isDesiredLootItem(uint32_t itemId);
-        const std::vector<uint32_t>& getDesiredLootItems() const;
-        
-		const std::vector<Container*>& getContainers() const {
-			return containers;
-		}
+		void setDesiredLootItems(const std::vector<uint32_t>& desiredItems);
+		bool isDesiredLootItem(uint32_t itemId);
+		const std::vector<uint32_t>& getDesiredLootItems() const;
 
 	protected:
 		void checkTradeState(const Item* item);
@@ -834,8 +830,7 @@ class Player : public Creature, public Cylinder
 		bool outfitAttributes;
 		bool addAttackSkillPoint;
 
-        std::vector<uint32_t> desiredLootItems;
-		std::vector<Container*> containers;
+		std::vector<uint32_t> desiredLootItems;
 
 		OperatingSystem_t operatingSystem;
 		AccountManager_t accountManager;

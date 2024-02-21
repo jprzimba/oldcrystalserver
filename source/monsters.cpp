@@ -112,7 +112,7 @@ void MonsterType::dropLoot(Container* corpse)
             Item* tmpItem = *iit;
             if (tmpItem && owner->isDesiredLootItem(tmpItem->getID()))
             {
-                ReturnValue ret = g_game.internalPlayerAddItem(owner, owner, tmpItem, true);
+                ReturnValue ret = g_game.internalPlayerAddItem(owner, owner, tmpItem);
                 if (ret != RET_NOERROR)
                     delete tmpItem;
             }

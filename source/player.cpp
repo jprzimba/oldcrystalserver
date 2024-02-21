@@ -816,7 +816,7 @@ void Player::dropLoot(Container* corpse)
 		return;
 
 	uint32_t loss = lossPercent[LOSS_CONTAINERS];
-	if(g_config.getBool(ConfigManager::BLESSINGS))
+	if (g_config.getBool(ConfigManager::BLESSINGS))
 	{
 		uint32_t start = g_config.getNumber(ConfigManager::BLESS_REDUCTION_BASE), bless = getBlessings();
 		while(bless > 0 && loss > 0)
@@ -831,11 +831,11 @@ void Player::dropLoot(Container* corpse)
 	for(int32_t i = SLOT_FIRST; i < SLOT_LAST; ++i)
 	{
 		Item* item = inventory[i];
-		if(!item)
+		if (!item)
 			continue;
 
 		uint32_t tmp = random_range(1, 100);
-		if(skull > SKULL_WHITE || (item->getContainer() && tmp < loss) || (!item->getContainer() && tmp < itemLoss))
+		if (skull > SKULL_WHITE || (item->getContainer() && tmp < loss) || (!item->getContainer() && tmp < itemLoss))
 		{
 			g_game.internalMoveItem(NULL, this, corpse, INDEX_WHEREEVER, item, item->getItemCount(), 0);
 			sendRemoveInventoryItem((slots_t)i, inventory[(slots_t)i]);
@@ -1797,11 +1797,8 @@ void Player::setNextActionTask(SchedulerTask* task)
 	}
 }
 
-uint32_t Player::getNextActionTime(bool scheduler/* = true*/) const
+uint32_t Player::getNextActionTime() const
 {
-	if (!scheduler)
-		return (uint32_t)std::max((int64_t)0, ((int64_t)nextAction - OTSYS_TIME()));
-
 	return (uint32_t)std::max((int64_t)SCHEDULER_MINTICKS, ((int64_t)nextAction - OTSYS_TIME()));
 }
 
@@ -3533,19 +3530,19 @@ void Player::getPathSearchParams(const Creature* creature, FindPathParams& fpp) 
 
 void Player::doAttacking(uint32_t)
 {
-	uint32_t attackSpeed = getAttackSpeed();
-	if (attackSpeed == 0 || (hasCondition(CONDITION_PACIFIED) && !hasCustomFlag(PlayerCustomFlag_IgnorePacification)))
+	if (!lastAttack)
+		lastAttack = OTSYS_TIME() - getAttackSpeed() - 1;
+	else if ((OTSYS_TIME() - lastAttack) < getAttackSpeed())
+		return;
+
+	if (hasCondition(CONDITION_PACIFIED) && !hasCustomFlag(PlayerCustomFlag_IgnorePacification))
 	{
 		lastAttack = OTSYS_TIME();
 		return;
 	}
 
-	if (!lastAttack)
-		lastAttack = OTSYS_TIME() - attackSpeed - 1;
-	else if ((OTSYS_TIME() - lastAttack) < attackSpeed)
-		return;
-
-	if (const Weapon* _weapon = g_weapons->getWeapon(weapon))
+	Item* item = getWeapon(false);
+	if (const Weapon* _weapon = g_weapons->getWeapon(item))
 	{
 		if (_weapon->interruptSwing() && !canDoAction())
 		{
@@ -3555,7 +3552,7 @@ void Player::doAttacking(uint32_t)
 		}
 		else
 		{
-			if ((!_weapon->hasExhaustion() || !hasCondition(CONDITION_EXHAUST, EXHAUST_COMBAT)) && _weapon->useWeapon(this, weapon, attackedCreature))
+			if ((!_weapon->hasExhaustion() || !hasCondition(CONDITION_EXHAUST, EXHAUST_COMBAT)) && _weapon->useWeapon(this, item, attackedCreature))
 				lastAttack = OTSYS_TIME();
 
 			updateWeapon();
@@ -3773,7 +3770,7 @@ void Player::onCombatRemoveCondition(const Creature* attacker, Condition* condit
 	{
 		if (!canDoAction())
 		{
-			int32_t delay = getNextActionTime(false);
+			int32_t delay = getNextActionTime();
 			delay -= (delay % EVENT_CREATURE_THINK_INTERVAL);
 			if (delay < 0)
 				removeCondition(condition);
@@ -4408,7 +4405,7 @@ void Player::setPromotionLevel(uint32_t pLevel)
 
 uint16_t Player::getBlessings() const
 {
-	if(!g_config.getBool(ConfigManager::BLESSINGS) || (!isPremium() &&
+	if (!g_config.getBool(ConfigManager::BLESSINGS) || (!isPremium() &&
 		g_config.getBool(ConfigManager::BLESSING_ONLY_PREMIUM)))
 		return 0;
 
@@ -5346,4 +5343,3 @@ const std::vector<uint32_t>& Player::getDesiredLootItems() const
 {
     return desiredLootItems;
 }
-

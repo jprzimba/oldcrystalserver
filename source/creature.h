@@ -231,7 +231,7 @@ class Creature : public AutoId, virtual public Thing
 		int32_t getStepDuration(Direction dir) const;
 		int32_t getStepDuration() const;
 
-		void getPathToFollowCreature();
+		void goToFollowCreature();
 		int64_t getEventStepTicks(bool onlyDelay = false) const;
 		int64_t getTimeSinceLastMove() const;
 		virtual int32_t getStepSpeed() const {return getSpeed();}

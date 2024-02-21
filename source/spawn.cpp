@@ -357,7 +357,7 @@ void Spawn::checkSpawn()
 
 		spawnMonster(it->first, sb.mType, sb.pos, sb.direction);
 		++spawnCount;
-		if(spawnCount >= (uint32_t)g_config.getNumber(ConfigManager::RATE_SPAWN))
+		if (spawnCount >= (uint32_t)g_config.getNumber(ConfigManager::RATE_SPAWN))
 			break;
 	}
 

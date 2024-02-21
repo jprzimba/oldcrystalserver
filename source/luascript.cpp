@@ -3732,27 +3732,27 @@ int32_t LuaInterface::luaDoPlayerAddItem(lua_State* L)
 	//doPlayerAddItem(cid, itemid[, count/subtype = 1[, canDropOnMap = true[, slot = 0]]])
 	//doPlayerAddItem(cid, itemid[, count = 1[, canDropOnMap = true[, subtype = 1[, slot = 0]]]])
 	int32_t params = lua_gettop(L), subType = 1, slot = SLOT_WHEREEVER;
-	if(params > 5)
+	if (params > 5)
 		slot = popNumber(L);
 
-	if(params > 4)
+	if (params > 4)
 	{
-		if(params > 5)
+		if (params > 5)
 			subType = popNumber(L);
 		else
 			slot = popNumber(L);
 	}
 
 	bool canDropOnMap = true;
-	if(params > 3)
+	if (params > 3)
 		canDropOnMap = popNumber(L);
 
 	uint32_t count = 1;
-	if(params > 2)
+	if (params > 2)
 		count = popNumber(L);
 
 	uint32_t itemId = popNumber(L);
-	if(slot > SLOT_AMMO)
+	if (slot > SLOT_AMMO)
 	{
 		errorEx("Invalid slot.");
 		lua_pushboolean(L, false);
@@ -3761,7 +3761,7 @@ int32_t LuaInterface::luaDoPlayerAddItem(lua_State* L)
 
 	ScriptEnviroment* env = getEnv();
 	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
-	if(!player)
+	if (!player)
 	{
 		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
 		lua_pushboolean(L, false);
@@ -3770,11 +3770,11 @@ int32_t LuaInterface::luaDoPlayerAddItem(lua_State* L)
 
 	const ItemType& it = Item::items[itemId];
 	int32_t itemCount = 1;
-	if(params > 4)
+	if (params > 4)
 		itemCount = std::max((uint32_t)1, count);
-	else if(it.hasSubType())
+	else if (it.hasSubType())
 	{
-		if(it.stackable)
+		if (it.stackable)
 			itemCount = (int32_t)std::ceil((float)count / 100);
 
 		subType = count;
@@ -3784,18 +3784,18 @@ int32_t LuaInterface::luaDoPlayerAddItem(lua_State* L)
 	{
 		int32_t stackCount = std::min(100, subType);
 		Item* newItem = Item::CreateItem(itemId, stackCount);
-		if(!newItem)
+		if (!newItem)
 		{
 			errorEx(getError(LUA_ERROR_ITEM_NOT_FOUND));
 			lua_pushboolean(L, false);
 			return 1;
 		}
 
-		if(it.stackable)
+		if (it.stackable)
 			subType -= stackCount;
 
 		ReturnValue ret = g_game.internalPlayerAddItem(NULL, player, newItem, canDropOnMap, (slots_t)slot);
-		if(ret != RET_NOERROR)
+		if (ret != RET_NOERROR)
 		{
 			delete newItem;
 			lua_pushboolean(L, false);
@@ -3803,10 +3803,10 @@ int32_t LuaInterface::luaDoPlayerAddItem(lua_State* L)
 		}
 
 		--itemCount;
-		if(itemCount)
+		if (itemCount)
 			continue;
 
-		if(newItem->getParent())
+		if (newItem->getParent())
 			lua_pushnumber(L, env->addThing(newItem));
 		else //stackable item stacked with existing object, newItem will be released
 			lua_pushnil(L);
@@ -3822,15 +3822,15 @@ int32_t LuaInterface::luaDoPlayerAddItemEx(lua_State* L)
 {
 	//doPlayerAddItemEx(cid, uid[, canDropOnMap = false[, slot = 0]])
 	int32_t params = lua_gettop(L), slot = SLOT_WHEREEVER;
-	if(params > 3)
+	if (params > 3)
 		slot = popNumber(L);
 
 	bool canDropOnMap = false;
-	if(params > 2)
+	if (params > 2)
 		canDropOnMap = popNumber(L);
 
 	uint32_t uid = (uint32_t)popNumber(L);
-	if(slot > SLOT_AMMO)
+	if (slot > SLOT_AMMO)
 	{
 		errorEx("Invalid slot.");
 		lua_pushboolean(L, false);
@@ -3839,7 +3839,7 @@ int32_t LuaInterface::luaDoPlayerAddItemEx(lua_State* L)
 
 	ScriptEnviroment* env = getEnv();
 	Player* player = env->getPlayerByUID(popNumber(L));
-	if(!player)
+	if (!player)
 	{
 		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
 		lua_pushboolean(L, false);
@@ -3847,14 +3847,14 @@ int32_t LuaInterface::luaDoPlayerAddItemEx(lua_State* L)
 	}
 
 	Item* item = env->getItemByUID(uid);
-	if(!item)
+	if (!item)
 	{
 		errorEx(getError(LUA_ERROR_ITEM_NOT_FOUND));
 		lua_pushboolean(L, false);
 		return 1;
 	}
 
-	if(item->getParent() == VirtualCylinder::virtualCylinder)
+	if (item->getParent() == VirtualCylinder::virtualCylinder)
 		lua_pushnumber(L, g_game.internalPlayerAddItem(NULL, player, item, canDropOnMap, (slots_t)slot));
 	else
 		lua_pushboolean(L, false);
@@ -9365,13 +9365,13 @@ int32_t LuaInterface::luaGetItemIdByName(lua_State* L)
 {
 	//getItemIdByName(name[, displayError = true])
 	bool displayError = true;
-	if(lua_gettop(L) >= 2)
+	if (lua_gettop(L) >= 2)
 		displayError = popNumber(L);
 
 	int32_t itemId = Item::items.getItemIdByName(popString(L));
-	if(itemId == -1)
+	if (itemId == -1)
 	{
-		if(displayError)
+		if (displayError)
 			errorEx(getError(LUA_ERROR_ITEM_NOT_FOUND));
 
 		lua_pushboolean(L, false);
@@ -10102,7 +10102,7 @@ int32_t LuaInterface::luaL_loadmodlib(lua_State* L)
 	for(LibMap::iterator it = ScriptManager::getInstance()->getFirstLib();
 		it != ScriptManager::getInstance()->getLastLib(); ++it)
 	{
-		if(asLowerCaseString(it->first) != name)
+		if (asLowerCaseString(it->first) != name)
 			continue;
 
 		luaL_loadstring(L, it->second.second.c_str());
@@ -10120,11 +10120,11 @@ int32_t LuaInterface::luaL_domodlib(lua_State* L)
 	for(LibMap::iterator it = ScriptManager::getInstance()->getFirstLib();
 		it != ScriptManager::getInstance()->getLastLib(); ++it)
 	{
-		if(asLowerCaseString(it->first) != name)
+		if (asLowerCaseString(it->first) != name)
 			continue;
 
 		bool ret = luaL_dostring(L, it->second.second.c_str());
-		if(ret)
+		if (ret)
 			error(NULL, popString(L));
 
 		lua_pushboolean(L, !ret);

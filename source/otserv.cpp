@@ -549,7 +549,7 @@ void otserv(StringVec, ServiceManager* services)
 		ScriptManager::getInstance();
 
 	std::clog << ">> Loading mods..." << std::endl;
-	if(!ScriptManager::getInstance()->loadMods())
+	if (!ScriptManager::getInstance()->loadMods())
 		startupErrorMessage();
 
 	#ifdef __LOGIN_SERVER__
