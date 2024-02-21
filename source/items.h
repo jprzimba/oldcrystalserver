@@ -118,7 +118,7 @@ class ItemType
 	public:
 		ItemType();
 		virtual ~ItemType();
-		Abilities* getAbilities() {if (!abilities) abilities = new Abilities; return abilities;}
+		Abilities* getAbilities() {if(!abilities) abilities = new Abilities; return abilities;}
 
 		bool isGroundTile() const {return (group == ITEM_GROUP_GROUND);}
 		bool isContainer() const {return (group == ITEM_GROUP_CONTAINER);}
@@ -180,7 +180,7 @@ class Array
 
 		void clear()
 		{
-			if (m_data && m_size)
+			if(m_data && m_size)
 			{
 				free(m_data);
 				m_size = 0;
@@ -217,7 +217,7 @@ void Array<A>::reload()
 template<typename A>
 A Array<A>::getElement(uint32_t id)
 {
-	if (id < m_size)
+	if(id < m_size)
 		return m_data[id];
 
 	return 0;
@@ -226,7 +226,7 @@ A Array<A>::getElement(uint32_t id)
 template<typename A>
 const A Array<A>::getElement(uint32_t id) const
 {
-	if (id < m_size)
+	if(id < m_size)
 		return m_data[id];
 
 	return 0;
@@ -235,7 +235,7 @@ const A Array<A>::getElement(uint32_t id) const
 template<typename A>
 void Array<A>::addElement(A a, uint32_t pos)
 {
-	if (pos >= m_size)
+	if(pos >= m_size)
 	{
 		m_data = (A*)realloc(m_data, sizeof(A) * (pos + ITEMS_INCREMENT));
 		memset(m_data + m_size, 0, sizeof(A) * (pos + ITEMS_INCREMENT - m_size));

@@ -146,10 +146,10 @@ class MatrixArea
 			cols = _cols;
 
 			data_ = new bool*[rows];
-			for (uint32_t row = 0; row < rows; ++row)
+			for(uint32_t row = 0; row < rows; ++row)
 			{
 				data_[row] = new bool[cols];
-				for (uint32_t col = 0; col < cols; ++col)
+				for(uint32_t col = 0; col < cols; ++col)
 					data_[row][col] = 0;
 			}
 		}
@@ -162,18 +162,18 @@ class MatrixArea
 			cols = rhs.cols;
 
 			data_ = new bool*[rows];
-			for (uint32_t row = 0; row < rows; ++row)
+			for(uint32_t row = 0; row < rows; ++row)
 			{
 				data_[row] = new bool[cols];
 
-				for (uint32_t col = 0; col < cols; ++col)
+				for(uint32_t col = 0; col < cols; ++col)
 					data_[row][col] = rhs.data_[row][col];
 			}
 		}
 
 		virtual ~MatrixArea()
 		{
-			for (uint32_t row = 0; row < rows; ++row)
+			for(uint32_t row = 0; row < rows; ++row)
 				delete[] data_[row];
 
 			delete[] data_;
@@ -233,29 +233,29 @@ class CombatArea
 		{
 			int32_t dx = targetPos.x - centerPos.x, dy = targetPos.y - centerPos.y;
 			Direction dir = NORTH;
-			if (dx < 0)
+			if(dx < 0)
 				dir = WEST;
-			else if (dx > 0)
+			else if(dx > 0)
 				dir = EAST;
-			else if (dy < 0)
+			else if(dy < 0)
 				dir = NORTH;
 			else
 				dir = SOUTH;
 
-			if (hasExtArea)
+			if(hasExtArea)
 			{
-				if (dx < 0 && dy < 0)
+				if(dx < 0 && dy < 0)
 					dir = NORTHWEST;
-				else if (dx > 0 && dy < 0)
+				else if(dx > 0 && dy < 0)
 					dir = NORTHEAST;
-				else if (dx < 0 && dy > 0)
+				else if(dx < 0 && dy > 0)
 					dir = SOUTHWEST;
-				else if (dx > 0 && dy > 0)
+				else if(dx > 0 && dy > 0)
 					dir = SOUTHEAST;
 			}
 
 			CombatAreas::const_iterator it = areas.find(dir);
-			if (it != areas.end())
+			if(it != areas.end())
 				return it->second;
 
 			return NULL;
@@ -315,7 +315,7 @@ class Combat
 
 		void setArea(CombatArea* _area)
 		{
-			if (area)
+			if(area)
 				delete area;
 
 			area = _area;

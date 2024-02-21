@@ -36,7 +36,7 @@ GlobalEvents::~GlobalEvents()
 void GlobalEvents::clearMap(GlobalEventMap& map)
 {
 	GlobalEventMap::iterator it;
-	for (it = map.begin(); it != map.end(); ++it)
+	for(it = map.begin(); it != map.end(); ++it)
 		delete it->second;
 
 	map.clear();
@@ -53,7 +53,7 @@ void GlobalEvents::clear()
 
 Event* GlobalEvents::getEvent(const std::string& nodeName)
 {
-	if (asLowerCaseString(nodeName) == "globalevent")
+	if(asLowerCaseString(nodeName) == "globalevent")
 		return new GlobalEvent(&m_interface);
 
 	return NULL;
@@ -62,23 +62,23 @@ Event* GlobalEvents::getEvent(const std::string& nodeName)
 bool GlobalEvents::registerEvent(Event* event, xmlNodePtr, bool override)
 {
 	GlobalEvent* globalEvent = dynamic_cast<GlobalEvent*>(event);
-	if (!globalEvent)
+	if(!globalEvent)
 		return false;
 
 	GlobalEventMap* map = &thinkMap;
-	if (globalEvent->getEventType() == GLOBALEVENT_TIMER)
+	if(globalEvent->getEventType() == GLOBALEVENT_TIMER)
 		map = &timerMap;
-	else if (globalEvent->getEventType() != GLOBALEVENT_NONE)
+	else if(globalEvent->getEventType() != GLOBALEVENT_NONE)
 		map = &serverMap;
 
 	GlobalEventMap::iterator it = map->find(globalEvent->getName());
-	if (it == map->end())
+	if(it == map->end())
 	{
 		map->insert(std::make_pair(globalEvent->getName(), globalEvent));
 		return true;
 	}
 
-	if (override)
+	if(override)
 	{
 		delete it->second;
 		it->second = globalEvent;
@@ -102,13 +102,13 @@ void GlobalEvents::timer()
 {
 	time_t now = time(NULL);
 	tm* ts = localtime(&now);
-	for (GlobalEventMap::iterator it = timerMap.begin(); it != timerMap.end(); ++it)
+	for(GlobalEventMap::iterator it = timerMap.begin(); it != timerMap.end(); ++it)
 	{
 		int32_t tmp = it->second->getInterval(), h = tmp >> 16, m = (tmp >> 8) & 0xFF, s = tmp & 0xFF;
-		if (h != ts->tm_hour || m != ts->tm_min || s != ts->tm_sec)
+		if(h != ts->tm_hour || m != ts->tm_min || s != ts->tm_sec)
 			continue;
 
-		if (!it->second->executeEvent())
+		if(!it->second->executeEvent())
 			std::clog << "[Error - GlobalEvents::timer] Couldn't execute event: "
 				<< it->second->getName() << std::endl;
 	}
@@ -120,13 +120,13 @@ void GlobalEvents::timer()
 void GlobalEvents::think()
 {
 	int64_t now = OTSYS_TIME();
-	for (GlobalEventMap::iterator it = thinkMap.begin(); it != thinkMap.end(); ++it)
+	for(GlobalEventMap::iterator it = thinkMap.begin(); it != thinkMap.end(); ++it)
 	{
-		if ((it->second->getLastExecution() + it->second->getInterval()) > now)
+		if((it->second->getLastExecution() + it->second->getInterval()) > now)
 			continue;
 
 		it->second->setLastExecution(now);
-		if (!it->second->executeEvent())
+		if(!it->second->executeEvent())
 			std::clog << "[Error - GlobalEvents::think] Couldn't execute event: "
 				<< it->second->getName() << std::endl;
 	}
@@ -137,9 +137,9 @@ void GlobalEvents::think()
 
 void GlobalEvents::execute(GlobalEvent_t type)
 {
-	for (GlobalEventMap::iterator it = serverMap.begin(); it != serverMap.end(); ++it)
+	for(GlobalEventMap::iterator it = serverMap.begin(); it != serverMap.end(); ++it)
 	{
-		if (it->second->getEventType() == type)
+		if(it->second->getEventType() == type)
 			it->second->executeEvent();
 	}
 }
@@ -160,9 +160,9 @@ GlobalEventMap GlobalEvents::getEventMap(GlobalEvent_t type)
 		case GLOBALEVENT_RECORD:
 		{
 			GlobalEventMap retMap;
-			for (GlobalEventMap::iterator it = serverMap.begin(); it != serverMap.end(); ++it)
+			for(GlobalEventMap::iterator it = serverMap.begin(); it != serverMap.end(); ++it)
 			{
-				if (it->second->getEventType() == type)
+				if(it->second->getEventType() == type)
 					retMap[it->first] = it->second;
 			}
 
@@ -186,7 +186,7 @@ GlobalEvent::GlobalEvent(LuaInterface* _interface):
 bool GlobalEvent::configureEvent(xmlNodePtr p)
 {
 	std::string strValue;
-	if (!readXMLString(p, "name", strValue))
+	if(!readXMLString(p, "name", strValue))
 	{
 		std::clog << "[Error - GlobalEvent::configureEvent] No name for a globalevent." << std::endl;
 		return false;
@@ -194,16 +194,16 @@ bool GlobalEvent::configureEvent(xmlNodePtr p)
 
 	m_name = strValue;
 	m_eventType = GLOBALEVENT_NONE;
-	if (readXMLString(p, "type", strValue))
+	if(readXMLString(p, "type", strValue))
 	{
 		std::string tmpStrValue = asLowerCaseString(strValue);
-		if (tmpStrValue == "startup" || tmpStrValue == "start" || tmpStrValue == "load")
+		if(tmpStrValue == "startup" || tmpStrValue == "start" || tmpStrValue == "load")
 			m_eventType = GLOBALEVENT_STARTUP;
-		else if (tmpStrValue == "shutdown" || tmpStrValue == "quit" || tmpStrValue == "exit")
+		else if(tmpStrValue == "shutdown" || tmpStrValue == "quit" || tmpStrValue == "exit")
 			m_eventType = GLOBALEVENT_SHUTDOWN;
-		else if (tmpStrValue == "globalsave" || tmpStrValue == "global")
+		else if(tmpStrValue == "globalsave" || tmpStrValue == "global")
 			m_eventType = GLOBALEVENT_GLOBALSAVE;
-		else if (tmpStrValue == "record" || tmpStrValue == "playersrecord")
+		else if(tmpStrValue == "record" || tmpStrValue == "playersrecord")
 			m_eventType = GLOBALEVENT_RECORD;
 		else
 		{
@@ -213,28 +213,28 @@ bool GlobalEvent::configureEvent(xmlNodePtr p)
 
 		return true;
 	}
-	else if (readXMLString(p, "time", strValue) || readXMLString(p, "at", strValue))
+	else if(readXMLString(p, "time", strValue) || readXMLString(p, "at", strValue))
 	{
 		IntegerVec params = vectorAtoi(explodeString(strValue, ":"));
-		if (params[0] > 23 || params[0] < 0)
+		if(params[0] > 23 || params[0] < 0)
 		{
 			std::clog << "[Error - GlobalEvent::configureEvent] No valid hour \"" << strValue << "\" for globalevent with name " << m_name << std::endl;
 			return false;
 		}
 
 		m_interval |= params[0] << 16;
-		if (params.size() > 1)
+		if(params.size() > 1)
 		{
-			if (params[1] > 59 || params[1] < 0)
+			if(params[1] > 59 || params[1] < 0)
 			{
 				std::clog << "[Error - GlobalEvent::configureEvent] No valid minute \"" << strValue << "\" for globalevent with name " << m_name << std::endl;
 				return false;
 			}
 
 			m_interval |= params[1] << 8;
-			if (params.size() > 2)
+			if(params.size() > 2)
 			{
-				if (params[2] > 59 || params[2] < 0)
+				if(params[2] > 59 || params[2] < 0)
 				{
 					std::clog << "[Error - GlobalEvent::configureEvent] No valid second \"" << strValue << "\" for globalevent with name " << m_name << std::endl;
 					return false;
@@ -249,7 +249,7 @@ bool GlobalEvent::configureEvent(xmlNodePtr p)
 	}
 
 	int32_t intValue;
-	if (readXMLInteger(p, "interval", intValue))
+	if(readXMLInteger(p, "interval", intValue))
 	{
 		m_interval = std::max((int32_t)SCHEDULER_MINTICKS, intValue);
 		return true;
@@ -300,21 +300,21 @@ std::string GlobalEvent::getScriptEventParams() const
 int32_t GlobalEvent::executeRecord(uint32_t current, uint32_t old, Player* player)
 {
 	//onRecord(current, old, cid)
-	if (m_interface->reserveEnv())
+	if(m_interface->reserveEnv())
 	{
 		ScriptEnviroment* env = m_interface->getEnv();
-		if (m_scripted == EVENT_SCRIPT_BUFFER)
+		if(m_scripted == EVENT_SCRIPT_BUFFER)
 		{
 			std::stringstream scriptstream;
 			scriptstream << "local current = " << current << std::endl;
 			scriptstream << "local old = " << old << std::endl;
 			scriptstream << "local cid = " << env->addThing(player) << std::endl;
 
-			if (m_scriptData)
+			if(m_scriptData)
 				scriptstream << *m_scriptData;
 
 			bool result = true;
-			if (m_interface->loadBuffer(scriptstream.str()))
+			if(m_interface->loadBuffer(scriptstream.str()))
 			{
 				lua_State* L = m_interface->getState();
 				result = m_interface->getGlobalBool(L, "_result", true);
@@ -353,22 +353,22 @@ int32_t GlobalEvent::executeRecord(uint32_t current, uint32_t old, Player* playe
 
 int32_t GlobalEvent::executeEvent()
 {
-	if (m_interface->reserveEnv())
+	if(m_interface->reserveEnv())
 	{
 		ScriptEnviroment* env = m_interface->getEnv();
-		if (m_scripted == EVENT_SCRIPT_BUFFER)
+		if(m_scripted == EVENT_SCRIPT_BUFFER)
 		{
 			std::stringstream scriptstream;
-			if (m_eventType == GLOBALEVENT_NONE)
+			if(m_eventType == GLOBALEVENT_NONE)
 				scriptstream << "local interval = " << m_interval << std::endl;
-			else if (m_eventType == GLOBALEVENT_TIMER)
+			else if(m_eventType == GLOBALEVENT_TIMER)
 				scriptstream << "local time = " << m_interval << std::endl;
 
-			if (m_scriptData)
+			if(m_scriptData)
 				scriptstream << *m_scriptData;
 
 			bool result = true;
-			if (m_interface->loadBuffer(scriptstream.str()))
+			if(m_interface->loadBuffer(scriptstream.str()))
 			{
 				lua_State* L = m_interface->getState();
 				result = m_interface->getGlobalBool(L, "_result", true);
@@ -384,7 +384,7 @@ int32_t GlobalEvent::executeEvent()
 			m_interface->pushFunction(m_scriptId);
 
 			int32_t params = 0;
-			if (m_eventType == GLOBALEVENT_NONE || m_eventType == GLOBALEVENT_TIMER)
+			if(m_eventType == GLOBALEVENT_NONE || m_eventType == GLOBALEVENT_TIMER)
 			{
 				lua_pushnumber(L, m_interval);
 				params = 1;

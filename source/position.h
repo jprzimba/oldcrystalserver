@@ -67,22 +67,22 @@ class Position
 
 		bool operator<(const Position& p) const
 		{
-			if (z < p.z)
+			if(z < p.z)
 				return true;
 
-			if (z > p.z)
+			if(z > p.z)
 				return false;
 
-			if (y < p.y)
+			if(y < p.y)
 				return true;
 
-			if (y > p.y)
+			if(y > p.y)
 				return false;
 
-			if (x < p.x)
+			if(x < p.x)
 				return true;
 
-			if (x > p.x)
+			if(x > p.x)
 				return false;
 
 			return false;

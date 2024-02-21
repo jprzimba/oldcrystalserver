@@ -26,7 +26,7 @@ uint32_t OutputMessagePool::outputMessagePoolCount = OUTPUT_POOL_SIZE;
 
 OutputMessagePool::OutputMessagePool()
 {
-	for (uint32_t i = 0; i < OUTPUT_POOL_SIZE; ++i)
+	for(uint32_t i = 0; i < OUTPUT_POOL_SIZE; ++i)
 	{
 		OutputMessage* msg = new OutputMessage();
 		m_outputMessages.push_back(msg);
@@ -47,7 +47,7 @@ void OutputMessagePool::startExecutionFrame()
 
 OutputMessagePool::~OutputMessagePool()
 {
-	for (InternalList::iterator it = m_outputMessages.begin(); it != m_outputMessages.end(); ++it)
+	for(InternalList::iterator it = m_outputMessages.begin(); it != m_outputMessages.end(); ++it)
 		delete (*it);
 
 	m_outputMessages.clear();
@@ -59,14 +59,14 @@ void OutputMessagePool::send(OutputMessage_ptr msg)
 	OutputMessage::OutputMessageState state = msg->getState();
 
 	m_outputPoolLock.unlock();
-	if (state == OutputMessage::STATE_ALLOCATED_NO_AUTOSEND)
+	if(state == OutputMessage::STATE_ALLOCATED_NO_AUTOSEND)
 	{
 		#ifdef __DEBUG_NET_DETAIL__
 		std::clog << "Sending message - SINGLE" << std::endl;
 		#endif
-		if (msg->getConnection())
+		if(msg->getConnection())
 		{
-			if (!msg->getConnection()->send(msg) && msg->getProtocol())
+			if(!msg->getConnection()->send(msg) && msg->getProtocol())
 				msg->getProtocol()->onSendMessage(msg);
 		}
 		#ifdef __DEBUG_NET__
@@ -84,12 +84,12 @@ void OutputMessagePool::sendAll()
 {
 	boost::recursive_mutex::scoped_lock lockClass(m_outputPoolLock);
 	OutputMessageList::iterator it;
-	for (it = m_addQueue.begin(); it != m_addQueue.end();)
+	for(it = m_addQueue.begin(); it != m_addQueue.end();)
 	{
 		//drop messages that are older than 10 seconds
-		if (OTSYS_TIME() - (*it)->getFrame() > 10000)
+		if(OTSYS_TIME() - (*it)->getFrame() > 10000)
 		{
-			if ((*it)->getProtocol())
+			if((*it)->getProtocol())
 				(*it)->getProtocol()->onSendMessage(*it);
 
 			it = m_addQueue.erase(it);
@@ -102,23 +102,23 @@ void OutputMessagePool::sendAll()
 	}
 
 	m_addQueue.clear();
-	for (it = m_autoSend.begin(); it != m_autoSend.end();)
+	for(it = m_autoSend.begin(); it != m_autoSend.end();)
 	{
 		OutputMessage_ptr omsg = (*it);
 		#ifdef __NO_PLAYER_SENDBUFFER__
 		//use this define only for debugging
-		if (true)
+		if(true)
 		#else
 		//It will send only messages bigger then 1 kb or with a lifetime greater than 10 ms
-		if (omsg->size() > 1024 || (m_frameTime - omsg->getFrame() > 10))
+		if(omsg->size() > 1024 || (m_frameTime - omsg->getFrame() > 10))
 		#endif
 		{
 			#ifdef __DEBUG_NET_DETAIL__
 			std::clog << "Sending message - ALL" << std::endl;
 			#endif
-			if (omsg->getConnection())
+			if(omsg->getConnection())
 			{
-				if (!omsg->getConnection()->send(omsg) && omsg->getProtocol())
+				if(!omsg->getConnection()->send(omsg) && omsg->getProtocol())
 					omsg->getProtocol()->onSendMessage(omsg);
 			}
 			#ifdef __DEBUG_NET__
@@ -141,12 +141,12 @@ void OutputMessagePool::releaseMessage(OutputMessage* msg)
 
 void OutputMessagePool::internalReleaseMessage(OutputMessage* msg)
 {
-	if (msg->getProtocol())
+	if(msg->getProtocol())
 		msg->getProtocol()->unRef();
 	else
 		std::clog << "[Warning - OutputMessagePool::internalReleaseMessage] protocol not found." << std::endl;
 
-	if (msg->getConnection())
+	if(msg->getConnection())
 		msg->getConnection()->unRef();
 	else
 		std::clog << "[Warning - OutputMessagePool::internalReleaseMessage] connection not found." << std::endl;
@@ -166,14 +166,14 @@ OutputMessage_ptr OutputMessagePool::getOutputMessage(Protocol* protocol, bool a
 	#ifdef __DEBUG_NET_DETAIL__
 	std::clog << "request output message - auto = " << autoSend << std::endl;
 	#endif
-	if (m_shutdown)
+	if(m_shutdown)
 		return OutputMessage_ptr();
 
 	boost::recursive_mutex::scoped_lock lockClass(m_outputPoolLock);
-	if (!protocol->getConnection())
+	if(!protocol->getConnection())
 		return OutputMessage_ptr();
 
-	if (m_outputMessages.empty())
+	if(m_outputMessages.empty())
 	{
 #ifdef __ENABLE_SERVER_DIAGNOSTIC__
 		outputMessagePoolCount++;
@@ -198,7 +198,7 @@ void OutputMessagePool::configureOutputMessage(OutputMessage_ptr msg, Protocol* 
 {
 	TRACK_MESSAGE(msg);
 	msg->reset();
-	if (autoSend)
+	if(autoSend)
 	{
 		msg->setState(OutputMessage::STATE_ALLOCATED);
 		m_autoSend.push_back(msg);

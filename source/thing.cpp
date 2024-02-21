@@ -28,7 +28,7 @@ Cylinder* Thing::getTopParent()
 {
 	//tile
 	Cylinder* aux = getParent();
-	if (!aux)
+	if(!aux)
 		return dynamic_cast<Cylinder*>(this);
 
 	Cylinder* prev = dynamic_cast<Cylinder*>(this);
@@ -38,7 +38,7 @@ Cylinder* Thing::getTopParent()
 		aux = aux->getParent();
 	}
 
-	if (dynamic_cast<Cylinder*>(prev))
+	if(dynamic_cast<Cylinder*>(prev))
 		return prev;
 
 	return aux;
@@ -48,7 +48,7 @@ const Cylinder* Thing::getTopParent() const
 {
 	//tile
 	const Cylinder* aux = getParent();
-	if (!aux)
+	if(!aux)
 		return dynamic_cast<const Cylinder*>(this);
 
 	const Cylinder* prev = dynamic_cast<const Cylinder*>(this);
@@ -58,7 +58,7 @@ const Cylinder* Thing::getTopParent() const
 		aux = aux->getParent();
 	}
 
-	if (dynamic_cast<const Cylinder*>(prev))
+	if(dynamic_cast<const Cylinder*>(prev))
 		return prev;
 
 	return aux;
@@ -68,14 +68,14 @@ Tile* Thing::getTile()
 {
 	Cylinder* cylinder = getTopParent();
 #ifdef __DEBUG_MOVESYS__
-	if (!cylinder)
+	if(!cylinder)
 	{
 		std::clog << "[Failure - Thing::getTile] NULL tile" << std::endl;
 		return &(Tile::nullTile);
 	}
 #endif
 
-	if (cylinder->getParent())
+	if(cylinder->getParent())
 		cylinder = cylinder->getParent();
 
 	return dynamic_cast<Tile*>(cylinder);
@@ -85,14 +85,14 @@ const Tile* Thing::getTile() const
 {
 	const Cylinder* cylinder = getTopParent();
 #ifdef __DEBUG_MOVESYS__
-	if (!cylinder)
+	if(!cylinder)
 	{
 		std::clog << "[Failure - Thing::getTile] NULL tile" << std::endl;
 		return &(Tile::nullTile);
 	}
 #endif
 
-	if (cylinder->getParent())
+	if(cylinder->getParent())
 		cylinder = cylinder->getParent();
 
 	return dynamic_cast<const Tile*>(cylinder);
@@ -100,7 +100,7 @@ const Tile* Thing::getTile() const
 
 Position Thing::getPosition() const
 {
-	if (const Tile* tile = getTile())
+	if(const Tile* tile = getTile())
 		return tile->getPosition();
 
 #ifdef __DEBUG_MOVESYS__
@@ -112,7 +112,7 @@ Position Thing::getPosition() const
 bool Thing::isRemoved() const
 {
 	const Cylinder* aux = getParent();
-	if (!aux)
+	if(!aux)
 		return true;
 
 	return aux->isRemoved();

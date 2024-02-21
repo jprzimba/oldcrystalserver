@@ -48,7 +48,7 @@ class OutputMessage : public NetworkMessage, boost::noncopyable
 		void writeMessageLength() {addHeader((uint16_t)(m_size));}
 		void addCryptoHeader(bool addChecksum)
 		{
-			if (addChecksum)
+			if(addChecksum)
 				addHeader((adlerChecksum((uint8_t*)(m_buffer + m_outputBufferStart), m_size)));
 
 			addHeader((uint16_t)(m_size));
@@ -57,7 +57,7 @@ class OutputMessage : public NetworkMessage, boost::noncopyable
 #ifdef __TRACK_NETWORK__
 		virtual void track(std::string file, int32_t line, std::string func)
 		{
-			if (lastUses.size() >= 25)
+			if(lastUses.size() >= 25)
 				lastUses.pop_front();
 
 			std::ostringstream os;
@@ -73,7 +73,7 @@ class OutputMessage : public NetworkMessage, boost::noncopyable
 		void printTrace()
 		{
 			uint32_t n = 1;
-			for (std::list<std::string>::const_reverse_iterator it = lastUses.rbegin(); it != lastUses.rend(); ++it, ++n)
+			for(std::list<std::string>::const_reverse_iterator it = lastUses.rbegin(); it != lastUses.rend(); ++it, ++n)
 				std::clog << "\t" << n << ".\t" << (*it) << std::endl;
 		}
 #endif
@@ -90,7 +90,7 @@ class OutputMessage : public NetworkMessage, boost::noncopyable
 		template <typename T>
 		inline void addHeader(T value)
 		{
-			if ((int32_t)m_outputBufferStart - (int32_t)sizeof(T) < 0)
+			if((int32_t)m_outputBufferStart - (int32_t)sizeof(T) < 0)
 			{
 				std::clog << "[Error - OutputMessage::addHeader] m_outputBufferStart(" << m_outputBufferStart << ") < " << sizeof(T) << std::endl;
 				return;

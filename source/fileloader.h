@@ -19,6 +19,10 @@
 #define __FILELOADER__
 #include "otsystem.h"
 
+#ifdef __USE_ZLIB__
+#include <zlib.h>
+#endif
+
 struct NodeStruct;
 typedef NodeStruct* NODE;
 
@@ -35,15 +39,15 @@ struct NodeStruct
 	NodeStruct* next;
 	NodeStruct* child;
 
-	static void clearNet(NodeStruct* root) {if (root) clearChild(root);}
+	static void clearNet(NodeStruct* root) {if(root) clearChild(root);}
 	private:
 		static void clearNext(NodeStruct* node)
 		{
 			NodeStruct* deleteNode = node;
 			NodeStruct* nextNode;
-			while (deleteNode)
+			while(deleteNode)
 			{
-				if (deleteNode->child)
+				if(deleteNode->child)
 					clearChild(deleteNode->child);
 
 				nextNode = deleteNode->next;
@@ -54,10 +58,10 @@ struct NodeStruct
 
 		static void clearChild(NodeStruct* node)
 		{
-			if (node->child)
+			if(node->child)
 				clearChild(node->child);
 
-			if (node->next)
+			if(node->next)
 				clearNext(node->next);
 
 			delete node;
@@ -88,7 +92,7 @@ class FileLoader
 		FileLoader();
 		virtual ~FileLoader();
 
-		bool openFile(const char* name, const char* identifier, bool write, bool caching = false);
+		bool openFile(std::string name, bool write, bool caching = false);
 		const uint8_t* getProps(const NODE, uint32_t &size);
 		bool getProps(const NODE, PropStream& props);
 		NODE getChildNode(const NODE& parent, uint32_t &type) const;
@@ -119,23 +123,30 @@ class FileLoader
 	public:
 		inline bool writeData(const void* data, int32_t size, bool unescape)
 		{
-			for (int32_t i = 0; i < size; ++i)
+			for(int32_t i = 0; i < size; ++i)
 			{
 				uint8_t c = *(((uint8_t*)data) + i);
-				if (unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR))
+				if(unescape && (c == NODE_START || c == NODE_END || c == ESCAPE_CHAR))
 				{
 					uint8_t tmp = ESCAPE_CHAR;
-
+#ifdef __USE_ZLIB__
+					size_t value = gzwrite(m_file, &tmp, 1);
+#else
 					size_t value = fwrite(&tmp, 1, 1, m_file);
-					if (value != 1)
+#endif
+					if(value != 1)
 					{
 						m_lastError = ERROR_COULDNOTWRITE;
 						return false;
 					}
 				}
 
+#ifdef __USE_ZLIB__
+				size_t value = gzwrite(m_file, &c, 1);
+#else
 				size_t value = fwrite(&c, 1, 1, m_file);
-				if (value != 1)
+#endif
+				if(value != 1)
 				{
 					m_lastError = ERROR_COULDNOTWRITE;
 					return false;
@@ -147,8 +158,11 @@ class FileLoader
 
 	protected:
 		FILELOADER_ERRORS m_lastError;
-
+#ifdef __USE_ZLIB__
+		gzFile m_file;
+#else
 		FILE* m_file;
+#endif
 
 		NODE m_root;
 		uint32_t m_buffer_size;
@@ -189,7 +203,7 @@ class PropStream
 		template <typename T>
 		inline bool getType(T& ret)
 		{
-			if (size() < (int32_t)sizeof(T))
+			if(size() < (int32_t)sizeof(T))
 				return false;
 
 			ret = *((T*)p);
@@ -200,7 +214,7 @@ class PropStream
 		template <typename T>
 		inline bool getStruct(T* &ret)
 		{
-			if (size() < (int32_t)sizeof(T))
+			if(size() < (int32_t)sizeof(T))
 			{
 				ret = NULL;
 				return false;
@@ -219,7 +233,7 @@ class PropStream
 		inline bool getFloat(float& ret)
 		{
 			// ugly hack, but it makes reading not depending on arch
-			if (size() < (int32_t)sizeof(uint32_t))
+			if(size() < (int32_t)sizeof(uint32_t))
 				return false;
 
 			float f;
@@ -238,7 +252,7 @@ class PropStream
 
 		inline bool getString(std::string& ret, uint16_t strLen)
 		{
-			if (size() < (int32_t)strLen)
+			if(size() < (int32_t)strLen)
 				return false;
 
 			char* str = new char[strLen + 1];
@@ -254,10 +268,10 @@ class PropStream
 		inline bool getLongString(std::string& ret)
 		{
 			uint32_t strLen;
-			if (!getLong(strLen))
+			if(!getLong(strLen))
 				return false;
 
-			if (size() < (int32_t)strLen)
+			if(size() < (int32_t)strLen)
 				return false;
 
 			char* str = new char[strLen + 1];
@@ -272,7 +286,7 @@ class PropStream
 
 		inline bool skip(int16_t n)
 		{
-			if (size() < n)
+			if(size() < n)
 				return false;
 
 			p += n;
@@ -305,11 +319,11 @@ class PropWriteStream
 		template <typename T>
 		inline void addType(T add)
 		{
-			if ((bufferSize - size) < sizeof(T))
+			if((bufferSize - size) < sizeof(T))
 			{
 				bufferSize += ((sizeof(T) + 0x1F) & 0xFFFFFFE0);
 				char* tmp = (char*)realloc(buffer, bufferSize);
-				if (tmp != NULL)
+				if(tmp != NULL)
 					buffer = tmp;
 				else
 					std::clog << "[Error - PropWriteStream::addType] Failed to allocate memory" << std::endl;
@@ -323,11 +337,11 @@ class PropWriteStream
 		template <typename T>
 		inline void addStruct(T* add)
 		{
-			if ((bufferSize - size) < sizeof(T))
+			if((bufferSize - size) < sizeof(T))
 			{
 				bufferSize += ((sizeof(T) + 0x1F) & 0xFFFFFFE0);
 				char* tmp = (char*)realloc(buffer, bufferSize);
-				if (tmp != NULL)
+				if(tmp != NULL)
 					buffer = tmp;
 				else
 					std::clog << "[Error - PropWriteStream::addStruct] Failed to allocate memory" << std::endl;
@@ -346,11 +360,11 @@ class PropWriteStream
 		{
 			uint16_t strLen = add.size();
 			addShort(strLen);
-			if ((bufferSize - size) < strLen)
+			if((bufferSize - size) < strLen)
 			{
 				bufferSize += ((strLen + 0x1F) & 0xFFFFFFE0);
 				char* tmp = (char*)realloc(buffer, bufferSize);
-				if (tmp != NULL)
+				if(tmp != NULL)
 					buffer = tmp;
 				else
 					std::clog << "[Error - PropWriteStream::addString] Failed to allocate memory" << std::endl;
@@ -364,11 +378,11 @@ class PropWriteStream
 		{
 			uint16_t strLen = add.size();
 			addLong(strLen);
-			if ((bufferSize - size) < strLen)
+			if((bufferSize - size) < strLen)
 			{
 				bufferSize += ((strLen + 0x1F) & 0xFFFFFFE0);
 				char* tmp = (char*)realloc(buffer, bufferSize);
-				if (tmp != NULL)
+				if(tmp != NULL)
 					buffer = tmp;
 				else
 					std::clog << "[Error - PropWriteStream::addLongString] Failed to allocate memory" << std::endl;

@@ -34,58 +34,58 @@ HouseTile::HouseTile(int32_t x, int32_t y, int32_t z, House* _house):
 void HouseTile::__addThing(Creature* actor, int32_t index, Thing* thing)
 {
 	Tile::__addThing(actor, index, thing);
-	if (!thing->getParent())
+	if(!thing->getParent())
 		return;
 
-	if (Item* item = thing->getItem())
+	if(Item* item = thing->getItem())
 		updateHouse(item);
 }
 
 void HouseTile::__internalAddThing(uint32_t index, Thing* thing)
 {
 	Tile::__internalAddThing(index, thing);
-	if (!thing->getParent())
+	if(!thing->getParent())
 		return;
 
-	if (Item* item = thing->getItem())
+	if(Item* item = thing->getItem())
 		updateHouse(item);
 }
 
 void HouseTile::updateHouse(Item* item)
 {
-	if (item->getTile() != this)
+	if(item->getTile() != this)
 		return;
 
 	Door* door = item->getDoor();
-	if (door && door->getDoorId())
+	if(door && door->getDoorId())
 		house->addDoor(door);
-	else if (BedItem* bed = item->getBed())
+	else if(BedItem* bed = item->getBed())
 		house->addBed(bed);
 }
 
 ReturnValue HouseTile::__queryAdd(int32_t index, const Thing* thing, uint32_t count, uint32_t flags, Creature* actor/* = NULL*/) const
 {
-	if (const Creature* creature = thing->getCreature())
+	if(const Creature* creature = thing->getCreature())
 	{
-		if (const Player* player = creature->getPlayer())
+		if(const Player* player = creature->getPlayer())
 		{
-			if (!house->isInvited(player) && !player->hasCustomFlag(PlayerCustomFlag_CanMoveAnywhere))
+			if(!house->isInvited(player) && !player->hasCustomFlag(PlayerCustomFlag_CanMoveAnywhere))
 				return RET_PLAYERISNOTINVITED;
 		}
 		else
 			return RET_NOTPOSSIBLE;
 	}
-	else if (thing->getItem())
+	else if(thing->getItem())
 	{
 		const uint32_t itemLimit = g_config.getNumber(ConfigManager::HOUSE_TILE_LIMIT);
-		if (itemLimit && getItemCount() > itemLimit)
+		if(itemLimit && getItemCount() > itemLimit)
 			return RET_TILEISFULL;
 
-		if (actor && g_config.getBool(ConfigManager::HOUSE_PROTECTION))
+		if(actor && g_config.getBool(ConfigManager::HOUSE_PROTECTION))
 		{
-			if (const Player* player = actor->getPlayer())
+			if(const Player* player = actor->getPlayer())
 			{
-				if (!house->isInvited(player) && !player->hasCustomFlag(PlayerCustomFlag_CanThrowAnywhere))
+				if(!house->isInvited(player) && !player->hasCustomFlag(PlayerCustomFlag_CanThrowAnywhere))
 					return RET_PLAYERISNOTINVITED;
 			}
 		}
@@ -96,11 +96,11 @@ ReturnValue HouseTile::__queryAdd(int32_t index, const Thing* thing, uint32_t co
 
 ReturnValue HouseTile::__queryRemove(const Thing* thing, uint32_t count, uint32_t flags, Creature* actor/* = NULL*/) const
 {
-	if (thing->getItem() && actor && g_config.getBool(ConfigManager::HOUSE_PROTECTION))
+	if(thing->getItem() && actor && g_config.getBool(ConfigManager::HOUSE_PROTECTION))
 	{
-		if (const Player* player = actor->getPlayer())
+		if(const Player* player = actor->getPlayer())
 		{
-			if (!house->isInvited(player) && !player->hasCustomFlag(PlayerCustomFlag_CanThrowAnywhere))
+			if(!house->isInvited(player) && !player->hasCustomFlag(PlayerCustomFlag_CanThrowAnywhere))
 				return RET_PLAYERISNOTINVITED;
 		}
 	}
@@ -110,19 +110,19 @@ ReturnValue HouseTile::__queryRemove(const Thing* thing, uint32_t count, uint32_
 
 Cylinder* HouseTile::__queryDestination(int32_t& index, const Thing* thing, Item** destItem, uint32_t& flags)
 {
-	if (const Creature* creature = thing->getCreature())
+	if(const Creature* creature = thing->getCreature())
 	{
-		if (const Player* player = creature->getPlayer())
+		if(const Player* player = creature->getPlayer())
 		{
-			if (!house->isInvited(player) && !player->hasFlag(PlayerFlag_CanEditHouses))
+			if(!house->isInvited(player) && !player->hasFlag(PlayerFlag_CanEditHouses))
 			{
 				Tile* destTile = g_game.getTile(house->getEntry());
-				if (!destTile)
+				if(!destTile)
 				{
 					std::clog << "[Error - HouseTile::__queryDestination] Tile at house entry position for house: "
 						<< house->getName() << " (" << house->getId() << ") does not exist." << std::endl;
 					destTile = g_game.getTile(player->getMasterPosition());
-					if (!destTile)
+					if(!destTile)
 						destTile = &(Tile::nullTile);
 				}
 

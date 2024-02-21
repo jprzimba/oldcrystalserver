@@ -29,9 +29,9 @@ WaitList::iterator WaitingList::find(const Player* player, uint32_t& slot)
 {
 	slot = 1;
 	std::string name = asLowerCaseString(player->getName());
-	for (WaitList::iterator it = waitList.begin(); it != waitList.end(); ++it)
+	for(WaitList::iterator it = waitList.begin(); it != waitList.end(); ++it)
 	{
-		if ((*it)->ip == player->getIP() && asLowerCaseString((*it)->name) == name)
+		if((*it)->ip == player->getIP() && asLowerCaseString((*it)->name) == name)
 			return it;
 
 		++slot;
@@ -42,13 +42,13 @@ WaitList::iterator WaitingList::find(const Player* player, uint32_t& slot)
 
 int32_t WaitingList::getTime(int32_t slot)
 {
-	if (slot < 5)
+	if(slot < 5)
 		return 5;
-	else if (slot < 10)
+	else if(slot < 10)
 		return 10;
-	else if (slot < 20)
+	else if(slot < 20)
 		return 20;
-	else if (slot < 50)
+	else if(slot < 50)
 		return 60;
 
 	return 120;
@@ -57,7 +57,7 @@ int32_t WaitingList::getTime(int32_t slot)
 bool WaitingList::login(const Player* player)
 {
 	uint32_t online = g_game.getPlayersOnline(), max = g_config.getNumber(ConfigManager::MAX_PLAYERS);
-	if (player->hasFlag(PlayerFlag_CanAlwaysLogin) || player->isAccountManager() || (waitList.empty()
+	if(player->hasFlag(PlayerFlag_CanAlwaysLogin) || player->isAccountManager() || (waitList.empty()
 		&& online < max) || (g_config.getBool(ConfigManager::PREMIUM_SKIP_WAIT) && player->isPremium()))
 		return true;
 
@@ -65,9 +65,9 @@ bool WaitingList::login(const Player* player)
 	uint32_t slot = 0;
 
 	WaitList::iterator it = find(player, slot);
-	if (it != waitList.end())
+	if(it != waitList.end())
 	{
-		if ((online + slot) > max)
+		if((online + slot) > max)
 		{
 			//let them wait a bit longer
 			(*it)->timeout = OTSYS_TIME() + getTimeout(slot) * 1000;
@@ -81,13 +81,13 @@ bool WaitingList::login(const Player* player)
 	}
 
 	Wait* wait = new Wait();
-	if (player->isPremium())
+	if(player->isPremium())
 	{
 		slot = 1;
 		WaitList::iterator it = waitList.end();
-		for (WaitList::iterator wit = waitList.begin(); wit != it; ++wit)
+		for(WaitList::iterator wit = waitList.begin(); wit != it; ++wit)
 		{
-			if (!(*wit)->premium)
+			if(!(*wit)->premium)
 			{
 				it = wit;
 				break;
@@ -116,7 +116,7 @@ int32_t WaitingList::getSlot(const Player* player)
 {
 	uint32_t slot = 0;
 	WaitList::iterator it = find(player, slot);
-	if (it != waitList.end())
+	if(it != waitList.end())
 		return slot;
 
 	return -1;
@@ -124,9 +124,9 @@ int32_t WaitingList::getSlot(const Player* player)
 
 void WaitingList::cleanup()
 {
-	for (WaitList::iterator it = waitList.begin(); it != waitList.end();)
+	for(WaitList::iterator it = waitList.begin(); it != waitList.end();)
 	{
-		if (((*it)->timeout - OTSYS_TIME()) <= 0)
+		if(((*it)->timeout - OTSYS_TIME()) <= 0)
 		{
 			delete *it;
 			it = waitList.erase(it);

@@ -46,7 +46,7 @@ void ProtocolStatus::onRecvFirstMessage(NetworkMessage& msg)
 {
 
 	IpConnectMap::const_iterator it = ipConnectMap.find(getIP());
-	if (it != ipConnectMap.end() && OTSYS_TIME() < it->second + g_config.getNumber(ConfigManager::STATUSQUERY_TIMEOUT))
+	if(it != ipConnectMap.end() && OTSYS_TIME() < it->second + g_config.getNumber(ConfigManager::STATUSQUERY_TIMEOUT))
 	{
 		getConnection()->close();
 		return;
@@ -58,15 +58,15 @@ void ProtocolStatus::onRecvFirstMessage(NetworkMessage& msg)
 	{
 		case 0xFF:
 		{
-			if (msg.getString(false, 4) == "info")
+			if(msg.getString(false, 4) == "info")
 			{
-				if (OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false))
+				if(OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false))
 				{
 					TRACK_MESSAGE(output);
-					if (Status* status = Status::getInstance())
+					if(Status* status = Status::getInstance())
 					{
 						bool sendPlayers = false;
-						if (msg.size() > msg.position())
+						if(msg.size() > msg.position())
 							sendPlayers = msg.get<char>() == 0x01;
 
 						output->putString(status->getStatusString(sendPlayers), false);
@@ -83,10 +83,10 @@ void ProtocolStatus::onRecvFirstMessage(NetworkMessage& msg)
 		case 0x01:
 		{
 			uint32_t requestedInfo = msg.get<uint16_t>(); // only a byte is necessary, though we could add new infos here
-			if (OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false))
+			if(OutputMessage_ptr output = OutputMessagePool::getInstance()->getOutputMessage(this, false))
 			{
 				TRACK_MESSAGE(output);
-				if (Status* status = Status::getInstance())
+				if(Status* status = Status::getInstance())
 					status->getInfo(requestedInfo, output, msg);
 
 				OutputMessagePool::getInstance()->send(output);
@@ -148,15 +148,15 @@ std::string Status::getStatusString(bool sendPlayers) const
 	xmlSetProp(p, (const xmlChar*)"max", (const xmlChar*)buffer);
 	sprintf(buffer, "%d", g_game.getPlayersRecord());
 	xmlSetProp(p, (const xmlChar*)"peak", (const xmlChar*)buffer);
-	if (sendPlayers)
+	if(sendPlayers)
 	{
 		std::stringstream ss;
-		for (AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
+		for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
 		{
-			if (it->second->isRemoved() || it->second->isGhost())
+			if(it->second->isRemoved() || it->second->isGhost())
 				continue;
 
-			if (!ss.str().empty())
+			if(!ss.str().empty())
 				ss << ";";
 
 			ss << it->second->getName() << "," << it->second->getVocationId() << "," << it->second->getLevel();
@@ -197,7 +197,7 @@ std::string Status::getStatusString(bool sendPlayers) const
 	xmlDocDumpMemory(doc, (xmlChar**)&s, &len);
 
 	std::string xml;
-	if (s)
+	if(s)
 		xml = std::string((char*)s, len);
 
 	xmlFree(s);
@@ -207,7 +207,7 @@ std::string Status::getStatusString(bool sendPlayers) const
 
 void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMessage& msg) const
 {
-	if (requestedInfo & REQUEST_BASIC_SERVER_INFO)
+	if(requestedInfo & REQUEST_BASIC_SERVER_INFO)
 	{
 		output->put<char>(0x10);
 		output->putString(g_config.getString(ConfigManager::SERVER_NAME).c_str());
@@ -218,14 +218,14 @@ void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMe
 		output->putString(buffer);
 	}
 
-	if (requestedInfo & REQUEST_SERVER_OWNER_INFO)
+	if(requestedInfo & REQUEST_SERVER_OWNER_INFO)
 	{
 		output->put<char>(0x11);
 		output->putString(g_config.getString(ConfigManager::OWNER_NAME).c_str());
 		output->putString(g_config.getString(ConfigManager::OWNER_EMAIL).c_str());
 	}
 
-	if (requestedInfo & REQUEST_MISC_SERVER_INFO)
+	if(requestedInfo & REQUEST_MISC_SERVER_INFO)
 	{
 		output->put<char>(0x12);
 		output->putString(g_config.getString(ConfigManager::MOTD).c_str());
@@ -237,7 +237,7 @@ void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMe
 		output->put<uint32_t>((uint32_t)(uptime));
 	}
 
-	if (requestedInfo & REQUEST_PLAYERS_INFO)
+	if(requestedInfo & REQUEST_PLAYERS_INFO)
 	{
 		output->put<char>(0x20);
 		output->put<uint32_t>(g_game.getPlayersOnline());
@@ -245,7 +245,7 @@ void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMe
 		output->put<uint32_t>(g_game.getPlayersRecord());
 	}
 
-	if (requestedInfo & REQUEST_SERVER_MAP_INFO)
+	if(requestedInfo & REQUEST_SERVER_MAP_INFO)
 	{
 		output->put<char>(0x30);
 		output->putString(g_config.getString(ConfigManager::MAP_NAME).c_str());
@@ -257,37 +257,37 @@ void Status::getInfo(uint32_t requestedInfo, OutputMessage_ptr output, NetworkMe
 		output->put<uint16_t>(mapHeight);
 	}
 
-	if (requestedInfo & REQUEST_EXT_PLAYERS_INFO)
+	if(requestedInfo & REQUEST_EXT_PLAYERS_INFO)
 	{
 		output->put<char>(0x21);
 		std::list<std::pair<std::string, uint32_t> > players;
-		for (AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
+		for(AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
 		{
-			if (!it->second->isRemoved() && !it->second->isGhost())
+			if(!it->second->isRemoved() && !it->second->isGhost())
 				players.push_back(std::make_pair(it->second->getName(), it->second->getLevel()));
 		}
 
 		output->put<uint32_t>(players.size());
-		for (std::list<std::pair<std::string, uint32_t> >::iterator it = players.begin(); it != players.end(); ++it)
+		for(std::list<std::pair<std::string, uint32_t> >::iterator it = players.begin(); it != players.end(); ++it)
 		{
 			output->putString(it->first);
 			output->put<uint32_t>(it->second);
 		}
 	}
 
-	if (requestedInfo & REQUEST_PLAYER_STATUS_INFO)
+	if(requestedInfo & REQUEST_PLAYER_STATUS_INFO)
 	{
 		output->put<char>(0x22);
 		const std::string name = msg.getString();
 
 		Player* p = NULL;
-		if (g_game.getPlayerByNameWildcard(name, p) == RET_NOERROR && !p->isGhost())
+		if(g_game.getPlayerByNameWildcard(name, p) == RET_NOERROR && !p->isGhost())
 			output->put<char>(0x01);
 		else
 			output->put<char>(0x00);
 	}
 
-	if (requestedInfo & REQUEST_SERVER_SOFTWARE_INFO)
+	if(requestedInfo & REQUEST_SERVER_SOFTWARE_INFO)
 	{
 		output->put<char>(0x23);
 		output->putString(SOFTWARE_NAME);

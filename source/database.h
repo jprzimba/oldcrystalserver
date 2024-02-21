@@ -315,7 +315,7 @@ class DBTransaction
 
 		virtual ~DBTransaction()
 		{
-			if (m_state == STATE_START)
+			if(m_state == STATE_START)
 				m_database->rollback();
 		}
 
@@ -327,7 +327,7 @@ class DBTransaction
 
 		bool commit()
 		{
-			if (m_state != STATE_START)
+			if(m_state != STATE_START)
 				return false;
 
 			m_state = STEATE_COMMIT;

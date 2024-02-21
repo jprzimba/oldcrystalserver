@@ -111,13 +111,13 @@ public:
 	{
 		Pools::iterator it;
 		poolLock.lock();
-		for (it = pools.begin(); it != pools.end(); ++it)
+		for(it = pools.begin(); it != pools.end(); ++it)
 		{
-			if (it->first >= size + sizeof(poolTag))
+			if(it->first >= size + sizeof(poolTag))
 			{
 				poolTag* tag = reinterpret_cast<poolTag*>(it->second->malloc());
 #ifdef __OTSERV_ALLOCATOR_STATS__
-				if (!tag)
+				if(!tag)
 					dumpStats();
 
 #endif
@@ -145,12 +145,12 @@ public:
 
 	void deallocate(void* deletable)
 	{
-		if (!deletable)
+		if(!deletable)
 			return;
 
 		poolTag* const tag = reinterpret_cast<poolTag*>(deletable) - 1U;
 		poolLock.lock();
-		if (tag->poolbytes)
+		if(tag->poolbytes)
 		{
 			Pools::iterator it;
 			it = pools.find(tag->poolbytes);
@@ -179,11 +179,11 @@ public:
 		std::ofstream output("data/logs/memory_dump.log", std::ios_base::app);
 
 		output << "OTServ Allocator Stats: " << std::ctime(&rawtime) << std::endl;
-		for (PoolsStats::iterator it = poolsStats.begin(); it != poolsStats.end(); ++it)
+		for(PoolsStats::iterator it = poolsStats.begin(); it != poolsStats.end(); ++it)
 		{
 			output << (int32_t)(it->first) << " alloc: " << (int64_t)(it->second->allocations) << " dealloc: ";
 			output << (int64_t)(it->second->deallocations) << " unused: " << (int64_t)(it->second->unused);
-			if (it->second->allocations != 0 && it->first != 0)
+			if(it->second->allocations != 0 && it->first != 0)
 			{
 				output << " avg: " << (int64_t)((it->first) - (it->second->unused) / (it->second->allocations));
 				output << " %unused: " << (int64_t)((it->second->unused) * 100 / (it->second->allocations) / (it->first));
@@ -207,7 +207,7 @@ public:
 		}
 
 #ifdef __OTSERV_ALLOCATOR_STATS__
-		for (PoolsStats::iterator sit = poolsStats.begin(); sit != poolsStats.end();)
+		for(PoolsStats::iterator sit = poolsStats.begin(); sit != poolsStats.end();)
 		{
 			std::free(sit->second);
 			sit = poolsStats.erase(sit);

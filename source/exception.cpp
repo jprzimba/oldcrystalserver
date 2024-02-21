@@ -53,7 +53,7 @@ ExceptionHandler::ExceptionHandler()
 
 ExceptionHandler::~ExceptionHandler()
 {
-	if (installed)
+	if(installed)
 		RemoveHandler();
 }
 
@@ -61,10 +61,10 @@ bool ExceptionHandler::InstallHandler()
 {
 	#ifdef WINDOWS
 	boost::recursive_mutex::scoped_lock lockObj(mapLock);
-	if (!mapLoaded)
+	if(!mapLoaded)
 		LoadMap();
 
-	if (installed)
+	if(installed)
 		return false;
 
 	/*
@@ -92,7 +92,7 @@ bool ExceptionHandler::InstallHandler()
 
 bool ExceptionHandler::RemoveHandler()
 {
-	if (!installed)
+	if(!installed)
 		return false;
 
 	#ifdef WINDOWS
@@ -108,12 +108,12 @@ bool ExceptionHandler::RemoveHandler()
 char* getFunctionName(unsigned long addr, unsigned long& start)
 {
 	FunctionMap::iterator functions;
-	if (addr < offMin || addr > offMax)
+	if(addr < offMin || addr > offMax)
 		return NULL;
 
-	for (FunctionMap::iterator functions = functionMap.begin(); functions != functionMap.end(); ++functions)
+	for(FunctionMap::iterator functions = functionMap.begin(); functions != functionMap.end(); ++functions)
 	{
-		if (functions->first <= addr || functions == functionMap.begin())
+		if(functions->first <= addr || functions == functionMap.begin())
 			continue;
 
 		functions--;
@@ -134,7 +134,7 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 	std::ostream *outdriver;
 	std::clog << "CRASH: Writing report file..." << std::endl;
 	std::ofstream output(getFilePath(FILE_TYPE_LOG, "server/exceptions.log").c_str(), std::ios_base::app);
-	if (output.fail())
+	if(output.fail())
 	{
 		outdriver = &std::clog;
 		file = false;
@@ -157,7 +157,7 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 	//- global memory information
 	MEMORYSTATUSEX mstate;
 	mstate.dwLength = sizeof(mstate);
-	if (GlobalMemoryStatusEx(&mstate))
+	if(GlobalMemoryStatusEx(&mstate))
 	{
 		*outdriver << "Memory load: " << mstate.dwMemoryLoad << std::endl <<
 			"Total phys: " << mstate.ullTotalPhys/1024 << " K available phys: " <<
@@ -202,13 +202,13 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 	HANDLE lSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
 	BOOL r;
-	if (lSnapShot != 0)
+	if(lSnapShot != 0)
 	{
 		uProcess.dwSize = sizeof(uProcess);
 		r = Process32First(lSnapShot, &uProcess);
 		while (r)
 		{
-			if (uProcess.th32ProcessID == GetCurrentProcessId())
+			if(uProcess.th32ProcessID == GetCurrentProcessId())
 			{
 				*outdriver << "Threads: " << uProcess.cntThreads << std::endl;
 				break;
@@ -229,7 +229,7 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 	unsigned long functionAddr;
 
 	char* functionName = getFunctionName((unsigned long)ExceptionRecord->ExceptionAddress, functionAddr);
-	if (functionName)
+	if(functionName)
 		*outdriver << "(" << functionName << " - " << functionAddr << ")";
 
 	//registers
@@ -261,18 +261,18 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 	while (esp < stacklimit)
 	{
 		stack_val = *esp;
-		if (foundRetAddress)
+		if(foundRetAddress)
 			nparameters++;
 
-		if (esp - stackstart < 20 || nparameters < 10 || std::abs(esp - next_ret) < 10 || frame_param_counter < 8)
+		if(esp - stackstart < 20 || nparameters < 10 || std::abs(esp - next_ret) < 10 || frame_param_counter < 8)
 		{
 			*outdriver << (uint32_t)esp << " | ";
 			printPointer(outdriver,stack_val);
-			if (esp == next_ret)
+			if(esp == next_ret)
 				*outdriver << " \\\\\\\\\\\\ stack frame //////";
-			else if (esp - next_ret == 1)
+			else if(esp - next_ret == 1)
 				*outdriver << " <-- ret" ;
-			else if (esp - next_ret == 2)
+			else if(esp - next_ret == 2)
 			{
 				next_ret = (uint32_t*)*(esp - 2);
 				frame_param_counter = 0;
@@ -282,7 +282,7 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 			*outdriver<< std::endl;
 		}
 
-		if (stack_val >= offMin && stack_val <= offMax)
+		if(stack_val >= offMin && stack_val <= offMax)
 		{
 			foundRetAddress++;
 			unsigned long functionAddr;
@@ -296,10 +296,10 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 	}
 
 	*outdriver << "*****************************************************" << std::endl;
-	if (file)
+	if(file)
 		((std::ofstream*)outdriver)->close();
 
-	if (g_config.getBool(ConfigManager::TRACER_BOX))
+	if(g_config.getBool(ConfigManager::TRACER_BOX))
 	{
 		std::stringstream ss;
 		ss << "If you want developers review this crash log, please open a tracker ticket for the software at OtLand.net and attach the " << getFilePath(FILE_TYPE_LOG, "server/exceptions.log") << " file.";
@@ -314,7 +314,7 @@ EXCEPTION_DISPOSITION __cdecl _SEHHandler(struct _EXCEPTION_RECORD *ExceptionRec
 void printPointer(std::ostream* output, uint32_t p)
 {
 	*output << p;
-	if (!IsBadReadPtr((void*)p, 4))
+	if(!IsBadReadPtr((void*)p, 4))
 		*output << " -> " << *(uint32_t*)p;
 }
 #endif
@@ -322,7 +322,7 @@ void printPointer(std::ostream* output, uint32_t p)
 bool ExceptionHandler::LoadMap()
 {
 	#ifdef __GNUC__
-	if (mapLoaded)
+	if(mapLoaded)
 		return false;
 
 	functionMap.clear();
@@ -333,7 +333,7 @@ bool ExceptionHandler::LoadMap()
 	offMax = 0;
 
 	FILE* input = fopen("crystalserver.map", "r");
-	if (!input)
+	if(!input)
 	{
 		MessageBoxA(NULL, "Failed loading symbols, crystalserver.map file not found.", "Error", MB_OK | MB_ICONERROR);
 		std::clog << "Failed loading symbols, crystalserver.map file not found. " << std::endl;
@@ -345,22 +345,22 @@ bool ExceptionHandler::LoadMap()
 	char line[1024];
 	while (fgets(line, 1024, input))
 	{
-		if (!memcmp(line, ".text", 5))
+		if(!memcmp(line, ".text", 5))
 			break;
 	}
 
-	if (feof(input))
+	if(feof(input))
 		return false;
 
 	char tofind[] = "0x", lib[] = ".a(";
 	while (fgets(line, 1024, input))
 	{
 		char* pos = strstr(line, lib);
-		if (pos)
+		if(pos)
 			break; //not load libs
 
 		pos = strstr(line, tofind);
-		if (pos)
+		if(pos)
 		{
 			//read hex offset
 			char hexnumber[12];
@@ -369,19 +369,19 @@ bool ExceptionHandler::LoadMap()
 
 			char* pEnd;
 			uint32_t offset = strtol(hexnumber, &pEnd, 0);
-			if (offset)
+			if(offset)
 			{
 				//read function name
 				char* pos2 = pos + 12;
 				while (*pos2 != 0)
 				{
-					if (*pos2 != ' ')
+					if(*pos2 != ' ')
 						break;
 
 					pos2++;
 				}
 
-				if (*pos2 == 0 || (*pos2 == '0' && *(pos2+1) == 'x'))
+				if(*pos2 == 0 || (*pos2 == '0' && *(pos2+1) == 'x'))
 					continue;
 
 				char* name = new char[strlen(pos2)+1];
@@ -389,9 +389,9 @@ bool ExceptionHandler::LoadMap()
 				name[strlen(pos2) - 1] = 0;
 
 				functionMap[offset] = name;
-				if (offset > offMax)
+				if(offset > offMax)
 					offMax = offset;
-				if (offset < offMin)
+				if(offset < offMin)
 					offMin = offset;
 			}
 		}
@@ -453,18 +453,18 @@ void ExceptionHandler::dumpStack()
 	while (esp < stacklimit)
 	{
 		stack_val = *esp;
-		if (foundRetAddress)
+		if(foundRetAddress)
 			nparameters++;
 
-		if (esp - stackstart < 20 || nparameters < 10 || std::abs(esp - next_ret) < 10 || frame_param_counter < 8)
+		if(esp - stackstart < 20 || nparameters < 10 || std::abs(esp - next_ret) < 10 || frame_param_counter < 8)
 		{
 			output << (uint32_t)esp << " | ";
 			printPointer(&output, stack_val);
-			if (esp == next_ret)
+			if(esp == next_ret)
 				output << " \\\\\\\\\\\\ stack frame //////";
-			else if (esp - next_ret == 1)
+			else if(esp - next_ret == 1)
 				output << " <-- ret" ;
-			else if (esp - next_ret == 2)
+			else if(esp - next_ret == 2)
 			{
 				next_ret = (uint32_t*)*(esp - 2);
 				frame_param_counter = 0;
@@ -474,7 +474,7 @@ void ExceptionHandler::dumpStack()
 			output << std::endl;
 		}
 
-		if (stack_val >= offMin && stack_val <= offMax)
+		if(stack_val >= offMin && stack_val <= offMax)
 		{
 			foundRetAddress++;
 			//

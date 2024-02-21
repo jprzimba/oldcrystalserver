@@ -274,7 +274,7 @@ class NpcResponse
 		{
 			prop = rhs.prop;
 			scriptVars = rhs.scriptVars;
-			for (ResponseList::iterator it = rhs.subResponseList.begin(); it != rhs.subResponseList.end(); ++it)
+			for(ResponseList::iterator it = rhs.subResponseList.begin(); it != rhs.subResponseList.end(); ++it)
 			{
 				NpcResponse* response = new NpcResponse(*(*it));
 				subResponseList.push_back(response);
@@ -283,7 +283,7 @@ class NpcResponse
 
 		virtual ~NpcResponse()
 		{
-			for (ResponseList::iterator it = subResponseList.begin(); it != subResponseList.end(); ++it)
+			for(ResponseList::iterator it = subResponseList.begin(); it != subResponseList.end(); ++it)
 				delete *it;
 
 			subResponseList.clear();

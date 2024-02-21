@@ -32,9 +32,9 @@ bool ServicePort::m_logError = true;
 
 bool ServicePort::add(Service_ptr newService)
 {
-	for (ServiceVec::const_iterator it = m_services.begin(); it != m_services.end(); ++it)
+	for(ServiceVec::const_iterator it = m_services.begin(); it != m_services.end(); ++it)
 	{
-		if ((*it)->isSingleSocket())
+		if((*it)->isSingleSocket())
 			return false;
 	}
 
@@ -44,11 +44,11 @@ bool ServicePort::add(Service_ptr newService)
 
 void ServicePort::service(boost::weak_ptr<ServicePort> weakService, IPAddress ip, uint16_t port)
 {
-	if (weakService.expired())
+	if(weakService.expired())
 		return;
 
 	ServicePort_ptr service = weakService.lock();
-	if (!service)
+	if(!service)
 		return;
 
 	IPAddressList ips;
@@ -62,7 +62,7 @@ void ServicePort::open(IPAddressList ips, uint16_t port)
 	m_serverPort = port;
 
 	bool error = false;
-	for (IPAddressList::iterator it = ips.begin(); it != ips.end(); ++it)
+	for(IPAddressList::iterator it = ips.begin(); it != ips.end(); ++it)
 	{
 		try
 		{
@@ -74,10 +74,10 @@ void ServicePort::open(IPAddressList ips, uint16_t port)
 		}
 		catch(std::exception& e)
 		{
-			if (m_logError)
+			if(m_logError)
 			{
 				LOG_MESSAGE(LOGTYPE_ERROR, e.what(), "NETWORK")
-				if (!error)
+				if(!error)
 					error = true;
 			}
 
@@ -87,23 +87,23 @@ void ServicePort::open(IPAddressList ips, uint16_t port)
 		}
 	}
 
-	if (error)
+	if(error)
 		m_logError = false;
 }
 
 void ServicePort::close()
 {
-	if (!m_acceptors.size())
+	if(!m_acceptors.size())
 		return;
 
-	for (AcceptorVec::iterator it = m_acceptors.begin(); it != m_acceptors.end(); ++it)
+	for(AcceptorVec::iterator it = m_acceptors.begin(); it != m_acceptors.end(); ++it)
 	{
-		if (!(*it)->is_open())
+		if(!(*it)->is_open())
 			continue;
 
 		boost::system::error_code error;
 		(*it)->close(error);
-		if (error)
+		if(error)
 		{
 			PRINT_ASIO_ERROR("Closing listen socket");
 		}
@@ -122,7 +122,7 @@ void ServicePort::accept(Acceptor_ptr acceptor)
 	}
 	catch(std::exception& e)
 	{
-		if (m_logError)
+		if(m_logError)
 		{
 			LOG_MESSAGE(LOGTYPE_ERROR, e.what(), "NETWORK")
 			m_logError = false;
@@ -132,9 +132,9 @@ void ServicePort::accept(Acceptor_ptr acceptor)
 
 void ServicePort::handle(Acceptor_ptr acceptor, boost::asio::ip::tcp::socket* socket, const boost::system::error_code& error)
 {
-	if (!error)
+	if(!error)
 	{
-		if (m_services.empty())
+		if(m_services.empty())
 		{
 #ifdef __DEBUG_NET__
 			std::clog << "[Error - ServerPort::handle] No services running!" << std::endl;
@@ -146,20 +146,20 @@ void ServicePort::handle(Acceptor_ptr acceptor, boost::asio::ip::tcp::socket* so
 		const boost::asio::ip::tcp::endpoint ip = socket->remote_endpoint(error);
 
 		uint32_t remoteIp = 0;
-		if (!error)
+		if(!error)
 			remoteIp = htonl(ip.address().to_v4().to_ulong());
 
 		Connection_ptr connection;
-		if (remoteIp && ConnectionManager::getInstance()->acceptConnection(remoteIp) &&
+		if(remoteIp && ConnectionManager::getInstance()->acceptConnection(remoteIp) &&
 			(connection = ConnectionManager::getInstance()->createConnection(
 			socket, m_io_service, shared_from_this())))
 		{
-			if (m_services.front()->isSingleSocket())
+			if(m_services.front()->isSingleSocket())
 				connection->handle(m_services.front()->makeProtocol(connection));
 			else
 				connection->accept();
 		}
-		else if (socket->is_open())
+		else if(socket->is_open())
 		{
 			boost::system::error_code error;
 			socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
@@ -173,11 +173,11 @@ void ServicePort::handle(Acceptor_ptr acceptor, boost::asio::ip::tcp::socket* so
 #endif
 		accept(acceptor);
 	}
-	else if (error != boost::asio::error::operation_aborted)
+	else if(error != boost::asio::error::operation_aborted)
 	{
 		PRINT_ASIO_ERROR("Handling");
 		close();
-		if (!m_pendingStart)
+		if(!m_pendingStart)
 		{
 			m_pendingStart = true;
 			Scheduler::getInstance().addEvent(createSchedulerTask(5000, boost::bind(
@@ -193,11 +193,11 @@ void ServicePort::handle(Acceptor_ptr acceptor, boost::asio::ip::tcp::socket* so
 
 std::string ServicePort::getProtocolNames() const
 {
-	if (m_services.empty())
+	if(m_services.empty())
 		return std::string();
 
 	std::string str = m_services.front()->getProtocolName();
-	for (int32_t i = 1, j = m_services.size(); i < j; ++i)
+	for(int32_t i = 1, j = m_services.size(); i < j; ++i)
 	{
 		str += ", ";
 		str += m_services[i]->getProtocolName();
@@ -209,9 +209,9 @@ std::string ServicePort::getProtocolNames() const
 Protocol* ServicePort::makeProtocol(bool checksum, NetworkMessage& msg) const
 {
 	uint8_t protocolId = msg.get<char>();
-	for (ServiceVec::const_iterator it = m_services.begin(); it != m_services.end(); ++it)
+	for(ServiceVec::const_iterator it = m_services.begin(); it != m_services.end(); ++it)
 	{
-		if ((*it)->getProtocolId() == protocolId && ((checksum && (*it)->hasChecksum()) || !(*it)->hasChecksum()))
+		if((*it)->getProtocolId() == protocolId && ((checksum && (*it)->hasChecksum()) || !(*it)->hasChecksum()))
 			return (*it)->makeProtocol(Connection_ptr());
 	}
 
@@ -234,11 +234,11 @@ void ServiceManager::run()
 
 void ServiceManager::stop()
 {
-	if (!running)
+	if(!running)
 		return;
 
 	running = false;
-	for (AcceptorsMap::iterator it = m_acceptors.begin(); it != m_acceptors.end(); ++it)
+	for(AcceptorsMap::iterator it = m_acceptors.begin(); it != m_acceptors.end(); ++it)
 	{
 		try
 		{
@@ -260,7 +260,7 @@ void ServiceManager::stop()
 std::list<uint16_t> ServiceManager::getPorts() const
 {
 	std::list<uint16_t> ports;
-	for (AcceptorsMap::const_iterator it = m_acceptors.begin(); it != m_acceptors.end(); ++it)
+	for(AcceptorsMap::const_iterator it = m_acceptors.begin(); it != m_acceptors.end(); ++it)
 		ports.push_back(it->first);
 
 	ports.unique();

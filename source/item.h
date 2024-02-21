@@ -329,7 +329,7 @@ class Item : virtual public Thing, public ItemAttributes
 		void setDefaultDuration()
 		{
 			uint32_t duration = getDefaultDuration();
-			if (duration)
+			if(duration)
 				setDuration(duration);
 		}
 
@@ -356,7 +356,7 @@ inline std::string Item::getName() const
 {
 	bool ok;
 	std::string v = getStringAttribute("name", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].name;
@@ -366,7 +366,7 @@ inline std::string Item::getPluralName() const
 {
 	bool ok;
 	std::string v = getStringAttribute("pluralname", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].pluralName;
@@ -376,7 +376,7 @@ inline std::string Item::getArticle() const
 {
 	bool ok;
 	std::string v = getStringAttribute("article", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].article;
@@ -386,7 +386,7 @@ inline bool Item::isScriptProtected() const
 {
 	bool ok;
 	bool v = getBooleanAttribute("scriptprotected", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return false;
@@ -396,7 +396,7 @@ inline int32_t Item::getAttack() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("attack", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].attack;
@@ -406,7 +406,7 @@ inline int32_t Item::getExtraAttack() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("extraattack", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].extraAttack;
@@ -416,7 +416,7 @@ inline int32_t Item::getDefense() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("defense", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].defense;
@@ -426,7 +426,7 @@ inline int32_t Item::getExtraDefense() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("extradefense", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].extraDefense;
@@ -436,7 +436,7 @@ inline int32_t Item::getArmor() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("armor", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].armor;
@@ -446,7 +446,7 @@ inline int32_t Item::getAttackSpeed() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("attackspeed", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].attackSpeed;
@@ -456,7 +456,7 @@ inline int32_t Item::getHitChance() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("hitchance", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].hitChance;
@@ -466,7 +466,7 @@ inline int32_t Item::getShootRange() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("shootrange", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].shootRange;
@@ -476,7 +476,7 @@ inline bool Item::isDualWield() const
 {
 	bool ok;
 	bool v = getBooleanAttribute("dualwield", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].dualWield;
@@ -486,7 +486,7 @@ inline void Item::decreaseDuration(int32_t time)
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("duration", ok);
-	if (ok)
+	if(ok)
 		setAttribute("duration", v - time);
 }
 
@@ -494,7 +494,7 @@ inline int32_t Item::getDuration() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("duration", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return 0;
@@ -504,7 +504,7 @@ inline std::string Item::getSpecialDescription() const
 {
 	bool ok;
 	std::string v = getStringAttribute("description", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return "";
@@ -514,7 +514,7 @@ inline std::string Item::getText() const
 {
 	bool ok;
 	std::string v = getStringAttribute("text", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].text;
@@ -524,7 +524,7 @@ inline time_t Item::getDate() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("date", ok);
-	if (ok)
+	if(ok)
 		return (time_t)v;
 
 	return items[id].date;
@@ -534,7 +534,7 @@ inline std::string Item::getWriter() const
 {
 	bool ok;
 	std::string v = getStringAttribute("writer", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return items[id].writer;
@@ -544,7 +544,7 @@ inline int32_t Item::getActionId() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("aid", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return 0;
@@ -554,7 +554,7 @@ inline int32_t Item::getUniqueId() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("uid", ok);
-	if (ok)
+	if(ok)
 		return v;
 
 	return 0;
@@ -564,7 +564,7 @@ inline uint16_t Item::getCharges() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("charges", ok);
-	if (ok && v >= 0)
+	if(ok && v >= 0)
 		return (uint16_t)v;
 
 	return 0;
@@ -574,7 +574,7 @@ inline uint16_t Item::getFluidType() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("fluidtype", ok);
-	if (ok && v >= 0)
+	if(ok && v >= 0)
 		return (uint16_t)v;
 
 	return 0;
@@ -584,7 +584,7 @@ inline uint32_t Item::getOwner() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("owner", ok);
-	if (ok)
+	if(ok)
 		return (uint32_t)v;
 
 	return 0;
@@ -594,7 +594,7 @@ inline uint32_t Item::getCorpseOwner()
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("corpseowner", ok);
-	if (ok)
+	if(ok)
 		return (uint32_t)v;
 
 	return 0;
@@ -604,7 +604,7 @@ inline ItemDecayState_t Item::getDecaying() const
 {
 	bool ok;
 	int32_t v = getIntegerAttribute("decaying", ok);
-	if (ok)
+	if(ok)
 		return (ItemDecayState_t)v;
 
 	return DECAYING_FALSE;
@@ -612,7 +612,7 @@ inline ItemDecayState_t Item::getDecaying() const
 
 inline uint32_t Item::countByType(const Item* item, int32_t checkType)
 {
-	if (checkType != -1 && checkType != (int32_t)item->getSubType())
+	if(checkType != -1 && checkType != (int32_t)item->getSubType())
 		return 0;
 
 	return item->getItemCount();
