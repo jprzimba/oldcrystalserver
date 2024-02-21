@@ -270,6 +270,7 @@
 	promptExceptionTracerErrorBox = true
 	maxMessageBuffer = 4
 	useCapSystem = true
+	showContainerIndex = true
 
 	-- Ghost mode
 	ghostModeInvisibleEffect = false
@@ -312,7 +313,7 @@
 	rateExperienceFromPlayers = 0
 	rateSkill = 1.0
 	rateMagic = 1.0
-	rateLoot = 1.0
+	rateLoot = 50.0
 
 	-- Monster rates
 	rateMonsterHealth = 1.0

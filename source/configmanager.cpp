@@ -346,6 +346,7 @@ bool ConfigManager::load()
 	m_boolean[ROOK_SYSTEM]	= getGlobalBool("useRookSystem", false);
 	m_boolean[HOUSE_PROTECTION] = getGlobalBool("houseProtection", true);
 	m_boolean[HARDCOREPVP_INVISIBLE_ROKEN_STEALTHRING] = getGlobalBool("hardcorePvPInvisibleBrokenStealthRing", false);
+	m_boolean[SHOW_CONTAINER_INDEX] = getGlobalBool("showContainerIndex", false);
 
 	m_loaded = true;
 	return true;

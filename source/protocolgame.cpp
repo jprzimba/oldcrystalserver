@@ -1800,7 +1800,12 @@ void ProtocolGame::sendContainer(uint32_t cid, const Container* container, bool 
 	msg->put<char>(cid);
 
 	msg->putItemId(container);
-	msg->putString(container->getName());
+
+    std::string containerName = container->getName();
+    if (g_config.getBool(ConfigManager::SHOW_CONTAINER_INDEX))
+        containerName += " [" + intToString(cid) + "]";
+
+    msg->putString(containerName);
 	msg->put<char>(container->capacity());
 
 	msg->put<char>(hasParent ? 0x01 : 0x00);

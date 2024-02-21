@@ -2302,9 +2302,7 @@ bool Game::gmBroadcastMessage(Player* player, const std::string& text)
 bool Game::anonymousBroadcastMessage(MessageClasses type, const std::string& text)
 {
 	for (AutoList<Player>::iterator it = Player::autoList.begin(); it != Player::autoList.end(); ++it)
-	{
 		(*it).second->sendTextMessage(type, text.c_str());
-	}
 
 	return true;
 }

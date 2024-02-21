@@ -1644,3 +1644,10 @@ std::string getFilePath(FileType_t type, std::string name/* = ""*/)
 	}
 	return path;
 }
+
+std::string intToString(int number)
+{
+    std::stringstream ss;
+    ss << number;
+    return ss.str();
+}
